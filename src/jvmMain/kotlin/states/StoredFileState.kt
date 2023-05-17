@@ -14,9 +14,7 @@ class StoredFileState(from: StoredFile) {
 }
 
 fun StoredFile.getItems(): List<Item> {
-    return root.getJSONArray("items")
-        .toJsonObjectArray()
-        .map { Item(it) }
+    return root.getJSONArray("items").toJsonObjectArray { Item(it) }
 }
 
 @Stable
@@ -27,17 +25,15 @@ class Item(from: JSONObject) {
     val armorProperties by mutableStateOf(
         from
             .safe { getJSONArray("armorproperties") }
-            ?.toJsonObjectArray()
-            ?.map { ArmorProperty(it) }
-            ?.let { mutableStateListOf<ArmorProperty>().apply { addAll(it) } }
+            ?.toJsonObjectArray { ArmorProperty(it) }
+            ?.toMutableStateList()
     )
 
     val enchantments by mutableStateOf(
         from
             .safe { getJSONArray("enchantments") }
-            ?.toJsonObjectArray()
-            ?.map { Enchantment(it) }
-            ?.let { mutableStateListOf<Enchantment>().apply { addAll(it) } }
+            ?.toJsonObjectArray { Enchantment(it) }
+            ?.toMutableStateList()
     )
 
     var equipmentSlot by mutableStateOf(from.safe { getString("equipmentSlot") })
@@ -46,7 +42,7 @@ class Item(from: JSONObject) {
 
     var modified by mutableStateOf(from.safe { getBoolean("modified") })
 
-    var netheriteEnchant by mutableStateOf(from.safe { getJSONObject("netheriteEnchant") }?.let { Enchantment(it) })
+    var netheriteEnchant by mutableStateOf(from.safe { Enchantment(getJSONObject("netheriteEnchant")) })
 
     val power by mutableStateOf(from.getFloat("power"))
 
