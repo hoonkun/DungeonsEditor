@@ -46,7 +46,7 @@ fun ColumnScope.MainContainer(content: @Composable RowScope.() -> Unit) =
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
-            .fillMaxWidth(0.8f)
+            .fillMaxWidth(0.725f)
             .weight(1f),
         content = content
     )
@@ -63,7 +63,7 @@ fun BottomBarContainer(content: @Composable BoxScope.() -> Unit) =
     )
 
 fun main() = application {
-    val windowState = rememberWindowState(size = DpSize(1600.dp, 1400.dp))
+    val windowState = rememberWindowState(size = DpSize(1800.dp, 1400.dp))
     Window(onCloseRequest = ::exitApplication, state = windowState) {
         App()
     }

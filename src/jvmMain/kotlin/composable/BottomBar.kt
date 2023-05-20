@@ -28,7 +28,7 @@ import states.StoredFileState
 fun BottomBar(stored: StoredFileState) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(0.8f)
+        modifier = Modifier.fillMaxWidth(0.725f)
     ) {
         CurrencyField(
             value = "${DungeonsLevel.toInGameLevel(stored.level)}",

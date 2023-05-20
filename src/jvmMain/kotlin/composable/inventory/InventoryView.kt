@@ -38,7 +38,7 @@ private fun RowScope.LeftArea(content: @Composable ColumnScope.() -> Unit) =
 @Composable
 private fun RowScope.RightArea(content: @Composable ColumnScope.() -> Unit) =
     Column(
-        modifier = Modifier.fillMaxHeight().weight(0.55f).padding(top = 20.dp, bottom = 20.dp, start = 50.dp),
+        modifier = Modifier.fillMaxHeight().weight(0.55f).padding(top = 20.dp, bottom = 20.dp, start = 75.dp),
         content = content
     )
 
