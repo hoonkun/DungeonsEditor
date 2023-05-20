@@ -64,10 +64,14 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
     Box (
         modifier = Modifier
             .size(60.dp)
-            .offset((-80).dp)
+            .offset((-70).dp)
             .clickable(source, null, onClick = onClick)
             .drawBehind {
-                drawRect(if (collapsed) Color.White else Color(0xff79706b), topLeft = Offset(10f, this.size.height / 2 - 5f), size = Size(this.size.width - 20f, 10f))
+                drawRect(
+                    if (collapsed) Color.White else Color(0xff79706b),
+                    topLeft = Offset(12f, this.size.height / 2 - 5f),
+                    size = Size(this.size.width - 24f, 7f)
+                )
             }
     )
 }
@@ -97,7 +101,7 @@ fun ItemsFilterer(typeFilter: Item.ItemType?, rarityFilter: Item.Rarity?, setTyp
     val filterableTypes = remember { Item.ItemType.values().filter { it != Item.ItemType.Unknown } }
     val filterableRarities = remember { Item.Rarity.values() }
 
-    Column(modifier = Modifier.offset(x = (-80).dp).padding(top = 15.dp), horizontalAlignment = Alignment.End) {
+    Column(modifier = Modifier.offset(x = (-70).dp).padding(top = 15.dp), horizontalAlignment = Alignment.End) {
         for (type in filterableTypes) {
             ItemTypeFilter(type = type, selected = type == typeFilter) { setTypeFilter(type) }
             Spacer(modifier = Modifier.height(10.dp))
@@ -139,7 +143,7 @@ fun ItemRarityFilter(rarity: Item.Rarity, currentType: Item.ItemType?, selected:
 @Composable
 fun Divider() {
     Spacer(modifier = Modifier.height(5.dp))
-    Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(Color(0xff666666)))
+    Box(modifier = Modifier.fillMaxWidth().height(2.dp).padding(horizontal = 10.dp).background(Color(0xff666666)))
     Spacer(modifier = Modifier.height(5.dp))
 }
 
@@ -147,9 +151,9 @@ fun Divider() {
 fun <T>ItemsGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGridItemScope.(Int, T) -> Unit) where T: Item? =
     LazyVerticalGrid(
         GridCells.Fixed(columns),
-        contentPadding = PaddingValues(vertical = 10.dp),
+        contentPadding = PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) { itemsIndexed(items, itemContent = content) }
 
 @Composable
