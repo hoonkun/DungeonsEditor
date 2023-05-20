@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 @Stable
 class EditorState(stored: StoredFileState) {
     val inventoryState: InventoryEditorState = InventoryEditorState(stored)
+    val detailState: DetailEditorState = DetailEditorState(stored)
 }
 
 @Stable
@@ -24,7 +25,7 @@ class InventoryEditorState(stored: StoredFileState) {
             )
             if (captured < 0) return@map reservedNegativeIndexes[captured + 6]
 
-            return@map stored.items.unequiped.find { it.inventoryIndex == captured }
+            return@map stored.items.unequipped.find { it.inventoryIndex == captured }
         }
     }
 
@@ -35,3 +36,10 @@ class InventoryEditorState(stored: StoredFileState) {
         }
     }
 }
+
+@Stable
+class DetailEditorState(stored: StoredFileState) {
+    val selectedEnchantment: Pair<Item, Enchantment>? = null
+}
+
+infix fun Enchantment.of(other: Item): Pair<Item, Enchantment> = other to this

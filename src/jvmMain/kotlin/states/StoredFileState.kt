@@ -68,10 +68,13 @@ class Items(from: StoredFile) {
 
     val equipped by derivedStateOf { listOf(melee, armor, ranged, hotbar1, hotbar2, hotbar3) }
 
-    val unequiped by derivedStateOf { all.filter { it.equipmentSlot == Item.Slot.InventoryIndex } }
+    val unequipped by derivedStateOf { all.filter { it.equipmentSlot == Item.Slot.InventoryIndex } }
 
-    fun filter(type: Item.ItemType?, rarity: Item.Rarity?) =
-        unequiped.filter { (type == null || it.Type() == type) && (rarity == null || it.rarity == rarity) }
+    companion object {
+        val filter: (item: Item, Item.ItemType?, Item.Rarity?) -> Boolean = { it, type, rarity ->
+            (type == null || it.Type() == type) && (rarity == null || it.rarity == rarity)
+        }
+    }
 
 }
 

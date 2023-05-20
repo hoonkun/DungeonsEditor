@@ -9,21 +9,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import editorState
 import states.*
+import stored
 
 @Composable
-fun RowScope.InventoryView(stored: StoredFileState, editorState: EditorState) {
-    val items by derivedStateOf { stored.items }
+fun RowScope.InventoryView() {
+    val equipped by derivedStateOf { stored.items.equipped }
+    val inventory by derivedStateOf { stored.items.unequipped }
+    val selected by derivedStateOf { editorState.inventoryState.selectedItems }
 
     LeftArea {
-        EquippedItems(items, editorState)
+        EquippedItems(equipped)
         Divider()
-        InventoryItems(items, editorState)
+        InventoryItems(inventory)
     }
     RightArea {
-        AnimatorBySelectedItemExists(editorState.inventoryState.selectedItems.all { it == null }) {
+        AnimatorBySelectedItemExists(selected.all { it == null }) {
             if (it) NoItemsSelectedView()
-            else ItemComparatorView(editorState.inventoryState.selectedItems)
+            else ItemComparatorView(selected)
         }
     }
 }

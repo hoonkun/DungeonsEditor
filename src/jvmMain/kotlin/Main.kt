@@ -17,17 +17,17 @@ import states.EditorState
 import states.StoredFileState
 import java.io.File
 
+val stored = StoredFileState(File(Constants.SaveDataFilePath).readAsStoredFile())
+val editorState = EditorState(stored)
+
 @Composable
 @Preview
 fun App() {
-    val stored = remember { StoredFileState(File(Constants.SaveDataFilePath).readAsStoredFile()) }
-    val editorState = remember { EditorState(stored) }
-
     AppRoot {
         MainContainer {
-            InventoryView(stored, editorState)
+            InventoryView()
         }
-        BottomBarContainer { BottomBar(stored) }
+        BottomBarContainer { BottomBar() }
     }
 }
 

@@ -23,21 +23,20 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import editorState
 import extensions.DungeonsPower
 import extensions.GameResources
-import states.EditorState
-import states.InventoryEditorState
 import states.Item
 import states.Items
 
 @Composable
-fun EquippedItems(items: Items, editorState: EditorState) {
+fun EquippedItems(items: List<Item?>) {
     var collapsed by remember { mutableStateOf(false) }
 
     Box {
         EquippedItemsToggleAnimator(collapsed) {
-            ItemsGrid(columns = if (it) 6 else 3, items = items.equipped) { index, item ->
-                ItemView(item, editorState, it, -index - 1)
+            ItemsGrid(columns = if (it) 6 else 3, items = items) { index, item ->
+                ItemView(item, it, -index - 1)
             }
         }
         EquipmentItemsToggleButton(collapsed = collapsed, onClick = { collapsed = !collapsed })
@@ -77,11 +76,11 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
 }
 
 @Composable
-fun InventoryItems(items: Items, editorState: EditorState) {
+fun InventoryItems(items: List<Item>) {
     var typeFilter by remember { mutableStateOf<Item.ItemType?>(null) }
     var rarityFilter by remember { mutableStateOf<Item.Rarity?>(null) }
 
-    val filteredItems by remember { derivedStateOf { items.filter(typeFilter, rarityFilter) } }
+    val filteredItems by remember { derivedStateOf { items.filter { Items.filter(it, typeFilter, rarityFilter) } } }
 
     Box {
         ItemsFilterer(
@@ -91,7 +90,7 @@ fun InventoryItems(items: Items, editorState: EditorState) {
             setRarityFilter = { rarityFilter = if (rarityFilter == it) null else it }
         )
         ItemsGrid(items = filteredItems) { _, item ->
-            ItemView(item, editorState, index = item.inventoryIndex ?: 0)
+            ItemView(item, index = item.inventoryIndex ?: 0)
         }
     }
 }
@@ -157,19 +156,19 @@ fun <T>ItemsGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGrid
     ) { itemsIndexed(items, itemContent = content) }
 
 @Composable
-fun <T> ItemView(item: T, editorState: EditorState, simplified: Boolean = false, index: Int) where T: Item? {
-
-    ItemViewInteractable(editorState.inventoryState, index) {
+fun <T> ItemView(item: T, simplified: Boolean = false, index: Int) where T: Item? =
+    ItemViewInteractable(index) {
         if (item == null) DummyItemIcon()
         else ItemIcon(item, simplified)
     }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ItemViewInteractable(state: InventoryEditorState, index: Int, content: @Composable BoxScope.() -> Unit) {
+fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
+
+    val state = editorState.inventoryState
 
     Box(
         modifier = Modifier

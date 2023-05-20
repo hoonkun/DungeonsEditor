@@ -23,9 +23,10 @@ import androidx.compose.ui.unit.sp
 import extensions.DungeonsLevel
 import extensions.GameResources
 import states.StoredFileState
+import stored
 
 @Composable
-fun BottomBar(stored: StoredFileState) {
+fun BottomBar() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(0.725f)
