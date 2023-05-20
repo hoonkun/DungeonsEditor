@@ -57,6 +57,12 @@ fun BottomBar(stored: StoredFileState) {
             onValueChange = { if (it.toIntOrNull() != null) stored.currency.gold = it.toInt() }
         )
 
+        CurrencyText(
+            icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
+            value = "${DungeonsLevel.toInGameLevel(stored.level).toInt() -  stored.items.all.sumOf { it.enchantments?.sumOf { it.investedPoints } ?: 0 }}",
+            smallIcon = true
+        )
+
         CurrencyField(
             icon = "/Game/UI/Materials/Currency/T_EyeOfEnder_Currency.png",
             value = "${stored.currency.eyeOfEnder}",
@@ -66,8 +72,8 @@ fun BottomBar(stored: StoredFileState) {
 }
 
 @Composable
-private fun CurrencyText(icon: String, value: String) {
-    CurrencyImage(GameResources.image { icon })
+private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false) {
+    CurrencyImage(GameResources.image { icon }, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
     Text(text = value, style = TextStyle(fontSize = 25.sp, color = Color.White), modifier = Modifier.width(100.dp))
     Spacer(modifier = Modifier.width(30.dp))
