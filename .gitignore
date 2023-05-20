@@ -42,3 +42,8 @@ bin/
 .DS_Store
 
 .idea
+
+Constants.kt
+database.json
+localization_*.json
+src/jvmTest/kotlin/
