@@ -60,5 +60,3 @@ class DetailEditorState {
         selectedEnchantment = null
     }
 }
-
-infix fun Enchantment.of(other: Item): Pair<Item, Enchantment> = other to this
