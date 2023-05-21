@@ -57,8 +57,8 @@ private fun ItemDetailView(item: Item) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            ItemDescriptionText(text = item.Description())
             ItemDescriptionText(text = item.Flavour())
+            ItemDescriptionText(text = item.Description())
 
             Spacer(modifier = Modifier.height(20.dp))
 

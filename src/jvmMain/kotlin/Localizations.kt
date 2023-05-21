@@ -16,16 +16,20 @@ class Localizations {
             return this.texts[currentLocale]?.get(key)
         }
 
+        private val ItemCorrections = mapOf<String, String>()
+
         private val ItemNameCorrections = mapOf(
             "Powerbow" to "PowerBow",
             "Powerbow_Unique1" to "PowerBow_Unique1",
-            "Powerbow_Unique2" to "PowerBow_Unique2",
-            "TwistingVineBow_UNique1" to "TwistingVineBow_Unique1"
+            "Powerbow_Unique2" to "PowerBow_Unique2"
         )
 
+        private val ItemFlavourCorrections = ItemCorrections + mapOf()
+        private val ItemDescriptionCorrections = ItemCorrections + mapOf()
+
         fun ItemName(type: String) = Localizations["ItemType/${ItemNameCorrections[type] ?: type}"] ?: "알 수 없는 아이템"
-        fun ItemDescription(type: String) = Localizations["ItemType/Flavour_${ItemNameCorrections[type] ?: type}"]
-        fun ItemFlavour(type: String) = Localizations["ItemType/Desc_${ItemNameCorrections[type] ?: type}"]
+        fun ItemDescription(type: String) = Localizations["ItemType/Desc_${ItemDescriptionCorrections[type] ?: type}"]
+        fun ItemFlavour(type: String) = Localizations["ItemType/Flavour_${ItemFlavourCorrections[type] ?: type}"]
 
         private val EnchantmentCorrections = mapOf(
             "VoidTouchedMelee" to "VoidStrikeMelee",
