@@ -76,7 +76,7 @@ fun BottomBarContainer(content: @Composable BoxScope.() -> Unit) =
 
 fun main() = application {
     val windowState = rememberWindowState(size = DpSize(1800.dp, 1400.dp))
-    Window(onCloseRequest = ::exitApplication, state = windowState) {
+    Window(onCloseRequest = ::exitApplication, state = windowState, resizable = false) {
         App()
     }
 }
