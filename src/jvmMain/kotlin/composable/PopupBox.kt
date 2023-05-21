@@ -34,7 +34,11 @@ import editorState
 
 @Composable
 fun PopupBox() {
+    EnchantmentDetailPopup()
+}
 
+@Composable
+fun EnchantmentDetailPopup() {
     val selectedEnchantment = editorState.detailState.selectedEnchantment
     val selectedEnchantmentHolderOpen = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedEnchantment?.holder)
 
@@ -45,10 +49,9 @@ fun PopupBox() {
         if (enchantment == null || !open) return@PopupBoxAnimator
 
         PopupBoxRoot(size = 675.dp to 300.dp) {
-            EnchantmentDetailView(enchantment, requestClose =  { editorState.detailState.unselectEnchantment() })
+            EnchantmentDetailView(enchantment, requestClose = { editorState.detailState.unselectEnchantment() })
         }
     }
-
 }
 
 @Composable

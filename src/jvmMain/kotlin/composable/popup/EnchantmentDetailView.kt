@@ -33,7 +33,10 @@ fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
             LevelImagePositioner { LevelImage(enchantment.level) }
         }
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
-            NameText(text = Localizations.EnchantmentName(enchantment))
+            Row(verticalAlignment = Alignment.Bottom) {
+                NameText(text = Localizations.EnchantmentName(enchantment))
+                if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
+            }
             DescriptionText(text = Localizations.EnchantmentDescription(enchantment))
             Spacer(modifier = Modifier.height(20.dp))
             EffectText(text = Localizations.EnchantmentEffect(enchantment))
@@ -42,6 +45,14 @@ fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
         }
     }
 }
+
+@Composable
+fun PowerfulEnchantmentIndicator() =
+    Text(
+        text = Localizations["/enchantment_rarity_powerful"]!!,
+        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color(0xffe5247e)),
+        modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
+    )
 
 @Composable
 private fun LevelAdjustView(enchantment: Enchantment) {
