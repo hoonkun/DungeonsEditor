@@ -88,7 +88,7 @@ private fun NameText(text: String) =
 @Composable
 private fun DescriptionText(text: String?) {
     if (text == null) return
-    Text(text = text, style = TextStyle(fontSize = 20.sp, color = Color.White))
+    Text(text = text, style = TextStyle(fontSize = 18.sp, color = Color.White))
 }
 
 @Composable

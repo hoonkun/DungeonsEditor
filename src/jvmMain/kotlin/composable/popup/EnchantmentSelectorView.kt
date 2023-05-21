@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -41,11 +42,16 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
         }
     }
 
+    val gridState = rememberLazyGridState(
+        initialFirstVisibleItemIndex = available.indexOfFirst { it.id == modifyTarget.id }
+    )
+
     PopupCloseButton { editorState.detailState.toggleEnchantmentSelector() }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         contentPadding = PaddingValues(20.dp),
+        state = gridState,
         modifier = Modifier.fillMaxWidth()
     ) {
         items(available) {
