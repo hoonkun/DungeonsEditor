@@ -14,7 +14,7 @@ import extensions.GameResources
 import states.*
 
 @Composable
-fun ItemEnchantmentsView(item: Item, slots: List<EnchantmentSlot>) {
+fun ItemEnchantmentsView(slots: List<EnchantmentSlot>) {
     Spacer(modifier = Modifier.height(40.dp))
     Row(modifier = Modifier.fillMaxWidth()) {
         for (slot in slots) {
@@ -121,9 +121,9 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
         modifier = Modifier
             .weight(1f)
             .aspectRatio(1f)
+            .clickable(source, null) { editorState.detailState.selectEnchantment(enchantment) }
             .rotate(-45f)
             .scale(enchantment.ImageScale())
-            .clickable(source, null) { editorState.detailState.selectEnchantment(enchantment) }
     )
 }
 

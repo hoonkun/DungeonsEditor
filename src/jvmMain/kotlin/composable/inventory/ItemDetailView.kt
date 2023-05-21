@@ -71,7 +71,7 @@ private fun ItemDetailView(item: Item) {
                 }
             )
 
-            if (enchantmentSlots != null) ItemEnchantmentsView(item, enchantmentSlots)
+            if (enchantmentSlots != null) ItemEnchantmentsView(enchantmentSlots)
         }
     }
 }
