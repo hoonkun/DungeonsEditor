@@ -58,7 +58,7 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
             EnchantmentSelectButton(
                 data = it,
                 enabled = it.multipleAllowed || item.enchantments?.any { appliedEnchantment -> appliedEnchantment.id == it.id } != true,
-                onClick = { newEnchantmentData -> modifyTarget.id = newEnchantmentData.id }
+                onClick = { newEnchantmentData -> modifyTarget.changeId(newEnchantmentData.id) }
             )
         }
     }

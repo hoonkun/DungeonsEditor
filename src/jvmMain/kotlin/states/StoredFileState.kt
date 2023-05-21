@@ -239,7 +239,7 @@ class Item(from: JSONObject) {
 
 @Stable
 class Enchantment(val holder: Item, from: JSONObject) {
-    var id by mutableStateOf(from.getString("id"))
+    var id: String by mutableStateOf(from.getString("id"))
     var investedPoints by mutableStateOf(from.getInt("investedPoints"))
     var level by mutableStateOf(from.getInt("level"))
 
@@ -250,6 +250,11 @@ class Enchantment(val holder: Item, from: JSONObject) {
     fun ImageScale() = data.ImageScale()
 
     fun ShineImage() = data.ShineImage()
+
+    fun changeId(newId: String) {
+        id = newId
+        adjustLevel(level)
+    }
 
     fun adjustLevel(level: Int) {
         this.level = level
