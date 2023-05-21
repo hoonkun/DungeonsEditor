@@ -136,8 +136,8 @@ fun BoxScope.EnchantmentIcon(enchantment: Enchantment) =
     )
 
 @Composable
-private fun BlurBehindImage(bitmap: ImageBitmap, enabled: Boolean = true, modifier: Modifier = Modifier) =
+fun BlurBehindImage(bitmap: ImageBitmap, alpha: Float = 1.0f, enabled: Boolean = true, modifier: Modifier = Modifier) =
     Box(modifier = modifier) {
-        if (enabled) Image(bitmap, null, modifier = Modifier.fillMaxSize().scale(1.05f).blur(10.dp), alpha = 0.85f)
-        Image(bitmap, null, modifier = Modifier.fillMaxSize())
+        if (enabled) Image(bitmap, null, modifier = Modifier.fillMaxSize().scale(1.05f).blur(10.dp), alpha = 0.85f * alpha)
+        Image(bitmap, null, alpha = alpha, modifier = Modifier.fillMaxSize())
     }

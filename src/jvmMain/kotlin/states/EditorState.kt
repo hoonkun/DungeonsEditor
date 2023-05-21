@@ -42,7 +42,15 @@ class DetailEditorState {
     var selectedEnchantment: Enchantment? by mutableStateOf(null)
         private set
 
+    var enchantmentSelectorOpen: Boolean by mutableStateOf(false)
+        private set
+
+    fun toggleEnchantmentSelector() {
+        enchantmentSelectorOpen = !enchantmentSelectorOpen
+    }
+
     fun selectEnchantment(enchantment: Enchantment) {
+        enchantmentSelectorOpen = false
         selectedEnchantment =
             if (selectedEnchantment == enchantment) null
             else enchantment

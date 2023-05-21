@@ -1,14 +1,13 @@
 package composable.popup
 
 import Localizations
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,25 +20,28 @@ import composable.PopupCloseButton
 import composable.inventory.EnchantmentIcon
 import composable.inventory.LevelImage
 import composable.inventory.LevelImagePositioner
+import editorState
 import extensions.GameResources
 import states.Enchantment
 
 @Composable
 fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+
     Row {
-        Box(modifier = Modifier.size(300.dp)) {
+        Box(modifier = Modifier.size(300.dp).clickable(source, null) { editorState.detailState.toggleEnchantmentSelector() }) {
             PopupCloseButton(requestClose)
             EnchantmentIcon(enchantment)
             LevelImagePositioner { LevelImage(enchantment.level) }
         }
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
-                NameText(text = Localizations.EnchantmentName(enchantment))
+                NameText(text = Localizations.EnchantmentName(enchantment.data))
                 if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
             }
-            DescriptionText(text = Localizations.EnchantmentDescription(enchantment))
+            DescriptionText(text = Localizations.EnchantmentDescription(enchantment.data))
             Spacer(modifier = Modifier.height(20.dp))
-            EffectText(text = Localizations.EnchantmentEffect(enchantment))
+            EffectText(text = Localizations.EnchantmentEffect(enchantment.data))
             Spacer(modifier = Modifier.weight(1f))
             LevelAdjustView(enchantment)
         }

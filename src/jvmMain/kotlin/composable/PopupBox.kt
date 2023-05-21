@@ -1,9 +1,6 @@
 package composable
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +27,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import composable.popup.EnchantmentDetailView
+import composable.popup.EnchantmentSelectorView
 import editorState
 
 @Composable
@@ -40,9 +38,19 @@ fun PopupBox() {
 @Composable
 fun EnchantmentDetailPopup() {
     val selectedEnchantment = editorState.detailState.selectedEnchantment
-    val selectedEnchantmentHolderOpen = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedEnchantment?.holder)
+    val selectedEnchantmentHolderVisible = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedEnchantment?.holder)
 
-    PopupBoxAnimator(selectedEnchantment to selectedEnchantmentHolderOpen) {
+    val selectorOpen = editorState.detailState.enchantmentSelectorOpen
+
+    PopupBoxAnimator(Triple(selectorOpen, selectedEnchantment, selectedEnchantmentHolderVisible)) { (open, selected, holderVisible) ->
+        if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
+
+        PopupBoxRoot(size = 675.dp to 800.dp, offset = 100.dp to (-320).dp) {
+            EnchantmentSelectorView(selected.holder, selected)
+        }
+    }
+
+    PopupBoxAnimator(selectedEnchantment to selectedEnchantmentHolderVisible) {
         val enchantment = it.first
         val open = it.second
 

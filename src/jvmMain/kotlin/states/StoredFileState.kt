@@ -245,14 +245,11 @@ class Enchantment(val holder: Item, from: JSONObject) {
 
     val data by derivedStateOf { Database.current.enchantments.find { it.id == id } ?: throw RuntimeException("Unrecognizable enchantment received: $id") }
 
-    fun ImageScale(): Float =
-        if (id == "Unset") 1.05f else 1.425f
+    fun Image() = data.Image()
 
-    fun Image(): ImageBitmap =
-        InternalImage { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
+    fun ImageScale() = data.ImageScale()
 
-    fun ShineImage(): ImageBitmap =
-        InternalImage { it.name.lowercase().endsWith("shine_icon.png") }
+    fun ShineImage() = data.ShineImage()
 
     fun adjustLevel(level: Int) {
         this.level = level
@@ -268,20 +265,6 @@ class Enchantment(val holder: Item, from: JSONObject) {
             else 0
     }
 
-    private fun InternalImage(criteria: (File) -> Boolean): ImageBitmap {
-        if (id == "Unset") return GameResources.image("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
-
-        val cached = GameResources.image(id)
-        if (cached != null) return cached
-
-        val imagePath = Database.current.findEnchantment(id)?.dataPath ?: throw RuntimeException("unknown enchantment id!")
-        val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
-        val imageFile = dataDirectory.listFiles().let { files ->
-            files?.find { it.extension == "png" && criteria(it) }
-        } ?: throw RuntimeException("no image resource found: {$id}!")
-
-        return GameResources.image(id, false) { imageFile.absolutePath }
-    }
 }
 
 @Stable
