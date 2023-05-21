@@ -11,6 +11,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import composable.BottomBar
+import composable.PopupBox
 import composable.inventory.InventoryView
 import io.StoredFile.Companion.readAsStoredFile
 import states.EditorState
@@ -25,7 +26,10 @@ val editorState = EditorState(stored)
 fun App() {
     AppRoot {
         MainContainer {
-            InventoryView()
+            ContentContainer {
+                InventoryView()
+            }
+            PopupBox()
         }
         BottomBarContainer { BottomBar() }
     }
@@ -42,12 +46,20 @@ fun AppRoot(content: @Composable ColumnScope.() -> Unit) =
     )
 
 @Composable
-fun ColumnScope.MainContainer(content: @Composable RowScope.() -> Unit) =
+fun ColumnScope.MainContainer(content: @Composable BoxScope.() -> Unit) =
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxWidth().weight(1f),
+        content = content
+    )
+
+@Composable
+fun ContentContainer(content: @Composable RowScope.() -> Unit) =
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth(0.725f)
-            .weight(1f),
+            .fillMaxHeight(),
         content = content
     )
 

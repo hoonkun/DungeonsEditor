@@ -1,6 +1,7 @@
 package states
 
 import Database
+import EnchantmentData
 import Localizations
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -93,9 +94,11 @@ class Item(from: JSONObject) {
     val enchantments by mutableStateOf(
         from
             .safe { getJSONArray("enchantments") }
-            ?.toJsonObjectArray { Enchantment(it) }
+            ?.toJsonObjectArray { Enchantment(this@Item, it) }
             ?.toMutableStateList()
     )
+
+    val enchantmentSlots by derivedStateOf { enchantments?.chunked(3)?.map { EnchantmentSlot(it) } }
 
     var equipmentSlot by mutableStateOf(from.safe { Slot.fromValue(getString("equipmentSlot")) } ?: Slot.InventoryIndex)
 
@@ -103,7 +106,7 @@ class Item(from: JSONObject) {
 
     var modified by mutableStateOf(from.safe { getBoolean("modified") })
 
-    var netheriteEnchant by mutableStateOf(from.safe { Enchantment(getJSONObject("netheriteEnchant")) })
+    var netheriteEnchant by mutableStateOf(from.safe { Enchantment(this@Item, getJSONObject("netheriteEnchant")) })
 
     var power by mutableStateOf(from.getFloat("power"))
 
@@ -113,12 +116,10 @@ class Item(from: JSONObject) {
 
     val upgraded by mutableStateOf(from.getBoolean("upgraded"))
 
-    fun Name(): String = Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"] ?: "알 수 없는 아이템"
+    fun Name(): String = Localizations.ItemName(type)
 
-    fun Flavour(): String? = Localizations["ItemType/Flavour_$type"]
-    fun Description(): String? = Localizations["ItemType/Desc_$type"]
-
-    fun EnchantmentSlots(): List<EnchantmentSlot>? = enchantments?.chunked(3)?.map { enchantments -> EnchantmentSlot(enchantments, enchantments.find { it.investedPoints > 0 }) }
+    fun Flavour(): String? = Localizations.ItemFlavour(type)
+    fun Description(): String? = Localizations.ItemDescription(type)
 
     fun TotalInvestedEnchantmentPoints() = enchantments?.sumOf { it.investedPoints } ?: 0
 
@@ -126,7 +127,7 @@ class Item(from: JSONObject) {
         val cached = GameResources.image("$type-Inventory")
         if (cached != null) return cached
 
-        val imagePath = Database.current.gears[type]?.get(1) ?: Database.current.artifacts[type] ?: throw RuntimeException("unknown item type!")
+        val imagePath = Database.current.findGear(type)?.dataPath ?: Database.current.findArtifact(type)?.dataPath ?: throw RuntimeException("unknown item type!")
         val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
         val imageFile = dataDirectory.listFiles().let { files ->
             files?.find { it.extension == "png" && it.name.lowercase().endsWith("_icon_inventory.png") }
@@ -139,7 +140,7 @@ class Item(from: JSONObject) {
         val cached = GameResources.image("$type-Large")
         if (cached != null) return cached
 
-        val imagePath = Database.current.gears[type]?.get(1) ?: Database.current.artifacts[type] ?: throw RuntimeException("unknown item type!")
+        val imagePath = Database.current.findGear(type)?.dataPath ?: Database.current.findArtifact(type)?.dataPath ?: throw RuntimeException("unknown item type!")
         val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
         val imageFile = dataDirectory.listFiles().let { files ->
             files?.find { it.extension == "png" && it.name.lowercase().endsWith("_icon.png") }
@@ -150,10 +151,10 @@ class Item(from: JSONObject) {
     }
 
     fun Type(): ItemType {
-        val gear = Database.current.gears[type]
-        val artifact = Database.current.artifacts[type]
+        val gear = Database.current.findGear(type)
+        val artifact = Database.current.findArtifact(type)
         return if (gear != null) {
-            when (gear[0]) {
+            when (gear.type) {
                 "M" -> ItemType.Melee
                 "A" -> ItemType.Armor
                 "R" -> ItemType.Ranged
@@ -237,10 +238,12 @@ class Item(from: JSONObject) {
 }
 
 @Stable
-class Enchantment(from: JSONObject) {
+class Enchantment(val holder: Item, from: JSONObject) {
     var id by mutableStateOf(from.getString("id"))
     var investedPoints by mutableStateOf(from.getInt("investedPoints"))
     var level by mutableStateOf(from.getInt("level"))
+
+    val data by derivedStateOf { Database.current.enchantments.find { it.id == id } ?: throw RuntimeException("Unrecognizable enchantment received: $id") }
 
     fun ImageScale(): Float =
         if (id == "Unset") 1.05f else 1.425f
@@ -251,13 +254,27 @@ class Enchantment(from: JSONObject) {
     fun ShineImage(): ImageBitmap =
         InternalImage { it.name.lowercase().endsWith("shine_icon.png") }
 
+    fun adjustLevel(level: Int) {
+        this.level = level
+        this.investedPoints =
+            if (!data.powerful && holder.netheriteEnchant == null)
+                EnchantmentData.CommonNonGlidedInvestedPoints.slice(0 until level).sum()
+            else if (data.powerful && holder.netheriteEnchant == null)
+                EnchantmentData.PowerfulNonGlidedInvestedPoints.slice(0 until level).sum()
+            else if (!data.powerful && holder.netheriteEnchant != null)
+                EnchantmentData.CommonGlidedInvestedPoints.slice(0 until level).sum()
+            else if (data.powerful && holder.netheriteEnchant != null)
+                EnchantmentData.PowerfulGlidedInvestedPoints.slice(0 until level).sum()
+            else 0
+    }
+
     private fun InternalImage(criteria: (File) -> Boolean): ImageBitmap {
         if (id == "Unset") return GameResources.image("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
 
         val cached = GameResources.image(id)
         if (cached != null) return cached
 
-        val imagePath = Database.current.enchantments[id] ?: throw RuntimeException("unknown enchantment id!")
+        val imagePath = Database.current.findEnchantment(id)?.dataPath ?: throw RuntimeException("unknown enchantment id!")
         val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
         val imageFile = dataDirectory.listFiles().let { files ->
             files?.find { it.extension == "png" && criteria(it) }
@@ -269,11 +286,20 @@ class Enchantment(from: JSONObject) {
 
 @Stable
 class EnchantmentSlot(
-    enchantments: List<Enchantment>,
-    activatedEnchantment: Enchantment?
+    enchantments: List<Enchantment>
 ) {
     val enchantments = enchantments.toMutableStateList()
-    var activatedEnchantment by mutableStateOf(activatedEnchantment)
+
+    private val first by derivedStateOf { enchantments[0] }
+    private val second by derivedStateOf { enchantments[1] }
+    private val third by derivedStateOf { enchantments[2] }
+
+    val activatedEnchantment by derivedStateOf {
+        if (first.level > 0) first
+        else if (second.level > 0) second
+        else if (third.level > 0) third
+        else null
+    }
 }
 
 @Stable

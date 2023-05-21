@@ -15,9 +15,9 @@ import stored
 
 @Composable
 fun RowScope.InventoryView() {
-    val equipped by derivedStateOf { stored.items.equipped }
-    val inventory by derivedStateOf { stored.items.unequipped }
-    val selected by derivedStateOf { editorState.inventoryState.selectedItems }
+    val equipped by remember { derivedStateOf { stored.items.equipped } }
+    val inventory by remember { derivedStateOf { stored.items.unequipped } }
+    val selected by remember { derivedStateOf { editorState.inventoryState.selectedItems } }
 
     LeftArea {
         EquippedItems(equipped)

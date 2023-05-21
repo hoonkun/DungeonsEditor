@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 @Stable
 class EditorState(stored: StoredFileState) {
     val inventoryState: InventoryEditorState = InventoryEditorState(stored)
-    val detailState: DetailEditorState = DetailEditorState(stored)
+    val detailState: DetailEditorState = DetailEditorState()
 }
 
 @Stable
@@ -38,8 +38,19 @@ class InventoryEditorState(stored: StoredFileState) {
 }
 
 @Stable
-class DetailEditorState(stored: StoredFileState) {
-    val selectedEnchantment: Pair<Item, Enchantment>? = null
+class DetailEditorState {
+    var selectedEnchantment: Enchantment? by mutableStateOf(null)
+        private set
+
+    fun selectEnchantment(enchantment: Enchantment) {
+        selectedEnchantment =
+            if (selectedEnchantment == enchantment) null
+            else enchantment
+    }
+
+    fun unselectEnchantment() {
+        selectedEnchantment = null
+    }
 }
 
 infix fun Enchantment.of(other: Item): Pair<Item, Enchantment> = other to this

@@ -45,5 +45,6 @@ bin/
 
 Constants.kt
 database.json
+database*.json
 localization_*.json
 src/jvmTest/kotlin/

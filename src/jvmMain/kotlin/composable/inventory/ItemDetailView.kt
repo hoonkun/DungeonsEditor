@@ -48,7 +48,7 @@ private fun DummyItemView(type: String) =
 
 @Composable
 private fun ItemDetailView(item: Item) {
-    val enchantmentSlots = remember(item) { item.EnchantmentSlots() }
+    val enchantmentSlots = item.enchantmentSlots
 
     ItemDetailViewRoot {
         ItemImage(item = item)
