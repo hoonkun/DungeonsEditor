@@ -66,24 +66,23 @@ data class EnchantmentData(
         if (id == "Unset") 1.05f else 1.425f
 
     fun Image(): ImageBitmap =
-        InternalImage { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
+        InternalImage(id) { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
 
     fun ShineImage(): ImageBitmap =
-        InternalImage { it.name.lowercase().endsWith("shine_icon.png") }
+        InternalImage("${id}_shine") { it.name.lowercase().endsWith("shine_icon.png") }
 
-    private fun InternalImage(criteria: (File) -> Boolean): ImageBitmap {
+    private fun InternalImage(cacheId: String, criteria: (File) -> Boolean): ImageBitmap {
         if (id == "Unset") return GameResources.image("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
 
-        val cached = GameResources.image(id)
+        val cached = GameResources.image(cacheId)
         if (cached != null) return cached
 
         val imagePath = Database.current.findEnchantment(id)?.dataPath ?: throw RuntimeException("unknown enchantment id!")
         val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
-        val imageFile = dataDirectory.listFiles().let { files ->
-            files?.find { it.extension == "png" && criteria(it) }
-        } ?: throw RuntimeException("no image resource found: {$id}!")
+        val imageFile = dataDirectory.listFiles().let { files -> files?.find { it.extension == "png" && criteria(it) } }
+            ?: throw RuntimeException("no image resource found: {$id}!")
 
-        return GameResources.image(id, false) { imageFile.absolutePath }
+        return GameResources.image(cacheId, false) { imageFile.absolutePath }
     }
 
     companion object {
