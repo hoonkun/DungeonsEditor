@@ -1,7 +1,9 @@
 package composable.inventory
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -67,8 +69,26 @@ private fun NoItemsSelectedView() =
 
 @Composable
 private fun ItemComparatorView(items: List<Item?>) {
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-        AnimatedItemDetailView(items[0], "primary")
-        AnimatedItemDetailView(items[1], "secondary")
+    val scroll = rememberScrollState()
+    val adapter = rememberScrollbarAdapter(scroll)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(scroll), verticalArrangement = Arrangement.Center) {
+            AnimatedItemDetailView(items[0], "primary")
+            AnimatedItemDetailView(items[1], "secondary")
+        }
+        VerticalScrollbar(
+            adapter = adapter,
+            style = GlobalScrollbarStyle,
+            modifier = Modifier.align(Alignment.TopEnd).offset(x = 20.dp)
+        )
     }
 }
+
+val GlobalScrollbarStyle = ScrollbarStyle(
+    thickness = 20.dp,
+    minimalHeight = 100.dp,
+    hoverColor = Color.White.copy(alpha = 0.3f),
+    unhoverColor = Color.White.copy(alpha = 0.15f),
+    hoverDurationMillis = 0,
+    shape = RoundedCornerShape(3.dp),
+)
