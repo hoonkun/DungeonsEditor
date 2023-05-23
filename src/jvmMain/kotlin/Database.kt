@@ -41,7 +41,9 @@ data class Gear(
     val id: String,
     val dataPath: String,
     val type: String
-)
+) {
+    val rarity get() = listOf("_Unique", "_Spooky", "_Winter", "_Year").any { id.contains(it) }
+}
 
 @Serializable
 data class Artifact(
