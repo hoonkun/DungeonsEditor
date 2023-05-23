@@ -26,7 +26,7 @@ class StoredFile private constructor(inputJson: String) {
         }
 
         fun JSONObject.saveIntoStoredFile(into: File) {
-            val input = toString(1)
+            val input = toString(1).let { it.padEnd(it.length + 16 - (it.length % 16), ' ') }
 
             val cipher = Cipher
                 .getInstance("AES/ECB/NoPadding")
