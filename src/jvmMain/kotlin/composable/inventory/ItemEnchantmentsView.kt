@@ -36,7 +36,7 @@ private fun RowScope.ItemEnchantmentSlotView(slot: EnchantmentSlot) {
     if (activatedEnchantment != null) {
         ActivatedSlot(activatedEnchantment) {
             EnchantmentIcon(activatedEnchantment, true)
-            LevelImagePositioner { LevelImage(activatedEnchantment.level) }
+            LevelImagePositioner { LevelImage(activatedEnchantment.level, 1.75f) }
         }
     } else if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset") {
         LockedSlot()
@@ -82,10 +82,10 @@ fun RowScope.ActivatedSlot(enchantment: Enchantment, content: @Composable BoxSco
 }
 
 @Composable
-fun BoxScope.LevelImagePositioner(content: @Composable BoxScope.() -> Unit) =
+fun BoxScope.LevelImagePositioner(size: Float = 0.3f, content: @Composable BoxScope.() -> Unit) =
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize(0.45f).align(Alignment.TopEnd),
+        modifier = Modifier.fillMaxSize(size).align(Alignment.TopEnd),
         content = content
     )
 
@@ -146,13 +146,13 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
 }
 
 @Composable
-fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean = false) {
+fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean = false, scale: Float = 1.2f) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val selected = editorState.detailState.selectedEnchantment == enchantment
     BlurBehindImage(
         bitmap = enchantment.Image(),
-        scale = 1.2f,
+        scale = scale,
         modifier = Modifier
             .fillMaxSize()
             .align(Alignment.Center)
