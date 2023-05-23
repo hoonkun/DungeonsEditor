@@ -14,9 +14,9 @@ class DungeonsLevel {
 
 class DungeonsPower {
     companion object {
-        fun toInGamePower(serialized: Float): Float = (max(1f, serialized) - 1 + 0.00001f) * 10 + 1
+        fun toInGamePower(serialized: Float): Float = (max(1f, serialized) - 1) * 10 + 1
         fun toSerializedPower(ingame: Float) =
             if (ingame <= 0) 0f
-            else (((max(1f, ingame) - 1) / 10 - 0.00001f + 1) * 100000f).roundToInt() / 100000f
+            else (((max(1f, ingame) - 1) / 10 + 1) * 100000f).roundToInt() / 100000f
     }
 }
