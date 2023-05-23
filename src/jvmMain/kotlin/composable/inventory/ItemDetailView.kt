@@ -33,8 +33,7 @@ fun ColumnScope.AnimatedItemDetailView(targetState: Item?, type: String) =
             val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
             enter with exit
         },
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.weight(1f)
+        contentAlignment = Alignment.Center
     ) {
         if (it == null) DummyItemView(type)
         else ItemDetailView(it)
@@ -42,7 +41,7 @@ fun ColumnScope.AnimatedItemDetailView(targetState: Item?, type: String) =
 
 @Composable
 private fun DummyItemView(type: String) =
-    Box(modifier = Modifier.wrapContentHeight().fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.wrapContentHeight().fillMaxWidth().requiredHeightIn(min = 400.dp), contentAlignment = Alignment.Center) {
         ItemDescriptionText("${if (type == "primary") "왼쪽 클릭" else "오른쪽 클릭"}으로 비교할 대상을 추가해보세요!")
     }
 
