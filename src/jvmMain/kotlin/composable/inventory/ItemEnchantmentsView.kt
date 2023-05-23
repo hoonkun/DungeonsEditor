@@ -2,12 +2,17 @@ package composable.inventory
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import editorState
 import extensions.GameResources
@@ -30,7 +35,7 @@ private fun RowScope.ItemEnchantmentSlotView(slot: EnchantmentSlot) {
 
     if (activatedEnchantment != null) {
         ActivatedSlot(activatedEnchantment) {
-            EnchantmentIcon(activatedEnchantment)
+            EnchantmentIcon(activatedEnchantment, true)
             LevelImagePositioner { LevelImage(activatedEnchantment.level) }
         }
     } else if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset") {
@@ -70,7 +75,6 @@ fun RowScope.ActivatedSlot(enchantment: Enchantment, content: @Composable BoxSco
     Box(
         modifier = Modifier
             .weight(1f)
-            .scale(1.2f)
             .aspectRatio(1f / 1f)
             .clickable(source, null) { editorState.detailState.selectEnchantment(enchantment) },
         content = content
@@ -115,6 +119,9 @@ fun RowScope.SlotTopIcon() =
 @Composable
 fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
     val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val selected = editorState.detailState.selectedEnchantment == enchantment
+
     BlurBehindImage(
         bitmap = enchantment.Image(),
         enabled = enchantment.id != "Unset",
@@ -122,21 +129,52 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
             .weight(1f)
             .aspectRatio(1f)
             .clickable(source, null) { editorState.detailState.selectEnchantment(enchantment) }
+            .hoverable(source)
             .rotate(-45f)
             .scale(enchantment.ImageScale())
+            .rotate(45f)
+            .drawBehind {
+                drawRect(
+                    if (selected) Color.White else if (hovered) Color.White.copy(alpha = 0.3f) else Color.Transparent,
+                    style = Stroke(width = 4.dp.value),
+                    size = Size(size.width * 0.6f, size.height * 0.6f),
+                    topLeft = Offset(size.width * 0.2f, size.height * 0.2f)
+                )
+            }
+            .rotate(-45f)
     )
 }
 
 @Composable
-fun BoxScope.EnchantmentIcon(enchantment: Enchantment) =
+fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean = false) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val selected = editorState.detailState.selectedEnchantment == enchantment
     BlurBehindImage(
         bitmap = enchantment.Image(),
-        modifier = Modifier.fillMaxSize().align(Alignment.Center)
+        scale = 1.2f,
+        modifier = Modifier
+            .fillMaxSize()
+            .align(Alignment.Center)
+            .hoverable(source)
+            .rotate(45f)
+            .drawBehind {
+                if (!indicatorEnabled) return@drawBehind
+
+                drawRect(
+                    if (selected) Color.White else if (hovered) Color.White.copy(alpha = 0.3f) else Color.Transparent,
+                    style = Stroke(width = 6.dp.value),
+                    size = Size(size.width * 0.69f, size.height * 0.69f),
+                    topLeft = Offset(size.width * 0.155f, size.height * 0.155f)
+                )
+            }
+            .rotate(-45f)
     )
+}
 
 @Composable
-fun BlurBehindImage(bitmap: ImageBitmap, alpha: Float = 1.0f, enabled: Boolean = true, modifier: Modifier = Modifier) =
+fun BlurBehindImage(bitmap: ImageBitmap, alpha: Float = 1.0f, scale: Float = 1.0f, enabled: Boolean = true, modifier: Modifier = Modifier) =
     Box(modifier = modifier) {
-        if (enabled) Image(bitmap, null, modifier = Modifier.fillMaxSize().scale(1.05f).blur(10.dp), alpha = 0.85f * alpha)
-        Image(bitmap, null, alpha = alpha, modifier = Modifier.fillMaxSize())
+        if (enabled) Image(bitmap, null, modifier = Modifier.fillMaxSize().scale(scale + 0.05f).blur(10.dp), alpha = 0.85f * alpha)
+        Image(bitmap, null, alpha = alpha, modifier = Modifier.fillMaxSize().scale(scale))
     }
