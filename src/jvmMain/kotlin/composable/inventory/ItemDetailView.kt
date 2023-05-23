@@ -5,6 +5,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -48,11 +49,16 @@ private fun DummyItemView(type: String) =
 @Composable
 private fun ItemDetailView(item: Item) {
     val enchantmentSlots = item.enchantmentSlots
+    val netheriteEnchant = item.netheriteEnchant
 
     ItemDetailViewRoot {
         ItemImage(item = item)
         ItemDataColumn {
-            ItemNameText(text = item.Name())
+            Row(verticalAlignment = Alignment.Bottom) {
+                ItemNameText(text = item.Name())
+                Spacer(modifier = Modifier.width(20.dp))
+                NetheriteEnchant(enchantment = netheriteEnchant)
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -71,6 +77,37 @@ private fun ItemDetailView(item: Item) {
             )
 
             if (enchantmentSlots != null) ItemEnchantmentsView(enchantmentSlots)
+        }
+    }
+}
+
+@Composable
+private fun NetheriteEnchant(enchantment: Enchantment?) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (enchantment == null) {
+
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color(0x30ffc847), RoundedCornerShape(6.dp))
+                    .padding(vertical = 4.dp, horizontal = 10.dp)
+            ) {
+                Box(modifier = Modifier.size(40.dp)) {
+                    Image(
+                        bitmap = GameResources.image { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
+                    )
+                    Image(
+                        bitmap = enchantment.Image(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(fontSize = 26.sp, text = "화려한", color = Color.White, modifier = Modifier.offset(y = (-1).dp))
+            }
         }
     }
 }
