@@ -29,9 +29,9 @@ fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
 
     Row {
         Box(modifier = Modifier.size(300.dp).clickable(source, null) { editorState.detailState.toggleEnchantmentSelector() }) {
-            PopupCloseButton(requestClose)
             EnchantmentIcon(enchantment, scale = 1.0f)
             LevelImagePositioner(size = 0.4f) { LevelImage(enchantment.level, scale = 1.5f) }
+            PopupCloseButton(requestClose)
         }
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
