@@ -221,6 +221,7 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
             .fillMaxSize()
             .drawWithContent {
                 drawRect(rarity.BackgroundGradient())
+                if (item.netheriteEnchant != null) drawRect(GlidedItemBackgroundGradient())
 
                 drawContent()
 
@@ -277,6 +278,10 @@ private fun DrawScope.EnchantmentPointsBackgroundGradient() =
         start = Offset(0f, this.size.height),
         end = Offset(this.size.width, 0f)
     )
+
+@Stable
+private fun GlidedItemBackgroundGradient() =
+    Brush.linearGradient(0f to Color.Transparent, 0.5f to Color.Transparent, 1f to Color(0xaaffc847))
 
 @Stable
 private fun Item.Rarity.BackgroundGradient() = Brush.linearGradient(listOf(TranslucentColor(), Color.Transparent))
