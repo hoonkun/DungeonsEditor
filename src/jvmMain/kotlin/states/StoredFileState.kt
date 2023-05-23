@@ -116,6 +116,8 @@ class Item(from: JSONObject) {
 
     val upgraded by mutableStateOf(from.getBoolean("upgraded"))
 
+    val markedNew by mutableStateOf(from.safe { getBoolean("markedNew") } ?: false)
+
     fun Name(): String = Localizations.ItemName(type)
 
     fun Flavour(): String? = Localizations.ItemFlavour(type)

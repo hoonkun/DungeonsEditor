@@ -244,25 +244,37 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
         modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 13.dp)
     )
 
-    if (totalEnchantmentPoints == 0) return
+    if (totalEnchantmentPoints != 0) {
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 13.dp)
-    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 13.dp)
+        ) {
+            Image(
+                bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
+                contentDescription = null,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = "$totalEnchantmentPoints",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                modifier = Modifier.offset(y = (-2).dp)
+            )
+        }
+
+    }
+
+    if (item.markedNew) {
+
         Image(
-            bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
+            bitmap = GameResources.image { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
             contentDescription = null,
-            modifier = Modifier.size(22.dp)
+            modifier = Modifier.align(Alignment.TopEnd).fillMaxSize(0.2f).offset(2.dp, (-1.5).dp)
         )
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            text = "$totalEnchantmentPoints",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 25.sp,
-            modifier = Modifier.offset(y = (-2).dp)
-        )
+
     }
 
 }
