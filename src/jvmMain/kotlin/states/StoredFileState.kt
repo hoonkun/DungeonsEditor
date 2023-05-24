@@ -258,7 +258,7 @@ class Enchantment(val holder: Item, initialId: String, initialInvestedPoints: In
 
     fun changeId(newId: String) {
         id = newId
-        adjustLevel(level)
+        adjustLevel(if (newId == "Unset") 0 else level)
     }
 
     fun adjustLevel(level: Int, isNetheriteEnchant: Boolean = false) {

@@ -41,8 +41,11 @@ fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
             DescriptionText(text = Localizations.EnchantmentDescription(enchantment.data))
             Spacer(modifier = Modifier.height(20.dp))
             EffectText(text = Localizations.EnchantmentEffect(enchantment.data))
-            Spacer(modifier = Modifier.weight(1f))
-            LevelAdjustView(enchantment)
+
+            if (enchantment.id != "Unset") {
+                Spacer(modifier = Modifier.weight(1f))
+                LevelAdjustView(enchantment)
+            }
         }
     }
 }

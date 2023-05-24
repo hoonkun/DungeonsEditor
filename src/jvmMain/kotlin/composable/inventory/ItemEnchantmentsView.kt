@@ -153,10 +153,12 @@ fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean
     BlurBehindImage(
         bitmap = enchantment.Image(),
         scale = scale,
+        enabled = enchantment.id != "Unset",
         modifier = Modifier
             .fillMaxSize()
             .align(Alignment.Center)
             .hoverable(source)
+            .scale(enchantment.ImageScale() * 0.7f)
             .rotate(45f)
             .drawBehind {
                 if (!indicatorEnabled) return@drawBehind

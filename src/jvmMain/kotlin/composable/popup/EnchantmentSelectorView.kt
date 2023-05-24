@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,8 @@ import composable.inventory.BlurBehindImage
 import editorState
 import states.Enchantment
 import states.Item
+
+val EnchantmentSelectorDummy = EnchantmentData(id = "Unset", dataPath = "", multipleAllowed = true)
 
 @Composable
 fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
@@ -39,6 +42,8 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
                     true
                 }
                 .sortedBy { Localizations.EnchantmentName(it) }
+                .toMutableList()
+                .apply { this.add(0, EnchantmentSelectorDummy) }
         }
     }
 
@@ -93,5 +98,6 @@ fun BoxScope.EnchantmentIcon(enchantment: EnchantmentData, enabled: Boolean) =
     BlurBehindImage(
         bitmap = enchantment.Image(),
         alpha = if (enabled) 1f else 0.125f,
-        modifier = Modifier.fillMaxSize().align(Alignment.Center)
+        enabled = enchantment.id != "Unset",
+        modifier = Modifier.fillMaxSize().align(Alignment.Center).scale(enchantment.ImageScale() * 0.7f)
     )
