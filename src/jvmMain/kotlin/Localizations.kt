@@ -96,16 +96,20 @@ class Localizations {
         fun EnchantmentName(enchantment: EnchantmentData) =
             Localizations["Enchantment/${EnchantmentNameCorrections[enchantment.id] ?: enchantment.id}"] ?: "???"
         fun EnchantmentDescription(enchantment: EnchantmentData) =
-            Localizations["Enchantment/${EnchantmentDescriptionCorrections[enchantment.id] ?: enchantment.id}_desc"]
-                ?.let { text ->
-                    val enchantmentData = Database.current.enchantments.find { it.id == enchantment.id } ?: return@let null
-                    var result = text
-                    enchantmentData.specialDescValues?.forEachIndexed { index, value -> result = result.replace("{${index}}", Localizations[value] ?: "") }
-                    result
-                }
+            if (enchantment.id == "Unset")
+                "이 슬롯을 비활성화 상태로 변경합니다.\n'화려한'에 설정된 효과 부여의 경우 금박이 지워진 상태로 변경됩니다."
+            else
+                Localizations["Enchantment/${EnchantmentDescriptionCorrections[enchantment.id] ?: enchantment.id}_desc"]
+                    ?.let { text ->
+                        val enchantmentData = Database.current.enchantments.find { it.id == enchantment.id } ?: return@let null
+                        var result = text
+                        enchantmentData.specialDescValues?.forEachIndexed { index, value -> result = result.replace("{${index}}", Localizations[value] ?: "") }
+                        result
+                    }
 
         fun EnchantmentEffect(enchantment: EnchantmentData) =
-            Localizations[EnchantmentFixedEffectCorrections[enchantment.id] ?: "Enchantment/${EnchantmentEffectCorrections[enchantment.id] ?: enchantment.id}_effect"]
+            if (enchantment.id == "Unset") "{0} 확률로 아무것도 하지 않습니다?"
+            else Localizations[EnchantmentFixedEffectCorrections[enchantment.id] ?: "Enchantment/${EnchantmentEffectCorrections[enchantment.id] ?: enchantment.id}_effect"]
 
         init {
             val newTexts = mutableMapOf<String, Map<String, String>>()

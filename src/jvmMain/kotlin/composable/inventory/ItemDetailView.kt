@@ -4,6 +4,8 @@ import Localizations
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -13,9 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -86,17 +91,26 @@ private fun ItemDetailView(item: Item) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val selected = enchantment != null && editorState.detailState.selectedEnchantment == enchantment
+
     if (enchantment == null || enchantment.id == "Unset") {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .offset(y = (-8).dp)
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
-                    val newEnchantment = Enchantment(parentItem, "Unset", 0, 1)
-                    parentItem.netheriteEnchant = newEnchantment
-                    editorState.detailState.selectEnchantment(newEnchantment)
+                    var netheriteEnchant = parentItem.netheriteEnchant
+                    if (netheriteEnchant == null) {
+                        netheriteEnchant = Enchantment(parentItem, "Unset", 0, 0)
+                        parentItem.netheriteEnchant = netheriteEnchant
+                    }
+                    editorState.detailState.selectEnchantment(netheriteEnchant)
                 }
+                .hoverable(source)
                 .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
+                .drawBehind { drawInteractionBorder(hovered, selected) }
                 .padding(4.dp)
         ) {
             Image(
@@ -111,7 +125,9 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
             modifier = Modifier
                 .offset(y = (-8).dp)
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detailState.selectEnchantment(enchantment) }
+                .hoverable(source)
                 .background(Color(0x40ffc847), RoundedCornerShape(6.dp))
+                .drawBehind { drawInteractionBorder(hovered, selected) }
                 .padding(vertical = 4.dp, horizontal = 10.dp)
         ) {
             Box(modifier = Modifier.size(40.dp)) {
@@ -130,6 +146,16 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
             Text(fontSize = 26.sp, text = "화려한", color = Color.White, modifier = Modifier.offset(y = (-1).dp))
         }
     }
+}
+
+@Stable
+fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean) {
+    if (!hovered && !selected) return
+    drawRoundRect(
+        brush = SolidColor(if (selected) Color.White else Color.White.copy(0.35f)),
+        cornerRadius = CornerRadius(6.dp.value, 6.dp.value),
+        style = Stroke(3.dp.value)
+    )
 }
 
 @Composable
