@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import editorState
@@ -61,15 +62,15 @@ private fun ItemDetailView(item: Item) {
     ItemDetailViewRoot {
         ItemImage(item = item)
         ItemDataColumn {
-            Row(verticalAlignment = Alignment.Bottom) {
-                ItemNameText(text = item.Name())
-                Spacer(modifier = Modifier.width(20.dp))
+            Row {
+                RarityIndicator(item.rarity)
+                Spacer(modifier = Modifier.width(10.dp))
                 NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
-                Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Modified(parentItem = item)
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Row(modifier = Modifier.height(75.dp)) { ItemNameText(text = item.Name()) }
 
             ItemDescriptionText(text = item.Flavour())
             ItemDescriptionText(text = item.Description())
@@ -98,23 +99,24 @@ fun Modified(parentItem: Item) {
 
     val modified = parentItem.modified == true
 
-    Box(
+    Row(
         modifier = Modifier
-            .height(48.dp)
-            .offset(y = (-8).dp)
+            .height(38.dp)
             .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
-
+                parentItem.modified = !modified
+                if (modified) parentItem.timesModified = null
+                else parentItem.timesModified = 1
             }
             .hoverable(source)
-            .background(if (modified) Color(0x456f52ff) else Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
+            .background(if (modified) Color(0x556f52ff) else Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
             .drawBehind { drawInteractionBorder(hovered, false) }
-            .padding(vertical = if (modified) 4.dp else 8.dp, horizontal = 10.dp)
+            .padding(vertical = 4.dp, horizontal = 10.dp)
     ) {
-        Text(
-            text = if (modified) Localizations["/label_custom"]!! else "_",
-            fontSize = 26.sp,
-            color = Color.White
-        )
+        Text(text = if (modified) "효과 변경" else "_", fontSize = 20.sp, color = Color.White)
+        if (modified) {
+            UnlabeledField("${parentItem.timesModified}") { if (it.toIntOrNull() != null) parentItem.timesModified = it.toInt() }
+            Text(text = "번", fontSize = 20.sp, color = Color.White)
+        }
     }
 }
 
@@ -128,8 +130,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
     if (enchantment == null || enchantment.id == "Unset") {
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .offset(y = (-8).dp)
+                .wrapContentSize()
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
                     var netheriteEnchant = parentItem.netheriteEnchant
                     if (netheriteEnchant == null) {
@@ -146,21 +147,21 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
             Image(
                 bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" },
                 contentDescription = null,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(30.dp)
             )
         }
     } else {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .offset(y = (-8).dp)
+                .wrapContentSize()
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detailState.selectEnchantment(enchantment) }
                 .hoverable(source)
                 .background(Color(0x40ffc847), RoundedCornerShape(6.dp))
                 .drawBehind { drawInteractionBorder(hovered, selected) }
-                .padding(vertical = 4.dp, horizontal = 10.dp)
+                .padding(vertical = 4.dp, horizontal = 4.dp)
         ) {
-            Box(modifier = Modifier.size(40.dp)) {
+            Box(modifier = Modifier.size(30.dp)) {
                 Image(
                     bitmap = GameResources.image { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
                     contentDescription = null,
@@ -172,8 +173,8 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f).scale(1.15f)
                 )
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(fontSize = 26.sp, text = "화려한", color = Color.White, modifier = Modifier.offset(y = (-1).dp))
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(text = "화려한", fontSize = 20.sp, color = Color.White)
         }
     }
 }
@@ -205,7 +206,8 @@ private fun ItemNameText(text: String) =
             shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 5f),
             fontWeight = FontWeight.Bold,
             color = Color.White
-        )
+        ),
+        modifier = Modifier.offset(y = (-7).dp)
     )
 
 @Composable
@@ -328,4 +330,40 @@ fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
         }
     }
     return result
+}
+
+@Composable
+fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val lineColor by animateColorAsState(
+        if (!focused) Color(0x00b2a4ff) else Color(0xffb2a4ff),
+        animationSpec = tween(durationMillis = 250)
+    )
+
+    BasicTextField(
+        value,
+        onValueChange,
+        textStyle = TextStyle(fontSize = 20.sp, color = Color.White, textAlign = TextAlign.End),
+        singleLine = true,
+        cursorBrush = SolidColor(Color.White),
+        modifier = Modifier
+            .onFocusChanged { focused = it.hasFocus }
+            .width(35.dp)
+            .drawBehind {
+                drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 3.dp.value))
+            }
+    )
+}
+
+@Composable
+fun RarityIndicator(rarity: Item.Rarity) {
+    Text(
+        text = Localizations["/rarity_${rarity.name.lowercase()}"]!!,
+        fontSize = 20.sp,
+        color = Color.White,
+        modifier = Modifier
+            .height(38.dp)
+            .background(rarity.TranslucentColor(), shape = RoundedCornerShape(6.dp))
+            .padding(vertical = 4.dp, horizontal = 10.dp)
+    )
 }

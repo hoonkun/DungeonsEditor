@@ -74,6 +74,7 @@ private fun ItemComparatorView(items: List<Item?>) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(scroll), verticalArrangement = Arrangement.Center) {
             AnimatedItemDetailView(items[0], "primary")
+            Spacer(modifier = Modifier.height(20.dp))
             AnimatedItemDetailView(items[1], "secondary")
         }
         VerticalScrollbar(
