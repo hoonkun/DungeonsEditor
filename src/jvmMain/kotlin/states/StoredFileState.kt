@@ -240,12 +240,15 @@ class Item(from: JSONObject) {
 }
 
 @Stable
-class Enchantment(val holder: Item, from: JSONObject) {
-    var id: String by mutableStateOf(from.getString("id"))
-    var investedPoints by mutableStateOf(from.getInt("investedPoints"))
-    var level by mutableStateOf(from.getInt("level"))
+class Enchantment(val holder: Item, initialId: String, initialInvestedPoints: Int, initialLevel: Int) {
+    var id: String by mutableStateOf(initialId)
+    var investedPoints by mutableStateOf(initialInvestedPoints)
+    var level by mutableStateOf(initialLevel)
+        private set
 
     val data by derivedStateOf { Database.current.enchantments.find { it.id == id } ?: throw RuntimeException("Unrecognizable enchantment received: $id") }
+
+    constructor(holder: Item, from: JSONObject): this(holder, from.getString("id"), from.getInt("investedPoints"), from.getInt("level"))
 
     fun Image() = data.Image()
 
@@ -258,10 +261,12 @@ class Enchantment(val holder: Item, from: JSONObject) {
         adjustLevel(level)
     }
 
-    fun adjustLevel(level: Int) {
+    fun adjustLevel(level: Int, isNetheriteEnchant: Boolean = false) {
         this.level = level
         this.investedPoints =
-            if (!data.powerful && holder.netheriteEnchant == null)
+            if (isNetheriteEnchant)
+                0
+            else if (!data.powerful && holder.netheriteEnchant == null)
                 EnchantmentData.CommonNonGlidedInvestedPoints.slice(0 until level).sum()
             else if (data.powerful && holder.netheriteEnchant == null)
                 EnchantmentData.PowerfulNonGlidedInvestedPoints.slice(0 until level).sum()

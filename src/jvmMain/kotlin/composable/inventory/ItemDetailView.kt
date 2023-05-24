@@ -16,10 +16,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import editorState
 import extensions.DungeonsPower
 import extensions.GameResources
 import states.*
@@ -57,7 +59,7 @@ private fun ItemDetailView(item: Item) {
             Row(verticalAlignment = Alignment.Bottom) {
                 ItemNameText(text = item.Name())
                 Spacer(modifier = Modifier.width(20.dp))
-                NetheriteEnchant(enchantment = netheriteEnchant)
+                NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -81,13 +83,19 @@ private fun ItemDetailView(item: Item) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NetheriteEnchant(enchantment: Enchantment?) {
-    if (enchantment == null) {
+private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
+    if (enchantment == null || enchantment.id == "Unset") {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .offset(y = (-8).dp)
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
+                    val newEnchantment = Enchantment(parentItem, "Unset", 0, 1)
+                    parentItem.netheriteEnchant = newEnchantment
+                    editorState.detailState.selectEnchantment(newEnchantment)
+                }
                 .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
                 .padding(4.dp)
         ) {
@@ -102,6 +110,7 @@ private fun NetheriteEnchant(enchantment: Enchantment?) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .offset(y = (-8).dp)
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detailState.selectEnchantment(enchantment) }
                 .background(Color(0x40ffc847), RoundedCornerShape(6.dp))
                 .padding(vertical = 4.dp, horizontal = 10.dp)
         ) {
@@ -114,7 +123,7 @@ private fun NetheriteEnchant(enchantment: Enchantment?) {
                 Image(
                     bitmap = enchantment.Image(),
                     contentDescription = null,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f).scale(1.15f)
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))

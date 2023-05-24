@@ -43,7 +43,7 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
     }
 
     val gridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = available.indexOfFirst { it.id == modifyTarget.id }
+        initialFirstVisibleItemIndex = available.indexOfFirst { it.id == modifyTarget.id }.coerceAtLeast(0)
     )
 
     PopupCloseButton { editorState.detailState.toggleEnchantmentSelector() }
