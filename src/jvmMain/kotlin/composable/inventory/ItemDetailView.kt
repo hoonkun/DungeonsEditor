@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -280,15 +279,53 @@ private fun LabeledInput(label: String, value: String, onValueChange: (String) -
 private fun ArmorProperties(properties: List<ArmorProperty>?) {
     if (properties == null) return
 
-    for (property in properties) {
-        val text = property.Description()
-        if (text != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(GameResources.image { "/Game/UI/Materials/Inventory2/Inspector/${property.IconName()}_bullit.png" }, null, modifier = Modifier.size(30.dp))
-                Spacer(modifier = Modifier.width(10.dp))
-                ItemDescriptionText(text = "$text")
+    val groupedProperties by remember {
+        derivedStateOf {
+            val sorted = properties.sortedBy { it.Description()?.length }
+            val uniques = sorted.filter { it.rarity.lowercase() == "unique" }
+            val commons = sorted.filter { it.rarity.lowercase() == "common" }
+            val groupedUniques = groupByLength(uniques)
+            val groupedCommons = groupByLength(commons)
+            mutableListOf<List<ArmorProperty>>()
+                .apply {
+                    this.addAll(groupedUniques)
+                    this.addAll(groupedCommons)
+                }
+                .toList()
+        }
+    }
+
+
+    for (propertyRow in groupedProperties) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            for (property in propertyRow) {
+                val text = property.Description()!!
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Image(
+                        GameResources.image { "/Game/UI/Materials/Inventory2/Inspector/${property.IconName()}_bullit.png" },
+                        null,
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    ItemDescriptionText(text = text)
+                }
             }
         }
     }
     Spacer(modifier = Modifier.height(20.dp))
+}
+
+fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
+    val result = mutableListOf<MutableList<ArmorProperty>>(mutableListOf())
+    input.forEach {
+        val description = it.Description() ?: return@forEach
+        val long = description.length > 15
+        if (!long) {
+            if (result.last().size == 2) result.add(mutableListOf(it))
+            else result.last().add(it)
+        } else {
+            result.add(mutableListOf(it))
+        }
+    }
+    return result
 }
