@@ -44,15 +44,13 @@ fun ColumnScope.AnimatedItemDetailView(targetState: Item?, type: String) =
         },
         contentAlignment = Alignment.Center
     ) {
-        if (it == null) DummyItemView(type)
+        if (it == null) DummyItemView()
         else ItemDetailView(it)
     }
 
 @Composable
-private fun DummyItemView(type: String) =
-    Box(modifier = Modifier.wrapContentHeight().fillMaxWidth().requiredHeightIn(min = 400.dp), contentAlignment = Alignment.Center) {
-        ItemDescriptionText("${if (type == "primary") "왼쪽 클릭" else "오른쪽 클릭"}으로 비교할 대상을 추가해보세요!")
-    }
+private fun DummyItemView() =
+    Box(modifier = Modifier.wrapContentHeight().fillMaxWidth())
 
 @Composable
 private fun ItemDetailView(item: Item) {
