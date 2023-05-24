@@ -83,31 +83,42 @@ private fun ItemDetailView(item: Item) {
 
 @Composable
 private fun NetheriteEnchant(enchantment: Enchantment?) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (enchantment == null) {
-
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(Color(0x30ffc847), RoundedCornerShape(6.dp))
-                    .padding(vertical = 4.dp, horizontal = 10.dp)
-            ) {
-                Box(modifier = Modifier.size(40.dp)) {
-                    Image(
-                        bitmap = GameResources.image { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
-                    )
-                    Image(
-                        bitmap = enchantment.Image(),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(fontSize = 26.sp, text = "화려한", color = Color.White, modifier = Modifier.offset(y = (-1).dp))
+    if (enchantment == null) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .offset(y = (-8).dp)
+                .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
+                .padding(4.dp)
+        ) {
+            Image(
+                bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" },
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )
+        }
+    } else {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .offset(y = (-8).dp)
+                .background(Color(0x40ffc847), RoundedCornerShape(6.dp))
+                .padding(vertical = 4.dp, horizontal = 10.dp)
+        ) {
+            Box(modifier = Modifier.size(40.dp)) {
+                Image(
+                    bitmap = GameResources.image { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
+                )
+                Image(
+                    bitmap = enchantment.Image(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
+                )
             }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(fontSize = 26.sp, text = "화려한", color = Color.White, modifier = Modifier.offset(y = (-1).dp))
         }
     }
 }
