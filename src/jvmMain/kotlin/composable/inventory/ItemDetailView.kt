@@ -64,10 +64,12 @@ private fun ItemDetailView(item: Item) {
         ItemDataColumn {
             Row {
                 RarityIndicator(item.rarity)
-                Spacer(modifier = Modifier.width(10.dp))
-                NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
-                Spacer(modifier = Modifier.width(10.dp))
-                Modified(parentItem = item)
+                if (item.Type() != Item.ItemType.Artifact) {
+                    Spacer(modifier = Modifier.width(10.dp))
+                    NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Modified(parentItem = item)
+                }
             }
 
             Row(modifier = Modifier.height(75.dp)) { ItemNameText(text = item.Name()) }
