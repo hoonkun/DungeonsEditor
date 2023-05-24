@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -65,6 +66,8 @@ private fun ItemDetailView(item: Item) {
                 ItemNameText(text = item.Name())
                 Spacer(modifier = Modifier.width(20.dp))
                 NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
+                Spacer(modifier = Modifier.width(20.dp))
+                Modified(parentItem = item)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -85,6 +88,34 @@ private fun ItemDetailView(item: Item) {
 
             if (enchantmentSlots != null) ItemEnchantmentsView(enchantmentSlots)
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun Modified(parentItem: Item) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+
+    val modified = parentItem.modified == true
+
+    Box(
+        modifier = Modifier
+            .height(48.dp)
+            .offset(y = (-8).dp)
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
+
+            }
+            .hoverable(source)
+            .background(if (modified) Color(0x456f52ff) else Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
+            .drawBehind { drawInteractionBorder(hovered, false) }
+            .padding(vertical = if (modified) 4.dp else 8.dp, horizontal = 10.dp)
+    ) {
+        Text(
+            text = if (modified) Localizations["/label_custom"]!! else "_",
+            fontSize = 26.sp,
+            color = Color.White
+        )
     }
 }
 

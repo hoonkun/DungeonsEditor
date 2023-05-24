@@ -112,7 +112,7 @@ class Item(from: JSONObject) {
 
     val rarity by mutableStateOf(Rarity.fromValue(from.getString("rarity")))
 
-    val timesModified by mutableStateOf(from.safe { getInt("timesmodified") })
+    var timesModified by mutableStateOf(from.safe { getInt("timesmodified") })
 
     val upgraded by mutableStateOf(from.getBoolean("upgraded"))
 
