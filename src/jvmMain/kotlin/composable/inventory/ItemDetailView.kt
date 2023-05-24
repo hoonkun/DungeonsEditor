@@ -104,11 +104,7 @@ fun Modified(parentItem: Item) {
     Row(
         modifier = Modifier
             .height(38.dp)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
-                parentItem.modified = !modified
-                if (modified) parentItem.timesModified = null
-                else parentItem.timesModified = 1
-            }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { parentItem.modified = !modified }
             .hoverable(source)
             .background(if (modified) Color(0x556f52ff) else Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
             .drawBehind { drawInteractionBorder(hovered, false) }
@@ -116,7 +112,11 @@ fun Modified(parentItem: Item) {
     ) {
         Text(text = if (modified) "효과 변경" else "_", fontSize = 20.sp, color = Color.White)
         if (modified) {
-            UnlabeledField("${parentItem.timesModified}") { if (it.toIntOrNull() != null) parentItem.timesModified = it.toInt() }
+            UnlabeledField("${parentItem.timesModified ?: 0}") {  newValue ->
+                if (newValue.toIntOrNull() != null) {
+                    parentItem.timesModified = newValue.toInt().takeIf { it != 0 }
+                }
+            }
             Text(text = "번", fontSize = 20.sp, color = Color.White)
         }
     }
