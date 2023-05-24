@@ -136,7 +136,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
                     var netheriteEnchant = parentItem.netheriteEnchant
                     if (netheriteEnchant == null) {
-                        netheriteEnchant = Enchantment(parentItem, "Unset", 0, 0)
+                        netheriteEnchant = Enchantment(parentItem, "Unset", 0, 0, true)
                         parentItem.netheriteEnchant = netheriteEnchant
                     }
                     editorState.detailState.selectEnchantment(netheriteEnchant)

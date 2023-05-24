@@ -94,7 +94,7 @@ class Item(from: JSONObject) {
     val enchantments by mutableStateOf(
         from
             .safe { getJSONArray("enchantments") }
-            ?.toJsonObjectArray { Enchantment(this@Item, it) }
+            ?.toJsonObjectArray { Enchantment(this@Item, it, false) }
             ?.toMutableStateList()
     )
 
@@ -106,7 +106,7 @@ class Item(from: JSONObject) {
 
     var modified by mutableStateOf(from.safe { getBoolean("modified") })
 
-    var netheriteEnchant by mutableStateOf(from.safe { Enchantment(this@Item, getJSONObject("netheriteEnchant")) })
+    var netheriteEnchant by mutableStateOf(from.safe { Enchantment(this@Item, getJSONObject("netheriteEnchant"), true) })
 
     var power by mutableStateOf(from.getFloat("power"))
 
@@ -240,15 +240,24 @@ class Item(from: JSONObject) {
 }
 
 @Stable
-class Enchantment(val holder: Item, initialId: String, initialInvestedPoints: Int, initialLevel: Int) {
+class Enchantment(
+    val holder: Item,
+    initialId: String,
+    initialInvestedPoints: Int,
+    initialLevel: Int,
+    private val isNetheriteEnchant: Boolean
+) {
     var id: String by mutableStateOf(initialId)
+        private set
+
     var investedPoints by mutableStateOf(initialInvestedPoints)
     var level by mutableStateOf(initialLevel)
         private set
 
     val data by derivedStateOf { Database.current.enchantments.find { it.id == id } ?: throw RuntimeException("Unrecognizable enchantment received: $id") }
 
-    constructor(holder: Item, from: JSONObject): this(holder, from.getString("id"), from.getInt("investedPoints"), from.getInt("level"))
+    constructor(holder: Item, from: JSONObject, isNetheriteEnchant: Boolean):
+            this(holder, from.getString("id"), from.getInt("investedPoints"), from.getInt("level"), isNetheriteEnchant)
 
     fun Image() = data.Image()
 
@@ -257,22 +266,29 @@ class Enchantment(val holder: Item, initialId: String, initialInvestedPoints: In
     fun ShineImage() = data.ShineImage()
 
     fun changeId(newId: String) {
+        val prevId = id
         id = newId
         adjustLevel(if (newId == "Unset") 0 else level)
+
+        if (isNetheriteEnchant && (prevId == "Unset" || newId == "Unset")) {
+            holder.enchantments?.forEach { it.adjustLevel(it.level) }
+        }
     }
 
     fun adjustLevel(level: Int, isNetheriteEnchant: Boolean = false) {
         this.level = level
+
+        val nonGlided = holder.netheriteEnchant == null || holder.netheriteEnchant?.id == "Unset"
         this.investedPoints =
             if (isNetheriteEnchant)
                 0
-            else if (!data.powerful && holder.netheriteEnchant == null)
+            else if (!data.powerful && nonGlided)
                 EnchantmentData.CommonNonGlidedInvestedPoints.slice(0 until level).sum()
-            else if (data.powerful && holder.netheriteEnchant == null)
+            else if (data.powerful && nonGlided)
                 EnchantmentData.PowerfulNonGlidedInvestedPoints.slice(0 until level).sum()
-            else if (!data.powerful && holder.netheriteEnchant != null)
+            else if (!data.powerful && !nonGlided)
                 EnchantmentData.CommonGlidedInvestedPoints.slice(0 until level).sum()
-            else if (data.powerful && holder.netheriteEnchant != null)
+            else if (data.powerful && !nonGlided)
                 EnchantmentData.PowerfulGlidedInvestedPoints.slice(0 until level).sum()
             else 0
     }
