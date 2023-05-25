@@ -45,11 +45,17 @@ class DetailEditorState {
     var enchantmentSelectorOpen: Boolean by mutableStateOf(false)
         private set
 
+    var selectedArmorProperty: ArmorProperty? by mutableStateOf(null)
+
+    var armorPropertySelectorOpen: Boolean by mutableStateOf(false)
+
     fun toggleEnchantmentSelector() {
         enchantmentSelectorOpen = !enchantmentSelectorOpen
     }
 
     fun selectEnchantment(enchantment: Enchantment) {
+        if (selectedArmorProperty != null) unselectArmorProperty()
+
         enchantmentSelectorOpen = false
         selectedEnchantment =
             if (selectedEnchantment == enchantment) null
@@ -58,5 +64,24 @@ class DetailEditorState {
 
     fun unselectEnchantment() {
         selectedEnchantment = null
+        enchantmentSelectorOpen = false
+    }
+
+    fun selectArmorProperty(property: ArmorProperty) {
+        if (selectedEnchantment != null) unselectEnchantment()
+
+        armorPropertySelectorOpen = false
+        selectedArmorProperty =
+            if (selectedArmorProperty == property) null
+            else property
+    }
+
+    fun unselectArmorProperty() {
+        selectedArmorProperty = null
+        armorPropertySelectorOpen = false
+    }
+
+    fun toggleArmorPropertySelector() {
+        armorPropertySelectorOpen = !armorPropertySelectorOpen
     }
 }

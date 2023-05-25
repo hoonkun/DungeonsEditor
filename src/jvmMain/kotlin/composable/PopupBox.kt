@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import composable.popup.ArmorPropertyDetailView
+import composable.popup.ArmorPropertySelectorView
 import composable.popup.EnchantmentDetailView
 import composable.popup.EnchantmentSelectorView
 import editorState
@@ -33,6 +35,7 @@ import editorState
 @Composable
 fun PopupBox() {
     EnchantmentDetailPopup()
+    ArmorPropertyDetailPopup()
 }
 
 @Composable
@@ -40,7 +43,7 @@ fun EnchantmentDetailPopup() {
     val selectedEnchantment = editorState.detailState.selectedEnchantment
     val selectedEnchantmentHolderVisible = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedEnchantment?.holder)
 
-    val selectorOpen = editorState.detailState.enchantmentSelectorOpen
+    val selectorOpen = editorState.detailState.selectedEnchantment != null
 
     PopupBoxAnimator(Triple(selectorOpen, selectedEnchantment, selectedEnchantmentHolderVisible)) { (open, selected, holderVisible) ->
         if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
@@ -58,6 +61,30 @@ fun EnchantmentDetailPopup() {
 
         PopupBoxRoot(size = 675.dp to 300.dp) {
             EnchantmentDetailView(enchantment, requestClose = { editorState.detailState.unselectEnchantment() })
+        }
+    }
+}
+
+@Composable
+fun ArmorPropertyDetailPopup() {
+    val selected = editorState.detailState.selectedArmorProperty
+    val holderVisible = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedArmorProperty?.holder)
+
+    val open = editorState.detailState.selectedArmorProperty != null
+
+    PopupBoxAnimator(Triple(open, selected, holderVisible)) { (open, selected, holderVisible) ->
+        if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
+
+        PopupBoxRoot(size = 675.dp to 800.dp, offset = 100.dp to (-160).dp) {
+            ArmorPropertySelectorView(selected)
+        }
+    }
+
+    PopupBoxAnimator(selected to holderVisible) { (property, open) ->
+        if (property == null || !open) return@PopupBoxAnimator
+
+        PopupBoxRoot(size = 675.dp to 140.dp) {
+            ArmorPropertyDetailView(property, requestClose = { editorState.detailState.unselectArmorProperty() })
         }
     }
 }
@@ -117,7 +144,7 @@ fun PopupCloseButton(onClick: () -> Unit) {
     Box (
         modifier = Modifier
             .size(50.dp)
-            .offset(10.dp, 10.dp)
+            .offset(x = 10.dp, y = (-10).dp)
             .hoverable(source)
             .clickable(source, null, onClick = onClick)
             .drawBehind {

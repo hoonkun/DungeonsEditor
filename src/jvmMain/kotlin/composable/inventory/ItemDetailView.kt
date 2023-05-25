@@ -301,20 +301,46 @@ private fun ArmorProperties(properties: List<ArmorProperty>?) {
     for (propertyRow in groupedProperties) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             for (property in propertyRow) {
-                val text = property.Description()!!
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    Image(
-                        GameResources.image { "/Game/UI/Materials/Inventory2/Inspector/${property.IconName()}_bullit.png" },
-                        null,
-                        modifier = Modifier.size(30.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    ItemDescriptionText(text = text)
-                }
+                ArmorPropertyView(property)
+                if (propertyRow.indexOf(property) == 0) Spacer(modifier = Modifier.width(20.dp))
             }
         }
     }
     Spacer(modifier = Modifier.height(20.dp))
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun RowScope.ArmorPropertyView(property: ArmorProperty) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val selected = editorState.detailState.selectedArmorProperty == property
+
+    Row(modifier = Modifier.weight(1f)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .hoverable(source)
+                .drawBehind {
+                    drawRoundRect(
+                        SolidColor(Color.White),
+                        alpha = if (selected) 0.2f else if (hovered) 0.1f else 0.0f,
+                        cornerRadius = CornerRadius(6.dp.value, 6.dp.value),
+                        topLeft = Offset(-10.dp.value, 0f),
+                        size = Size(size.width + 20.dp.value, size.height)
+                    )
+                }
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detailState.selectArmorProperty(property) }
+        ) {
+            Image(
+                property.Icon(),
+                null,
+                modifier = Modifier.size(30.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            ItemDescriptionText(text = property.Description()!!)
+        }
+    }
 }
 
 fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {

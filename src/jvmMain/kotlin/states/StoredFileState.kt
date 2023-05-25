@@ -87,7 +87,7 @@ class Item(from: JSONObject) {
     val armorProperties by mutableStateOf(
         from
             .safe { getJSONArray("armorproperties") }
-            ?.toJsonObjectArray { ArmorProperty(it) }
+            ?.toJsonObjectArray { ArmorProperty(this, it) }
             ?.toMutableStateList()
     )
 
@@ -314,25 +314,35 @@ class EnchantmentSlot(
 }
 
 @Stable
-class ArmorProperty(from: JSONObject) {
-    var id: String by mutableStateOf(from.getString("id"))
-    var rarity: String by mutableStateOf(from.getString("rarity"))
+class ArmorProperty(val holder: Item, id: String, rarity: String) {
+    var id: String by mutableStateOf(id)
+    var rarity: String by mutableStateOf(rarity)
 
-    fun Description() =
-        Localizations["ArmorProperties/${id}_description"]
-            ?.replace("{0}", "")
-            ?.replace("{1}", "")
-            ?.replace("{2}", "")
-            ?.replace("개의", "추가")
-            ?.replace("  ", " ")
-            ?.trim()
+    constructor(holder: Item, from: JSONObject): this(holder, from.getString("id"), from.getString("rarity"))
 
-    fun IconName() =
+    fun Description() = Description(id)
+
+    fun Icon() =
+        GameResources.image { "/Game/UI/Materials/Inventory2/Inspector/${IconName()}_bullit.png" }
+
+    private fun IconName() =
         when (rarity.lowercase()) {
             "common" -> "regular"
             "unique" -> "unique"
             "rare" -> "rare" // Is this even exists?
             else -> "regular"
         }
+
+    companion object {
+        fun Description(id: String) =
+            Localizations["ArmorProperties/${id}_description"]
+                ?.replace("{0}", "")
+                ?.replace("{1}", "")
+                ?.replace("{2}", "")
+                ?.replace("개의", "추가")
+                ?.replace("만큼", "")
+                ?.replace("  ", " ")
+                ?.trim()
+    }
 
 }

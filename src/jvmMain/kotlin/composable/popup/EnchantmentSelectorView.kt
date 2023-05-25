@@ -51,8 +51,6 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
         initialFirstVisibleItemIndex = available.indexOfFirst { it.id == modifyTarget.id }.coerceAtLeast(0)
     )
 
-    PopupCloseButton { editorState.detailState.toggleEnchantmentSelector() }
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         contentPadding = PaddingValues(20.dp),
