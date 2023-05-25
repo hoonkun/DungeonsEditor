@@ -3,7 +3,9 @@ package composable.popup
 import EnchantmentData
 import Localizations
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,8 +18,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -92,10 +99,30 @@ fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, onClick: (E
 }
 
 @Composable
-fun BoxScope.EnchantmentIcon(enchantment: EnchantmentData, enabled: Boolean) =
+fun BoxScope.EnchantmentIcon(enchantment: EnchantmentData, enabled: Boolean) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+
+    val selected = enchantment.id == editorState.detailState.selectedEnchantment?.id
+
     BlurBehindImage(
         bitmap = enchantment.Image(),
-        alpha = if (enabled) 1f else 0.125f,
+        alpha = if (enabled || selected) 1f else 0.125f,
         enabled = enchantment.id != "Unset",
-        modifier = Modifier.fillMaxSize().align(Alignment.Center).scale(enchantment.ImageScale() * 0.7f)
+        modifier = Modifier
+            .fillMaxSize()
+            .align(Alignment.Center)
+            .scale(enchantment.ImageScale() * 0.7f)
+            .hoverable(source)
+            .rotate(45f)
+            .drawBehind {
+                drawRect(
+                    if (selected) Color.White.copy(alpha = 0.4f) else if (hovered) Color.White.copy(alpha = 0.3f) else Color.Transparent,
+                    style = Stroke(width = 6.dp.value),
+                    size = Size(size.width * 0.6f, size.height * 0.6f),
+                    topLeft = Offset(size.width * 0.2f, size.height * 0.2f)
+                )
+            }
+            .rotate(-45f)
     )
+}
