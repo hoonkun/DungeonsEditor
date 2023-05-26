@@ -7,6 +7,12 @@ inline fun <T>JSONObject.safe(block: JSONObject.() -> T): T? {
     return try { block(this) } catch (_: Exception) { null }
 }
 
+fun <T>JSONObject.replace(key: String, value: T): JSONObject {
+    remove(key)
+    put(key, value)
+    return this
+}
+
 inline fun <T>JSONObject.transformWithJsonObject(transform: (json: JSONObject) -> T): Map<String, T> {
     return this.keys()
         .iterator()

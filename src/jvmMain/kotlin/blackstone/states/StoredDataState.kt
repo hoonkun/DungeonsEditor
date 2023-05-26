@@ -1,3 +1,5 @@
+package blackstone.states
+
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -14,7 +16,7 @@ annotation class JsonField(val name: String)
 annotation class MustBeVerified(val message: String)
 
 @Stable
-class StoredDataState(from: JSONObject) {
+class StoredDataState(private val from: JSONObject) {
 
     companion object {
         private const val FIELD_BONUS_PREREQUISITES = "bonus_prerequisites"
@@ -89,7 +91,13 @@ class StoredDataState(from: JSONObject) {
         EndGameContentProgress(from.getJSONObject(FIELD_END_GAME_CONTENT_PROGRESS))
 
     @JsonField(FIELD_FINISHED_OBJECTIVE_TAGS)
-    var finishedObjectiveTags: FinishedObjectiveTags? by mutableStateOf(from.safe { FinishedObjectiveTags(getJSONObject(FIELD_FINISHED_OBJECTIVE_TAGS)) })
+    var finishedObjectiveTags: FinishedObjectiveTags? by mutableStateOf(
+        from.safe {
+            FinishedObjectiveTags(getJSONObject(
+                FIELD_FINISHED_OBJECTIVE_TAGS
+            ))
+        }
+    )
 
     @JsonField(FIELD_ITEMS)
     val items: SnapshotStateList<Item> = from.getJSONArray(FIELD_ITEMS).transformWithJsonObject { Item(it) }.toMutableStateList()
@@ -101,7 +109,13 @@ class StoredDataState(from: JSONObject) {
     var legendaryStatus: Int by mutableStateOf(from.getInt(FIELD_LEGENDARY_STATUS))
 
     @JsonField(FIELD_LOBBY_CHEST_PROGRESS)
-    var lobbyCanBeUndefined: SnapshotStateList<LobbyChestProgress>? by mutableStateOf(from.safe { getJSONArray(FIELD_LOBBY_CHEST_PROGRESS).transformWithJsonObject { LobbyChestProgress(it) }.toMutableStateList() })
+    var lobbyCanBeUndefined: SnapshotStateList<LobbyChestProgress>? by mutableStateOf(
+        from.safe {
+            getJSONArray(FIELD_LOBBY_CHEST_PROGRESS)
+                .transformWithJsonObject { LobbyChestProgress(it) }
+                .toMutableStateList()
+        }
+    )
 
     @JsonField(FIELD_MAP_UI_STATE)
     var mapUiState: MapUiState? by mutableStateOf(from.safe { MapUiState(getJSONObject(FIELD_MAP_UI_STATE)) })
@@ -195,6 +209,12 @@ class StoredDataState(from: JSONObject) {
 
     @JsonField(FIELD_XP)
     var xp: Long by mutableStateOf(from.getLong(FIELD_XP))
+
+    fun export(): JSONObject =
+        JSONObject(from.toString()).apply {
+            replace(FIELD_ITEMS, items.map { it.export() })
+            replace(FIELD_STORAGE_CHEST_ITEMS, storageChestItems.map { it.export() })
+        }
 
 }
 
@@ -324,7 +344,7 @@ class Item(
         private const val FIELD_EQUIPMENT_SLOT = "equipmentSlot"
     }
 
-    @JsonField(FIELD_INVENTORY_INDEX)
+    @JsonField(FIELD_INVENTORY_INDEX) @CanBeUndefined
     var inventoryIndex: Int? by mutableStateOf(inventoryIndex)
 
     @JsonField(FIELD_POWER)
@@ -370,6 +390,22 @@ class Item(
         from.safe { getInt(FIELD_TIMES_MODIFIED) },
         from.safe { getString(FIELD_EQUIPMENT_SLOT) }
     )
+
+    fun export(): JSONObject =
+        JSONObject().apply {
+            inventoryIndex?.let { put(FIELD_INVENTORY_INDEX, it) }
+            enchantments?.let { put(FIELD_ENCHANTMENTS, it.map { enchantment -> enchantment.export() }) }
+            armorProperties?.let { put(FIELD_ARMOR_PROPERTIES, it.map { property -> property.export() }) }
+            netheriteEnchant?.let { put(FIELD_NETHERITE_ENCHANT, it.export()) }
+            modified?.let { put(FIELD_MODIFIED, it) }
+            timesModified?.let { put(FIELD_TIMES_MODIFIED, it) }
+            equipmentSlot?.let { put(FIELD_EQUIPMENT_SLOT, it) }
+    
+            put(FIELD_POWER, power)
+            put(FIELD_RARITY, rarity)
+            put(FIELD_TYPE, type)
+            put(FIELD_UPGRADED, upgraded)
+        }
 }
 
 @Stable
@@ -398,6 +434,13 @@ class Enchantment(
         from.getInt(FIELD_INVESTED_POINTS),
         from.getInt(FIELD_LEVEL)
     )
+
+    fun export(): JSONObject =
+        JSONObject().apply {
+            put(FIELD_ID, id)
+            put(FIELD_INVESTED_POINTS, investedPoints)
+            put(FIELD_LEVEL, level)
+        }
 }
 
 @Stable
@@ -420,6 +463,12 @@ class ArmorProperty(
         from.getString(FIELD_ID),
         from.getString(FIELD_RARITY)
     )
+
+    fun export(): JSONObject =
+        JSONObject().apply {
+            put(FIELD_ID, id)
+            put(FIELD_RARITY, rarity)
+        }
 }
 
 @Stable
