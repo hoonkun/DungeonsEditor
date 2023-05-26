@@ -318,15 +318,46 @@ private fun ArmorProperties(properties: List<ArmorProperty>?) {
     }
 
 
-    for (propertyRow in groupedProperties) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            for (property in propertyRow) {
-                ArmorPropertyView(property)
-                if (propertyRow.indexOf(property) == 0) Spacer(modifier = Modifier.width(20.dp))
+    Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.weight(1f)) {
+            for (propertyRow in groupedProperties) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    for (property in propertyRow) {
+                        ArmorPropertyView(property)
+                        if (propertyRow.indexOf(property) == 0) Spacer(modifier = Modifier.width(20.dp))
+                    }
+                }
             }
         }
+        ArmorPropertyButton(mode = if (editorState.detail.selectedArmorProperty != null) "Delete" else "Add")
     }
     Spacer(modifier = Modifier.height(20.dp))
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ArmorPropertyButton(mode: String) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+
+    Box(
+        modifier = Modifier
+            .size(35.dp)
+            .hoverable(source)
+            .drawBehind {
+                if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value, 6.dp.value))
+                if (mode == "Add") drawRect(Color.White, topLeft = Offset(size.width / 2 - 2f, 8f), size = Size(4f, size.height - 16f))
+                drawRect(Color.White, topLeft = Offset(8f, size.height / 2 - 2f), size = Size(size.width - 16f, 4f))
+            }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
+                if (mode == "Add") { /* TODO */ }
+                else {
+                    val selected = editorState.detail.selectedArmorProperty ?: return@onClick
+                    selected.holder.armorProperties?.remove(selected)
+                    editorState.detail.unselectArmorProperty()
+                }
+            }
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -369,7 +400,7 @@ fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
     val result = mutableListOf<MutableList<ArmorProperty>>(mutableListOf())
     input.forEach {
         val description = it.data.description ?: return@forEach
-        val long = description.length > 15
+        val long = description.length > 12
         if (!long) {
             if (result.last().size == 2) result.add(mutableListOf(it))
             else result.last().add(it)
