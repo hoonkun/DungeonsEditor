@@ -214,6 +214,8 @@ class StoredDataState(private val from: JSONObject) {
         JSONObject(from.toString()).apply {
             replace(FIELD_ITEMS, items.map { it.export() })
             replace(FIELD_STORAGE_CHEST_ITEMS, storageChestItems.map { it.export() })
+            replace(FIELD_CURRENCIES, currencies.map { it.export() })
+            replace(FIELD_XP, xp)
         }
 
 }
@@ -252,6 +254,12 @@ class Currency(type: String, count: Int) {
     var count: Int by mutableStateOf(count)
 
     constructor(from: JSONObject): this(from.getString(FIELD_TYPE), from.getInt(FIELD_COUNT))
+
+    fun export(): JSONObject =
+        JSONObject().apply {
+            put(FIELD_TYPE, type)
+            put(FIELD_COUNT, count)
+        }
 }
 
 @Stable
