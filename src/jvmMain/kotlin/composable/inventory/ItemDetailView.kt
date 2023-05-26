@@ -1,5 +1,6 @@
 package composable.inventory
 
+import Database
 import Localizations
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -85,7 +86,7 @@ private fun ItemDetailView(item: Item) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            ArmorProperties(properties = item.armorProperties)
+            ArmorProperties(item = item, properties = item.armorProperties)
 
             PowerEditField(
                 value = DungeonsPower.toInGamePower(item.power).toString(),
@@ -296,7 +297,7 @@ private fun LabeledInput(label: String, value: String, onValueChange: (String) -
 }
 
 @Composable
-private fun ArmorProperties(properties: List<ArmorProperty>?) {
+private fun ArmorProperties(item: Item, properties: List<ArmorProperty>?) {
     Debugging.recomposition("ArmorProperties")
 
     if (properties == null) return
@@ -329,14 +330,14 @@ private fun ArmorProperties(properties: List<ArmorProperty>?) {
                 }
             }
         }
-        ArmorPropertyButton(mode = if (editorState.detail.selectedArmorProperty != null) "Delete" else "Add")
+        ArmorPropertyButton(item = item, mode = if (editorState.detail.selectedArmorProperty != null) "Delete" else "Add")
     }
     Spacer(modifier = Modifier.height(20.dp))
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ArmorPropertyButton(mode: String) {
+fun ArmorPropertyButton(item: Item, mode: String) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
@@ -350,8 +351,19 @@ fun ArmorPropertyButton(mode: String) {
                 drawRect(Color.White, topLeft = Offset(8f, size.height / 2 - 2f), size = Size(size.width - 16f, 4f))
             }
             .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
-                if (mode == "Add") { /* TODO */ }
-                else {
+                if (mode == "Add") {
+                    val properties = item.armorProperties ?: mutableStateListOf<ArmorProperty>().also { item.armorProperties = it }
+                    val newProperty = ArmorProperty(
+                        Database.current.armorProperties
+                            .filter { it.description != null }
+                            .sortedBy { it.description }
+                            .first().id,
+                        "Common"
+                    ).apply { holder = item }
+
+                    properties.add(newProperty)
+                    editorState.detail.toggleArmorProperty(newProperty)
+                } else {
                     val selected = editorState.detail.selectedArmorProperty ?: return@onClick
                     selected.holder.armorProperties?.remove(selected)
                     editorState.detail.unselectArmorProperty()
