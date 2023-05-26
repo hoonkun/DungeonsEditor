@@ -7,49 +7,85 @@ import java.io.File
 
 @Serializable
 data class Database (
-    val armorProperties: Set<String>,
+    val armorProperties: Set<ArmorPropertyData>,
     val enchantments: Set<EnchantmentData>,
-    val gears: Set<Gear>,
-    val artifacts: Set<Artifact>
+    val items: Set<ItemData>,
 ) {
 
-    fun findGear(id: String) = gears.find { it.id == id }
-
-    fun findArtifact(id: String) = artifacts.find { it.id == id }
+    fun findItem(type: String) = items.find { it.type == type }
 
     fun findEnchantment(id: String) = enchantments.find { it.id == id }
 
+    fun findArmorProperty(id: String) = armorProperties.find { it.id == id }
+
     companion object {
+
         private val _current = load()
         val current get() = _current!!
 
-        private fun load(): Database? {
-            return try {
-                val resource = {}::class.java.getResource("database.json")?.readText()
-                    ?: throw RuntimeException("No Database resource Found!")
-                Json.decodeFromString<Database>(resource)
-            } catch (e: Exception) {
-                null
-            }
-        }
+        private fun load(): Database? =
+            {}::class.java.getResource("database.json")?.readText()?.let { Json.decodeFromString<Database>(it) }
+
     }
 
 }
 
 @Serializable
-data class Gear(
-    val id: String,
-    val dataPath: String,
-    val type: String
+data class ArmorPropertyData(
+    val id: String
 ) {
-    val rarity get() = listOf("_Unique", "_Spooky", "_Winter", "_Year").any { id.contains(it) }
+    val description get() =
+        Localizations["ArmorProperties/${id}_description"]
+            ?.replace("{0}", "")
+            ?.replace("{1}", "")
+            ?.replace("{2}", "")
+            ?.replace("개의", "추가")
+            ?.replace("만큼", "")
+            ?.replace("  ", " ")
+            ?.trim()
+
+
 }
 
 @Serializable
-data class Artifact(
-    val id: String,
-    val dataPath: String
-)
+data class ItemData(
+    val type: String,
+    val dataPath: String,
+    val variant: String
+) {
+    val unique get() = listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) }
+
+    val name get() = Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"]
+    val flavour get() = Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"]
+    val description get() = Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"]
+
+    val inventoryIcon: ImageBitmap get() {
+        val cached = GameResources.image("$type-Inventory")
+        if (cached != null) return cached
+
+        val imagePath = Database.current.findItem(type)?.dataPath ?: throw RuntimeException("unknown item type!")
+        val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
+        val imageFile = dataDirectory.listFiles().let { files ->
+            files?.find { it.extension == "png" && it.name.lowercase().endsWith("_icon_inventory.png") }
+        } ?: throw RuntimeException("no image resource found!")
+
+        return GameResources.image(type, false) { imageFile.absolutePath }
+    }
+
+    val largeIcon: ImageBitmap get() {
+        val cached = GameResources.image("$type-Large")
+        if (cached != null) return cached
+
+        val imagePath = Database.current.findItem(type)?.dataPath ?: throw RuntimeException("unknown item type!")
+        val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
+        val imageFile = dataDirectory.listFiles().let { files ->
+            files?.find { it.extension == "png" && it.name.lowercase().endsWith("_icon.png") }
+                ?: files?.find { it.extension == "png" && it.name.lowercase().endsWith("_icon_inventory.png") }
+        } ?: throw RuntimeException("no image resource found!")
+
+        return GameResources.image(type, false) { imageFile.absolutePath }
+    }
+}
 
 @Serializable
 data class EnchantmentData(
@@ -62,16 +98,29 @@ data class EnchantmentData(
     val specialDescValues: List<String>? = null
 ) {
 
-    fun ImageScale(): Float =
+    val name: String get() =
+        Localizations["Enchantment/${Localizations.EnchantmentNameCorrections[id] ?: id}"] ?: "???"
+
+    val description: String? get() =
+        if (id == "Unset")
+            "이 슬롯을 비활성화 상태로 변경합니다.\n'화려한'에 설정된 효과 부여의 경우 금박이 지워진 상태로 변경됩니다."
+        else
+            Localizations["Enchantment/${Localizations.EnchantmentDescriptionCorrections[id] ?: id}_desc"]
+
+    val effect: String? get() =
+        if (id == "Unset") "{0} 확률로 아무것도 하지 않습니다?"
+        else Localizations[Localizations.EnchantmentFixedEffectCorrections[id] ?: "Enchantment/${Localizations.EnchantmentEffectCorrections[id] ?: id}_effect"]
+
+    val iconScale: Float get() =
         if (id == "Unset") 1.05f else 1.425f
 
-    fun Image(): ImageBitmap =
-        InternalImage(id) { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
+    val icon: ImageBitmap get() =
+        retrieveImage(id) { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
 
-    fun ShineImage(): ImageBitmap =
-        InternalImage("${id}_shine") { it.name.lowercase().endsWith("shine_icon.png") }
+    val shinePattern: ImageBitmap get() =
+        retrieveImage("${id}_shine") { it.name.lowercase().endsWith("shine_icon.png") }
 
-    private fun InternalImage(cacheId: String, criteria: (File) -> Boolean): ImageBitmap {
+    private fun retrieveImage(cacheId: String, criteria: (File) -> Boolean): ImageBitmap {
         if (id == "Unset") return GameResources.image("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
 
         val cached = GameResources.image(cacheId)

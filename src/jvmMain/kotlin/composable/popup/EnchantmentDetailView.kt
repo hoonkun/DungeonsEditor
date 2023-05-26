@@ -19,9 +19,11 @@ import composable.PopupCloseButton
 import composable.inventory.EnchantmentIcon
 import composable.inventory.LevelImage
 import composable.inventory.LevelImagePositioner
+import blackstone.states.Enchantment
+import blackstone.states.items.data
+import blackstone.states.items.leveling
 import editorState
 import extensions.GameResources
-import states.Enchantment
 
 @Composable
 fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
@@ -32,18 +34,18 @@ fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
         Row {
             Box(
                 modifier = Modifier.size(300.dp)
-                    .clickable(source, null) { editorState.detailState.toggleEnchantmentSelector() }) {
+                    .clickable(source, null) { editorState.detail.unselectEnchantment() }) {
                 EnchantmentIcon(enchantment, scale = 1.0f)
                 LevelImagePositioner(size = 0.4f) { LevelImage(enchantment.level, scale = 1.5f) }
             }
             Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    NameText(text = Localizations.EnchantmentName(enchantment.data))
+                    NameText(text = enchantment.data.name)
                     if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
                 }
-                DescriptionText(text = Localizations.EnchantmentDescription(enchantment.data))
+                DescriptionText(text = enchantment.data.description)
                 Spacer(modifier = Modifier.height(20.dp))
-                EffectText(text = Localizations.EnchantmentEffect(enchantment.data))
+                EffectText(text = enchantment.data.effect)
 
                 if (enchantment.id != "Unset") {
                     Spacer(modifier = Modifier.weight(1f))
@@ -65,10 +67,10 @@ fun PowerfulEnchantmentIndicator() =
 @Composable
 private fun LevelAdjustView(enchantment: Enchantment) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        SelectableLevelButton(0, enchantment.level) { enchantment.adjustLevel(0) }
-        SelectableLevelButton(1, enchantment.level) { enchantment.adjustLevel(1) }
-        SelectableLevelButton(2, enchantment.level) { enchantment.adjustLevel(2) }
-        SelectableLevelButton(3, enchantment.level) { enchantment.adjustLevel(3) }
+        SelectableLevelButton(0, enchantment.level) { enchantment.leveling(0) }
+        SelectableLevelButton(1, enchantment.level) { enchantment.leveling(1) }
+        SelectableLevelButton(2, enchantment.level) { enchantment.leveling(2) }
+        SelectableLevelButton(3, enchantment.level) { enchantment.leveling(3) }
     }
 }
 

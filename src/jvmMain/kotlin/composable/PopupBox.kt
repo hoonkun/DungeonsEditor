@@ -40,10 +40,10 @@ fun PopupBox() {
 
 @Composable
 fun EnchantmentDetailPopup() {
-    val selectedEnchantment = editorState.detailState.selectedEnchantment
-    val selectedEnchantmentHolderVisible = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedEnchantment?.holder)
+    val selectedEnchantment = editorState.detail.selectedEnchantment
+    val selectedEnchantmentHolderVisible = editorState.inventory.selectedItems.contains(editorState.detail.selectedEnchantment?.holder)
 
-    val selectorOpen = editorState.detailState.selectedEnchantment != null
+    val selectorOpen = editorState.detail.selectedEnchantment != null
 
     PopupBoxAnimator(Triple(selectorOpen, selectedEnchantment, selectedEnchantmentHolderVisible)) { (open, selected, holderVisible) ->
         if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
@@ -60,17 +60,17 @@ fun EnchantmentDetailPopup() {
         if (enchantment == null || !open) return@PopupBoxAnimator
 
         PopupBoxRoot(size = 675.dp to 300.dp) {
-            EnchantmentDetailView(enchantment, requestClose = { editorState.detailState.unselectEnchantment() })
+            EnchantmentDetailView(enchantment, requestClose = { editorState.detail.unselectEnchantment() })
         }
     }
 }
 
 @Composable
 fun ArmorPropertyDetailPopup() {
-    val selected = editorState.detailState.selectedArmorProperty
-    val holderVisible = editorState.inventoryState.selectedItems.contains(editorState.detailState.selectedArmorProperty?.holder)
+    val selected = editorState.detail.selectedArmorProperty
+    val holderVisible = editorState.inventory.selectedItems.contains(editorState.detail.selectedArmorProperty?.holder)
 
-    val open = editorState.detailState.selectedArmorProperty != null
+    val open = editorState.detail.selectedArmorProperty != null
 
     PopupBoxAnimator(Triple(open, selected, holderVisible)) { (open, selected, holderVisible) ->
         if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
@@ -84,7 +84,7 @@ fun ArmorPropertyDetailPopup() {
         if (property == null || !open) return@PopupBoxAnimator
 
         PopupBoxRoot(size = 675.dp to 140.dp) {
-            ArmorPropertyDetailView(property, requestClose = { editorState.detailState.unselectArmorProperty() })
+            ArmorPropertyDetailView(property, requestClose = { editorState.detail.unselectArmorProperty() })
         }
     }
 }

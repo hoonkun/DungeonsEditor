@@ -328,7 +328,8 @@ class Item(
     netheriteEnchant: Enchantment? = null,
     modified: Boolean? = null,
     timesModified: Int? = null,
-    equipmentSlot: String? = null
+    equipmentSlot: String? = null,
+    markedNew: Boolean? = null
 ) {
     companion object {
         private const val FIELD_INVENTORY_INDEX = "inventoryIndex"
@@ -342,6 +343,7 @@ class Item(
         private const val FIELD_MODIFIED = "modified"
         private const val FIELD_TIMES_MODIFIED = "timesmodified"
         private const val FIELD_EQUIPMENT_SLOT = "equipmentSlot"
+        private const val FIELD_MARKED_NEW = "markedNew"
     }
 
     @JsonField(FIELD_INVENTORY_INDEX) @CanBeUndefined
@@ -360,13 +362,13 @@ class Item(
     var upgraded: Boolean by mutableStateOf(upgraded)
 
     @JsonField(FIELD_ENCHANTMENTS) @CanBeUndefined
-    var enchantments: SnapshotStateList<Enchantment>? by mutableStateOf(enchantments?.toMutableStateList())
+    var enchantments: SnapshotStateList<Enchantment>? by mutableStateOf(enchantments?.onEach { it.holder = this }?.toMutableStateList())
 
     @JsonField(FIELD_ARMOR_PROPERTIES) @CanBeUndefined
-    var armorProperties: SnapshotStateList<ArmorProperty>? by mutableStateOf(armorProperties?.toMutableStateList())
+    var armorProperties: SnapshotStateList<ArmorProperty>? by mutableStateOf(armorProperties?.onEach { it.holder = this }?.toMutableStateList())
 
     @JsonField(FIELD_NETHERITE_ENCHANT) @CanBeUndefined
-    var netheriteEnchant: Enchantment? by mutableStateOf(netheriteEnchant)
+    var netheriteEnchant: Enchantment? by mutableStateOf(netheriteEnchant?.also { it.holder = this; it.isNetheriteEnchant = true })
 
     @JsonField(FIELD_MODIFIED) @CanBeUndefined
     var modified: Boolean? by mutableStateOf(modified)
@@ -376,6 +378,9 @@ class Item(
 
     @JsonField(FIELD_EQUIPMENT_SLOT) @CanBeUndefined
     var equipmentSlot: String? by mutableStateOf(equipmentSlot)
+
+    @JsonField(FIELD_MARKED_NEW) @CanBeUndefined
+    var markedNew: Boolean? by mutableStateOf(markedNew)
 
     constructor(from: JSONObject): this(
         from.safe { getInt(FIELD_INVENTORY_INDEX) },
@@ -388,7 +393,8 @@ class Item(
         from.safe { Enchantment(getJSONObject(FIELD_NETHERITE_ENCHANT)) },
         from.safe { getBoolean(FIELD_MODIFIED) },
         from.safe { getInt(FIELD_TIMES_MODIFIED) },
-        from.safe { getString(FIELD_EQUIPMENT_SLOT) }
+        from.safe { getString(FIELD_EQUIPMENT_SLOT) },
+        from.safe { getBoolean(FIELD_MARKED_NEW) }
     )
 
     fun export(): JSONObject =
@@ -400,6 +406,7 @@ class Item(
             modified?.let { put(FIELD_MODIFIED, it) }
             timesModified?.let { put(FIELD_TIMES_MODIFIED, it) }
             equipmentSlot?.let { put(FIELD_EQUIPMENT_SLOT, it) }
+            markedNew?.let { put(FIELD_MARKED_NEW, it) }
     
             put(FIELD_POWER, power)
             put(FIELD_RARITY, rarity)
@@ -419,6 +426,9 @@ class Enchantment(
         private const val FIELD_INVESTED_POINTS = "investedPoints"
         private const val FIELD_LEVEL = "level"
     }
+
+    lateinit var holder: Item
+    var isNetheriteEnchant: Boolean = false
 
     @JsonField(FIELD_ID)
     var id: String by mutableStateOf(id)
@@ -452,6 +462,8 @@ class ArmorProperty(
         private const val FIELD_ID = "id"
         private const val FIELD_RARITY = "rarity"
     }
+
+    lateinit var holder: Item
 
     @JsonField(FIELD_ID)
     var id: String by mutableStateOf(id)

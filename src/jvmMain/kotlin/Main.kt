@@ -10,15 +10,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import blackstone.states.StoredDataState
 import composable.BottomBar
 import composable.PopupBox
 import composable.inventory.InventoryView
 import io.StoredFile.Companion.readAsStoredFile
 import states.EditorState
-import states.StoredFileState
 import java.io.File
 
-val stored = StoredFileState(File(Constants.SaveDataFilePath).readAsStoredFile())
+val stored = StoredDataState(File(Constants.SaveDataFilePath).readAsStoredFile().root)
 val editorState = EditorState(stored)
 
 @Composable

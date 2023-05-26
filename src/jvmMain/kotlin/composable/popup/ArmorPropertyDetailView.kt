@@ -21,7 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import composable.PopupCloseButton
-import states.ArmorProperty
+import blackstone.states.ArmorProperty
+import blackstone.states.items.ArmorPropertyRarityIcon
+import blackstone.states.items.data
 
 @Composable
 fun ArmorPropertyDetailView(property: ArmorProperty, requestClose: () -> Unit) {
@@ -34,7 +36,7 @@ fun ArmorPropertyDetailView(property: ArmorProperty, requestClose: () -> Unit) {
                 ArmorPropertyRarityToggle(property)
                 Spacer(modifier = Modifier.width(15.dp))
                 Text(
-                    text = property.Description()!!,
+                    text = property.data.description!!,
                     style = TextStyle(
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
@@ -53,7 +55,7 @@ fun ArmorPropertyRarityToggle(property: ArmorProperty) {
     val hovered by source.collectIsHoveredAsState()
 
     Image(
-        bitmap = property.Icon(),
+        bitmap = ArmorPropertyRarityIcon(property.rarity),
         contentDescription = null,
         modifier = Modifier
             .size(41.dp)

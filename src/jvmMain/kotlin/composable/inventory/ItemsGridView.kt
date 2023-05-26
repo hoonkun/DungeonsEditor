@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.sp
 import editorState
 import extensions.DungeonsPower
 import extensions.GameResources
-import states.Item
-import states.Items
+import blackstone.states.Item
+import blackstone.states.items.*
 
 @Composable
 fun EquippedItems(items: List<Item?>) {
@@ -77,16 +77,25 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
 
 @Composable
 fun InventoryItems(items: List<Item>) {
-    var typeFilter by remember { mutableStateOf<Item.ItemType?>(null) }
-    var rarityFilter by remember { mutableStateOf<Item.Rarity?>(null) }
+    var variantFilter by remember { mutableStateOf<String?>(null) }
+    var rarityFilter by remember { mutableStateOf<String?>(null) }
 
-    val filteredItems by remember { derivedStateOf { items.filter { Items.filter(it, typeFilter, rarityFilter) } } }
+    val filteredItems by remember {
+        derivedStateOf {
+            items.filter {
+                val variantMatched = (variantFilter == null || (if (variantFilter == "Enchanted") it.totalInvestedEnchantmentPoints > 0 else it.data.variant == variantFilter))
+                val rarityMatched = (rarityFilter == null || it.rarity == rarityFilter)
+
+                variantMatched && rarityMatched
+            }
+        }
+    }
 
     Box {
         ItemsFilterer(
-            typeFilter = typeFilter,
+            variantFilter = variantFilter,
             rarityFilter = rarityFilter,
-            setTypeFilter = { typeFilter = if (typeFilter == it) null else it },
+            setVariantFilter = { variantFilter = if (variantFilter == it) null else it },
             setRarityFilter = { rarityFilter = if (rarityFilter == it) null else it }
         )
         ItemsGrid(items = filteredItems) { _, item ->
@@ -96,43 +105,38 @@ fun InventoryItems(items: List<Item>) {
 }
 
 @Composable
-fun ItemsFilterer(typeFilter: Item.ItemType?, rarityFilter: Item.Rarity?, setTypeFilter: (Item.ItemType?) -> Unit, setRarityFilter: (Item.Rarity?) -> Unit) {
-    val filterableTypes = remember { Item.ItemType.values().filter { it != Item.ItemType.Unknown } }
-    val filterableRarities = remember { Item.Rarity.values() }
+fun ItemsFilterer(variantFilter: String?, rarityFilter: String?, setVariantFilter: (String?) -> Unit, setRarityFilter: (String?) -> Unit) {
+    val filterableVariants = remember { listOf("Melee", "Armor", "Ranged", "Artifact", "Enchanted") }
+    val filterableRarities = remember { listOf("Unique", "Rare", "Common") }
 
     Column(modifier = Modifier.offset(x = (-70).dp).padding(top = 15.dp), horizontalAlignment = Alignment.End) {
-        for (type in filterableTypes) {
-            ItemTypeFilter(type = type, selected = type == typeFilter) { setTypeFilter(type) }
+        for (type in filterableVariants) {
+            ItemVariantFilter(variant = type, selected = type == variantFilter) { setVariantFilter(type) }
             Spacer(modifier = Modifier.height(10.dp))
         }
         Spacer(modifier = Modifier.height(20.dp))
         for (rarity in filterableRarities) {
-            ItemRarityFilter(rarity = rarity, currentType = typeFilter, selected = rarity == rarityFilter) { setRarityFilter(rarity) }
+            ItemRarityFilter(rarity = rarity, selectedVariantFilter = variantFilter, selected = rarity == rarityFilter) { setRarityFilter(rarity) }
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
 
 @Composable
-fun ItemTypeFilter(type: Item.ItemType, selected: Boolean, onClick: () -> Unit) {
+fun ItemVariantFilter(variant: String, selected: Boolean, onClick: () -> Unit) {
     val source = remember { MutableInteractionSource() }
-    val image = remember(type, selected) {
-        GameResources.image { "/Game/UI/Materials/Inventory2/Filter/${type.FilterIconName(selected)}.png" }
-    }
+    val image = remember(variant, selected) { VariantFilterIcon(variant, selected) }
     Image(image, "filter_type_frame", modifier = Modifier.size(60.dp).clickable(source, null, onClick = onClick).padding(10.dp))
 }
 
 @Composable
-fun ItemRarityFilter(rarity: Item.Rarity, currentType: Item.ItemType?, selected: Boolean, onClick: () -> Unit) {
+fun ItemRarityFilter(rarity: String, selectedVariantFilter: String?, selected: Boolean, onClick: () -> Unit) {
     val source = remember { MutableInteractionSource() }
     val alpha = if (selected) 1f else 0.35f
 
-    val frameImage = remember(rarity) {
-        GameResources.image { "/Game/UI/Materials/Notification/${rarity.FrameName()}" }
-    }
-    val overlayImage = remember(currentType) {
-        GameResources.image { "/Game/UI/Materials/MissionSelectMap/inspector/loot/${currentType?.DropIconName() ?: "drop_unknown.png"}" }
-    }
+    val frameImage = remember(rarity) { RarityFilterFrame(rarity) }
+    val overlayImage = remember(selectedVariantFilter) { RarityFilterOverlayIcon(selectedVariantFilter) }
+
     Box(modifier = Modifier.size(60.dp).clickable(source, null, onClick = onClick), contentAlignment = Alignment.Center) {
         Image(frameImage, "filter_rarity_frame", alpha = alpha, modifier = Modifier.fillMaxSize())
         Image(overlayImage, "filter_rarity_overlay", alpha = alpha, modifier = Modifier.fillMaxSize(0.5f))
@@ -168,7 +172,7 @@ fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
-    val state = editorState.inventoryState
+    val state = editorState.inventory
 
     Box(
         modifier = Modifier
@@ -202,8 +206,8 @@ fun DummyItemIcon() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Item.Rarity.Common.TranslucentColor(), Color.Transparent)))
-            .border(7.dp, Brush.linearGradient(listOf(Item.Rarity.Common.OpaqueColor(), Color.Transparent, Item.Rarity.Common.OpaqueColor())), shape = RectangleShape)
+            .background(Brush.linearGradient(listOf(RarityColor("Common", RarityColorType.Translucent), Color.Transparent)))
+            .border(7.dp, Brush.linearGradient(listOf(RarityColor("Common", RarityColorType.Opaque), Color.Transparent, RarityColor("Common", RarityColorType.Opaque))), shape = RectangleShape)
             .padding(20.dp)
     )
 }
@@ -212,15 +216,15 @@ fun DummyItemIcon() {
 fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
     val rarity = item.rarity
     val power = DungeonsPower.toInGamePower(item.power).toInt()
-    val totalEnchantmentPoints = item.TotalInvestedEnchantmentPoints()
+    val totalEnchantmentPoints = item.totalInvestedEnchantmentPoints
 
     Image(
-        bitmap = item.InventoryIcon(),
+        bitmap = item.data.inventoryIcon,
         contentDescription = null,
         modifier = Modifier
             .fillMaxSize()
             .drawWithContent {
-                drawRect(rarity.BackgroundGradient())
+                drawRect(RarityBackgroundGradient(rarity))
                 if (item.netheriteEnchant != null) drawRect(GlidedItemBackgroundGradient())
 
                 drawContent()
@@ -228,8 +232,8 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
                 drawRect(PowerBackgroundGradient())
                 if (totalEnchantmentPoints > 0) drawRect(EnchantmentPointsBackgroundGradient())
 
-                drawRect(rarity.BorderGradient1(), style = Stroke(5.dp.value))
-                drawRect(rarity.BorderGradient2(size.width, size.height), style = Stroke(5.dp.value))
+                drawRect(RarityBorderGradient1(rarity), style = Stroke(5.dp.value))
+                drawRect(RarityBorderGradient2(rarity, size.width, size.height), style = Stroke(5.dp.value))
             }
             .padding(if (simplified) 12.5.dp else 20.dp)
     )
@@ -267,14 +271,12 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
 
     }
 
-    if (item.markedNew) {
-
+    if (item.markedNew == true) {
         Image(
             bitmap = GameResources.image { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
             contentDescription = null,
             modifier = Modifier.align(Alignment.TopEnd).fillMaxSize(0.2f).offset(2.dp, (-1.5).dp)
         )
-
     }
 
 }
@@ -296,12 +298,12 @@ private fun GlidedItemBackgroundGradient() =
     Brush.linearGradient(0f to Color.Transparent, 0.5f to Color.Transparent, 1f to Color(0xaaffc847))
 
 @Stable
-private fun Item.Rarity.BackgroundGradient() = Brush.linearGradient(listOf(TranslucentColor(), Color.Transparent))
+private fun RarityBackgroundGradient(rarity: String) = Brush.linearGradient(listOf(RarityColor(rarity, RarityColorType.Translucent), Color.Transparent))
 
 @Stable
-private fun Item.Rarity.BorderGradient1() =
-    Brush.linearGradient(listOf(OpaqueColor(), Color.Transparent, OpaqueColor().copy(alpha = 0.75f)))
+private fun RarityBorderGradient1(rarity: String) =
+    Brush.linearGradient(listOf(RarityColor(rarity, RarityColorType.Opaque), Color.Transparent, RarityColor(rarity, RarityColorType.Opaque).copy(alpha = 0.75f)))
 
 @Stable
-private fun Item.Rarity.BorderGradient2(width: Float, height: Float) =
-    Brush.linearGradient(listOf(OpaqueColor().copy(alpha = 0.5f), Color.Transparent), start = Offset(width, 0f), end = Offset(0f, height))
+private fun RarityBorderGradient2(rarity: String, width: Float, height: Float) =
+    Brush.linearGradient(listOf(RarityColor(rarity, RarityColorType.Opaque).copy(alpha = 0.5f), Color.Transparent), start = Offset(width, 0f), end = Offset(0f, height))

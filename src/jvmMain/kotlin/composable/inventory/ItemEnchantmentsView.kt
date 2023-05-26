@@ -16,10 +16,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import editorState
 import extensions.GameResources
-import states.*
+import blackstone.states.*
+import blackstone.states.items.data
 
 @Composable
-fun ItemEnchantmentsView(slots: List<EnchantmentSlot>) {
+fun ItemEnchantmentsView(enchantments: List<Enchantment>) {
+    val slots by remember { derivedStateOf { enchantments.chunked(3) } }
+
     Spacer(modifier = Modifier.height(40.dp))
     Row(modifier = Modifier.fillMaxWidth()) {
         for (slot in slots) {
@@ -29,9 +32,9 @@ fun ItemEnchantmentsView(slots: List<EnchantmentSlot>) {
 }
 
 @Composable
-private fun RowScope.ItemEnchantmentSlotView(slot: EnchantmentSlot) {
-    val activatedEnchantment = slot.activatedEnchantment
-    val (e0, e1, e2) = slot.enchantments
+private fun RowScope.ItemEnchantmentSlotView(slot: List<Enchantment>) {
+    val activatedEnchantment = slot.find { it.level > 0 }
+    val (e0, e1, e2) = slot
 
     if (activatedEnchantment != null) {
         ActivatedSlot(activatedEnchantment) {
@@ -76,7 +79,7 @@ fun RowScope.ActivatedSlot(enchantment: Enchantment, content: @Composable BoxSco
         modifier = Modifier
             .weight(1f)
             .aspectRatio(1f / 1f)
-            .clickable(source, null) { editorState.detailState.selectEnchantment(enchantment) },
+            .clickable(source, null) { editorState.detail.toggleEnchantment(enchantment) },
         content = content
     )
 }
@@ -120,18 +123,18 @@ fun RowScope.SlotTopIcon() =
 fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = editorState.detailState.selectedEnchantment == enchantment
+    val selected = editorState.detail.selectedEnchantment == enchantment
 
     BlurBehindImage(
-        bitmap = enchantment.Image(),
+        bitmap = enchantment.data.icon,
         enabled = enchantment.id != "Unset",
         modifier = Modifier
             .weight(1f)
             .aspectRatio(1f)
-            .clickable(source, null) { editorState.detailState.selectEnchantment(enchantment) }
+            .clickable(source, null) { editorState.detail.toggleEnchantment(enchantment) }
             .hoverable(source)
             .rotate(-45f)
-            .scale(enchantment.ImageScale())
+            .scale(enchantment.data.iconScale)
             .rotate(45f)
             .drawBehind {
                 drawRect(
@@ -149,16 +152,16 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
 fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean = false, scale: Float = 1.2f) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = editorState.detailState.selectedEnchantment == enchantment
+    val selected = editorState.detail.selectedEnchantment == enchantment
     BlurBehindImage(
-        bitmap = enchantment.Image(),
+        bitmap = enchantment.data.icon,
         scale = scale,
         enabled = enchantment.id != "Unset",
         modifier = Modifier
             .fillMaxSize()
             .align(Alignment.Center)
             .hoverable(source)
-            .scale(enchantment.ImageScale() * 0.7f)
+            .scale(enchantment.data.iconScale * 0.7f)
             .rotate(45f)
             .drawBehind {
                 if (!indicatorEnabled) return@drawBehind

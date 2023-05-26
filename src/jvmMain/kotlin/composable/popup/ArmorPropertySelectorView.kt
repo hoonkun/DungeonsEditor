@@ -1,5 +1,6 @@
 package composable.popup
 
+import ArmorPropertyData
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -13,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -21,14 +21,13 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import states.ArmorProperty
-import states.Item
+import blackstone.states.ArmorProperty
 
 @Composable
 fun ArmorPropertySelectorView(property: ArmorProperty) {
-    val sorted = remember { Database.current.armorProperties.sortedBy { ArmorProperty.Description(it) }.filter { ArmorProperty.Description(it) != null } }
+    val sorted = remember { Database.current.armorProperties.filter { it.description != null }.sortedBy { it.description } }
     val lazy = rememberLazyListState(
-        initialFirstVisibleItemIndex = sorted.indexOfFirst { it == property.id }.coerceAtLeast(0),
+        initialFirstVisibleItemIndex = sorted.indexOfFirst { it.id == property.id }.coerceAtLeast(0),
         initialFirstVisibleItemScrollOffset = -60.dp.value.toInt()
     )
 
@@ -36,7 +35,7 @@ fun ArmorPropertySelectorView(property: ArmorProperty) {
         items(sorted) { propertyData ->
             ArmorPropertySelectText(
                 property,
-                ArmorProperty.Description(propertyData)!!,
+                propertyData.description!!,
                 propertyData
             )
         }
@@ -45,19 +44,19 @@ fun ArmorPropertySelectorView(property: ArmorProperty) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ArmorPropertySelectText(property: ArmorProperty, description: String, propertyData: String) {
+fun ArmorPropertySelectText(property: ArmorProperty, description: String, propertyData: ArmorPropertyData) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { property.id = propertyData }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { property.id = propertyData.id }
             .hoverable(interaction)
             .drawBehind {
                 drawRect(
                     Color.White,
-                    alpha = if (property.id == propertyData) 0.3f else if (hovered) 0.15f else 0f,
+                    alpha = if (property.id == propertyData.id) 0.3f else if (hovered) 0.15f else 0f,
                     topLeft = Offset(-30.dp.value, 5.dp.value),
                     size = Size(size.width + 60.dp.value, size.height - 10.dp.value)
                 )
@@ -69,7 +68,7 @@ fun ArmorPropertySelectText(property: ArmorProperty, description: String, proper
             style = TextStyle(fontSize = 26.sp, color = Color.White)
         )
         Text(
-            text = propertyData,
+            text = propertyData.id,
             style = TextStyle(fontSize = 18.sp, color = Color.White)
         )
     }
