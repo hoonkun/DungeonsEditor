@@ -38,7 +38,7 @@ class StoredFileState(from: StoredFile) {
 
 @Stable
 class Currencies(from: StoredFile) {
-    private val items = from.root.getJSONArray("currency").toJsonObjectArray { Currency(it) }
+    private val items = from.root.getJSONArray("currency").transformWithJsonObject { Currency(it) }
     var emerald by mutableStateOf(items.find { it.type == "Emerald" }?.count ?: 0)
     var gold by mutableStateOf(items.find { it.type == "Gold" }?.count ?: 0)
     var eyeOfEnder by mutableStateOf(items.find { it.type == "EyeOfEnder" }?.count ?: 0)
@@ -55,7 +55,7 @@ class Items(from: StoredFile) {
 
     val all = from.root
         .getJSONArray("items")
-        .toJsonObjectArray { Item(it) }
+        .transformWithJsonObject { Item(it) }
         .sortedBy { it.inventoryIndex }
         .toMutableStateList()
 
@@ -87,14 +87,14 @@ class Item(from: JSONObject) {
     val armorProperties by mutableStateOf(
         from
             .safe { getJSONArray("armorproperties") }
-            ?.toJsonObjectArray { ArmorProperty(this, it) }
+            ?.transformWithJsonObject { ArmorProperty(this, it) }
             ?.toMutableStateList()
     )
 
     val enchantments by mutableStateOf(
         from
             .safe { getJSONArray("enchantments") }
-            ?.toJsonObjectArray { Enchantment(this@Item, it, false) }
+            ?.transformWithJsonObject { Enchantment(this@Item, it, false) }
             ?.toMutableStateList()
     )
 
