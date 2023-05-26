@@ -27,10 +27,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import blackstone.states.ArmorProperty
+import blackstone.states.Enchantment
+import blackstone.states.Item
+import blackstone.states.items.ArmorPropertyRarityIcon
+import blackstone.states.items.RarityColor
+import blackstone.states.items.RarityColorType
+import blackstone.states.items.data
 import editorState
 import extensions.DungeonsPower
 import extensions.GameResources
-import states.*
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -54,7 +60,9 @@ private fun DummyItemView() =
 
 @Composable
 private fun ItemDetailView(item: Item) {
-    val enchantmentSlots = item.enchantmentSlots
+    Debugging.recomposition("ItemDetailView")
+
+    val enchantments = item.enchantments
     val netheriteEnchant = item.netheriteEnchant
 
     ItemDetailViewRoot {
@@ -62,7 +70,7 @@ private fun ItemDetailView(item: Item) {
         ItemDataColumn {
             Row {
                 RarityIndicator(item.rarity)
-                if (item.Type() != Item.ItemType.Artifact) {
+                if (item.data.variant != "Artifact") {
                     Spacer(modifier = Modifier.width(10.dp))
                     NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
                     Spacer(modifier = Modifier.width(10.dp))
@@ -70,10 +78,10 @@ private fun ItemDetailView(item: Item) {
                 }
             }
 
-            Row(modifier = Modifier.height(75.dp)) { ItemNameText(text = item.Name()) }
+            Row(modifier = Modifier.height(75.dp)) { ItemNameText(text = item.data.name ?: "알 수 없는 아이템") }
 
-            ItemDescriptionText(text = item.Flavour())
-            ItemDescriptionText(text = item.Description())
+            ItemDescriptionText(text = item.data.flavour)
+            ItemDescriptionText(text = item.data.description)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -82,11 +90,11 @@ private fun ItemDetailView(item: Item) {
             PowerEditField(
                 value = DungeonsPower.toInGamePower(item.power).toString(),
                 onValueChange = {
-                    if (it.toFloatOrNull() != null) item.power = DungeonsPower.toSerializedPower(it.toFloat())
+                    if (it.toDoubleOrNull() != null) item.power = DungeonsPower.toSerializedPower(it.toDouble())
                 }
             )
 
-            if (enchantmentSlots != null) ItemEnchantmentsView(enchantmentSlots)
+            if (enchantments != null) ItemEnchantmentsView(enchantments)
         }
     }
 }
@@ -94,6 +102,8 @@ private fun ItemDetailView(item: Item) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Modified(parentItem: Item) {
+    Debugging.recomposition("Modified")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
@@ -123,9 +133,11 @@ fun Modified(parentItem: Item) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
+    Debugging.recomposition("NetheriteEnchant")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = enchantment != null && editorState.detailState.selectedEnchantment == enchantment
+    val selected = enchantment != null && editorState.detail.selectedEnchantment == enchantment
 
     if (enchantment == null || enchantment.id == "Unset") {
         Box(
@@ -134,10 +146,10 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
                     var netheriteEnchant = parentItem.netheriteEnchant
                     if (netheriteEnchant == null) {
-                        netheriteEnchant = Enchantment(parentItem, "Unset", 0, 0, true)
+                        netheriteEnchant = Enchantment("Unset", 0, 0).apply { holder = parentItem; isNetheriteEnchant = true }
                         parentItem.netheriteEnchant = netheriteEnchant
                     }
-                    editorState.detailState.selectEnchantment(netheriteEnchant)
+                    editorState.detail.toggleEnchantment(netheriteEnchant)
                 }
                 .hoverable(source)
                 .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
@@ -155,7 +167,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .wrapContentSize()
-                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detailState.selectEnchantment(enchantment) }
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detail.toggleEnchantment(enchantment) }
                 .hoverable(source)
                 .background(Color(0x40ffc847), RoundedCornerShape(6.dp))
                 .drawBehind { drawInteractionBorder(hovered, selected) }
@@ -168,7 +180,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
                 )
                 Image(
-                    bitmap = enchantment.Image(),
+                    bitmap = enchantment.data.icon,
                     contentDescription = null,
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f).scale(1.15f)
                 )
@@ -212,6 +224,8 @@ private fun ItemNameText(text: String) =
 
 @Composable
 private fun ItemDescriptionText(text: String?) {
+    Debugging.recomposition("ItemDescription")
+
     if (text == null) return
 
     Text(
@@ -227,7 +241,7 @@ private fun ItemDescriptionText(text: String?) {
 @Composable
 private fun BoxScope.ItemImage(item: Item) =
     Image(
-        item.LargeIcon(),
+        item.data.largeIcon,
         null,
         alpha = 0.25f,
         modifier = Modifier
@@ -247,6 +261,8 @@ private fun PowerIcon() =
 
 @Composable
 private fun PowerEditField(value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("PowerEditField")
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         PowerIcon()
         Spacer(modifier = Modifier.width(10.dp))
@@ -256,6 +272,8 @@ private fun PowerEditField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 private fun LabeledInput(label: String, value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("LabeledInput")
+
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(if (!focused) Color(0xff888888) else Color(0xffff884c), animationSpec = tween(durationMillis = 250))
 
@@ -279,11 +297,13 @@ private fun LabeledInput(label: String, value: String, onValueChange: (String) -
 
 @Composable
 private fun ArmorProperties(properties: List<ArmorProperty>?) {
+    Debugging.recomposition("ArmorProperties")
+
     if (properties == null) return
 
     val groupedProperties by remember {
         derivedStateOf {
-            val sorted = properties.sortedBy { it.Description()?.length }
+            val sorted = properties.sortedBy { it.data.description?.length }
             val uniques = sorted.filter { it.rarity.lowercase() == "unique" }
             val commons = sorted.filter { it.rarity.lowercase() == "common" }
             val groupedUniques = groupByLength(uniques)
@@ -312,9 +332,11 @@ private fun ArmorProperties(properties: List<ArmorProperty>?) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RowScope.ArmorPropertyView(property: ArmorProperty) {
+    Debugging.recomposition("ArmorPropertyView")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = editorState.detailState.selectedArmorProperty == property
+    val selected = editorState.detail.selectedArmorProperty == property
 
     Row(modifier = Modifier.weight(1f)) {
         Row(
@@ -330,15 +352,15 @@ fun RowScope.ArmorPropertyView(property: ArmorProperty) {
                         size = Size(size.width + 20.dp.value, size.height)
                     )
                 }
-                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detailState.selectArmorProperty(property) }
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detail.toggleArmorProperty(property) }
         ) {
             Image(
-                property.Icon(),
+                ArmorPropertyRarityIcon(property.rarity),
                 null,
                 modifier = Modifier.size(30.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
-            ItemDescriptionText(text = property.Description()!!)
+            ItemDescriptionText(text = property.data.description)
         }
     }
 }
@@ -346,7 +368,7 @@ fun RowScope.ArmorPropertyView(property: ArmorProperty) {
 fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
     val result = mutableListOf<MutableList<ArmorProperty>>(mutableListOf())
     input.forEach {
-        val description = it.Description() ?: return@forEach
+        val description = it.data.description ?: return@forEach
         val long = description.length > 15
         if (!long) {
             if (result.last().size == 2) result.add(mutableListOf(it))
@@ -360,6 +382,8 @@ fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
 
 @Composable
 fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("UnlabeledField")
+
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
         if (!focused) Color(0x00b2a4ff) else Color(0xffb2a4ff),
@@ -382,14 +406,16 @@ fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun RarityIndicator(rarity: Item.Rarity) {
+fun RarityIndicator(rarity: String) {
+    Debugging.recomposition("RarityIndicator")
+
     Text(
-        text = Localizations["/rarity_${rarity.name.lowercase()}"]!!,
+        text = Localizations["/rarity_${rarity.lowercase()}"]!!,
         fontSize = 20.sp,
         color = Color.White,
         modifier = Modifier
             .height(38.dp)
-            .background(rarity.TranslucentColor(), shape = RoundedCornerShape(6.dp))
+            .background(RarityColor(rarity, RarityColorType.Translucent), shape = RoundedCornerShape(6.dp))
             .padding(vertical = 4.dp, horizontal = 10.dp)
     )
 }

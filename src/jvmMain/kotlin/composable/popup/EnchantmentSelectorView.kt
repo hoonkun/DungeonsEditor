@@ -1,7 +1,7 @@
 package composable.popup
 
+import Debugging
 import EnchantmentData
-import Localizations
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,26 +29,29 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import composable.PopupCloseButton
 import composable.inventory.BlurBehindImage
 import editorState
-import states.Enchantment
-import states.Item
+import blackstone.states.Enchantment
+import blackstone.states.Item
+import blackstone.states.items.changeInto
+import blackstone.states.items.data
 
 val EnchantmentSelectorDummy = EnchantmentData(id = "Unset", dataPath = "", multipleAllowed = true)
 
 @Composable
 fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
+    Debugging.recomposition("EnchantmentSelectorView")
+
     val available by remember {
         derivedStateOf {
             Database.current.enchantments
                 .filter {
                     if (it.applyFor == null) return@filter false
-                    if (!it.applyFor.contains(item.Type().name)) return@filter false
+                    if (!it.applyFor.contains(item.data.variant)) return@filter false
 
                     true
                 }
-                .sortedBy { Localizations.EnchantmentName(it) }
+                .sortedBy { it.name }
                 .toMutableList()
                 .apply { this.add(0, EnchantmentSelectorDummy) }
         }
@@ -68,7 +71,7 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
             EnchantmentSelectButton(
                 data = it,
                 enabled = it.multipleAllowed || item.enchantments?.any { appliedEnchantment -> appliedEnchantment.id == it.id } != true,
-                onClick = { newEnchantmentData -> modifyTarget.changeId(newEnchantmentData.id) }
+                onClick = { newEnchantmentData -> modifyTarget.changeInto(newEnchantmentData.id) }
             )
         }
     }
@@ -76,6 +79,8 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
 
 @Composable
 fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, onClick: (EnchantmentData) -> Unit) {
+    Debugging.recomposition("EnchantmentSelectButton")
+
     val source = remember { MutableInteractionSource() }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
@@ -87,7 +92,7 @@ fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, onClick: (E
             EnchantmentIcon(data, enabled)
         }
         Text(
-            text = Localizations.EnchantmentName(data),
+            text = data.name,
             style = TextStyle(
                 color = if (enabled) Color.White else Color.White.copy(alpha = 0.5f),
                 fontSize = 16.sp,
@@ -100,19 +105,21 @@ fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, onClick: (E
 
 @Composable
 fun BoxScope.EnchantmentIcon(enchantment: EnchantmentData, enabled: Boolean) {
+    Debugging.recomposition("EnchantmentIcon")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
-    val selected = enchantment.id == editorState.detailState.selectedEnchantment?.id
+    val selected = enchantment.id == editorState.detail.selectedEnchantment?.id
 
     BlurBehindImage(
-        bitmap = enchantment.Image(),
+        bitmap = enchantment.icon,
         alpha = if (enabled || selected) 1f else 0.125f,
         enabled = enchantment.id != "Unset",
         modifier = Modifier
             .fillMaxSize()
             .align(Alignment.Center)
-            .scale(enchantment.ImageScale() * 0.7f)
+            .scale(enchantment.iconScale * 0.7f)
             .hoverable(source)
             .rotate(45f)
             .drawBehind {

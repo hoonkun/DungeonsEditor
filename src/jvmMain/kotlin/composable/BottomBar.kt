@@ -1,5 +1,6 @@
 package composable
 
+import Debugging
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -20,19 +21,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import blackstone.states.common.common
 import extensions.DungeonsLevel
 import extensions.GameResources
 import stored
 
 @Composable
 fun BottomBar() {
+    Debugging.recomposition("BottomBar")
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(0.725f)
     ) {
         CurrencyField(
-            value = "${DungeonsLevel.toInGameLevel(stored.level)}",
-            onValueChange = { if (it.toFloatOrNull() != null) stored.level = DungeonsLevel.toSerializedLevel(it.toFloat()) }
+            value = "${DungeonsLevel.toInGameLevel(stored.xp)}",
+            onValueChange = { if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) }
         ) {
             Box(contentAlignment = Alignment.Center) {
                 CurrencyImage(GameResources.image { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
@@ -42,37 +46,39 @@ fun BottomBar() {
 
         CurrencyText(
             icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
-            value = "${stored.power}"
+            value = "${stored.common.power}"
         )
 
         CurrencyField(
             icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
-            value = "${stored.currency.emerald}",
-            onValueChange = { if (it.toIntOrNull() != null) stored.currency.emerald = it.toInt() }
+            value = "${stored.common.emeralds}",
+            onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Emerald" }?.count = it.toInt() }
         )
 
         CurrencyField(
             icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
-            value = "${stored.currency.gold}",
-            onValueChange = { if (it.toIntOrNull() != null) stored.currency.gold = it.toInt() }
+            value = "${stored.common.golds}",
+            onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Gold" }?.count = it.toInt() }
         )
 
         CurrencyText(
             icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
-            value = "${DungeonsLevel.toInGameLevel(stored.level).toInt() -  stored.items.all.sumOf { it.enchantments?.sumOf { it.investedPoints } ?: 0 }}",
+            value = "${DungeonsLevel.toInGameLevel(stored.xp).toInt() -  stored.items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }}",
             smallIcon = true
         )
 
         CurrencyField(
             icon = "/Game/UI/Materials/Currency/T_EyeOfEnder_Currency.png",
-            value = "${stored.currency.eyeOfEnder}",
-            onValueChange = { if (it.toIntOrNull() != null) stored.currency.eyeOfEnder = it.toInt() }
+            value = "${stored.common.eyeOfEnder}",
+            onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "EyeOfEnder" }?.count = it.toInt() }
         )
     }
 }
 
 @Composable
 private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false) {
+    Debugging.recomposition("CurrencyText")
+
     CurrencyImage(GameResources.image { icon }, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
     Text(text = value, style = TextStyle(fontSize = 25.sp, color = Color.White), modifier = Modifier.width(100.dp))
@@ -81,6 +87,8 @@ private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false
 
 @Composable
 private fun CurrencyField(icon: String, value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("CurrencyField(String, String, (String) -> Unit)")
+
     CurrencyImage(GameResources.image { icon }, true)
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
@@ -89,6 +97,8 @@ private fun CurrencyField(icon: String, value: String, onValueChange: (String) -
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit, icon: @Composable () -> Unit) {
+    Debugging.recomposition("CurrencyField(String, (String) -> Unit, @Composable () -> Unit)")
+
     icon()
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
@@ -96,12 +106,13 @@ private fun CurrencyField(value: String, onValueChange: (String) -> Unit, icon: 
 }
 
 @Composable
-private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) {
+private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
     Image(image, null, modifier = Modifier.size(if (small) 40.dp else 50.dp))
-}
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("CurrencyField(String, (String) -> Unit)")
+
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
         if (!focused) Color(0x00888888) else Color(0xffff884c),

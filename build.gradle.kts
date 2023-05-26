@@ -32,6 +32,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
                 implementation("io.coil-kt:coil:2.3.0")
                 implementation("io.coil-kt:coil-compose:2.3.0")
+                implementation(kotlin("reflect"))
             }
         }
         val jvmTest by getting {

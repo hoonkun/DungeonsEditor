@@ -11,15 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import blackstone.states.items.equipped
+import blackstone.states.items.unequipped
+import blackstone.states.Item
 import editorState
-import states.*
 import stored
 
 @Composable
 fun RowScope.InventoryView() {
-    val equipped by remember { derivedStateOf { stored.items.equipped } }
-    val inventory by remember { derivedStateOf { stored.items.unequipped } }
-    val selected by remember { derivedStateOf { editorState.inventoryState.selectedItems } }
+    Debugging.recomposition("InventoryView")
+
+    val equipped by remember { derivedStateOf { stored.items.filter(equipped) } }
+    val inventory by remember { derivedStateOf { stored.items.filter(unequipped) } }
+    val selected by remember { derivedStateOf { editorState.inventory.selectedItems } }
 
     LeftArea {
         EquippedItems(equipped)
@@ -69,6 +73,8 @@ private fun NoItemsSelectedView() =
 
 @Composable
 private fun ItemComparatorView(items: List<Item?>) {
+    Debugging.recomposition("ItemComparatorView")
+
     val scroll = rememberScrollState()
     val adapter = rememberScrollbarAdapter(scroll)
     Box(modifier = Modifier.fillMaxSize()) {
