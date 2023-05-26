@@ -27,6 +27,8 @@ import extensions.GameResources
 
 @Composable
 fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
+    Debugging.recomposition("EnchantmentDetailView")
+
     val source = remember { MutableInteractionSource() }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
@@ -65,18 +67,19 @@ fun PowerfulEnchantmentIndicator() =
     )
 
 @Composable
-private fun LevelAdjustView(enchantment: Enchantment) {
+private fun LevelAdjustView(enchantment: Enchantment) =
     Row(verticalAlignment = Alignment.CenterVertically) {
         SelectableLevelButton(0, enchantment.level) { enchantment.leveling(0) }
         SelectableLevelButton(1, enchantment.level) { enchantment.leveling(1) }
         SelectableLevelButton(2, enchantment.level) { enchantment.leveling(2) }
         SelectableLevelButton(3, enchantment.level) { enchantment.leveling(3) }
     }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RowScope.SelectableLevelButton(displayLevel: Int, selectedLevel: Int, onClick: () -> Unit) {
+    Debugging.recomposition("SelectableLevelButton")
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier

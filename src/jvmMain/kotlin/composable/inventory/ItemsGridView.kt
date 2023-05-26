@@ -31,6 +31,8 @@ import blackstone.states.items.*
 
 @Composable
 fun EquippedItems(items: List<Item?>) {
+    Debugging.recomposition("EquippedItems")
+
     var collapsed by remember { mutableStateOf(false) }
 
     Box {
@@ -58,6 +60,8 @@ private fun EquippedItemsToggleAnimator(targetState: Boolean, content: @Composab
 
 @Composable
 private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) {
+    Debugging.recomposition("EquipmentItemsToggleButton")
+
     val source = remember { MutableInteractionSource() }
 
     Box (
@@ -77,6 +81,8 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
 
 @Composable
 fun InventoryItems(items: List<Item>) {
+    Debugging.recomposition("InventoryItems")
+
     var variantFilter by remember { mutableStateOf<String?>(null) }
     var rarityFilter by remember { mutableStateOf<String?>(null) }
 
@@ -106,6 +112,8 @@ fun InventoryItems(items: List<Item>) {
 
 @Composable
 fun ItemsFilterer(variantFilter: String?, rarityFilter: String?, setVariantFilter: (String?) -> Unit, setRarityFilter: (String?) -> Unit) {
+    Debugging.recomposition("ItemsFilterer")
+
     val filterableVariants = remember { listOf("Melee", "Armor", "Ranged", "Artifact", "Enchanted") }
     val filterableRarities = remember { listOf("Unique", "Rare", "Common") }
 
@@ -124,6 +132,8 @@ fun ItemsFilterer(variantFilter: String?, rarityFilter: String?, setVariantFilte
 
 @Composable
 fun ItemVariantFilter(variant: String, selected: Boolean, onClick: () -> Unit) {
+    Debugging.recomposition("ItemVariantFilter")
+
     val source = remember { MutableInteractionSource() }
     val image = remember(variant, selected) { VariantFilterIcon(variant, selected) }
     Image(image, "filter_type_frame", modifier = Modifier.size(60.dp).clickable(source, null, onClick = onClick).padding(10.dp))
@@ -131,6 +141,8 @@ fun ItemVariantFilter(variant: String, selected: Boolean, onClick: () -> Unit) {
 
 @Composable
 fun ItemRarityFilter(rarity: String, selectedVariantFilter: String?, selected: Boolean, onClick: () -> Unit) {
+    Debugging.recomposition("ItemRarityFilter")
+
     val source = remember { MutableInteractionSource() }
     val alpha = if (selected) 1f else 0.35f
 
@@ -169,6 +181,8 @@ fun <T> ItemView(item: T, simplified: Boolean = false, index: Int) where T: Item
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
+    Debugging.recomposition("ItemViewInteractable")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
@@ -202,7 +216,7 @@ fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
 }
 
 @Composable
-fun DummyItemIcon() {
+fun DummyItemIcon() =
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -210,10 +224,11 @@ fun DummyItemIcon() {
             .border(7.dp, Brush.linearGradient(listOf(RarityColor("Common", RarityColorType.Opaque), Color.Transparent, RarityColor("Common", RarityColorType.Opaque))), shape = RectangleShape)
             .padding(20.dp)
     )
-}
 
 @Composable
 fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
+    Debugging.recomposition("ItemIcon")
+
     val rarity = item.rarity
     val power = DungeonsPower.toInGamePower(item.power).toInt()
     val totalEnchantmentPoints = item.totalInvestedEnchantmentPoints

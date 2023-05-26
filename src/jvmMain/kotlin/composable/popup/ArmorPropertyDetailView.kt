@@ -27,6 +27,8 @@ import blackstone.states.items.data
 
 @Composable
 fun ArmorPropertyDetailView(property: ArmorProperty, requestClose: () -> Unit) {
+    Debugging.recomposition("ArmorPropertyDetailView")
+
     Box(modifier = Modifier.fillMaxSize().padding(30.dp)) {
         Row(modifier = Modifier.align(Alignment.TopEnd)) { PopupCloseButton(requestClose) }
         Column {
@@ -51,6 +53,8 @@ fun ArmorPropertyDetailView(property: ArmorProperty, requestClose: () -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArmorPropertyRarityToggle(property: ArmorProperty) {
+    Debugging.recomposition("ArmorPropertyRarityToggle")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 

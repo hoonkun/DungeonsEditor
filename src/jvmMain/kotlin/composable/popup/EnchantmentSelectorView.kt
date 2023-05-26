@@ -1,5 +1,6 @@
 package composable.popup
 
+import Debugging
 import EnchantmentData
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -39,6 +40,8 @@ val EnchantmentSelectorDummy = EnchantmentData(id = "Unset", dataPath = "", mult
 
 @Composable
 fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
+    Debugging.recomposition("EnchantmentSelectorView")
+
     val available by remember {
         derivedStateOf {
             Database.current.enchantments
@@ -76,6 +79,8 @@ fun EnchantmentSelectorView(item: Item, modifyTarget: Enchantment) {
 
 @Composable
 fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, onClick: (EnchantmentData) -> Unit) {
+    Debugging.recomposition("EnchantmentSelectButton")
+
     val source = remember { MutableInteractionSource() }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
@@ -100,6 +105,8 @@ fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, onClick: (E
 
 @Composable
 fun BoxScope.EnchantmentIcon(enchantment: EnchantmentData, enabled: Boolean) {
+    Debugging.recomposition("EnchantmentIcon")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 

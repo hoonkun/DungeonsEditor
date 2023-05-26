@@ -24,6 +24,7 @@ val editorState = EditorState(stored)
 @Composable
 @Preview
 fun App() {
+    Debugging.recomposition("App")
     AppRoot {
         MainContainer {
             ContentContainer {

@@ -21,6 +21,8 @@ import blackstone.states.items.data
 
 @Composable
 fun ItemEnchantmentsView(enchantments: List<Enchantment>) {
+    Debugging.recomposition("ItemEnchantmentsView")
+
     val slots by remember { derivedStateOf { enchantments.chunked(3) } }
 
     Spacer(modifier = Modifier.height(40.dp))
@@ -33,6 +35,8 @@ fun ItemEnchantmentsView(enchantments: List<Enchantment>) {
 
 @Composable
 private fun RowScope.ItemEnchantmentSlotView(slot: List<Enchantment>) {
+    Debugging.recomposition("ItemEnchantmentSlotView")
+
     val activatedEnchantment = slot.find { it.level > 0 }
     val (e0, e1, e2) = slot
 
@@ -73,6 +77,8 @@ fun RowScope.OpenedSlot(
 
 @Composable
 fun RowScope.ActivatedSlot(enchantment: Enchantment, content: @Composable BoxScope.() -> Unit) {
+    Debugging.recomposition("ActivatedSlot")
+
     val source = remember { MutableInteractionSource() }
 
     Box(
@@ -94,6 +100,8 @@ fun BoxScope.LevelImagePositioner(size: Float = 0.3f, content: @Composable BoxSc
 
 @Composable
 fun LevelImage(level: Int, scale: Float = 1.0f) {
+    Debugging.recomposition("LevelImage")
+
     if (level == 0) return
 
     Image(
@@ -121,6 +129,8 @@ fun RowScope.SlotTopIcon() =
 
 @Composable
 fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
+    Debugging.recomposition("RowScope.EnchantmentIcon")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val selected = editorState.detail.selectedEnchantment == enchantment
@@ -150,6 +160,8 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
 
 @Composable
 fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean = false, scale: Float = 1.2f) {
+    Debugging.recomposition("BoxScope.EnchantmentIcon")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val selected = editorState.detail.selectedEnchantment == enchantment

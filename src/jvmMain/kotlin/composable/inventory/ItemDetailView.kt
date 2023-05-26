@@ -60,6 +60,8 @@ private fun DummyItemView() =
 
 @Composable
 private fun ItemDetailView(item: Item) {
+    Debugging.recomposition("ItemDetailView")
+
     val enchantments = item.enchantments
     val netheriteEnchant = item.netheriteEnchant
 
@@ -100,6 +102,8 @@ private fun ItemDetailView(item: Item) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Modified(parentItem: Item) {
+    Debugging.recomposition("Modified")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
@@ -129,6 +133,8 @@ fun Modified(parentItem: Item) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
+    Debugging.recomposition("NetheriteEnchant")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val selected = enchantment != null && editorState.detail.selectedEnchantment == enchantment
@@ -218,6 +224,8 @@ private fun ItemNameText(text: String) =
 
 @Composable
 private fun ItemDescriptionText(text: String?) {
+    Debugging.recomposition("ItemDescription")
+
     if (text == null) return
 
     Text(
@@ -253,6 +261,8 @@ private fun PowerIcon() =
 
 @Composable
 private fun PowerEditField(value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("PowerEditField")
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         PowerIcon()
         Spacer(modifier = Modifier.width(10.dp))
@@ -262,6 +272,8 @@ private fun PowerEditField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 private fun LabeledInput(label: String, value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("LabeledInput")
+
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(if (!focused) Color(0xff888888) else Color(0xffff884c), animationSpec = tween(durationMillis = 250))
 
@@ -285,6 +297,8 @@ private fun LabeledInput(label: String, value: String, onValueChange: (String) -
 
 @Composable
 private fun ArmorProperties(properties: List<ArmorProperty>?) {
+    Debugging.recomposition("ArmorProperties")
+
     if (properties == null) return
 
     val groupedProperties by remember {
@@ -318,6 +332,8 @@ private fun ArmorProperties(properties: List<ArmorProperty>?) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RowScope.ArmorPropertyView(property: ArmorProperty) {
+    Debugging.recomposition("ArmorPropertyView")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val selected = editorState.detail.selectedArmorProperty == property
@@ -366,6 +382,8 @@ fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
 
 @Composable
 fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("UnlabeledField")
+
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
         if (!focused) Color(0x00b2a4ff) else Color(0xffb2a4ff),
@@ -389,6 +407,8 @@ fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 fun RarityIndicator(rarity: String) {
+    Debugging.recomposition("RarityIndicator")
+
     Text(
         text = Localizations["/rarity_${rarity.lowercase()}"]!!,
         fontSize = 20.sp,

@@ -1,5 +1,6 @@
 package composable
 
+import Debugging
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -27,6 +28,8 @@ import stored
 
 @Composable
 fun BottomBar() {
+    Debugging.recomposition("BottomBar")
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(0.725f)
@@ -74,6 +77,8 @@ fun BottomBar() {
 
 @Composable
 private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false) {
+    Debugging.recomposition("CurrencyText")
+
     CurrencyImage(GameResources.image { icon }, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
     Text(text = value, style = TextStyle(fontSize = 25.sp, color = Color.White), modifier = Modifier.width(100.dp))
@@ -82,6 +87,8 @@ private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false
 
 @Composable
 private fun CurrencyField(icon: String, value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("CurrencyField(String, String, (String) -> Unit)")
+
     CurrencyImage(GameResources.image { icon }, true)
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
@@ -90,6 +97,8 @@ private fun CurrencyField(icon: String, value: String, onValueChange: (String) -
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit, icon: @Composable () -> Unit) {
+    Debugging.recomposition("CurrencyField(String, (String) -> Unit, @Composable () -> Unit)")
+
     icon()
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
@@ -97,12 +106,13 @@ private fun CurrencyField(value: String, onValueChange: (String) -> Unit, icon: 
 }
 
 @Composable
-private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) {
+private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
     Image(image, null, modifier = Modifier.size(if (small) 40.dp else 50.dp))
-}
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit) {
+    Debugging.recomposition("CurrencyField(String, (String) -> Unit)")
+
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
         if (!focused) Color(0x00888888) else Color(0xffff884c),

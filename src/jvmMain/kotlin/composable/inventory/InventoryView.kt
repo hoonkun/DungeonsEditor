@@ -19,6 +19,8 @@ import stored
 
 @Composable
 fun RowScope.InventoryView() {
+    Debugging.recomposition("InventoryView")
+
     val equipped by remember { derivedStateOf { stored.items.filter(equipped) } }
     val inventory by remember { derivedStateOf { stored.items.filter(unequipped) } }
     val selected by remember { derivedStateOf { editorState.inventory.selectedItems } }
@@ -71,6 +73,8 @@ private fun NoItemsSelectedView() =
 
 @Composable
 private fun ItemComparatorView(items: List<Item?>) {
+    Debugging.recomposition("ItemComparatorView")
+
     val scroll = rememberScrollState()
     val adapter = rememberScrollbarAdapter(scroll)
     Box(modifier = Modifier.fillMaxSize()) {

@@ -34,12 +34,16 @@ import editorState
 
 @Composable
 fun PopupBox() {
+    Debugging.recomposition("PopupBox")
+
     EnchantmentDetailPopup()
     ArmorPropertyDetailPopup()
 }
 
 @Composable
 fun EnchantmentDetailPopup() {
+    Debugging.recomposition("EnchantmentDetailPopup")
+
     val selectedEnchantment = editorState.detail.selectedEnchantment
     val selectedEnchantmentHolderVisible = editorState.inventory.selectedItems.contains(editorState.detail.selectedEnchantment?.holder)
 
@@ -67,6 +71,8 @@ fun EnchantmentDetailPopup() {
 
 @Composable
 fun ArmorPropertyDetailPopup() {
+    Debugging.recomposition("ArmorPropertyDetailPopup")
+
     val selected = editorState.detail.selectedArmorProperty
     val holderVisible = editorState.inventory.selectedItems.contains(editorState.detail.selectedArmorProperty?.holder)
 
@@ -96,6 +102,8 @@ private fun PopupBoxRoot(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    Debugging.recomposition("PopupBoxRoot")
+
     val source = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
@@ -109,35 +117,9 @@ private fun PopupBoxRoot(
 }
 
 @Composable
-fun PopupButton(text: String, onClick: () -> Unit) {
-    val source = remember { MutableInteractionSource() }
-    val hovered by source.collectIsHoveredAsState()
-    val pressed by source.collectIsPressedAsState()
-
-    Box(
-        modifier = Modifier
-            .hoverable(source)
-            .clickable(source, null, onClick = onClick)
-            .drawBehind {
-                val color =
-                    if (pressed) Color(0xffd07039)
-                    else if (hovered) Color(0xffffa74f)
-                    else Color(0xffff8a46)
-
-                drawRoundRect(color, cornerRadius = CornerRadius(5.dp.value))
-            }
-    ) {
-        Text(
-            text = text,
-            style = TextStyle(fontSize = 20.sp, color = Color.White),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 30.dp)
-        )
-    }
-}
-
-@Composable
 fun PopupCloseButton(onClick: () -> Unit) {
+    Debugging.recomposition("PopupCloseButton")
+
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 

@@ -25,6 +25,8 @@ import blackstone.states.ArmorProperty
 
 @Composable
 fun ArmorPropertySelectorView(property: ArmorProperty) {
+    Debugging.recomposition("ArmorPropertySelectorView")
+
     val sorted = remember { Database.current.armorProperties.filter { it.description != null }.sortedBy { it.description } }
     val lazy = rememberLazyListState(
         initialFirstVisibleItemIndex = sorted.indexOfFirst { it.id == property.id }.coerceAtLeast(0),
@@ -45,6 +47,8 @@ fun ArmorPropertySelectorView(property: ArmorProperty) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArmorPropertySelectText(property: ArmorProperty, description: String, propertyData: ArmorPropertyData) {
+    Debugging.recomposition("ArmorPropertySelectText")
+
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
 
