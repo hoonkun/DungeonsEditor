@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import editorState
+import arctic
 import extensions.GameResources
 import blackstone.states.*
 import blackstone.states.items.data
@@ -50,7 +50,7 @@ private fun RowScope.ItemEnchantmentSlotView(slot: List<Enchantment>) {
         val hovered by interaction.collectIsHoveredAsState()
 
         Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f).hoverable(interaction)) {
-            if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset" && !hovered && !slot.contains(editorState.detail.selectedEnchantment)) {
+            if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset" && !hovered && !slot.contains(arctic.enchantments.detailTarget)) {
                 LockedSlot()
             } else {
                 OpenedSlot(
@@ -92,7 +92,7 @@ fun RowScope.ActivatedSlot(enchantment: Enchantment, content: @Composable BoxSco
         modifier = Modifier
             .weight(1f)
             .aspectRatio(1f / 1f)
-            .clickable(source, null) { editorState.detail.toggleEnchantment(enchantment) },
+            .clickable(source, null) { arctic.enchantments.viewDetail(enchantment) },
         content = content
     )
 }
@@ -140,7 +140,7 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = editorState.detail.selectedEnchantment == enchantment
+    val selected = arctic.enchantments.isDetailTarget(enchantment)
 
     BlurBehindImage(
         bitmap = enchantment.data.icon,
@@ -148,7 +148,7 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
         modifier = Modifier
             .weight(1f)
             .aspectRatio(1f)
-            .clickable(source, null) { editorState.detail.toggleEnchantment(enchantment) }
+            .clickable(source, null) { arctic.enchantments.viewDetail(enchantment) }
             .hoverable(source)
             .drawBehind {
                 drawRect(
@@ -169,7 +169,7 @@ fun BoxScope.EnchantmentIcon(enchantment: Enchantment, indicatorEnabled: Boolean
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = editorState.detail.selectedEnchantment == enchantment
+    val selected = arctic.enchantments.isDetailTarget(enchantment)
     BlurBehindImage(
         bitmap = enchantment.data.icon,
         scale = scale,

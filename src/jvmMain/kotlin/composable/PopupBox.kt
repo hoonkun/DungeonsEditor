@@ -7,30 +7,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import arctic
 import composable.popup.ArmorPropertyDetailView
 import composable.popup.ArmorPropertySelectorView
 import composable.popup.EnchantmentDetailView
 import composable.popup.EnchantmentSelectorView
-import editorState
 
 @Composable
 fun PopupBox() {
@@ -44,10 +38,10 @@ fun PopupBox() {
 fun EnchantmentDetailPopup() {
     Debugging.recomposition("EnchantmentDetailPopup")
 
-    val selectedEnchantment = editorState.detail.selectedEnchantment
-    val selectedEnchantmentHolderVisible = editorState.inventory.selectedItems.contains(editorState.detail.selectedEnchantment?.holder)
+    val selectedEnchantment = arctic.enchantments.detailTarget
+    val selectedEnchantmentHolderVisible = arctic.items.selected(selectedEnchantment?.holder)
 
-    val selectorOpen = editorState.detail.selectedEnchantment != null
+    val selectorOpen = arctic.enchantments.hasDetailTarget
 
     PopupBoxAnimator(Triple(selectorOpen, selectedEnchantment, selectedEnchantmentHolderVisible)) { (open, selected, holderVisible) ->
         if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
@@ -64,7 +58,7 @@ fun EnchantmentDetailPopup() {
         if (enchantment == null || !open) return@PopupBoxAnimator
 
         PopupBoxRoot(size = 675.dp to 300.dp) {
-            EnchantmentDetailView(enchantment, requestClose = { editorState.detail.unselectEnchantment() })
+            EnchantmentDetailView(enchantment, requestClose = { arctic.enchantments.closeDetail() })
         }
     }
 }
@@ -73,10 +67,10 @@ fun EnchantmentDetailPopup() {
 fun ArmorPropertyDetailPopup() {
     Debugging.recomposition("ArmorPropertyDetailPopup")
 
-    val selected = editorState.detail.selectedArmorProperty
-    val holderVisible = editorState.inventory.selectedItems.contains(editorState.detail.selectedArmorProperty?.holder)
+    val selected = arctic.armorProperties.detailTarget
+    val holderVisible = arctic.items.selected(selected?.holder)
 
-    val open = editorState.detail.selectedArmorProperty != null
+    val open = arctic.armorProperties.hasDetailTarget
 
     PopupBoxAnimator(Triple(open, selected, holderVisible)) { (open, selected, holderVisible) ->
         if (!open || selected == null || !holderVisible) return@PopupBoxAnimator
@@ -90,7 +84,7 @@ fun ArmorPropertyDetailPopup() {
         if (property == null || !open) return@PopupBoxAnimator
 
         PopupBoxRoot(size = 675.dp to 140.dp) {
-            ArmorPropertyDetailView(property, requestClose = { editorState.detail.unselectArmorProperty() })
+            ArmorPropertyDetailView(property, requestClose = { arctic.armorProperties.closeDetail() })
         }
     }
 }

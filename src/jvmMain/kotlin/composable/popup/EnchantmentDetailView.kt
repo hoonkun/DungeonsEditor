@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import composable.PopupCloseButton
 import composable.inventory.EnchantmentIcon
 import composable.inventory.LevelImage
@@ -22,7 +23,6 @@ import composable.inventory.LevelImagePositioner
 import blackstone.states.Enchantment
 import blackstone.states.items.data
 import blackstone.states.items.leveling
-import editorState
 import extensions.GameResources
 
 @Composable
@@ -36,7 +36,7 @@ fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
         Row {
             Box(
                 modifier = Modifier.size(300.dp)
-                    .clickable(source, null) { editorState.detail.unselectEnchantment() }) {
+                    .clickable(source, null) { arctic.enchantments.closeDetail() }) {
                 EnchantmentIcon(enchantment, scale = 1.0f)
                 LevelImagePositioner(size = 0.4f) { LevelImage(enchantment.level, scale = 1.5f) }
             }

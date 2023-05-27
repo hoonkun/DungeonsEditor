@@ -29,8 +29,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import composable.inventory.BlurBehindImage
-import editorState
 import blackstone.states.Enchantment
 import blackstone.states.Item
 import blackstone.states.items.changeInto
@@ -110,7 +110,7 @@ fun BoxScope.EnchantmentIcon(enchantment: EnchantmentData, enabled: Boolean) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
-    val selected = enchantment.id == editorState.detail.selectedEnchantment?.id
+    val selected = enchantment.id == arctic.enchantments.detailTarget?.id
 
     BlurBehindImage(
         bitmap = enchantment.icon,

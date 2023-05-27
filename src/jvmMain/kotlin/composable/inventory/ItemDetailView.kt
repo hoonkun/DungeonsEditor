@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
@@ -35,7 +36,6 @@ import blackstone.states.items.ArmorPropertyRarityIcon
 import blackstone.states.items.RarityColor
 import blackstone.states.items.RarityColorType
 import blackstone.states.items.data
-import editorState
 import extensions.DungeonsPower
 import extensions.GameResources
 
@@ -138,7 +138,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = enchantment != null && editorState.detail.selectedEnchantment == enchantment
+    val selected = enchantment != null && arctic.enchantments.isDetailTarget(enchantment)
 
     if (enchantment == null || enchantment.id == "Unset") {
         Box(
@@ -150,7 +150,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                         netheriteEnchant = Enchantment("Unset", 0, 0).apply { holder = parentItem; isNetheriteEnchant = true }
                         parentItem.netheriteEnchant = netheriteEnchant
                     }
-                    editorState.detail.toggleEnchantment(netheriteEnchant)
+                    arctic.enchantments.viewDetail(netheriteEnchant)
                 }
                 .hoverable(source)
                 .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
@@ -168,7 +168,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .wrapContentSize()
-                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detail.toggleEnchantment(enchantment) }
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { arctic.enchantments.viewDetail(enchantment) }
                 .hoverable(source)
                 .background(Color(0x40ffc847), RoundedCornerShape(6.dp))
                 .drawBehind { drawInteractionBorder(hovered, selected) }
@@ -330,7 +330,7 @@ private fun ArmorProperties(item: Item, properties: List<ArmorProperty>?) {
                 }
             }
         }
-        ArmorPropertyButton(item = item, mode = if (editorState.detail.selectedArmorProperty != null) "Delete" else "Add")
+        ArmorPropertyButton(item = item, mode = if (arctic.armorProperties.hasDetailTarget) "Delete" else "Add")
     }
     Spacer(modifier = Modifier.height(20.dp))
 }
@@ -362,11 +362,11 @@ fun ArmorPropertyButton(item: Item, mode: String) {
                     ).apply { holder = item }
 
                     properties.add(newProperty)
-                    editorState.detail.toggleArmorProperty(newProperty)
+                    arctic.armorProperties.viewDetail(newProperty)
                 } else {
-                    val selected = editorState.detail.selectedArmorProperty ?: return@onClick
+                    val selected = arctic.armorProperties.detailTarget ?: return@onClick
                     selected.holder.armorProperties?.remove(selected)
-                    editorState.detail.unselectArmorProperty()
+                    arctic.armorProperties.closeDetail()
                 }
             }
     )
@@ -379,7 +379,7 @@ fun RowScope.ArmorPropertyView(property: ArmorProperty) {
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val selected = editorState.detail.selectedArmorProperty == property
+    val selected = arctic.armorProperties.isDetailTarget(property)
 
     Row(modifier = Modifier.weight(1f)) {
         Row(
@@ -395,7 +395,7 @@ fun RowScope.ArmorPropertyView(property: ArmorProperty) {
                         size = Size(size.width + 20.dp.value, size.height)
                     )
                 }
-                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { editorState.detail.toggleArmorProperty(property) }
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { arctic.armorProperties.viewDetail(property) }
         ) {
             Image(
                 ArmorPropertyRarityIcon(property.rarity),
