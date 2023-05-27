@@ -44,7 +44,6 @@ data class ArmorPropertyData(
             ?.replace("  ", " ")
             ?.trim()
 
-
 }
 
 @Serializable

@@ -370,7 +370,13 @@ class Item(
     var upgraded: Boolean by mutableStateOf(upgraded)
 
     @JsonField(FIELD_ENCHANTMENTS) @CanBeUndefined
-    var enchantments: SnapshotStateList<Enchantment>? by mutableStateOf(enchantments?.onEach { it.holder = this }?.toMutableStateList())
+    var enchantments: SnapshotStateList<Enchantment>? by mutableStateOf(
+        enchantments
+            ?.onEach { it.holder = this }
+            ?.toMutableList()
+            ?.padEnd(9) { Enchantment("Unset", 0, 0).apply { holder = this@Item } }
+            ?.toMutableStateList()
+    )
 
     @JsonField(FIELD_ARMOR_PROPERTIES) @CanBeUndefined
     var armorProperties: SnapshotStateList<ArmorProperty>? by mutableStateOf(armorProperties?.onEach { it.holder = this }?.toMutableStateList())
@@ -408,13 +414,22 @@ class Item(
     fun export(): JSONObject =
         JSONObject().apply {
             inventoryIndex?.let { put(FIELD_INVENTORY_INDEX, it) }
-            enchantments?.let { put(FIELD_ENCHANTMENTS, it.map { enchantment -> enchantment.export() }) }
             armorProperties?.let { put(FIELD_ARMOR_PROPERTIES, it.map { property -> property.export() }) }
             netheriteEnchant?.let { put(FIELD_NETHERITE_ENCHANT, it.export()) }
             modified?.let { put(FIELD_MODIFIED, it) }
             timesModified?.let { put(FIELD_TIMES_MODIFIED, it) }
             equipmentSlot?.let { put(FIELD_EQUIPMENT_SLOT, it) }
             markedNew?.let { put(FIELD_MARKED_NEW, it) }
+            enchantments?.let {
+                put(
+                    FIELD_ENCHANTMENTS,
+                    it
+                        .chunked(3)
+                        .filter { slot -> !slot.all { enchantment -> enchantment.id == "Unset" } }
+                        .flatten()
+                        .map { enchantment -> enchantment.export() }
+                )
+            }
     
             put(FIELD_POWER, power)
             put(FIELD_RARITY, rarity)

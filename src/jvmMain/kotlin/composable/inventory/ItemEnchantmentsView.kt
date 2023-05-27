@@ -45,26 +45,33 @@ private fun RowScope.ItemEnchantmentSlotView(slot: List<Enchantment>) {
             EnchantmentIcon(activatedEnchantment, true)
             LevelImagePositioner { LevelImage(activatedEnchantment.level, 1.75f) }
         }
-    } else if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset") {
-        LockedSlot()
     } else {
-        OpenedSlot(
-            top = { SlotTopIcon() },
-            right = { EnchantmentIcon(e1) },
-            left = { EnchantmentIcon(e0) },
-            bottom = { EnchantmentIcon(e2) }
-        )
+        val interaction = remember { MutableInteractionSource() }
+        val hovered by interaction.collectIsHoveredAsState()
+
+        Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f).hoverable(interaction)) {
+            if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset" && !hovered && !slot.contains(editorState.detail.selectedEnchantment)) {
+                LockedSlot()
+            } else {
+                OpenedSlot(
+                    top = { SlotTopIcon() },
+                    right = { EnchantmentIcon(e1) },
+                    left = { EnchantmentIcon(e0) },
+                    bottom = { EnchantmentIcon(e2) }
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun RowScope.OpenedSlot(
+fun BoxScope.OpenedSlot(
     top: @Composable RowScope.() -> Unit,
     right: @Composable RowScope.() -> Unit,
     bottom: @Composable RowScope.() -> Unit,
     left: @Composable RowScope.() -> Unit,
 ) =
-    Column(modifier = Modifier.weight(1f).aspectRatio(1f / 1f).rotate(45f).scale(0.75f)) {
+    Column(modifier = Modifier.fillMaxSize().rotate(45f).scale(0.75f)) {
         Row {
             top()
             right()
@@ -112,11 +119,11 @@ fun LevelImage(level: Int, scale: Float = 1.0f) {
 }
 
 @Composable
-fun RowScope.LockedSlot() =
+fun BoxScope.LockedSlot() =
     Image(
         bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_row.png" },
         contentDescription = null,
-        modifier = Modifier.weight(1f).scale(1.1f)
+        modifier = Modifier.fillMaxSize().offset(x = 5.dp, y = 5.dp).scale(0.9f)
     )
 
 @Composable
@@ -143,17 +150,15 @@ fun RowScope.EnchantmentIcon(enchantment: Enchantment) {
             .aspectRatio(1f)
             .clickable(source, null) { editorState.detail.toggleEnchantment(enchantment) }
             .hoverable(source)
-            .rotate(-45f)
-            .scale(enchantment.data.iconScale)
-            .rotate(45f)
             .drawBehind {
                 drawRect(
                     if (selected) Color.White else if (hovered) Color.White.copy(alpha = 0.3f) else Color.Transparent,
-                    style = Stroke(width = 4.dp.value),
-                    size = Size(size.width * 0.6f, size.height * 0.6f),
-                    topLeft = Offset(size.width * 0.2f, size.height * 0.2f)
+                    style = Stroke(width = 6.dp.value),
+                    size = Size(size.width * 0.8f, size.height * 0.8f),
+                    topLeft = Offset(size.width * 0.1f, size.height * 0.1f)
                 )
             }
+            .scale(enchantment.data.iconScale)
             .rotate(-45f)
     )
 }
