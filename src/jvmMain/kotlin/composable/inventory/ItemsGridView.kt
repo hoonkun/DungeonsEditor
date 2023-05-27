@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -63,15 +64,17 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
     Debugging.recomposition("EquipmentItemsToggleButton")
 
     val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
 
     Box (
         modifier = Modifier
             .size(60.dp)
             .offset((-70).dp)
             .clickable(source, null, onClick = onClick)
+            .hoverable(source)
             .drawBehind {
                 drawRect(
-                    if (collapsed) Color.White else Color(0xff79706b),
+                    if (collapsed) Color.White else if (hovered) Color(0xa0ffffff) else Color(0xff79706b),
                     topLeft = Offset(12f, this.size.height / 2 - 5f),
                     size = Size(this.size.width - 24f, 7f)
                 )
@@ -159,8 +162,10 @@ fun ItemVariantFilter(variant: String, selected: Boolean, onClick: () -> Unit) {
     Debugging.recomposition("ItemVariantFilter")
 
     val source = remember { MutableInteractionSource() }
-    val image = remember(variant, selected) { VariantFilterIcon(variant, selected) }
-    Image(image, "filter_type_frame", modifier = Modifier.size(60.dp).clickable(source, null, onClick = onClick).padding(10.dp))
+    val hovered by source.collectIsHoveredAsState()
+    val image = remember(variant, selected, hovered) { VariantFilterIcon(variant, selected || hovered) }
+    val alpha = if (selected) 1f else if (hovered) 0.65f else 1f
+    Image(image, "filter_type_frame", modifier = Modifier.size(60.dp).hoverable(source).clickable(source, null, onClick = onClick).padding(10.dp).alpha(alpha))
 }
 
 @Composable
@@ -168,12 +173,13 @@ fun ItemRarityFilter(rarity: String, selectedVariantFilter: String?, selected: B
     Debugging.recomposition("ItemRarityFilter")
 
     val source = remember { MutableInteractionSource() }
-    val alpha = if (selected) 1f else 0.35f
+    val hovered by source.collectIsHoveredAsState()
+    val alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f
 
     val frameImage = remember(rarity) { RarityFilterFrame(rarity) }
     val overlayImage = remember(selectedVariantFilter) { RarityFilterOverlayIcon(selectedVariantFilter) }
 
-    Box(modifier = Modifier.size(60.dp).clickable(source, null, onClick = onClick), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.size(60.dp).hoverable(source).clickable(source, null, onClick = onClick), contentAlignment = Alignment.Center) {
         Image(frameImage, "filter_rarity_frame", alpha = alpha, modifier = Modifier.fillMaxSize())
         Image(overlayImage, "filter_rarity_overlay", alpha = alpha, modifier = Modifier.fillMaxSize(0.5f))
     }
