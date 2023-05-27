@@ -28,6 +28,12 @@ class Localizations {
         val ItemFlavourCorrections = ItemCorrections + mapOf()
         val ItemDescriptionCorrections = ItemCorrections + mapOf()
 
+        val ArmorPropertyCorrections = mapOf(
+            "ItemCooldownDecrease" to "ArtifactCooldownDecrease",
+            "ItemDamageBoost" to "ArtifactDamageBoost",
+            "SlowResistance" to "FreezingResistance"
+        )
+
         private val EnchantmentCorrections = mapOf(
             "VoidTouchedMelee" to "VoidStrikeMelee",
             "VoidTouchedRanged" to "VoidStrikeRanged",

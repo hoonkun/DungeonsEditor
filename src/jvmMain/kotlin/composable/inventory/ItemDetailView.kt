@@ -403,7 +403,7 @@ fun RowScope.ArmorPropertyView(property: ArmorProperty) {
                 modifier = Modifier.size(30.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
-            ItemDescriptionText(text = property.data.description)
+            ItemDescriptionText(text = property.data.description ?: property.id)
         }
     }
 }
@@ -411,8 +411,8 @@ fun RowScope.ArmorPropertyView(property: ArmorProperty) {
 fun groupByLength(input: List<ArmorProperty>): List<List<ArmorProperty>> {
     val result = mutableListOf<MutableList<ArmorProperty>>(mutableListOf())
     input.forEach {
-        val description = it.data.description ?: return@forEach
-        val long = description.length > 12
+        val description = it.data.description
+        val long = (description?.length ?: it.data.id.length) > 12
         if (!long) {
             if (result.last().size == 2) result.add(mutableListOf(it))
             else result.last().add(it)

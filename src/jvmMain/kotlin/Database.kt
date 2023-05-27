@@ -32,10 +32,11 @@ data class Database (
 
 @Serializable
 data class ArmorPropertyData(
-    val id: String
+    val id: String,
+    val defaultIn: List<String> = emptyList()
 ) {
     val description get() =
-        Localizations["ArmorProperties/${id}_description"]
+        (Localizations["ArmorProperties/${Localizations.ArmorPropertyCorrections[id] ?: id}_description"])
             ?.replace("{0}", "")
             ?.replace("{1}", "")
             ?.replace("{2}", "")
@@ -55,6 +56,8 @@ data class ItemData(
     val unique get() = listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) }
 
     val limited get() = listOf("_Spooky", "_Winter", "_Year").any { type.contains(it) }
+
+    val builtInProperties get() = Database.current.armorProperties.filter { it.defaultIn.contains(type) }
 
     val name get() = Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"]
     val flavour get() = Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"]
