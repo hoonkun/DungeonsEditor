@@ -40,9 +40,9 @@ fun BoxScope.ArmorPropertyCollection(property: ArmorProperty?) {
                 .fillMaxHeight()
                 .offset(x = (-15).dp)
                 .background(Color(0xff080808))
-                .align(Alignment.CenterEnd)
-                .padding(30.dp),
-        state = lazy
+                .align(Alignment.CenterEnd),
+        state = lazy,
+        contentPadding = PaddingValues(30.dp)
     ) {
         items(sorted) { propertyData ->
             ArmorPropertySelectText(property, propertyData)
