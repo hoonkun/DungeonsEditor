@@ -127,7 +127,31 @@ fun ItemsFilterer(variantFilter: String?, rarityFilter: String?, setVariantFilte
             ItemRarityFilter(rarity = rarity, selectedVariantFilter = variantFilter, selected = rarity == rarityFilter) { setRarityFilter(rarity) }
             Spacer(modifier = Modifier.height(10.dp))
         }
+        Spacer(modifier = Modifier.weight(1f))
+        ItemAddButton()
+        Spacer(modifier = Modifier.height(20.dp))
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ItemAddButton() {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+
+    Box(
+        modifier = Modifier
+            .size(60.dp)
+            .hoverable(source)
+            .padding(10.dp)
+            .drawBehind {
+                drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(size.width / 2 - 2f, 8f), size = Size(4f, size.height - 16f))
+                drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(8f, size.height / 2 - 2f), size = Size(size.width - 16f, 4f))
+            }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
+
+            }
+    )
 }
 
 @Composable
