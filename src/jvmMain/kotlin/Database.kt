@@ -54,6 +54,8 @@ data class ItemData(
 ) {
     val unique get() = listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) }
 
+    val limited get() = listOf("_Spooky", "_Winter", "_Year").any { type.contains(it) }
+
     val name get() = Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"]
     val flavour get() = Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"]
     val description get() = Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"]

@@ -70,7 +70,7 @@ private fun ItemDetailView(item: Item) {
         ItemImage(item = item)
         ItemDataColumn {
             Row {
-                RarityIndicator(item.rarity)
+                RarityIndicator(item)
                 if (item.data.variant != "Artifact") {
                     Spacer(modifier = Modifier.width(10.dp))
                     NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
@@ -449,16 +449,16 @@ fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun RarityIndicator(rarity: String) {
+fun RarityIndicator(item: Item) {
     Debugging.recomposition("RarityIndicator")
 
     Text(
-        text = Localizations["/rarity_${rarity.lowercase()}"]!!,
+        text = "${if(item.data.limited) "시즌한정 " else ""}${Localizations["/rarity_${item.rarity.lowercase()}"]}",
         fontSize = 20.sp,
         color = Color.White,
         modifier = Modifier
             .height(38.dp)
-            .background(RarityColor(rarity, RarityColorType.Translucent), shape = RoundedCornerShape(6.dp))
+            .background(RarityColor(item.rarity, RarityColorType.Translucent), shape = RoundedCornerShape(6.dp))
             .padding(vertical = 4.dp, horizontal = 10.dp)
     )
 }
