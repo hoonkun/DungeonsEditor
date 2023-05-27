@@ -79,9 +79,9 @@ private fun ItemComparatorView(items: List<Item?>) {
     val adapter = rememberScrollbarAdapter(scroll)
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(scroll), verticalArrangement = Arrangement.Center) {
-            AnimatedItemDetailView(items[0], "primary")
+            AnimatedItemDetailView(items[0])
             Spacer(modifier = Modifier.height(20.dp))
-            AnimatedItemDetailView(items[1], "secondary")
+            AnimatedItemDetailView(items[1])
         }
         VerticalScrollbar(
             adapter = adapter,

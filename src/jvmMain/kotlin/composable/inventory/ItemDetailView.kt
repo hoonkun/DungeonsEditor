@@ -41,7 +41,7 @@ import extensions.GameResources
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ColumnScope.AnimatedItemDetailView(targetState: Item?, type: String) =
+fun ColumnScope.AnimatedItemDetailView(targetState: Item?) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
