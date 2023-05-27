@@ -415,11 +415,11 @@ class Item(
         JSONObject().apply {
             inventoryIndex?.let { put(FIELD_INVENTORY_INDEX, it) }
             armorProperties?.let { put(FIELD_ARMOR_PROPERTIES, it.map { property -> property.export() }) }
-            netheriteEnchant?.let { put(FIELD_NETHERITE_ENCHANT, it.export()) }
             modified?.let { put(FIELD_MODIFIED, it) }
             timesModified?.let { put(FIELD_TIMES_MODIFIED, it) }
             equipmentSlot?.let { put(FIELD_EQUIPMENT_SLOT, it) }
             markedNew?.let { put(FIELD_MARKED_NEW, it) }
+            netheriteEnchant?.let { if (it.id != "Unset") put(FIELD_NETHERITE_ENCHANT, it.export()) }
             enchantments?.let {
                 put(
                     FIELD_ENCHANTMENTS,

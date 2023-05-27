@@ -7,9 +7,9 @@ import java.io.File
 
 @Serializable
 data class Database (
-    val armorProperties: Set<ArmorPropertyData>,
-    val enchantments: Set<EnchantmentData>,
-    val items: Set<ItemData>,
+    val armorProperties: List<ArmorPropertyData>,
+    val enchantments: List<EnchantmentData>,
+    val items: List<ItemData>,
 ) {
 
     fun findItem(type: String) = items.find { it.type == type }
