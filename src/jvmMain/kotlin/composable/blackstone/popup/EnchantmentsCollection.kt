@@ -29,17 +29,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import blackstone.states.Enchantment
-import blackstone.states.items.changeInto
-import blackstone.states.items.data
+import blackstone.states.Item
+import blackstone.states.items.*
 import composable.inventory.BlurBehindImage
+import extensions.replace
 
 @Composable
-fun BoxScope.EnchantmentsCollection(target: Enchantment) {
+fun EnchantmentsCollection(holder: Item, index: Int, isNetheriteEnchant: Boolean) {
 
-    val enchantments by remember(target.holder.data.variant) {
+    val target = (if (isNetheriteEnchant) holder.netheriteEnchant else holder.enchantments!![index])
+        ?: throw RuntimeException("[EnchantmentCollection] non-null assertion failed: holder.netheriteEnchant must not be null")
+
+    val enchantments by remember(holder.data.variant) {
         derivedStateOf {
-            Database.current.enchantments.filter { it.applyFor?.contains(target.holder.data.variant) == true }
+            Database.current.enchantments.filter { it.applyFor?.contains(holder.data.variant) == true }
         }
     }
 
@@ -48,17 +53,32 @@ fun BoxScope.EnchantmentsCollection(target: Enchantment) {
         modifier = Modifier
             .requiredWidth(700.dp)
             .fillMaxHeight()
-            .offset(x = (-15).dp)
-            .background(Color(0xff080808))
-            .align(Alignment.CenterEnd),
+            .background(Color(0xff080808)),
         contentPadding = PaddingValues(vertical = 60.dp, horizontal = 10.dp)
     ) {
         items(enchantments, key = { it.id }) { enchantment ->
             EnchantmentSelectButton(
                 data = enchantment,
-                enabled = enchantment.multipleAllowed || (target.holder.enchantments?.all { it.id != enchantment.id } ?: true),
+                enabled = enchantment.multipleAllowed || (holder.enchantments?.all { it.id != enchantment.id } ?: true),
                 selected = target.id == enchantment.id,
-                onClick = { newEnchantmentData -> target.changeInto(newEnchantmentData.id) }
+                onClick = { newEnchantmentData ->
+                    val newId = if (newEnchantmentData.id == target.id) "Unset" else newEnchantmentData.id
+
+                    val newEnchantment = Enchantment(newId, holder, isNetheriteEnchant = target.isNetheriteEnchant)
+                    newEnchantment.leveling(
+                        if (newId != "Unset") target.level else 0,
+                        isNetheriteEnchant = target.isNetheriteEnchant
+                    )
+
+                    if (target.isNetheriteEnchant) {
+                        holder.netheriteEnchant = newEnchantment
+                    } else {
+                        holder.enchantments?.replace(target, newEnchantment)
+                    }
+
+                    holder.recalculateEnchantmentPoints()
+                    arctic.enchantments.viewDetail(newEnchantment)
+                }
             )
         }
     }
@@ -74,7 +94,7 @@ fun EnchantmentSelectButton(data: EnchantmentData, enabled: Boolean, selected: B
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f / 1f)
-                .clickable(source, null, enabled = enabled) { onClick(data) }
+                .clickable(source, null, enabled = enabled || selected) { onClick(data) }
         ) {
             EnchantmentIcon(data, enabled, selected)
         }

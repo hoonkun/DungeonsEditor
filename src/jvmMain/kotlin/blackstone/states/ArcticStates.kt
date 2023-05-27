@@ -51,12 +51,16 @@ class EnchantmentsState(private val stored: StoredDataState) {
     var detailTarget: Enchantment? by mutableStateOf(null)
         private set
 
+    var shadowDetailTarget: Enchantment? by mutableStateOf(null)
+        private set
+
     val hasDetailTarget get() = detailTarget != null
 
     fun isDetailTarget(enchantment: Enchantment) = detailTarget == enchantment
 
     fun viewDetail(enchantment: Enchantment) {
         detailTarget = enchantment
+        shadowDetailTarget = enchantment
     }
 
     fun closeDetail() {

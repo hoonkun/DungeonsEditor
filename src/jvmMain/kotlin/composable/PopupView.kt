@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
+import blackstone.states.Item
 import composable.blackstone.popup.ArmorPropertyCollection
 import composable.blackstone.popup.ArmorPropertyDetail
 import composable.blackstone.popup.EnchantmentDetail
@@ -31,36 +32,70 @@ fun BoxScope.Popups() {
     ArmorPropertyPopup()
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BoxScope.EnchantmentPopup() {
-    val detailTarget by remember { derivedStateOf { arctic.enchantments.detailTarget } }
-    val rootEnabled by remember { derivedStateOf { arctic.enchantments.hasDetailTarget } }
+    val _target by remember { derivedStateOf { arctic.enchantments.detailTarget } }
+    val _shadow by remember { derivedStateOf { arctic.enchantments.shadowDetailTarget } }
 
-    val detailEnabled by remember { derivedStateOf { arctic.enchantments.detailTarget.let { it != null && it.id != "Unset" } } }
+    val collectionTargetState = EnchantPopupLeftState(
+        holder = _target?.holder,
+        index = _target?.holder?.enchantments?.indexOf(_target),
+        isNetheriteEnchant = _target?.isNetheriteEnchant == true
+    )
+    val detailState = EnchantPopupRightState(
+        target = _target,
+        isUnset = _target?.id == "Unset"
+    )
 
-    Backdrop(rootEnabled) { arctic.enchantments.closeDetail() }
+    Backdrop(arctic.enchantments.hasDetailTarget) { arctic.enchantments.closeDetail() }
 
-    Row(modifier = Modifier.fillMaxWidth()) {
-        LeftSlide(EnchantPopupLeftState(rootEnabled, detailTarget)) { (visible, target) ->
-            if (!visible || target == null) Box(modifier = Modifier.width(700.dp).fillMaxHeight().align(Alignment.CenterEnd))
-            else EnchantmentsCollection(target)
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        AnimatedContent(
+            targetState = collectionTargetState,
+            transitionSpec = {
+                val enter = fadeIn() + slideIn(initialOffset = { IntOffset(- it.width / 10, 0) })
+                val exit = fadeOut(tween(durationMillis = 100))
+                enter with exit
+            },
+            modifier = Modifier.width(750.dp)
+        ) { (holder, index, isNetheriteEnchant) ->
+            if (holder != null && index != null) EnchantmentsCollection(holder, index, isNetheriteEnchant)
+            else Box(modifier = Modifier.width(700.dp).fillMaxHeight())
         }
+        AnimatedContent(
+            targetState = detailState,
+            transitionSpec = {
+                val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(0, 50) })
+                val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(0, -50) })
+                enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
+            },
+            modifier = Modifier.height(500.dp)
+        ) { (target, unset) ->
+            if (target != null && !unset) EnchantmentDetail(target)
+            else Box(modifier = Modifier.width(0.dp).height(500.dp))
 
-        RightSlide(EnchantPopupRightState(rootEnabled && detailEnabled, detailTarget)) { (visible, target) ->
-            if (!visible || target == null) Box(modifier = Modifier.size(675.dp, 300.dp))
-            else EnchantmentDetail(target)
+            if (target == null && _shadow != null && _shadow?.id != "Unset")
+                Box(modifier = Modifier.width(675.dp).height(500.dp))
+            else if (target == null && _shadow != null && _shadow?.id == "Unset")
+                Box(modifier = Modifier.width(0.dp).height(500.dp))
         }
     }
 }
 
 data class EnchantPopupLeftState(
-    val visible: Boolean,
-    val target: Enchantment?
+    val holder: Item?,
+    val index: Int?,
+    val isNetheriteEnchant: Boolean
 )
 
 data class EnchantPopupRightState(
-    val visible: Boolean,
-    val target: Enchantment?
+    val target: Enchantment?,
+    val isUnset: Boolean
 )
 
 @Composable

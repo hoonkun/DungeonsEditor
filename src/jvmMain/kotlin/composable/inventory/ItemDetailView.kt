@@ -32,10 +32,7 @@ import arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
-import blackstone.states.items.ArmorPropertyRarityIcon
-import blackstone.states.items.RarityColor
-import blackstone.states.items.RarityColorType
-import blackstone.states.items.data
+import blackstone.states.items.*
 import extensions.DungeonsPower
 import extensions.GameResources
 
@@ -147,7 +144,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
                     var netheriteEnchant = parentItem.netheriteEnchant
                     if (netheriteEnchant == null) {
-                        netheriteEnchant = Enchantment("Unset", 0, 0).apply { holder = parentItem; isNetheriteEnchant = true }
+                        netheriteEnchant = Enchantment("Unset", parentItem, isNetheriteEnchant = true)
                         parentItem.netheriteEnchant = netheriteEnchant
                     }
                     arctic.enchantments.viewDetail(netheriteEnchant)

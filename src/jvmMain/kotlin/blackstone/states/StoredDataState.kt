@@ -3,6 +3,7 @@ package blackstone.states
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import blackstone.states.items.Enchantment
 import extensions.*
 import org.json.JSONObject
 
@@ -374,7 +375,7 @@ class Item(
         enchantments
             ?.onEach { it.holder = this }
             ?.toMutableList()
-            ?.padEnd(9) { Enchantment("Unset", 0, 0).apply { holder = this@Item } }
+            ?.padEnd(9) { Enchantment("Unset", this@Item) }
             ?.toMutableStateList()
     )
 

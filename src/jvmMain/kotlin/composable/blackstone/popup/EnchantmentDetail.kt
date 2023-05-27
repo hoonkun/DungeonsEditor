@@ -1,6 +1,8 @@
 package composable.blackstone.popup
 
 import Localizations
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +28,7 @@ import extensions.GameResources
 fun EnchantmentDetail(enchantment: Enchantment) {
     Debugging.recomposition("EnchantmentDetailView")
 
-    Row(modifier = Modifier.size(675.dp, 300.dp).offset(x = 15.dp).background(Color(0xff080808))) {
+    Row(modifier = Modifier.requiredSize(675.dp, 300.dp).background(Color(0xff080808))) {
         Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
             EnchantmentIcon(enchantment, scale = 1.0f)
             LevelImagePositioner(size = 0.4f) { LevelImage(enchantment.level, scale = 1.5f) }
