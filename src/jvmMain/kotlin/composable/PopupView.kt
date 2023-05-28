@@ -47,6 +47,10 @@ fun EnchantmentPopup() {
         isUnset = _target?.id == "Unset"
     )
 
+    val slideEnabled: (EnchantDetailPopupTargetStates, EnchantDetailPopupTargetStates) -> Boolean = { initial, target ->
+        !initial.isUnset && target.target != null && !target.isUnset || initial.target == null && target.target != null
+    }
+
     Backdrop(arctic.enchantments.hasDetailTarget) { arctic.enchantments.closeDetail() }
 
     Row(
@@ -58,7 +62,7 @@ fun EnchantmentPopup() {
             if (holder != null && index != null) EnchantmentsCollection(holder, index, isNetheriteEnchant)
             else Box(modifier = Modifier.width(700.dp).fillMaxHeight())
         }
-        AnimatedDetail(detailTargetState) { (target, isUnset) ->
+        AnimatedDetail(detailTargetState, slideEnabled = slideEnabled) { (target, isUnset) ->
             if (target != null && !isUnset) EnchantmentDetail(target)
             else Box(modifier = Modifier.width(0.dp).height(500.dp))
 
@@ -115,6 +119,10 @@ fun ArmorPropertyPopup() {
         else 250
     }
 
+    val slideEnabled: (ArmorPropertyDetailPopupTargetStates, ArmorPropertyDetailPopupTargetStates) -> Boolean = { initial, target ->
+        initial.target != null && target.holder != null && target.target != null || initial.holder == null && target.holder != null
+    }
+
     Backdrop(_hasTarget || _hasInto) {
         if (_hasTarget) arctic.armorProperties.closeDetail()
         else if (_hasInto) arctic.armorProperties.cancelCreation()
@@ -132,7 +140,7 @@ fun ArmorPropertyPopup() {
             else Box(modifier = Modifier.width(700.dp).fillMaxHeight())
         }
 
-        AnimatedDetail(detailTargetState, sizeTransformDuration = detailSizeTransformDuration) { (_, target, created) ->
+        AnimatedDetail(detailTargetState, slideEnabled = slideEnabled, sizeTransformDuration = detailSizeTransformDuration) { (_, target, created) ->
             if (target != null) ArmorPropertyDetail(target)
             else Box(modifier = Modifier.size(0.dp, 500.dp))
 
@@ -169,8 +177,8 @@ fun <S> AnimatedCollection(targetState: S, content: @Composable AnimatedVisibili
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
-            val enter = fadeIn() + slideIn(initialOffset = { IntOffset(- it.width / 10, 0) })
-            val exit = fadeOut(tween(durationMillis = 100))
+            val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(- it.width / 10, 0) })
+            val exit = fadeOut(tween(durationMillis = 250))
             enter with exit
         },
         modifier = Modifier.width(750.dp),
@@ -179,12 +187,23 @@ fun <S> AnimatedCollection(targetState: S, content: @Composable AnimatedVisibili
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun <S> AnimatedDetail(targetState: S, sizeTransformDuration: (S, S) -> Int = { _, _, -> 250 }, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
+fun <S> AnimatedDetail(
+    targetState: S,
+    sizeTransformDuration: (S, S) -> Int = { _, _, -> 250 },
+    slideEnabled: (S, S) -> Boolean = { _, _ -> true },
+    content: @Composable AnimatedVisibilityScope.(S) -> Unit
+) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
-            val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(0, 50) })
-            val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(0, -50) })
+            val slide = slideEnabled(this.initialState, this.targetState)
+
+            var enter = fadeIn(tween(durationMillis = 250))
+            if (slide) enter += slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(0, 50) })
+
+            var exit = fadeOut(tween(durationMillis = 250))
+            if (slide) exit += slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(0, -50) })
+
             enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = sizeTransformDuration(this.initialState, this.targetState)) }
         },
         modifier = Modifier.height(500.dp),
