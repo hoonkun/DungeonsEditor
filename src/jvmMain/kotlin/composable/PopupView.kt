@@ -111,7 +111,7 @@ fun ArmorPropertyPopup() {
     )
 
     val detailSizeTransformDuration: (ArmorPropertyDetailPopupTargetStates, ArmorPropertyDetailPopupTargetStates) -> Int = { initial, target ->
-        if ((initial.created && !target.created) || (initial.holder == null && initial.target == null && target.created)) 0
+        if ((initial.holder == null && initial.created && !target.created) || (initial.holder == null && initial.target == null && target.created)) 0
         else 250
     }
 

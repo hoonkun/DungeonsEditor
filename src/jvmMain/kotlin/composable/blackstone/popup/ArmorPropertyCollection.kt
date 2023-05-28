@@ -69,12 +69,19 @@ fun ArmorPropertySelectText(holder: Item, index: Int?, indexValid: Boolean, prop
         val newProperty = ArmorProperty(propertyData.id, holder)
 
         if (index != null && indexValid) {
-            properties.replace(properties[index], newProperty)
+            val existing = properties[index]
+            if (existing.id == newProperty.id) {
+                properties.remove(existing)
+                arctic.armorProperties.closeDetail()
+                arctic.armorProperties.requestCreate(existing.holder)
+            } else {
+                properties.replace(properties[index], newProperty)
+                arctic.armorProperties.viewDetail(newProperty)
+            }
         } else {
             properties.add(newProperty)
+            arctic.armorProperties.viewDetail(newProperty)
         }
-
-        arctic.armorProperties.viewDetail(newProperty)
     }
 
     Column(
