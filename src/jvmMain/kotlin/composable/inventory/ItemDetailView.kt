@@ -67,7 +67,11 @@ private fun ItemDetailView(item: Item) {
         ItemImage(item = item)
         ItemDataColumn {
             Row {
-                RarityIndicator(item)
+                AlterButton(
+                    text = "${if(item.data.limited) "시즌한정 " else ""}${Localizations["/rarity_${item.rarity.lowercase()}"]}",
+                    color = RarityColor(item.rarity, RarityColorType.Translucent),
+                    enabled = !item.data.unique
+                ) { item.rarity = if (item.rarity == "Common") "Rare" else "Common" }
                 if (item.data.variant != "Artifact") {
                     Spacer(modifier = Modifier.width(7.dp))
                     NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
@@ -105,7 +109,7 @@ private fun ItemDetailView(item: Item) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AlterButton(text: String, onClick: () -> Unit) {
+fun AlterButton(text: String, color: Color = Color(0x15ffffff), enabled: Boolean = true, onClick: () -> Unit) {
     Debugging.recomposition("Modified")
 
     val source = remember { MutableInteractionSource() }
@@ -114,9 +118,9 @@ fun AlterButton(text: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .height(38.dp)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), onClick = onClick)
-            .hoverable(source)
-            .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled, onClick = onClick)
+            .hoverable(source, enabled)
+            .background(color, shape = RoundedCornerShape(6.dp))
             .drawBehind { drawInteractionBorder(hovered, false) }
             .padding(vertical = 4.dp, horizontal = 10.dp)
     ) {
@@ -459,20 +463,5 @@ fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
             .drawBehind {
                 drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 3.dp.value))
             }
-    )
-}
-
-@Composable
-fun RarityIndicator(item: Item) {
-    Debugging.recomposition("RarityIndicator")
-
-    Text(
-        text = "${if(item.data.limited) "시즌한정 " else ""}${Localizations["/rarity_${item.rarity.lowercase()}"]}",
-        fontSize = 20.sp,
-        color = Color.White,
-        modifier = Modifier
-            .height(38.dp)
-            .background(RarityColor(item.rarity, RarityColorType.Translucent), shape = RoundedCornerShape(6.dp))
-            .padding(vertical = 4.dp, horizontal = 10.dp)
     )
 }
