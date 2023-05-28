@@ -7,7 +7,7 @@ import kotlin.math.sqrt
 
 class DungeonsLevel {
     companion object {
-        fun toInGameLevel(serialized: Long): Float = ((1f / 30f) * (sqrt(3 * serialized + 100f) + 20) * 10000f).roundToInt() / 10000f
+        fun toInGameLevel(serialized: Long): Double = ((1.0 / 30.0) * (sqrt(3 * serialized + 100.0) + 20) * 10000.0).roundToInt() / 10000.0
         fun toSerializedLevel(ingame: Double): Long = (100 * (ingame - 1) * (3 * ingame - 1)).toLong()
     }
 }

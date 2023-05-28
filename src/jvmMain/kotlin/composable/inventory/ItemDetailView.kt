@@ -34,6 +34,7 @@ import blackstone.states.Item
 import blackstone.states.items.*
 import extensions.DungeonsPower
 import extensions.GameResources
+import extensions.toFixed
 import stored
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -96,7 +97,7 @@ private fun ItemDetailView(item: Item) {
             ArmorProperties(item = item, properties = item.armorProperties)
 
             PowerEditField(
-                value = DungeonsPower.toInGamePower(item.power).toString(),
+                value = DungeonsPower.toInGamePower(item.power).toFixed(4).toString(),
                 onValueChange = {
                     if (it.toDoubleOrNull() != null) item.power = DungeonsPower.toSerializedPower(it.toDouble())
                 }

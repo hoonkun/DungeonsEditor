@@ -33,6 +33,7 @@ import composable.inventory.PowerEditField
 import composable.inventory.drawInteractionBorder
 import extensions.DungeonsPower
 import extensions.GameResources
+import extensions.toFixed
 import stored
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -78,7 +79,7 @@ fun ItemDataDetail(itemData: ItemData) {
                     Spacer(modifier = Modifier.weight(1f))
 
                     PowerEditField(
-                        value = DungeonsPower.toInGamePower(power).toString(),
+                        value = DungeonsPower.toInGamePower(power).toFixed(4).toString(),
                         onValueChange = {
                             if (it.toDoubleOrNull() != null) power = DungeonsPower.toSerializedPower(it.toDouble())
                         },

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import blackstone.states.common.common
 import extensions.DungeonsLevel
 import extensions.GameResources
+import extensions.toFixed
 import stored
 
 @Composable
@@ -35,7 +36,7 @@ fun BottomBar() {
         modifier = Modifier.fillMaxWidth(0.725f)
     ) {
         CurrencyField(
-            value = "${DungeonsLevel.toInGameLevel(stored.xp)}",
+            value = "${DungeonsLevel.toInGameLevel(stored.xp).toFixed(3)}",
             onValueChange = { if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) }
         ) {
             Box(contentAlignment = Alignment.Center) {
