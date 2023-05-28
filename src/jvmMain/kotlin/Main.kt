@@ -30,7 +30,11 @@ val arctic = ArcticStates(stored)
 fun App() {
     Debugging.recomposition("App")
 
-    val backdropVisible by remember { derivedStateOf { arctic.enchantments.hasDetailTarget || arctic.armorProperties.hasDetailTarget || arctic.armorProperties.hasCreateInto } }
+    val backdropVisible by remember {
+        derivedStateOf {
+            arctic.enchantments.hasDetailTarget || arctic.armorProperties.hasDetailTarget || arctic.armorProperties.hasCreateInto || arctic.itemCreation.enabled
+        }
+    }
     val popupBackdropBlurRadius by animateDpAsState(if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
 
     AppRoot {

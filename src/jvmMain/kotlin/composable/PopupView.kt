@@ -1,28 +1,31 @@
 package composable
 
+import ItemData
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.onClick
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerButton
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
-import composable.blackstone.popup.ArmorPropertyCollection
-import composable.blackstone.popup.ArmorPropertyDetail
-import composable.blackstone.popup.EnchantmentDetail
-import composable.blackstone.popup.EnchantmentsCollection
+import composable.blackstone.popup.*
 
 @Composable
 fun BoxScope.Popups() {
@@ -30,7 +33,100 @@ fun BoxScope.Popups() {
 
     EnchantmentPopup()
     ArmorPropertyPopup()
+
+    ItemCreationPopup()
 }
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ItemCreationPopup() {
+
+    val _enabled: Boolean by remember { derivedStateOf { arctic.itemCreation.enabled } }
+    var _target: ItemData? by remember { mutableStateOf(null) }
+
+    var _variant by remember { mutableStateOf("Melee") }
+
+    Backdrop(arctic.itemCreation.enabled) { arctic.itemCreation.enabled = false }
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box {
+            AnimatedCollection(_enabled, width = 160.dp, modifier = Modifier.offset(x = (-120).dp)) {
+                if (it) {
+                    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 54.dp)) {
+                        VariantFilterTextInteractable("근거리", _variant == "Melee") { _variant = "Melee" }
+                        VariantFilterTextInteractable("원거리", _variant == "Ranged") { _variant = "Ranged" }
+                        VariantFilterTextInteractable("방어구", _variant == "Armor") { _variant = "Armor" }
+                        VariantFilterTextInteractable("유물", _variant == "Artifact") { _variant = "Artifact" }
+                    }
+                } else {
+                    Spacer(modifier = Modifier.requiredWidth(160.dp).fillMaxHeight())
+                }
+            }
+            AnimatedContent(
+                targetState = _enabled to _variant,
+                transitionSpec = {
+                    val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(- 70.dp.value.toInt(), 0) })
+                    var exit = fadeOut(tween(durationMillis = 250))
+                    if (targetState.first) exit += scaleOut(tween(durationMillis = 250), targetScale = 0.9f)
+                    enter with exit
+                },
+                modifier = Modifier.width(1050.dp)
+            ) { (enabled, variant) ->
+                if (enabled) ItemDataCollection(variant) { _target = it }
+                else Box(modifier = Modifier.width(950.dp).fillMaxHeight())
+            }
+        }
+    }
+
+    Backdrop(_target != null) { _target = null }
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        AnimatedDetail(_target) { target ->
+            if (target != null) ItemDataDetail()
+            else Box(modifier = Modifier.width(850.dp).fillMaxHeight())
+        }
+    }
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun VariantFilterTextInteractable(text: String, selected: Boolean, onClick: () -> Unit) {
+
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+
+    val blurAlpha by animateFloatAsState(if (hovered) 0.8f else 0f)
+    val overlayAlpha by animateFloatAsState(if (selected) 1f else 0.6f)
+
+    Box(
+        modifier = Modifier
+            .padding(bottom = 10.dp)
+            .hoverable(source)
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), onClick = onClick)
+    ) {
+        VariantFilterText(text, modifier = Modifier.blur(10.dp).alpha(blurAlpha))
+        VariantFilterText(text, modifier = Modifier.alpha(overlayAlpha))
+    }
+}
+
+@Composable
+fun VariantFilterText(text: String, modifier: Modifier = Modifier) =
+    Text(
+        text = text,
+        color = Color.White,
+        fontSize = 35.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier.padding(start = 20.dp, top = 5.dp, bottom = 5.dp, end = 20.dp)
+    )
 
 @Composable
 fun EnchantmentPopup() {
@@ -173,15 +269,15 @@ fun Backdrop(visible: Boolean, onClick: () -> Unit) =
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun <S> AnimatedCollection(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
+fun <S> AnimatedCollection(targetState: S, width: Dp = 750.dp, modifier: Modifier = Modifier, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
-            val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(- it.width / 10, 0) })
+            val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(- 70.dp.value.toInt(), 0) })
             val exit = fadeOut(tween(durationMillis = 250))
             enter with exit
         },
-        modifier = Modifier.width(750.dp),
+        modifier = modifier.then(Modifier.width(width)),
         content = content
     )
 

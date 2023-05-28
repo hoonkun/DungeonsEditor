@@ -8,9 +8,18 @@ class ArcticStates(stored: StoredDataState) {
 
     val items = ItemsState(stored)
 
-    val enchantments = EnchantmentsState(stored)
+    val itemCreation = ItemCreationState()
 
-    val armorProperties = ArmorPropertiesState(stored)
+    val enchantments = EnchantmentsState()
+
+    val armorProperties = ArmorPropertiesState()
+
+}
+
+@Stable
+class ItemCreationState {
+
+    var enabled: Boolean by mutableStateOf(false)
 
 }
 
@@ -55,7 +64,7 @@ class ItemsState(private val stored: StoredDataState) {
 }
 
 @Stable
-class EnchantmentsState(private val stored: StoredDataState) {
+class EnchantmentsState {
 
     var detailTarget: Enchantment? by mutableStateOf(null)
         private set
@@ -79,7 +88,7 @@ class EnchantmentsState(private val stored: StoredDataState) {
 }
 
 @Stable
-class ArmorPropertiesState(private val stored: StoredDataState) {
+class ArmorPropertiesState {
 
     var detailTarget: ArmorProperty? by mutableStateOf(null)
         private set
