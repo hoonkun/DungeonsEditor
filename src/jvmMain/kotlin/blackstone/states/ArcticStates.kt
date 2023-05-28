@@ -72,7 +72,11 @@ class ItemsState(private val stored: StoredDataState) {
     fun selectedSlot(item: Item) = selected.indexOf(item)
 
     fun select(index: Int, slot: Int) {
-        selectedIndexes[slot] = if (selectedIndexes[slot] == index) null else index
+        val existingIndex = selectedIndexes.indexOf(index)
+        val existingItem = if (existingIndex >= 0) selected[existingIndex] else null
+
+        if (existingIndex >= 0 && existingItem != null) unselect(existingItem)
+        else selectedIndexes[slot] = if (selectedIndexes[slot] == index) null else index
     }
 
     fun unselect(item: Item) {
