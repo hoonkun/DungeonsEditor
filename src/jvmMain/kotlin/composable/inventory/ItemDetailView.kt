@@ -69,14 +69,16 @@ private fun ItemDetailView(item: Item) {
             Row {
                 RarityIndicator(item)
                 if (item.data.variant != "Artifact") {
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(7.dp))
                     NetheriteEnchant(parentItem = item, enchantment = netheriteEnchant)
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(7.dp))
                     Modified(parentItem = item)
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                AlterButton("타입 변경") { arctic.item.enable("edition", item) }
+                Spacer(modifier = Modifier.width(7.dp))
                 AlterButton("복제") { stored.addItem(item.copy(), item) }
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(7.dp))
                 AlterButton("삭제") { stored.deleteItem(item) }
             }
 

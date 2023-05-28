@@ -9,7 +9,7 @@ class ArcticStates(stored: StoredDataState) {
 
     val items = ItemsState(stored)
 
-    val itemCreation = ItemCreationState()
+    val item = ItemState()
 
     val enchantments = EnchantmentsState()
 
@@ -18,22 +18,28 @@ class ArcticStates(stored: StoredDataState) {
 }
 
 @Stable
-class ItemCreationState {
+class ItemState {
 
-    var enabled: Boolean by mutableStateOf(false)
+    var enabled: String? by mutableStateOf(null)
         private set
+
+    var updateTarget: Item? by mutableStateOf(null)
 
     var target: ItemData? by mutableStateOf(null)
 
     var filter: String by mutableStateOf("Melee")
 
-    fun enable() {
-        enabled = true
-        filter = "Melee"
+    fun enable(with: String, updateTarget: Item? = null) {
+        enabled = with
+        filter = updateTarget?.data?.variant ?: "Melee"
+
+        if (with == "edition" && updateTarget == null) throw RuntimeException("item selector enabled with edition mode, but update target not specified")
+        this.updateTarget = updateTarget
     }
 
     fun disable() {
-        enabled = false
+        enabled = null
+        updateTarget = null
     }
 
 }

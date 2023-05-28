@@ -26,6 +26,7 @@ import arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
+import blackstone.states.items.data
 import composable.blackstone.popup.*
 
 @Composable
@@ -42,14 +43,15 @@ fun BoxScope.Popups() {
 @Composable
 fun ItemCreationPopup() {
 
-    val _enabled: Boolean = arctic.itemCreation.enabled
-    val _target: ItemData? = arctic.itemCreation.target
+    val _enabled: String? = arctic.item.enabled
+    val _target: ItemData? = arctic.item.target
+    val _updateTarget: Item? = arctic.item.updateTarget
 
-    val _variant: String = arctic.itemCreation.filter
+    val _variant: String = arctic.item.filter
 
     val blurRadius by animateDpAsState(if (_target != null) 75.dp else 0.dp)
 
-    Backdrop(arctic.itemCreation.enabled) { arctic.itemCreation.disable() }
+    Backdrop(arctic.item.enabled != null) { arctic.item.disable() }
 
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -57,13 +59,13 @@ fun ItemCreationPopup() {
         modifier = Modifier.fillMaxWidth().blur(blurRadius)
     ) {
         Box {
-            AnimatedCollection(_enabled, width = 160.dp, modifier = Modifier.offset(x = (-120).dp)) {
-                if (it) {
+            AnimatedCollection(_enabled to _updateTarget, width = 160.dp, modifier = Modifier.offset(x = (-120).dp)) { (enabled, updateTarget) ->
+                if (enabled != null) {
                     Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 54.dp)) {
-                        VariantFilterTextInteractable("근거리", "Melee")
-                        VariantFilterTextInteractable("원거리", "Ranged")
-                        VariantFilterTextInteractable("방어구", "Armor")
-                        VariantFilterTextInteractable("유물", "Artifact")
+                        VariantFilterTextInteractable("근거리", "Melee", enabled, updateTarget)
+                        VariantFilterTextInteractable("원거리", "Ranged", enabled, updateTarget)
+                        VariantFilterTextInteractable("방어구", "Armor", enabled, updateTarget)
+                        VariantFilterTextInteractable("유물", "Artifact", enabled, updateTarget)
                     }
                 } else {
                     Spacer(modifier = Modifier.requiredWidth(160.dp).fillMaxHeight())
@@ -74,18 +76,24 @@ fun ItemCreationPopup() {
                 transitionSpec = {
                     val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(- 70.dp.value.toInt(), 0) })
                     var exit = fadeOut(tween(durationMillis = 250))
-                    if (targetState.first) exit += scaleOut(tween(durationMillis = 250), targetScale = 0.9f)
+                    if (targetState.first != null) exit += scaleOut(tween(durationMillis = 250), targetScale = 0.9f)
                     enter with exit
                 },
                 modifier = Modifier.width(1050.dp)
             ) { (enabled, variant) ->
-                if (enabled) ItemDataCollection(variant) { arctic.itemCreation.target = it }
+                if (enabled != null) ItemDataCollection(variant) {
+                    if (enabled == "creation") arctic.item.target = it
+                    else if (enabled == "edition") {
+                        arctic.item.updateTarget!!.type = it.type
+                        arctic.item.disable()
+                    }
+                }
                 else Box(modifier = Modifier.width(950.dp).fillMaxHeight())
             }
         }
     }
 
-    Backdrop(_target != null) { arctic.itemCreation.target = null }
+    Backdrop(_target != null) { arctic.item.target = null }
 
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -102,22 +110,24 @@ fun ItemCreationPopup() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun VariantFilterTextInteractable(text: String, variant: String) {
+fun VariantFilterTextInteractable(text: String, variant: String, enabledWith: String, updateTarget: Item?) {
 
-    val selected = arctic.itemCreation.filter == variant
-    val onClick = { arctic.itemCreation.filter = variant }
+    val selected = arctic.item.filter == variant
+    val onClick = { arctic.item.filter = variant }
+
+    val enabled = enabledWith == "creation" || updateTarget!!.data.variant == variant
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
-    val blurAlpha by animateFloatAsState(if (hovered) 0.8f else 0f)
-    val overlayAlpha by animateFloatAsState(if (selected) 1f else 0.6f)
+    val blurAlpha by animateFloatAsState(if (!enabled) 0f else if (hovered) 0.8f else 0f)
+    val overlayAlpha by animateFloatAsState(if (!enabled) 0.15f else if (selected) 1f else 0.6f)
 
     Box(
         modifier = Modifier
             .padding(bottom = 10.dp)
-            .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), onClick = onClick)
+            .hoverable(source, enabled = enabled)
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled, onClick = onClick)
     ) {
         VariantFilterText(text, modifier = Modifier.blur(10.dp).alpha(blurAlpha))
         VariantFilterText(text, modifier = Modifier.alpha(overlayAlpha))
