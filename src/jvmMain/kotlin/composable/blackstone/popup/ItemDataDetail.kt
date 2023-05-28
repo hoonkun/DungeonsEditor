@@ -49,8 +49,8 @@ fun ItemDataDetail(itemData: ItemData) {
             .fillMaxWidth()
             .requiredHeight(325.dp)
             .background(Color(0xff080808))
-            .padding(40.dp)
             .onClick {  }
+            .padding(40.dp)
     ) {
         Row(modifier = Modifier.requiredWidth(900.dp)) {
             Image(itemData.largeIcon, null, modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f))

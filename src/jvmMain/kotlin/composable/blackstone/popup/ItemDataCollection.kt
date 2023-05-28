@@ -47,6 +47,7 @@ private val VariantText = mapOf(
     "Artifact" to "유물"
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemDataCollection(variant: String, onItemSelect: (ItemData) -> Unit) {
     LazyVerticalGrid(
@@ -56,27 +57,13 @@ fun ItemDataCollection(variant: String, onItemSelect: (ItemData) -> Unit) {
             .fillMaxHeight()
             .requiredWidth(950.dp)
             .background(Color(0xff080808))
+            .onClick {  }
             .padding(horizontal = 20.dp),
     ) {
         item(span = { GridItemSpan(5) }) { CategoryText(VariantText[variant]!!) }
         items(variants(variant)) {
             ItemDataView(it, onItemSelect)
         }
-//        item(span = { GridItemSpan(5) }) { CategoryDivider() }
-//        item(span = { GridItemSpan(5) }) { CategoryText("방어구") }
-//        items(variants("Armor")) {
-//            ItemDataView(it, onItemSelect)
-//        }
-//        item(span = { GridItemSpan(5) }) { CategoryDivider() }
-//        item(span = { GridItemSpan(5) }) { CategoryText("원거리 무기") }
-//        items(variants("Ranged")) {
-//            ItemDataView(it, onItemSelect)
-//        }
-//        item(span = { GridItemSpan(5) }) { CategoryDivider() }
-//        item(span = { GridItemSpan(5) }) { CategoryText("유물") }
-//        items(variants("Artifact")) {
-//            ItemDataView(it, onItemSelect)
-//        }
     }
 
 }
