@@ -46,20 +46,13 @@ private fun RowScope.ItemEnchantmentSlotView(slot: List<Enchantment>) {
             LevelImagePositioner { LevelImage(activatedEnchantment.level, 1.75f) }
         }
     } else {
-        val interaction = remember { MutableInteractionSource() }
-        val hovered by interaction.collectIsHoveredAsState()
-
-        Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f).hoverable(interaction)) {
-            if (e0.id == "Unset" && e1.id == "Unset" && e2.id == "Unset" && !hovered && !slot.contains(arctic.enchantments.detailTarget)) {
-                LockedSlot()
-            } else {
-                OpenedSlot(
-                    top = { SlotTopIcon() },
-                    right = { EnchantmentIcon(e1) },
-                    left = { EnchantmentIcon(e0) },
-                    bottom = { EnchantmentIcon(e2) }
-                )
-            }
+        Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f)) {
+            OpenedSlot(
+                top = { SlotTopIcon() },
+                right = { EnchantmentIcon(e1) },
+                left = { EnchantmentIcon(e0) },
+                bottom = { EnchantmentIcon(e2) }
+            )
         }
     }
 }
