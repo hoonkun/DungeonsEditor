@@ -28,6 +28,15 @@ fun Item.recalculateEnchantmentPoints() {
     enchantments?.forEach { it.leveling(it.level) }
 }
 
+val StoredDataState.equippedItems get() = listOf(
+    items.find(equippedMelee),
+    items.find(equippedArmor),
+    items.find(equippedRanged),
+    items.find(equippedArtifact1),
+    items.find(equippedArtifact2),
+    items.find(equippedArtifact3)
+)
+
 fun StoredDataState.addItem(newItem: Item, selected: Item? = null) {
     items.add(6, newItem)
     items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }

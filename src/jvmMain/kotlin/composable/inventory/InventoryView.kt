@@ -12,16 +12,16 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arctic
-import blackstone.states.items.equipped
 import blackstone.states.items.unequipped
 import blackstone.states.Item
+import blackstone.states.items.equippedItems
 import stored
 
 @Composable
 fun RowScope.InventoryView() {
     Debugging.recomposition("InventoryView")
 
-    val equipped by remember { derivedStateOf { stored.items.filter(equipped) } }
+    val equipped by remember { derivedStateOf { stored.equippedItems } }
     val inventory by remember { derivedStateOf { stored.items.filter(unequipped) } }
     val selected by remember { derivedStateOf { arctic.items.selected } }
 

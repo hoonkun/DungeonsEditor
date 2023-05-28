@@ -213,14 +213,14 @@ fun <T>ItemsGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGrid
 
 @Composable
 fun <T> ItemView(item: T, simplified: Boolean = false, index: Int) where T: Item? =
-    ItemViewInteractable(index) {
+    ItemViewInteractable(index, item != null) {
         if (item == null) DummyItemIcon()
         else ItemIcon(item, simplified)
     }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
+fun ItemViewInteractable(index: Int, enabled: Boolean = true, content: @Composable BoxScope.() -> Unit) {
     Debugging.recomposition("ItemViewInteractable")
 
     val source = remember { MutableInteractionSource() }
@@ -231,8 +231,8 @@ fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
             .aspectRatio(1f / 1f)
             .padding(5.dp)
             .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { arctic.items.select(index, 0) }
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary)) { arctic.items.select(index, 1) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled) { arctic.items.select(index, 0) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), enabled = enabled) { arctic.items.select(index, 1) }
             .drawBehind {
                 val brush =
                     if (arctic.items.selected(index))
