@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -316,7 +317,7 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
         Image(
             bitmap = GameResources.image { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
             contentDescription = null,
-            modifier = Modifier.align(Alignment.TopEnd).fillMaxSize(0.2f).offset(2.dp, (-1.5).dp)
+            modifier = Modifier.align(Alignment.TopStart).fillMaxSize(0.2f).offset(2.dp, (-1.5).dp).scale(scaleX = -1f, scaleY = 1f)
         )
     }
 
