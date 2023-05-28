@@ -1,6 +1,7 @@
 package composable.inventory
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -10,10 +11,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -23,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arctic
@@ -67,18 +67,20 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
+    val image = remember { GameResources.image { "/Game/UI/Materials/Menu/arrow_gamemode.png" } }
+
+    val rotation by animateFloatAsState(if (collapsed) 180f else 0f)
+
     Box (
         modifier = Modifier
             .size(60.dp)
-            .offset((-70).dp)
+            .offset(x = (-70).dp, y = 10.dp)
             .clickable(source, null, onClick = onClick)
             .hoverable(source)
+            .padding(15.dp)
+            .rotate(rotation)
             .drawBehind {
-                drawRect(
-                    if (collapsed) Color.White else if (hovered) Color(0xa0ffffff) else Color(0xff79706b),
-                    topLeft = Offset(12f, this.size.height / 2 - 5f),
-                    size = Size(this.size.width - 24f, 7f)
-                )
+                drawImage(image, alpha = if (collapsed) 1.0f else if (hovered) 0.5f else 0.3f, dstSize = IntSize((image.width * 0.75f).toInt(), (image.height * 0.75f).toInt()))
             }
     )
 }
@@ -128,7 +130,7 @@ fun ItemsFilterer(variantFilter: String?, rarityFilter: String?, setVariantFilte
         }
         Spacer(modifier = Modifier.height(20.dp))
         for (rarity in filterableRarities) {
-            ItemRarityFilter(rarity = rarity, selectedVariantFilter = variantFilter, selected = rarity == rarityFilter) { setRarityFilter(rarity) }
+            ItemRarityFilter(rarity = rarity, selected = rarity == rarityFilter) { setRarityFilter(rarity) }
             Spacer(modifier = Modifier.height(10.dp))
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -168,20 +170,29 @@ fun ItemVariantFilter(variant: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun ItemRarityFilter(rarity: String, selectedVariantFilter: String?, selected: Boolean, onClick: () -> Unit) {
+fun ItemRarityFilter(rarity: String, selected: Boolean, onClick: () -> Unit) {
     Debugging.recomposition("ItemRarityFilter")
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f
 
-    val frameImage = remember(rarity) { RarityFilterFrame(rarity) }
-    val overlayImage = remember(selectedVariantFilter) { RarityFilterOverlayIcon(selectedVariantFilter) }
-
-    Box(modifier = Modifier.size(60.dp).hoverable(source).clickable(source, null, onClick = onClick), contentAlignment = Alignment.Center) {
-        Image(frameImage, "filter_rarity_frame", alpha = alpha, modifier = Modifier.fillMaxSize())
-        Image(overlayImage, "filter_rarity_overlay", alpha = alpha, modifier = Modifier.fillMaxSize(0.5f))
-    }
+    Box(
+        modifier = Modifier
+            .size(60.dp)
+            .hoverable(source)
+            .clickable(source, null, onClick = onClick)
+            .rotate(-20f)
+            .drawBehind {
+                drawRoundRect(
+                    RarityColor(rarity, RarityColorType.Opaque).copy(alpha = alpha),
+                    topLeft = Offset(10.dp.value, size.height / 2 - 6.dp.value),
+                    size = Size(size.width - 20.dp.value, 12.dp.value),
+                    cornerRadius = CornerRadius(3.dp.value)
+                )
+            }
+            .rotate(20f)
+    )
 }
 
 @Composable
