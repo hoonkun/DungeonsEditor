@@ -71,10 +71,11 @@ fun EnchantmentsCollection(holder: Item, index: Int, isNetheriteEnchant: Boolean
                     val newId = if (newEnchantmentData.id == target.id) "Unset" else newEnchantmentData.id
 
                     val newEnchantment = Enchantment(newId, holder, isNetheriteEnchant = target.isNetheriteEnchant)
-                    newEnchantment.leveling(
-                        if (newId != "Unset") target.level else 0,
-                        isNetheriteEnchant = target.isNetheriteEnchant
-                    )
+                    val newLevel =
+                        if (target.id == "Unset" && newId != "Unset" && target.isNetheriteEnchant) 1
+                        else if (newId != "Unset") target.level
+                        else 0
+                    newEnchantment.leveling(newLevel, isNetheriteEnchant = target.isNetheriteEnchant)
 
                     if (target.isNetheriteEnchant) {
                         holder.netheriteEnchant = newEnchantment

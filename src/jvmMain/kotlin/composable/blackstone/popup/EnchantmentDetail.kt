@@ -61,7 +61,8 @@ fun PowerfulEnchantmentIndicator() =
 @Composable
 private fun LevelAdjustView(enchantment: Enchantment) =
     Row(verticalAlignment = Alignment.CenterVertically) {
-        SelectableLevelButton(0, enchantment.level) { enchantment.leveling(0) }
+        if (!enchantment.isNetheriteEnchant)
+            SelectableLevelButton(0, enchantment.level) { enchantment.leveling(0) }
         SelectableLevelButton(1, enchantment.level) { enchantment.leveling(1) }
         SelectableLevelButton(2, enchantment.level) { enchantment.leveling(2) }
         SelectableLevelButton(3, enchantment.level) { enchantment.leveling(3) }
