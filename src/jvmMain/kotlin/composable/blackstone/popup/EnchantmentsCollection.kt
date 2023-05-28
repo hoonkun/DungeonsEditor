@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -48,13 +49,18 @@ fun EnchantmentsCollection(holder: Item, index: Int, isNetheriteEnchant: Boolean
         }
     }
 
+    val initialIndex = remember(target.id) { enchantments.indexOfFirst { it.id == target.id } }
+
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initialIndex, initialFirstVisibleItemScrollOffset = -529.dp.value.toInt())
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
+        contentPadding = PaddingValues(vertical = 60.dp, horizontal = 10.dp),
+        state = gridState,
         modifier = Modifier
             .requiredWidth(700.dp)
             .fillMaxHeight()
-            .background(Color(0xff080808)),
-        contentPadding = PaddingValues(vertical = 60.dp, horizontal = 10.dp)
+            .background(Color(0xff080808))
     ) {
         items(enchantments, key = { it.id }) { enchantment ->
             EnchantmentSelectButton(
