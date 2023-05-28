@@ -2,6 +2,7 @@ package composable
 
 import ItemData
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -46,12 +47,14 @@ fun ItemCreationPopup() {
 
     var _variant by remember { mutableStateOf("Melee") }
 
+    val blurRadius by animateDpAsState(if (_target != null) 75.dp else 0.dp)
+
     Backdrop(arctic.itemCreation.enabled) { arctic.itemCreation.enabled = false }
 
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().blur(blurRadius)
     ) {
         Box {
             AnimatedCollection(_enabled, width = 160.dp, modifier = Modifier.offset(x = (-120).dp)) {
@@ -87,11 +90,11 @@ fun ItemCreationPopup() {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxSize()
     ) {
-        AnimatedDetail(_target) { target ->
-            if (target != null) ItemDataDetail()
-            else Box(modifier = Modifier.width(850.dp).fillMaxHeight())
+        AnimatedDetail(_target, modifier = Modifier.fillMaxWidth().height(325.dp)) { target ->
+            if (target != null) ItemDataDetail(target)
+            else Box(modifier = Modifier.fillMaxSize())
         }
     }
 
@@ -287,6 +290,7 @@ fun <S> AnimatedDetail(
     targetState: S,
     sizeTransformDuration: (S, S) -> Int = { _, _, -> 250 },
     slideEnabled: (S, S) -> Boolean = { _, _ -> true },
+    modifier: Modifier = Modifier,
     content: @Composable AnimatedVisibilityScope.(S) -> Unit
 ) =
     AnimatedContent(
@@ -302,6 +306,6 @@ fun <S> AnimatedDetail(
 
             enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = sizeTransformDuration(this.initialState, this.targetState)) }
         },
-        modifier = Modifier.height(500.dp),
+        modifier = modifier.then(Modifier.height(500.dp)),
         content = content
     )

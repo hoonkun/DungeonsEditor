@@ -283,10 +283,10 @@ private fun PowerIcon() =
     )
 
 @Composable
-private fun PowerEditField(value: String, onValueChange: (String) -> Unit) {
+fun PowerEditField(value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
     Debugging.recomposition("PowerEditField")
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         PowerIcon()
         Spacer(modifier = Modifier.width(10.dp))
         LabeledInput(label = Localizations["/gearpower_POWER"]!!, value = value, onValueChange = onValueChange)
