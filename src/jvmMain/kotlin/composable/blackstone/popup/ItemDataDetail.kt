@@ -134,7 +134,7 @@ fun AddButtonIcon(modifier: Modifier = Modifier) {
         GameResources.image { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
         null,
         filterQuality = FilterQuality.None,
-        modifier = modifier.then(Modifier.size(150.dp).padding(12.5.dp))
+        modifier = modifier.then(Modifier.size(125.dp).padding(12.5.dp))
     )
 }
 
