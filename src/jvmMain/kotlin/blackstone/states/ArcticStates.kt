@@ -1,5 +1,6 @@
 package blackstone.states
 
+import ItemData
 import androidx.compose.runtime.*
 import blackstone.states.items.*
 
@@ -20,6 +21,8 @@ class ArcticStates(stored: StoredDataState) {
 class ItemCreationState {
 
     var enabled: Boolean by mutableStateOf(false)
+
+    var target: ItemData? by mutableStateOf(null)
 
 }
 

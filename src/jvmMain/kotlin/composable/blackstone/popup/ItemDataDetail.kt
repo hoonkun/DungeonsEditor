@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
@@ -124,7 +123,15 @@ fun BoxScope.AddButton(onClick: () -> Unit) {
             AddButtonIcon(modifier = Modifier.blur(10.dp).alpha(hoverAlpha))
             AddButtonIcon(modifier = Modifier.alpha(baseAlpha))
         }
-        Text(text = "추가", color = Color.White, fontSize = 18.sp, modifier = Modifier.align(Alignment.BottomCenter).offset(y = 25.dp).alpha(baseAlpha))
+        Text(
+            text = "추가",
+            color = Color.White,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = 25.dp)
+                .alpha(baseAlpha)
+        )
     }
 }
 

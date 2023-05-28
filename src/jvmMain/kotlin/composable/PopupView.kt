@@ -43,7 +43,7 @@ fun BoxScope.Popups() {
 fun ItemCreationPopup() {
 
     val _enabled: Boolean by remember { derivedStateOf { arctic.itemCreation.enabled } }
-    var _target: ItemData? by remember { mutableStateOf(null) }
+    val _target: ItemData? by remember { derivedStateOf { arctic.itemCreation.target } }
 
     var _variant by remember { mutableStateOf("Melee") }
 
@@ -79,13 +79,13 @@ fun ItemCreationPopup() {
                 },
                 modifier = Modifier.width(1050.dp)
             ) { (enabled, variant) ->
-                if (enabled) ItemDataCollection(variant) { _target = it }
+                if (enabled) ItemDataCollection(variant) { arctic.itemCreation.target = it }
                 else Box(modifier = Modifier.width(950.dp).fillMaxHeight())
             }
         }
     }
 
-    Backdrop(_target != null) { _target = null }
+    Backdrop(_target != null) { arctic.itemCreation.target = null }
 
     Row(
         horizontalArrangement = Arrangement.Center,
