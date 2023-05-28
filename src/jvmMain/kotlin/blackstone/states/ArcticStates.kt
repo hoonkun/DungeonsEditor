@@ -74,10 +74,13 @@ class ArmorPropertiesState(private val stored: StoredDataState) {
 
     var detailTarget: ArmorProperty? by mutableStateOf(null)
         private set
+    var created: Boolean by mutableStateOf(false)
+        private set
 
     val hasDetailTarget get() = detailTarget != null
 
-    private var createInto: Item? by mutableStateOf(null)
+    var createInto: Item? by mutableStateOf(null)
+        private set
 
     val hasCreateInto get() = createInto != null
 
@@ -86,6 +89,7 @@ class ArmorPropertiesState(private val stored: StoredDataState) {
     fun viewDetail(armorProperty: ArmorProperty) {
         detailTarget = armorProperty
         createInto = null
+        created = true
     }
 
     fun closeDetail() {
@@ -94,6 +98,7 @@ class ArmorPropertiesState(private val stored: StoredDataState) {
 
     fun requestCreate(into: Item) {
         detailTarget = null
+        created = false
         createInto = into
     }
 

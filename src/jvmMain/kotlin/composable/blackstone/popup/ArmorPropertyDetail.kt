@@ -28,7 +28,7 @@ import blackstone.states.items.data
 fun ArmorPropertyDetail(property: ArmorProperty) {
     Debugging.recomposition("ArmorPropertyDetailView")
 
-    Column(modifier = Modifier.width(675.dp).offset(x = 15.dp).background(Color(0xff080808)).padding(30.dp)) {
+    Column(modifier = Modifier.wrapContentSize().requiredWidth(675.dp).background(Color(0xff080808)).padding(30.dp)) {
         Text(text = "방어구 속성", style = TextStyle(fontSize = 18.sp, color = Color.White))
         Spacer(modifier = Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {

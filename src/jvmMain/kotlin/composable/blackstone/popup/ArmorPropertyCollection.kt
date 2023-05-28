@@ -22,51 +22,70 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import blackstone.states.ArmorProperty
+import blackstone.states.Item
+import blackstone.states.items.ArmorProperty
+import extensions.replace
 
 @Composable
-fun BoxScope.ArmorPropertyCollection(property: ArmorProperty?) {
+fun ArmorPropertyCollection(holder: Item, index: Int?, indexValid: Boolean) {
+
+    val property = if (index != null && indexValid) holder.armorProperties?.get(index) else null
 
     val sorted = remember { Database.current.armorProperties.filter { it.description != null }.sortedBy { it.description } }
     val lazy = rememberLazyListState(
-        initialFirstVisibleItemIndex = sorted.indexOfFirst { it.id == property?.id }.coerceAtLeast(0),
+        initialFirstVisibleItemIndex = if (property != null) sorted.indexOfFirst { it.id == property.id }.coerceAtLeast(0) else 0,
         initialFirstVisibleItemScrollOffset = -602.dp.value.toInt()
     )
 
     LazyColumn(
-        modifier =
-            Modifier
-                .requiredWidth(700.dp)
-                .fillMaxHeight()
-                .offset(x = (-15).dp)
-                .background(Color(0xff080808))
-                .align(Alignment.CenterEnd),
         state = lazy,
-        contentPadding = PaddingValues(30.dp)
+        contentPadding = PaddingValues(30.dp),
+        modifier = Modifier
+            .requiredWidth(700.dp)
+            .fillMaxHeight()
+            .background(Color(0xff080808)),
     ) {
         items(sorted) { propertyData ->
-            ArmorPropertySelectText(property, propertyData)
+            ArmorPropertySelectText(holder, index, indexValid, propertyData)
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ArmorPropertySelectText(property: ArmorProperty?, propertyData: ArmorPropertyData) {
+fun ArmorPropertySelectText(holder: Item, index: Int?, indexValid: Boolean, propertyData: ArmorPropertyData) {
     Debugging.recomposition("ArmorPropertySelectText")
 
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
+    val selected = index != null && indexValid && holder.armorProperties?.get(index)?.id == propertyData.id
+
+    val onItemClick: () -> Unit = {
+        val properties = holder.armorProperties
+            ?: throw RuntimeException("[ArmorPropertySelectText] non-null assertion failed: holder.armorProperties must not be null")
+
+        val newProperty = ArmorProperty(propertyData.id, holder)
+
+        if (index != null && indexValid) {
+            properties.replace(properties[index], newProperty)
+        } else {
+            properties.add(newProperty)
+        }
+
+        arctic.armorProperties.viewDetail(newProperty)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { if (property != null) property.id = propertyData.id }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), onClick = onItemClick)
             .hoverable(interaction)
             .drawBehind {
                 drawRect(
                     Color.White,
-                    alpha = if (property?.id == propertyData.id) 0.3f else if (hovered) 0.15f else 0f,
+                    alpha = if (selected) 0.3f else if (hovered) 0.15f else 0f,
                     topLeft = Offset(-30.dp.value, 5.dp.value),
                     size = Size(size.width + 60.dp.value, size.height - 10.dp.value)
                 )

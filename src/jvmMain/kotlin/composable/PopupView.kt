@@ -32,18 +32,17 @@ fun BoxScope.Popups() {
     ArmorPropertyPopup()
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BoxScope.EnchantmentPopup() {
+fun EnchantmentPopup() {
     val _target by remember { derivedStateOf { arctic.enchantments.detailTarget } }
     val _shadow by remember { derivedStateOf { arctic.enchantments.shadowDetailTarget } }
 
-    val collectionTargetState = EnchantPopupLeftState(
+    val collectionTargetState = EnchantCollectionPopupTargetStates(
         holder = _target?.holder,
         index = _target?.holder?.enchantments?.indexOf(_target),
         isNetheriteEnchant = _target?.isNetheriteEnchant == true
     )
-    val detailState = EnchantPopupRightState(
+    val detailTargetState = EnchantDetailPopupTargetStates(
         target = _target,
         isUnset = _target?.id == "Unset"
     )
@@ -55,28 +54,12 @@ fun BoxScope.EnchantmentPopup() {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        AnimatedContent(
-            targetState = collectionTargetState,
-            transitionSpec = {
-                val enter = fadeIn() + slideIn(initialOffset = { IntOffset(- it.width / 10, 0) })
-                val exit = fadeOut(tween(durationMillis = 100))
-                enter with exit
-            },
-            modifier = Modifier.width(750.dp)
-        ) { (holder, index, isNetheriteEnchant) ->
+        AnimatedCollection(collectionTargetState) { (holder, index, isNetheriteEnchant) ->
             if (holder != null && index != null) EnchantmentsCollection(holder, index, isNetheriteEnchant)
             else Box(modifier = Modifier.width(700.dp).fillMaxHeight())
         }
-        AnimatedContent(
-            targetState = detailState,
-            transitionSpec = {
-                val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(0, 50) })
-                val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(0, -50) })
-                enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
-            },
-            modifier = Modifier.height(500.dp)
-        ) { (target, unset) ->
-            if (target != null && !unset) EnchantmentDetail(target)
+        AnimatedDetail(detailTargetState) { (target, isUnset) ->
+            if (target != null && !isUnset) EnchantmentDetail(target)
             else Box(modifier = Modifier.width(0.dp).height(500.dp))
 
             if (target == null && _shadow != null && _shadow?.id != "Unset")
@@ -87,80 +70,123 @@ fun BoxScope.EnchantmentPopup() {
     }
 }
 
-data class EnchantPopupLeftState(
+data class EnchantCollectionPopupTargetStates(
     val holder: Item?,
     val index: Int?,
     val isNetheriteEnchant: Boolean
 )
 
-data class EnchantPopupRightState(
+data class EnchantDetailPopupTargetStates(
     val target: Enchantment?,
     val isUnset: Boolean
 )
 
 @Composable
-fun BoxScope.ArmorPropertyPopup() {
-    val detailTarget by remember { derivedStateOf { arctic.armorProperties.detailTarget } }
-    val rootEnabled by remember { derivedStateOf { arctic.armorProperties.hasDetailTarget } }
+fun ArmorPropertyPopup() {
+    val _target by remember { derivedStateOf { arctic.armorProperties.detailTarget } }
+    val _into by remember { derivedStateOf { arctic.armorProperties.createInto } }
+    val _created  by remember { derivedStateOf { arctic.armorProperties.created } }
 
-    val detailEnabled by remember { derivedStateOf { arctic.armorProperties.detailTarget.let { it != null } } }
+    val _hasTarget = arctic.armorProperties.hasDetailTarget
+    val _hasInto = arctic.armorProperties.hasCreateInto
 
-    Backdrop(rootEnabled) { arctic.armorProperties.closeDetail() }
-
-    Row(modifier = Modifier.fillMaxWidth()) {
-        LeftSlide(ArmorPropertyPopupLeftState(rootEnabled, detailTarget)) { (visible, target) ->
-            if (!visible) Box(modifier = Modifier.width(700.dp).fillMaxHeight().align(Alignment.CenterEnd))
-            else ArmorPropertyCollection(target)
+    val collectionTargetState =
+        if (_hasInto) {
+            ArmorPropertyCollectionPopupTargetStates(
+                holder = _into,
+                index = _into?.armorProperties?.size
+            )
+        } else {
+            val index = _target?.holder?.armorProperties?.indexOf(_target)
+            ArmorPropertyCollectionPopupTargetStates(
+                holder = _target?.holder,
+                index = index
+            )
         }
 
-        RightSlide(ArmorPropertyPopupRightState(rootEnabled && detailEnabled, detailTarget)) { (visible, target) ->
-            if (!visible || target == null) Box(modifier = Modifier.size(675.dp, 300.dp))
-            else ArmorPropertyDetail(target)
+    val detailTargetState = ArmorPropertyDetailPopupTargetStates(
+        holder = collectionTargetState.holder,
+        target = _target,
+        created = _created
+    )
+
+    val detailSizeTransformDuration: (ArmorPropertyDetailPopupTargetStates, ArmorPropertyDetailPopupTargetStates) -> Int = { initial, target ->
+        if ((initial.created && !target.created) || (initial.holder == null && initial.target == null && target.created)) 0
+        else 250
+    }
+
+    Backdrop(_hasTarget || _hasInto) {
+        if (_hasTarget) arctic.armorProperties.closeDetail()
+        else if (_hasInto) arctic.armorProperties.cancelCreation()
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        AnimatedCollection(collectionTargetState) { (holder, index) ->
+            val indexValid = index != null && index < (holder?.armorProperties?.size ?: 0)
+
+            if (holder != null) ArmorPropertyCollection(holder, index, indexValid)
+            else Box(modifier = Modifier.width(700.dp).fillMaxHeight())
+        }
+
+        AnimatedDetail(detailTargetState, sizeTransformDuration = detailSizeTransformDuration) { (_, target, created) ->
+            if (target != null) ArmorPropertyDetail(target)
+            else Box(modifier = Modifier.size(0.dp, 500.dp))
+
+            if (target == null && created) {
+                Box(modifier = Modifier.width(675.dp).height(500.dp))
+            } else if (target == null) {
+                Box(modifier = Modifier.width(0.dp).height(500.dp))
+            }
         }
     }
 }
 
-data class ArmorPropertyPopupLeftState(
-    val visible: Boolean,
-    val target: ArmorProperty?
+data class ArmorPropertyCollectionPopupTargetStates(
+    val holder: Item?,
+    val index: Int?
 )
 
-data class ArmorPropertyPopupRightState(
-    val visible: Boolean,
-    val target: ArmorProperty?
+data class ArmorPropertyDetailPopupTargetStates(
+    val holder: Item?,
+    val target: ArmorProperty?,
+    val created: Boolean
 )
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BoxScope.Backdrop(visible: Boolean, onClick: () -> Unit) =
+fun Backdrop(visible: Boolean, onClick: () -> Unit) =
     AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut(), label = "Backdrop") {
         Box(modifier = Modifier.fillMaxSize().background(Color(0x60000000)).onClick(onClick = onClick))
     }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun <S> RowScope.LeftSlide(targetState: S, content: @Composable BoxScope.(S) -> Unit) =
+fun <S> AnimatedCollection(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
-            val enter = fadeIn() + slideIn(initialOffset = { IntOffset(-it.width / 10, 0) })
+            val enter = fadeIn() + slideIn(initialOffset = { IntOffset(- it.width / 10, 0) })
             val exit = fadeOut(tween(durationMillis = 100))
             enter with exit
         },
-        modifier = Modifier.weight(0.5f),
-        content = { Box(modifier = Modifier.fillMaxSize()) { content(it) } }
+        modifier = Modifier.width(750.dp),
+        content = content
     )
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun <S> RowScope.RightSlide(targetState: S, content: @Composable BoxScope.(S) -> Unit) =
+fun <S> AnimatedDetail(targetState: S, sizeTransformDuration: (S, S) -> Int = { _, _, -> 250 }, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
-            val enter = fadeIn() + slideIn(initialOffset = { IntOffset(it.width / 10, 0) })
-            val exit = fadeOut(tween(durationMillis = 100))
-            enter with exit
+            val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(0, 50) })
+            val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(0, -50) })
+            enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = sizeTransformDuration(this.initialState, this.targetState)) }
         },
-        modifier = Modifier.weight(0.53f),
-        content = { Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxSize()) { content(it) } }
+        modifier = Modifier.height(500.dp),
+        content = content
     )

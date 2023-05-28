@@ -349,17 +349,7 @@ fun ArmorPropertyButton(item: Item, mode: String) {
             }
             .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
                 if (mode == "Add") {
-                    val properties = item.armorProperties ?: mutableStateListOf<ArmorProperty>().also { item.armorProperties = it }
-                    val newProperty = ArmorProperty(
-                        Database.current.armorProperties
-                            .filter { it.description != null }
-                            .sortedBy { it.description }
-                            .first().id,
-                        "Common"
-                    ).apply { holder = item }
-
-                    properties.add(newProperty)
-                    arctic.armorProperties.viewDetail(newProperty)
+                    arctic.armorProperties.requestCreate(item)
                 } else {
                     val selected = arctic.armorProperties.detailTarget ?: return@onClick
                     selected.holder.armorProperties?.remove(selected)

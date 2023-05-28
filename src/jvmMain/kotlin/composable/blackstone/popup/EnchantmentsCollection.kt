@@ -40,8 +40,8 @@ import extensions.replace
 @Composable
 fun EnchantmentsCollection(holder: Item, index: Int, isNetheriteEnchant: Boolean) {
 
-    val target = (if (isNetheriteEnchant) holder.netheriteEnchant else holder.enchantments!![index])
-        ?: throw RuntimeException("[EnchantmentCollection] non-null assertion failed: holder.netheriteEnchant must not be null")
+    val target = (if (isNetheriteEnchant) holder.netheriteEnchant else holder.enchantments?.get(index))
+        ?: throw RuntimeException("[EnchantmentCollection] non-null assertion failed: holder.netheriteEnchant(or holder.enchantments) must not be null")
 
     val enchantments by remember(holder.data.variant) {
         derivedStateOf {
@@ -49,7 +49,7 @@ fun EnchantmentsCollection(holder: Item, index: Int, isNetheriteEnchant: Boolean
         }
     }
 
-    val initialIndex = remember(target.id) { enchantments.indexOfFirst { it.id == target.id } }
+    val initialIndex = remember(target.id) { enchantments.indexOfFirst { it.id == target.id }.coerceAtLeast(0) }
 
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = initialIndex, initialFirstVisibleItemScrollOffset = -529.dp.value.toInt())
 
