@@ -1,13 +1,13 @@
-package composable.popup
+package composable.blackstone.popup
 
 import Localizations
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,44 +15,36 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import composable.PopupCloseButton
-import composable.inventory.EnchantmentIcon
-import composable.inventory.LevelImage
-import composable.inventory.LevelImagePositioner
 import blackstone.states.Enchantment
 import blackstone.states.items.data
 import blackstone.states.items.leveling
-import editorState
+import composable.inventory.EnchantmentIcon
+import composable.inventory.LevelImage
+import composable.inventory.LevelImagePositioner
 import extensions.GameResources
 
+
 @Composable
-fun EnchantmentDetailView(enchantment: Enchantment, requestClose: () -> Unit) {
+fun EnchantmentDetail(enchantment: Enchantment) {
     Debugging.recomposition("EnchantmentDetailView")
 
-    val source = remember { MutableInteractionSource() }
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
-        Box(modifier = Modifier.padding(30.dp)) { PopupCloseButton(requestClose) }
-        Row {
-            Box(
-                modifier = Modifier.size(300.dp)
-                    .clickable(source, null) { editorState.detail.unselectEnchantment() }) {
-                EnchantmentIcon(enchantment, scale = 1.0f)
-                LevelImagePositioner(size = 0.4f) { LevelImage(enchantment.level, scale = 1.5f) }
+    Row(modifier = Modifier.requiredSize(675.dp, 300.dp).background(Color(0xff080808))) {
+        Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
+            EnchantmentIcon(enchantment, scale = 1.0f)
+            LevelImagePositioner(size = 0.4f) { LevelImage(enchantment.level, scale = 1.5f) }
+        }
+        Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
+            Row(verticalAlignment = Alignment.Bottom) {
+                NameText(text = enchantment.data.name)
+                if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
             }
-            Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    NameText(text = enchantment.data.name)
-                    if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
-                }
-                DescriptionText(text = enchantment.data.description)
-                Spacer(modifier = Modifier.height(20.dp))
-                EffectText(text = enchantment.data.effect)
+            DescriptionText(text = enchantment.data.description)
+            Spacer(modifier = Modifier.height(20.dp))
+            EffectText(text = enchantment.data.effect)
 
-                if (enchantment.id != "Unset") {
-                    Spacer(modifier = Modifier.weight(1f))
-                    LevelAdjustView(enchantment)
-                }
+            if (enchantment.id != "Unset") {
+                Spacer(modifier = Modifier.weight(1f))
+                LevelAdjustView(enchantment)
             }
         }
     }

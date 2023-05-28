@@ -24,7 +24,7 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import editorState
+import arctic
 import extensions.DungeonsPower
 import extensions.GameResources
 import blackstone.states.Item
@@ -216,18 +216,16 @@ fun ItemViewInteractable(index: Int, content: @Composable BoxScope.() -> Unit) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
-    val state = editorState.inventory
-
     Box(
         modifier = Modifier
             .aspectRatio(1f / 1f)
             .padding(5.dp)
             .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { state.select(index, "primary") }
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary)) { state.select(index, "secondary") }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { arctic.items.select(index, 0) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary)) { arctic.items.select(index, 1) }
             .drawBehind {
                 val brush =
-                    if (state.selectedIndexes.contains(index))
+                    if (arctic.items.selected(index))
                         Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                     else if (hovered)
                         Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))

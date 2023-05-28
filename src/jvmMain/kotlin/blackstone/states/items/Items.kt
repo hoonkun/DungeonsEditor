@@ -22,6 +22,10 @@ val Item.data get() = Database.current.findItem(type) ?: throw RuntimeException(
 
 val Item.totalInvestedEnchantmentPoints get() = enchantments?.sumOf { it.investedPoints } ?: 0
 
+fun Item.recalculateEnchantmentPoints() {
+    enchantments?.forEach { it.leveling(it.level) }
+}
+
 fun VariantFilterIcon(with: String, selected: Boolean): ImageBitmap {
     val filename = when (with) {
         "Melee" -> "filter_melee"

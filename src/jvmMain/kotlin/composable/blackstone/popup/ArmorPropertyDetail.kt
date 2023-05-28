@@ -1,4 +1,4 @@
-package composable.popup
+package composable.blackstone.popup
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,32 +20,28 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import composable.PopupCloseButton
 import blackstone.states.ArmorProperty
 import blackstone.states.items.ArmorPropertyRarityIcon
 import blackstone.states.items.data
 
 @Composable
-fun ArmorPropertyDetailView(property: ArmorProperty, requestClose: () -> Unit) {
+fun ArmorPropertyDetail(property: ArmorProperty) {
     Debugging.recomposition("ArmorPropertyDetailView")
 
-    Box(modifier = Modifier.fillMaxSize().padding(30.dp)) {
-        Row(modifier = Modifier.align(Alignment.TopEnd)) { PopupCloseButton(requestClose) }
-        Column {
-            Text(text = "방어구 속성", style = TextStyle(fontSize = 18.sp, color = Color.White))
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                ArmorPropertyRarityToggle(property)
-                Spacer(modifier = Modifier.width(15.dp))
-                Text(
-                    text = property.data.description!!,
-                    style = TextStyle(
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+    Column(modifier = Modifier.wrapContentSize().requiredWidth(675.dp).background(Color(0xff080808)).padding(30.dp)) {
+        Text(text = "방어구 속성", style = TextStyle(fontSize = 18.sp, color = Color.White))
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ArmorPropertyRarityToggle(property)
+            Spacer(modifier = Modifier.width(15.dp))
+            Text(
+                text = property.data.description!!,
+                style = TextStyle(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
-            }
+            )
         }
     }
 }

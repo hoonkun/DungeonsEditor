@@ -11,10 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import blackstone.states.items.equipped
 import blackstone.states.items.unequipped
 import blackstone.states.Item
-import editorState
 import stored
 
 @Composable
@@ -23,7 +23,7 @@ fun RowScope.InventoryView() {
 
     val equipped by remember { derivedStateOf { stored.items.filter(equipped) } }
     val inventory by remember { derivedStateOf { stored.items.filter(unequipped) } }
-    val selected by remember { derivedStateOf { editorState.inventory.selectedItems } }
+    val selected by remember { derivedStateOf { arctic.items.selected } }
 
     LeftArea {
         EquippedItems(equipped)
