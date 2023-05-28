@@ -50,34 +50,45 @@ fun ItemDataDetail(itemData: ItemData) {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .requiredHeight(325.dp)
+            .requiredHeight(385.dp)
             .background(Color(0xff080808))
             .onClick {  }
             .padding(40.dp)
     ) {
-        Row(modifier = Modifier.requiredWidth(900.dp)) {
-            Image(itemData.largeIcon, null, modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f))
-            Spacer(modifier = Modifier.width(25.dp))
-            Column {
-                AlterButton(
-                    text = "${if(itemData.limited) "시즌한정 " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
-                    enabled = !itemData.unique,
-                    color = RarityColor(rarity, RarityColorType.Translucent)
-                ) { rarity = if (rarity == "Common") "Rare" else "Common" }
-                Text(text = name ?: "알 수 없는 아이템", color = Color.White, fontSize = 50.sp, fontWeight = FontWeight.Bold)
+        Box (contentAlignment = Alignment.TopEnd, modifier = Modifier.requiredWidth(950.dp)) {
+            Row {
+                Image(itemData.largeIcon, null, modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f))
+                Spacer(modifier = Modifier.width(25.dp))
+                Column {
+                    AlterButton(
+                        text = "${if (itemData.limited) "시즌한정 " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
+                        enabled = !itemData.unique,
+                        color = RarityColor(rarity, RarityColorType.Translucent)
+                    ) { rarity = if (rarity == "Common") "Rare" else "Common" }
+                    Text(
+                        text = name ?: "알 수 없는 아이템",
+                        color = Color.White,
+                        fontSize = 50.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
-                if (description != null) Text(text = description, color = Color.White, fontSize = 25.sp)
-                if (flavour != null) Text(text = flavour, color = Color.White, fontSize = 25.sp)
+                    if (description != null) Text(text = description, color = Color.White, fontSize = 25.sp)
+                    if (flavour != null) Text(text = flavour, color = Color.White, fontSize = 25.sp)
 
-                Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                PowerEditField(
-                    value = DungeonsPower.toInGamePower(power).toString(),
-                    onValueChange = {
-                        if (it.toDoubleOrNull() != null) power = DungeonsPower.toSerializedPower(it.toDouble())
-                    },
-                    modifier = Modifier.align(Alignment.End)
-                )
+                    PowerEditField(
+                        value = DungeonsPower.toInGamePower(power).toString(),
+                        onValueChange = {
+                            if (it.toDoubleOrNull() != null) power = DungeonsPower.toSerializedPower(it.toDouble())
+                        },
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+            }
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.offset(y = 365.dp)) {
+                if (itemData.variant != "Artifact") WarningText(text = "다른 옵션들은 추가한 뒤에 우측 영역에서 수정할 수 있어요!")
+                if (itemData.variant == "Armor") WarningText(text = "추가 후 표시되는 기본 ArmorProperty 값은 수기로 기록된 것으로, 정확하지 않을 수 있습니다.")
             }
         }
         AddButton {
@@ -92,11 +103,16 @@ fun ItemDataDetail(itemData: ItemData) {
                 markedNew = true
             )
             stored.addItem(newItem)
-            arctic.itemCreation.enabled = false
+            arctic.itemCreation.disable()
             arctic.itemCreation.target = null
         }
     }
 
+}
+
+@Composable
+fun WarningText(text: String) {
+    Text(text = text, color = Color.White.copy(alpha = 0.45f), fontSize = 18.sp)
 }
 
 @OptIn(ExperimentalFoundationApi::class)

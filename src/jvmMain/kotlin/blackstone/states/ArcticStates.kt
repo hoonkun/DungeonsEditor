@@ -21,8 +21,20 @@ class ArcticStates(stored: StoredDataState) {
 class ItemCreationState {
 
     var enabled: Boolean by mutableStateOf(false)
+        private set
 
     var target: ItemData? by mutableStateOf(null)
+
+    var filter: String by mutableStateOf("Melee")
+
+    fun enable() {
+        enabled = true
+        filter = "Melee"
+    }
+
+    fun disable() {
+        enabled = false
+    }
 
 }
 

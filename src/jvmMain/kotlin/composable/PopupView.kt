@@ -42,14 +42,14 @@ fun BoxScope.Popups() {
 @Composable
 fun ItemCreationPopup() {
 
-    val _enabled: Boolean by remember { derivedStateOf { arctic.itemCreation.enabled } }
-    val _target: ItemData? by remember { derivedStateOf { arctic.itemCreation.target } }
+    val _enabled: Boolean = arctic.itemCreation.enabled
+    val _target: ItemData? = arctic.itemCreation.target
 
-    var _variant by remember { mutableStateOf("Melee") }
+    val _variant: String = arctic.itemCreation.filter
 
     val blurRadius by animateDpAsState(if (_target != null) 75.dp else 0.dp)
 
-    Backdrop(arctic.itemCreation.enabled) { arctic.itemCreation.enabled = false }
+    Backdrop(arctic.itemCreation.enabled) { arctic.itemCreation.disable() }
 
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -60,10 +60,10 @@ fun ItemCreationPopup() {
             AnimatedCollection(_enabled, width = 160.dp, modifier = Modifier.offset(x = (-120).dp)) {
                 if (it) {
                     Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 54.dp)) {
-                        VariantFilterTextInteractable("근거리", _variant == "Melee") { _variant = "Melee" }
-                        VariantFilterTextInteractable("원거리", _variant == "Ranged") { _variant = "Ranged" }
-                        VariantFilterTextInteractable("방어구", _variant == "Armor") { _variant = "Armor" }
-                        VariantFilterTextInteractable("유물", _variant == "Artifact") { _variant = "Artifact" }
+                        VariantFilterTextInteractable("근거리", "Melee")
+                        VariantFilterTextInteractable("원거리", "Ranged")
+                        VariantFilterTextInteractable("방어구", "Armor")
+                        VariantFilterTextInteractable("유물", "Artifact")
                     }
                 } else {
                     Spacer(modifier = Modifier.requiredWidth(160.dp).fillMaxHeight())
@@ -92,7 +92,7 @@ fun ItemCreationPopup() {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxSize()
     ) {
-        AnimatedDetail(_target, modifier = Modifier.fillMaxWidth().height(325.dp)) { target ->
+        AnimatedDetail(_target, modifier = Modifier.fillMaxWidth().height(550.dp)) { target ->
             if (target != null) ItemDataDetail(target)
             else Box(modifier = Modifier.fillMaxSize())
         }
@@ -102,7 +102,10 @@ fun ItemCreationPopup() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun VariantFilterTextInteractable(text: String, selected: Boolean, onClick: () -> Unit) {
+fun VariantFilterTextInteractable(text: String, variant: String) {
+
+    val selected = arctic.itemCreation.filter == variant
+    val onClick = { arctic.itemCreation.filter = variant }
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
