@@ -39,8 +39,17 @@ class ItemsState(private val stored: StoredDataState) {
 
     fun selected(item: Item?) = selected.contains(item)
 
+    fun selectedSlot(item: Item) = selected.indexOf(item)
+
     fun select(index: Int, slot: Int) {
         selectedIndexes[slot] = if (selectedIndexes[slot] == index) null else index
+    }
+
+    fun unselect(item: Item) {
+        val index = selected.indexOf(item)
+        if (index < 0) return
+
+        selectedIndexes[index] = null
     }
 
 }

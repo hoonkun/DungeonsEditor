@@ -3,6 +3,7 @@ package blackstone.states
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import blackstone.states.items.ArmorProperty
 import blackstone.states.items.Enchantment
 import extensions.*
 import org.json.JSONObject
@@ -412,6 +413,27 @@ class Item(
         from.safe { getBoolean(FIELD_MARKED_NEW) }
     )
 
+    constructor(other: Item): this(
+        other.inventoryIndex,
+        other.power,
+        other.rarity,
+        other.type,
+        other.upgraded,
+        other.enchantments?.map { Enchantment(it) },
+        other.armorProperties?.map { ArmorProperty(it) },
+        other.netheriteEnchant?.let { Enchantment(it) },
+        other.modified,
+        other.timesModified,
+        other.equipmentSlot,
+        other.markedNew
+    )
+
+    fun copy(): Item = Item(this).apply {
+        equipmentSlot = null
+        inventoryIndex = 0
+        markedNew = true
+    }
+
     fun export(): JSONObject =
         JSONObject().apply {
             inventoryIndex?.let { put(FIELD_INVENTORY_INDEX, it) }
@@ -469,6 +491,8 @@ class Enchantment(
         from.getInt(FIELD_LEVEL)
     )
 
+    constructor(other: Enchantment): this(other.id, other.investedPoints, other.level)
+
     fun export(): JSONObject =
         JSONObject().apply {
             put(FIELD_ID, id)
@@ -499,6 +523,8 @@ class ArmorProperty(
         from.getString(FIELD_ID),
         from.getString(FIELD_RARITY)
     )
+
+    constructor(other: ArmorProperty): this(other.id, other.rarity)
 
     fun export(): JSONObject =
         JSONObject().apply {

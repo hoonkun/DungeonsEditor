@@ -3,7 +3,9 @@ package blackstone.states.items
 import Database
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import arctic
 import blackstone.states.Item
+import blackstone.states.StoredDataState
 import extensions.GameResources
 
 
@@ -24,6 +26,27 @@ val Item.totalInvestedEnchantmentPoints get() = enchantments?.sumOf { it.investe
 
 fun Item.recalculateEnchantmentPoints() {
     enchantments?.forEach { it.leveling(it.level) }
+}
+
+fun StoredDataState.addItem(newItem: Item, selected: Item? = null) {
+    items.add(6, newItem)
+    items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
+
+    if (selected == null) return
+
+    val slot = arctic.items.selectedSlot(selected)
+    if (slot < 0) return
+
+    val newSelectIndex = newItem.inventoryIndex ?: return
+
+    arctic.items.select(newSelectIndex, slot)
+}
+
+fun StoredDataState.deleteItem(targetItem: Item) {
+    arctic.items.unselect(targetItem)
+
+    items.remove(targetItem)
+    items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
 }
 
 fun VariantFilterIcon(with: String, selected: Boolean): ImageBitmap {

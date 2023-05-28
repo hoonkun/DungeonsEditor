@@ -10,6 +10,9 @@ val Enchantment.data get() = Database.current.findEnchantment(id) ?: throw Runti
 fun Enchantment(id: String, holder: Item, investedPoints: Int = 0, level: Int = 0, isNetheriteEnchant: Boolean = false) =
     Enchantment(id, investedPoints, level).apply { this.holder = holder; this.isNetheriteEnchant = isNetheriteEnchant }
 
+fun Enchantment(other: Enchantment) =
+    Enchantment(other).apply { this.holder = other.holder; this.isNetheriteEnchant = other.isNetheriteEnchant }
+
 fun Enchantment.changeInto(newId: String) {
     val prevId = id
     id = newId

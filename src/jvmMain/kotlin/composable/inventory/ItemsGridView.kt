@@ -89,7 +89,7 @@ fun InventoryItems(items: List<Item>) {
     var variantFilter by remember { mutableStateOf<String?>(null) }
     var rarityFilter by remember { mutableStateOf<String?>(null) }
 
-    val filteredItems by remember {
+    val filteredItems by remember(items) {
         derivedStateOf {
             items.filter {
                 val variantMatched = (variantFilter == null || (if (variantFilter == "Enchanted") it.totalInvestedEnchantmentPoints > 0 else it.data.variant == variantFilter))

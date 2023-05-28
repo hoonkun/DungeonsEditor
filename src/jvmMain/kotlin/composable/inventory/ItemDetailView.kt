@@ -1,6 +1,5 @@
 package composable.inventory
 
-import Database
 import Localizations
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -35,6 +34,7 @@ import blackstone.states.Item
 import blackstone.states.items.*
 import extensions.DungeonsPower
 import extensions.GameResources
+import stored
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -74,6 +74,10 @@ private fun ItemDetailView(item: Item) {
                     Spacer(modifier = Modifier.width(10.dp))
                     Modified(parentItem = item)
                 }
+                Spacer(modifier = Modifier.weight(1f))
+                AlterButton("복제") { stored.addItem(item.copy(), item) }
+                Spacer(modifier = Modifier.width(10.dp))
+                AlterButton("삭제") { stored.deleteItem(item) }
             }
 
             Row(modifier = Modifier.height(75.dp)) { ItemNameText(text = item.data.name ?: "알 수 없는 아이템") }
@@ -94,6 +98,27 @@ private fun ItemDetailView(item: Item) {
 
             if (enchantments != null) ItemEnchantmentsView(enchantments)
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun AlterButton(text: String, onClick: () -> Unit) {
+    Debugging.recomposition("Modified")
+
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+
+    Row(
+        modifier = Modifier
+            .height(38.dp)
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), onClick = onClick)
+            .hoverable(source)
+            .background(Color(0x15ffffff), shape = RoundedCornerShape(6.dp))
+            .drawBehind { drawInteractionBorder(hovered, false) }
+            .padding(vertical = 4.dp, horizontal = 10.dp)
+    ) {
+        Text(text = text, fontSize = 20.sp, color = Color.White)
     }
 }
 
