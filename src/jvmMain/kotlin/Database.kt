@@ -53,7 +53,7 @@ data class ItemData(
     val dataPath: String,
     val variant: String
 ) {
-    val unique get() = listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) }
+    val unique get() = variant != "Artifact" && listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) }
 
     val limited get() = listOf("_Spooky", "_Winter", "_Year").any { type.contains(it) }
 
