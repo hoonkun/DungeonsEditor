@@ -22,9 +22,13 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
+import blackstone.states.ArmorProperty
+import blackstone.states.Item
 import blackstone.states.common.common
 import blackstone.states.items.RarityColor
 import blackstone.states.items.RarityColorType
+import blackstone.states.items.addItem
 import composable.inventory.PowerEditField
 import composable.inventory.drawInteractionBorder
 import extensions.DungeonsPower
@@ -76,7 +80,21 @@ fun ItemDataDetail(itemData: ItemData) {
                 )
             }
         }
-        AddButton {  }
+        AddButton {
+            val newItem = Item(
+                inventoryIndex = 0,
+                power = power,
+                rarity = rarity,
+                type = itemData.type,
+                upgraded = false,
+                enchantments = if (itemData.variant != "Artifact") listOf() else null,
+                armorProperties = if (itemData.variant == "Armor") itemData.builtInProperties.map { ArmorProperty(id = it.id, rarity = "Common") } else null,
+                markedNew = true
+            )
+            stored.addItem(newItem)
+            arctic.itemCreation.enabled = false
+            arctic.itemCreation.target = null
+        }
     }
 
 }
