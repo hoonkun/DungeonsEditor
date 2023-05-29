@@ -4,6 +4,11 @@ import Debugging
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
@@ -12,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -21,6 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import arctic
 import blackstone.states.common.common
 import extensions.DungeonsLevel
 import extensions.GameResources
@@ -68,11 +75,62 @@ fun BottomBar() {
             smallIcon = true
         )
 
+        /*
         CurrencyField(
             icon = "/Game/UI/Materials/Currency/T_EyeOfEnder_Currency.png",
             value = "${stored.common.eyeOfEnder}",
             onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "EyeOfEnder" }?.count = it.toInt() }
         )
+        */
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        InventorySwitcher()
+
+    }
+}
+
+@Composable
+fun InventorySwitcher() {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .hoverable(source)
+            .clickable(source, null) { arctic.toggleView() }
+            .padding(vertical = 10.dp)
+            .drawBehind {
+                drawRoundRect(
+                    Color.White,
+                    alpha = if (pressed) 0.2f else if (hovered) 0.15f else 0f,
+                    cornerRadius = CornerRadius(6.dp.value, 6.dp.value)
+                )
+            }
+            .padding(start = 15.dp)
+    ) {
+
+        Box(modifier = Modifier.width(32.5.dp)) {
+            Image(
+                bitmap = GameResources.image { "/Game/UI/Materials/Character/left_arrow_carousel.png" },
+                contentDescription = null,
+                modifier = Modifier.width(20.dp).align(Alignment.CenterStart)
+            )
+            Image(
+                bitmap = GameResources.image { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
+                contentDescription = null,
+                modifier = Modifier.width(20.dp).align(Alignment.CenterEnd)
+            )
+        }
+
+        Image(
+            bitmap = GameResources.image { "/Game/UI/Materials/Chests/chest_locked.png" },
+            contentDescription = null,
+            modifier = Modifier.fillMaxHeight().padding(vertical = 10.dp, horizontal = 5.dp)
+        )
+
     }
 }
 

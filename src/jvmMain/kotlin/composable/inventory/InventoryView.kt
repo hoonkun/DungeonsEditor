@@ -18,6 +18,22 @@ import blackstone.states.items.equippedItems
 import stored
 
 @Composable
+fun RowScope.StorageView() {
+    Debugging.recomposition("StorageView")
+
+    val inventory by remember { derivedStateOf { stored.storageChestItems } }
+    val selected by remember { derivedStateOf { arctic.items.selected } }
+
+    LeftArea { InventoryItems(inventory) }
+    RightArea {
+        AnimatorBySelectedItemExists(selected.all { it == null }) {
+            if (it) NoItemsSelectedView()
+            else ItemComparatorView(selected)
+        }
+    }
+}
+
+@Composable
 fun RowScope.InventoryView() {
     Debugging.recomposition("InventoryView")
 

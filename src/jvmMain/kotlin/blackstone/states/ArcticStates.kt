@@ -2,11 +2,14 @@ package blackstone.states
 
 import ItemData
 import androidx.compose.runtime.*
+import arctic
 import blackstone.states.items.*
 import stored
 
 @Stable
 class ArcticStates(stored: StoredDataState) {
+
+    var view by mutableStateOf("inventory")
 
     val items = ItemsState(stored)
 
@@ -17,6 +20,11 @@ class ArcticStates(stored: StoredDataState) {
     val armorProperties = ArmorPropertiesState()
 
     val popups = PopupsState()
+
+    fun toggleView() {
+        view = if (view == "storage") "inventory" else "storage"
+        items.clearSelection()
+    }
 
 }
 
@@ -77,9 +85,14 @@ class ItemsState(private val stored: StoredDataState) {
     private val selectedIndexes = mutableStateListOf<Int?>(null, null)
     val selected by derivedStateOf {
         selectedIndexes.map {
-            if (it == null) null
-            else if (it < 0) negativeIndexItemsFactory[it + 6]()
-            else stored.items.find { item -> item.inventoryIndex == it }
+            if (it == null) return@map null
+
+            return@map if (arctic.view == "inventory") {
+                if (it < 0) negativeIndexItemsFactory[it + 6]()
+                else stored.items.find { item -> item.inventoryIndex == it }
+            } else {
+                stored.storageChestItems.find { item -> item.inventoryIndex == it }
+            }
         }
     }
 
@@ -102,6 +115,12 @@ class ItemsState(private val stored: StoredDataState) {
         if (index < 0) return
 
         selectedIndexes[index] = null
+    }
+
+    fun clearSelection() {
+        selectedIndexes.clear()
+        selectedIndexes.add(null)
+        selectedIndexes.add(null)
     }
 
 }
