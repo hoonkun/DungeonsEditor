@@ -34,7 +34,8 @@ fun App() {
         arctic.enchantments.hasDetailTarget ||
         arctic.armorProperties.hasDetailTarget ||
         arctic.armorProperties.hasCreateInto ||
-        arctic.item.enabled != null
+        arctic.item.enabled != null ||
+        arctic.popups.inventoryFull
     val moreBlur = arctic.item.target != null
 
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))

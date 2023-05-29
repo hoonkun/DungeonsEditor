@@ -82,7 +82,7 @@ private fun ItemDetailView(item: Item) {
                 Spacer(modifier = Modifier.weight(1f))
                 AlterButton("타입 변경") { arctic.item.enable("edition", item) }
                 Spacer(modifier = Modifier.width(7.dp))
-                AlterButton("복제") { stored.addItem(item.copy(), item) }
+                AlterButton("복제") { if (!arctic.popups.checkInventoryFull()) stored.addItem(item.copy(), item) }
                 Spacer(modifier = Modifier.width(7.dp))
                 AlterButton("삭제") { stored.deleteItem(item) }
             }

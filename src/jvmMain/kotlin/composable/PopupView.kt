@@ -33,10 +33,50 @@ import composable.blackstone.popup.*
 fun BoxScope.Popups() {
     Debugging.recomposition("Popups")
 
+    InventoryFullPopup()
+    SavedPopup()
+
     EnchantmentPopup()
     ArmorPropertyPopup()
 
     ItemCreationPopup()
+}
+
+@Composable
+fun InventoryFullPopup() {
+    val _enabled: Boolean = arctic.popups.inventoryFull
+
+    Backdrop(_enabled) { arctic.popups.inventoryFull = false }
+
+    AnimatedVisibility(
+        visible = _enabled,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "인벤토리가 가득 차서 더 이상 추가할 수 없어요. 먼저 아이템을 삭제하거나 창고로 옮겨보세요!",
+                color = Color.White,
+                fontSize = 32.sp
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "닫으려면 아무 곳이나 누르세요",
+                color = Color.White.copy(alpha = 0.4f),
+                fontSize = 24.sp
+            )
+        }
+    }
+
+}
+
+@Composable
+fun SavedPopup() {
+
 }
 
 @OptIn(ExperimentalAnimationApi::class)

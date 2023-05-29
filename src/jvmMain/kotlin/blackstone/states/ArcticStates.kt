@@ -3,6 +3,7 @@ package blackstone.states
 import ItemData
 import androidx.compose.runtime.*
 import blackstone.states.items.*
+import stored
 
 @Stable
 class ArcticStates(stored: StoredDataState) {
@@ -14,6 +15,23 @@ class ArcticStates(stored: StoredDataState) {
     val enchantments = EnchantmentsState()
 
     val armorProperties = ArmorPropertiesState()
+
+    val popups = PopupsState()
+
+}
+
+@Stable
+class PopupsState {
+
+    var inventoryFull by mutableStateOf(false)
+
+    fun checkInventoryFull(): Boolean {
+        if (stored.items.size >= 300) {
+            inventoryFull = true
+            return true
+        }
+        return false
+    }
 
 }
 
