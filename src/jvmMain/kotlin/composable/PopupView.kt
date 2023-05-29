@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
@@ -90,23 +89,23 @@ fun InventoryFullPopup() {
 @Composable
 fun DeletionPopup() {
 
-    val target: Item? = arctic.deletion.target
+    val _target: Item? = arctic.deletion.target
 
-    Backdrop(target != null) { arctic.deletion.target = null }
+    Backdrop(_target != null) { arctic.deletion.target = null }
 
     AnimatedContent(
-        targetState = target,
+        targetState = _target to _target?.where(),
         transitionSpec = {
             val enter = fadeIn() + scaleIn(initialScale = 1.1f)
             val exit = fadeOut() + scaleOut(targetScale = 1.1f)
             enter with exit
         },
         modifier = Modifier.fillMaxSize()
-    ) {
-        if (it != null) {
+    ) { (target, where) ->
+        if (target != null) {
             val message =
-                if (it.where() == arctic.view) "정말 이 아이템을 삭제하시겠어요?"
-                else "${if (it.where() == "inventory") "인벤토리" else "창고"}에 있는 아이템이에요. 정말 이 아이템을 삭제하시겠어요?"
+                if (where == arctic.view) "정말 이 아이템을 삭제하시겠어요?"
+                else "${if (where == "inventory") "인벤토리" else "창고"}에 있는 아이템이에요. 정말 이 아이템을 삭제하시겠어요?"
 
             val description = "게임 내에서 분해하면 에메랄드 보상을 받을 수 있지만, 여기서는 받을 수 없어요."
 
@@ -130,7 +129,7 @@ fun DeletionPopup() {
                 Row {
                     RetroButton("취소", Color(0xffffffff), "overlay") { arctic.deletion.target = null }
                     Spacer(modifier = Modifier.width(150.dp))
-                    RetroButton("삭제", Color(0xffff6e25), "outline") { stored.deleteItem(it); arctic.deletion.target = null }
+                    RetroButton("삭제", Color(0xffff6e25), "outline") { stored.deleteItem(target); arctic.deletion.target = null }
                 }
             }
         } else {
