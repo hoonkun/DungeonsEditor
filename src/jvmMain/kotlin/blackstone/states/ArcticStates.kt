@@ -17,6 +17,8 @@ class ArcticStates {
 
     val edition = EditionState()
 
+    val deletion = DeletionState()
+
     val enchantments = EnchantmentsState()
 
     val armorProperties = ArmorPropertiesState()
@@ -26,6 +28,13 @@ class ArcticStates {
     fun toggleView() {
         view = if (view == "storage") "inventory" else "storage"
     }
+
+}
+
+@Stable
+class DeletionState {
+
+    var target: Item? by mutableStateOf(null)
 
 }
 

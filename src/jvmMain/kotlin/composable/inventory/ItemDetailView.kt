@@ -84,7 +84,7 @@ private fun ItemDetailView(item: Item) {
                 Spacer(modifier = Modifier.width(7.dp))
                 AlterButton("복제") { if (!arctic.popups.checkInventoryFull()) stored.addItem(item.copy(), item) }
                 Spacer(modifier = Modifier.width(7.dp))
-                AlterButton("삭제") { stored.deleteItem(item) }
+                AlterButton("삭제") { arctic.deletion.target = item }
             }
 
             Row(modifier = Modifier.height(75.dp)) { ItemNameText(text = item.data.name ?: "알 수 없는 아이템") }

@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -15,7 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -27,7 +33,10 @@ import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
 import blackstone.states.items.data
+import blackstone.states.items.deleteItem
+import blackstone.states.items.where
 import composable.blackstone.popup.*
+import stored
 
 @Composable
 fun BoxScope.Popups() {
@@ -41,6 +50,8 @@ fun BoxScope.Popups() {
 
     ItemCreationPopup()
     ItemEditionPopup()
+
+    DeletionPopup()
 }
 
 @Composable
@@ -73,6 +84,123 @@ fun InventoryFullPopup() {
         }
     }
 
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun DeletionPopup() {
+
+    val target: Item? = arctic.deletion.target
+
+    Backdrop(target != null) { arctic.deletion.target = null }
+
+    AnimatedContent(
+        targetState = target,
+        transitionSpec = {
+            val enter = fadeIn() + scaleIn(initialScale = 1.1f)
+            val exit = fadeOut() + scaleOut(targetScale = 1.1f)
+            enter with exit
+        },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (it != null) {
+            val message =
+                if (it.where() == arctic.view) "정말 이 아이템을 삭제하시겠어요?"
+                else "${if (it.where() == "inventory") "인벤토리" else "창고"}에 있는 아이템이에요. 정말 이 아이템을 삭제하시겠어요?"
+
+            val description = "게임 내에서 분해하면 에메랄드 보상을 받을 수 있지만, 여기서는 받을 수 없어요."
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = message,
+                    color = Color.White,
+                    fontSize = 32.sp
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = description,
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 24.sp
+                )
+                Spacer(modifier = Modifier.height(80.dp))
+                Row {
+                    RetroButton("취소", Color(0xffffffff), "overlay") { arctic.deletion.target = null }
+                    Spacer(modifier = Modifier.width(150.dp))
+                    RetroButton("삭제", Color(0xffff6e25), "outline") { stored.deleteItem(it); arctic.deletion.target = null }
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize())
+        }
+    }
+
+}
+
+@Composable
+fun RetroButton(text: String, color: Color, hoverInteraction: String, onClick: () -> Unit) {
+
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+
+    val radius = 8.dp.value
+    val stroke = 5.dp.value
+
+    val drawMain: DrawScope.() -> Unit = {
+        drawRect(color, topLeft = Offset(stroke, stroke + radius), size = Size(size.width - 2 * stroke, size.height - 2 * (stroke + radius)))
+        drawRect(color, topLeft = Offset(stroke + radius, stroke), size = Size(size.width - 2 * (stroke + radius), size.height - 2 * stroke))
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(200.dp, 70.dp)
+            .hoverable(source)
+            .clickable(source, null, onClick = onClick)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(if (hoverInteraction == "overlay") 0.2f else 1f)
+                .drawBehind {
+                    if (!hovered) return@drawBehind
+
+                    if (hoverInteraction == "outline") {
+                        drawRect(Color.White, topLeft = Offset(radius, 0f), size = Size(size.width - 2 * radius, size.height))
+                        drawRect(Color.White, topLeft = Offset(0f, radius), size = Size(size.width, size.height - 2 * radius))
+                    }
+
+                    if (hoverInteraction == "overlay") {
+                        drawMain()
+                    }
+                }
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .drawBehind {
+                    if (hoverInteraction == "overlay") return@drawBehind
+
+                    drawMain()
+                }
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.25f)
+                .drawBehind {
+                    if (!pressed) return@drawBehind
+
+                    drawRect(Color.Black, topLeft = Offset(radius, 0f), size = Size(size.width - 2 * radius, size.height))
+                    drawRect(Color.Black, topLeft = Offset(0f, radius), size = Size(size.width, size.height - 2 * radius))
+                }
+        )
+        Text(text = text, fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold)
+    }
 }
 
 @Composable
