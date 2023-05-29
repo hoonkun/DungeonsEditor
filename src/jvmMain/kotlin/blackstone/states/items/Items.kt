@@ -7,6 +7,7 @@ import arctic
 import blackstone.states.Item
 import blackstone.states.StoredDataState
 import extensions.GameResources
+import stored
 
 
 val equippedMelee: (Item) -> Boolean = { it.equipmentSlot == "MeleeGear" }
@@ -28,6 +29,8 @@ fun Item.recalculateEnchantmentPoints() {
     enchantments?.forEach { it.leveling(it.level) }
 }
 
+fun Item.where() = if (stored.items.contains(this)) "inventory" else if (stored.storageChestItems.contains(this)) "storage" else null
+
 val StoredDataState.equippedItems get() = listOf(
     items.find(equippedMelee),
     items.find(equippedArmor),
@@ -37,8 +40,9 @@ val StoredDataState.equippedItems get() = listOf(
     items.find(equippedArtifact3)
 )
 
-fun StoredDataState.addItem(newItem: Item, selected: Item? = null) {
-    if (arctic.view == "inventory") {
+fun StoredDataState.addItem(newItem: Item, source: Item? = null) {
+    val where = source?.where() ?: arctic.view
+    if (where == "inventory") {
         items.add(6, newItem)
         items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
     } else {
@@ -46,25 +50,25 @@ fun StoredDataState.addItem(newItem: Item, selected: Item? = null) {
         storageChestItems.forEachIndexed { index, item -> item.inventoryIndex = index }
     }
 
-    if (selected == null) return
-
-    val slot = arctic.items.selectedSlot(selected)
-    if (slot < 0) return
-
-    val newSelectIndex = newItem.inventoryIndex ?: return
-
-    arctic.items.select(newSelectIndex, slot)
+    if (source != null) {
+        arctic.items.replaceSelection(source, newItem)
+    } else {
+        arctic.items.clearSelection()
+        arctic.items.select(newItem, 0)
+    }
 }
 
 fun StoredDataState.deleteItem(targetItem: Item) {
     arctic.items.unselect(targetItem)
 
-    if (arctic.view == "inventory") {
+    if (targetItem.where() == "inventory") {
         items.remove(targetItem)
         items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
-    } else {
+    } else if (targetItem.where() == "storage") {
         storageChestItems.remove(targetItem)
         storageChestItems.forEachIndexed { index, item -> item.inventoryIndex = index }
+    } else {
+        // This item does not exist in any available spaces.
     }
 }
 

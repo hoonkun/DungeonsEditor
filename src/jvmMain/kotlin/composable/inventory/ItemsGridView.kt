@@ -213,14 +213,14 @@ fun <T>ItemsGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGrid
 
 @Composable
 fun <T> ItemView(item: T, simplified: Boolean = false, index: Int) where T: Item? =
-    ItemViewInteractable(index, item != null) {
+    ItemViewInteractable(item, item != null) {
         if (item == null) DummyItemIcon()
         else ItemIcon(item, simplified)
     }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ItemViewInteractable(index: Int, enabled: Boolean = true, content: @Composable BoxScope.() -> Unit) {
+fun ItemViewInteractable(item: Item?, enabled: Boolean = true, content: @Composable BoxScope.() -> Unit) {
     Debugging.recomposition("ItemViewInteractable")
 
     val source = remember { MutableInteractionSource() }
@@ -231,11 +231,11 @@ fun ItemViewInteractable(index: Int, enabled: Boolean = true, content: @Composab
             .aspectRatio(1f / 1f)
             .padding(5.dp)
             .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled) { arctic.items.select(index, 0) }
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), enabled = enabled) { arctic.items.select(index, 1) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled) { if (item != null) arctic.items.select(item, 0) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), enabled = enabled) { if (item != null) arctic.items.select(item, 1) }
             .drawBehind {
                 val brush =
-                    if (arctic.items.selected(index))
+                    if (arctic.items.selected(item))
                         Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                     else if (hovered)
                         Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))

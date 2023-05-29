@@ -4,6 +4,7 @@ import ItemData
 import androidx.compose.runtime.*
 import arctic
 import blackstone.states.items.*
+import extensions.replace
 import stored
 
 @Stable
@@ -23,7 +24,6 @@ class ArcticStates(stored: StoredDataState) {
 
     fun toggleView() {
         view = if (view == "storage") "inventory" else "storage"
-        items.clearSelection()
     }
 
 }
@@ -82,45 +82,30 @@ class ItemsState(private val stored: StoredDataState) {
         { stored.items.find(equippedMelee) }
     )
 
-    private val selectedIndexes = mutableStateListOf<Int?>(null, null)
-    val selected by derivedStateOf {
-        selectedIndexes.map {
-            if (it == null) return@map null
+    val selected = mutableStateListOf<Item?>(null, null)
 
-            return@map if (arctic.view == "inventory") {
-                if (it < 0) negativeIndexItemsFactory[it + 6]()
-                else stored.items.find { item -> item.inventoryIndex == it }
-            } else {
-                stored.storageChestItems.find { item -> item.inventoryIndex == it }
-            }
-        }
-    }
-
-    fun selected(index: Int) = selectedIndexes.contains(index)
-
-    fun selected(item: Item?) = selected.contains(item)
+    fun selected(item: Item?) = if (item != null) selected.contains(item) else false
 
     fun selectedSlot(item: Item) = selected.indexOf(item)
 
-    fun select(index: Int, slot: Int) {
-        val existingIndex = selectedIndexes.indexOf(index)
-        val existingItem = if (existingIndex >= 0) selected[existingIndex] else null
+    fun select(item: Item, slot: Int) {
+        if (selected.contains(item))
+            unselect(item)
+        else
+            selected[slot] = item
+    }
 
-        if (existingIndex >= 0 && existingItem != null) unselect(existingItem)
-        else selectedIndexes[slot] = if (selectedIndexes[slot] == index) null else index
+    fun replaceSelection(from: Item, new: Item?) {
+        selected.replace(from, new)
     }
 
     fun unselect(item: Item) {
-        val index = selected.indexOf(item)
-        if (index < 0) return
-
-        selectedIndexes[index] = null
+        selected.replace(item, null)
     }
 
     fun clearSelection() {
-        selectedIndexes.clear()
-        selectedIndexes.add(null)
-        selectedIndexes.add(null)
+        selected[0] = null
+        selected[1] = null
     }
 
 }
