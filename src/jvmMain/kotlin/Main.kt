@@ -5,13 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.input.key.*
+import blackstone.states.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.window.*
 import blackstone.states.ArcticStates
 import blackstone.states.StoredDataState
 import composable.BottomBar
@@ -91,8 +93,11 @@ fun BottomBarContainer(content: @Composable BoxScope.() -> Unit) =
     )
 
 fun main() = application {
-    val windowState = rememberWindowState(size = DpSize(1800.dp, 1400.dp))
-    Window(onCloseRequest = ::exitApplication, state = windowState, resizable = false) {
+    Window(
+        onCloseRequest = ::exitApplication,
+        state = rememberWindowState(size = DpSize(1800.dp, 1400.dp), position = WindowPosition(Alignment.Center)),
+        resizable = false
+    ) {
         App()
     }
     if (arctic.dialogs.fileSaveDstSelector) {

@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import blackstone.states.dp
+import blackstone.states.sp
 import blackstone.states.Enchantment
 import blackstone.states.items.data
 import blackstone.states.items.leveling

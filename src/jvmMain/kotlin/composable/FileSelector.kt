@@ -27,8 +27,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import blackstone.states.dp
+import blackstone.states.sp
 import java.io.File
 
 

@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import blackstone.states.dp
+import blackstone.states.sp
 import arctic
 import extensions.DungeonsPower
 import extensions.GameResources
@@ -80,7 +80,7 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
             .padding(15.dp)
             .rotate(rotation)
             .drawBehind {
-                drawImage(image, alpha = if (collapsed) 1.0f else if (hovered) 0.5f else 0.3f, dstSize = IntSize((image.width * 0.75f).toInt(), (image.height * 0.75f).toInt()))
+                drawImage(image, alpha = if (collapsed) 1.0f else if (hovered) 0.5f else 0.3f, dstSize = IntSize((image.width * 0.75f * 1.dp.value).toInt(), (image.height * 0.75f * 1.dp.value).toInt()))
             }
     )
 }
@@ -152,8 +152,8 @@ fun ItemAddButton() {
             .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { if(!arctic.popups.checkInventoryFull()) arctic.creation.enable() }
             .padding(10.dp)
             .drawBehind {
-                drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(size.width / 2 - 2f, 8f), size = Size(4f, size.height - 16f))
-                drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(8f, size.height / 2 - 2f), size = Size(size.width - 16f, 4f))
+                drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(size.width / 2 - 2.dp.value, 8.dp.value), size = Size(4.dp.value, size.height - 16.dp.value))
+                drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(8.dp.value, size.height / 2 - 2.dp.value), size = Size(size.width - 16.dp.value, 4.dp.value))
             }
     )
 }

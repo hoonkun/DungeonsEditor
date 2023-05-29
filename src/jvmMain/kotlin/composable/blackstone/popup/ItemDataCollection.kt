@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import blackstone.states.dp
+import blackstone.states.sp
 import blackstone.states.items.RarityColor
 import blackstone.states.items.RarityColorType
 import extensions.padEnd
