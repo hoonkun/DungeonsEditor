@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -195,7 +196,15 @@ fun DeletionPopup() {
 }
 
 @Composable
-fun RetroButton(text: String, color: Color, hoverInteraction: String, onClick: () -> Unit) {
+fun RetroButton(
+    text: String,
+    color: Color,
+    hoverInteraction: String,
+    disabledColor: Color = Color(0xff666666),
+    enabled: Boolean = true,
+    buttonSize: Pair<Dp, Dp> = 225.dp to 70.dp,
+    onClick: () -> Unit
+) {
 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
@@ -205,16 +214,16 @@ fun RetroButton(text: String, color: Color, hoverInteraction: String, onClick: (
     val stroke = 5.dp.value
 
     val drawMain: DrawScope.() -> Unit = {
-        drawRect(color, topLeft = Offset(stroke, stroke + radius), size = Size(size.width - 2 * stroke, size.height - 2 * (stroke + radius)))
-        drawRect(color, topLeft = Offset(stroke + radius, stroke), size = Size(size.width - 2 * (stroke + radius), size.height - 2 * stroke))
+        drawRect(if (enabled) color else disabledColor, topLeft = Offset(stroke, stroke + radius), size = Size(size.width - 2 * stroke, size.height - 2 * (stroke + radius)))
+        drawRect(if (enabled) color else disabledColor, topLeft = Offset(stroke + radius, stroke), size = Size(size.width - 2 * (stroke + radius), size.height - 2 * stroke))
     }
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(225.dp, 70.dp)
-            .hoverable(source)
-            .clickable(source, null, onClick = onClick)
+            .size(buttonSize.first, buttonSize.second)
+            .hoverable(source, enabled)
+            .clickable(source, null, enabled, onClick = onClick)
     ) {
         Box(
             modifier = Modifier

@@ -6,7 +6,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import blackstone.states.items.ArmorProperty
 import blackstone.states.items.Enchantment
 import extensions.*
+import io.StoredFile.Companion.saveIntoStoredFile
 import org.json.JSONObject
+import java.io.File
 
 @Target(AnnotationTarget.PROPERTY)
 annotation class CanBeUndefined
@@ -219,6 +221,10 @@ class StoredDataState(private val from: JSONObject) {
             replace(FIELD_CURRENCIES, currencies.map { it.export() })
             replace(FIELD_XP, xp)
         }
+
+    fun save(file: File) {
+        export().saveIntoStoredFile(file)
+    }
 
 }
 

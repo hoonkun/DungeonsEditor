@@ -27,10 +27,17 @@ class ArcticStates {
 
     val popups = PopupsState()
 
+    val dialogs = DialogsState()
+
     fun toggleView() {
         view = if (view == "storage") "inventory" else "storage"
     }
 
+}
+
+@Stable
+class DialogsState {
+    var fileSaveDstSelector by mutableStateOf(false)
 }
 
 @Stable

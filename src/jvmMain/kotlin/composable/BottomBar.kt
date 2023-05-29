@@ -90,7 +90,27 @@ fun BottomBar() {
 
         InventorySwitcher()
 
+        Spacer(modifier = Modifier.width(20.dp))
+
+        SaveButton()
+
     }
+}
+
+@Composable
+fun SaveButton() {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    Image(
+        bitmap = GameResources.image { "/Game/UI/Materials/Chests/unlocked_checkmark.png" },
+        contentDescription = null,
+        modifier = Modifier
+            .size(60.dp)
+            .hoverable(source)
+            .clickable(source, null) { arctic.dialogs.fileSaveDstSelector = true }
+            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value)) }
+            .padding(10.dp)
+    )
 }
 
 @Composable

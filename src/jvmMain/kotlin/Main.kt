@@ -16,6 +16,7 @@ import blackstone.states.ArcticStates
 import blackstone.states.StoredDataState
 import composable.BottomBar
 import composable.Popups
+import composable.Selector
 import composable.inventory.InventoryView
 import io.StoredFile.Companion.readAsStoredFile
 import java.io.File
@@ -92,5 +93,13 @@ fun main() = application {
     val windowState = rememberWindowState(size = DpSize(1800.dp, 1400.dp))
     Window(onCloseRequest = ::exitApplication, state = windowState, resizable = false) {
         App()
+    }
+    if (arctic.dialogs.fileSaveDstSelector) {
+        Window(onCloseRequest = { arctic.dialogs.fileSaveDstSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
+            Selector(
+                validator = { !it.isDirectory },
+                onSelect = { stored.save(it) }
+            )
+        }
     }
 }
