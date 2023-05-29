@@ -1,3 +1,4 @@
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -5,14 +6,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.*
 import blackstone.states.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.*
 import blackstone.states.ArcticStates
 import blackstone.states.StoredDataState
@@ -23,7 +23,6 @@ import composable.inventory.InventoryView
 import io.StoredFile.Companion.readAsStoredFile
 import java.io.File
 
-val stored = StoredDataState(File(Constants.SaveDataFilePath).readAsStoredFile().root)
 val arctic = ArcticStates()
 
 @Composable
@@ -37,7 +36,7 @@ fun App() {
         arctic.armorProperties.hasDetailTarget ||
         arctic.armorProperties.hasCreateInto ||
         arctic.creation.enabled ||
-        arctic.popups.inventoryFull ||
+        arctic.alerts.inventoryFull ||
         arctic.edition.target != null ||
         arctic.deletion.target != null ||
         arctic.duplication.target != null
@@ -50,7 +49,7 @@ fun App() {
             ContentContainer {
                 InventoryView()
             }
-            BottomBarContainer { BottomBar() }
+            BottomBarContainer { stored -> BottomBar(stored) }
         }
         Popups()
     }
@@ -81,15 +80,27 @@ fun ColumnScope.ContentContainer(content: @Composable RowScope.() -> Unit) =
         content = content
     )
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BottomBarContainer(content: @Composable BoxScope.() -> Unit) =
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredHeight(85.dp)
-            .background(Color(0xff191919)),
-        content = content
+fun BottomBarContainer(content: @Composable BoxScope.(StoredDataState) -> Unit) =
+    AnimatedContent(
+        targetState = arctic.stored,
+        transitionSpec = {
+            val enter = fadeIn(tween(250)) + slideIn(tween(250), initialOffset = { IntOffset(20.dp.value.toInt(), 0) })
+            val exit = fadeOut(tween(250)) + slideOut(tween(250), targetOffset = { IntOffset(20.dp.value.toInt(), 0) })
+            enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
+        },
+        modifier = Modifier.fillMaxSize().height(85.dp),
+        content = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(85.dp)
+                    .background(Color(0xff191919)),
+                content = { if (it != null) content(it) }
+            )
+        }
     )
 
 fun main() = application {
@@ -104,7 +115,7 @@ fun main() = application {
         Window(onCloseRequest = { arctic.dialogs.fileSaveDstSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
             Selector(
                 validator = { !it.isDirectory },
-                onSelect = { stored.save(it); arctic.dialogs.fileSaveDstSelector = false }
+                onSelect = { arctic.requireStored.save(it); arctic.dialogs.fileSaveDstSelector = false }
             )
         }
     }

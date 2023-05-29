@@ -2,12 +2,13 @@ package blackstone.states
 
 import ItemData
 import androidx.compose.runtime.*
-import blackstone.states.items.*
 import extensions.replace
-import stored
 
 @Stable
 class ArcticStates {
+
+    var stored: StoredDataState? by mutableStateOf(null)
+    val requireStored: StoredDataState get() = stored!!
 
     var view by mutableStateOf("inventory")
 
@@ -25,7 +26,7 @@ class ArcticStates {
 
     val armorProperties = ArmorPropertiesState()
 
-    val popups = PopupsState()
+    val alerts = PopupsState(this)
 
     val dialogs = DialogsState()
 
@@ -55,12 +56,12 @@ class DuplicationState {
 }
 
 @Stable
-class PopupsState {
+class PopupsState(private val parent: ArcticStates) {
 
     var inventoryFull by mutableStateOf(false)
 
-    fun checkInventoryFull(): Boolean {
-        if (stored.items.size >= 300) {
+    fun checkAvailable(): Boolean {
+        if (parent.requireStored.items.size >= 300) {
             inventoryFull = true
             return true
         }

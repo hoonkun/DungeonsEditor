@@ -25,22 +25,19 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import blackstone.states.dp
-import blackstone.states.sp
 import arctic
-import blackstone.states.ArmorProperty
-import blackstone.states.Enchantment
-import blackstone.states.Item
+import blackstone.states.*
 import blackstone.states.items.addItem
 import blackstone.states.items.data
 import blackstone.states.items.deleteItem
 import blackstone.states.items.where
 import composable.blackstone.popup.*
-import stored
 
 @Composable
 fun BoxScope.Popups() {
     Debugging.recomposition("Popups")
+
+    val stored = arctic.stored
 
     InventoryFullPopup()
     SavedPopup()
@@ -91,9 +88,9 @@ fun SaveInProgressPopup() {
 
 @Composable
 fun InventoryFullPopup() {
-    val _enabled: Boolean = arctic.popups.inventoryFull
+    val _enabled: Boolean = arctic.alerts.inventoryFull
 
-    Backdrop(_enabled) { arctic.popups.inventoryFull = false }
+    Backdrop(_enabled) { arctic.alerts.inventoryFull = false }
 
     AnimatedVisibility(
         visible = _enabled,
@@ -160,11 +157,11 @@ fun DuplicatePopup() {
                 )
                 Spacer(modifier = Modifier.height(80.dp))
                 Row {
-                    RetroButton("원래 위치에 복제", Color(0xff3f8e4f), "outline") { stored.addItem(target.copy(), target); arctic.duplication.target = null }
+                    RetroButton("원래 위치에 복제", Color(0xff3f8e4f), "outline") { target.parent.addItem(target.copy(), target); arctic.duplication.target = null }
                     Spacer(modifier = Modifier.width(75.dp))
                     RetroButton("취소", Color(0xffffffff), "overlay") { arctic.duplication.target = null }
                     Spacer(modifier = Modifier.width(75.dp))
-                    RetroButton("여기에 복제", Color(0xff3f8e4f), "outline") { stored.addItem(target.copy()); arctic.duplication.target = null }
+                    RetroButton("여기에 복제", Color(0xff3f8e4f), "outline") { target.parent.addItem(target.copy()); arctic.duplication.target = null }
                 }
             }
         } else {
@@ -218,7 +215,7 @@ fun DeletionPopup() {
                 Row {
                     RetroButton("취소", Color(0xffffffff), "overlay") { arctic.deletion.target = null }
                     Spacer(modifier = Modifier.width(150.dp))
-                    RetroButton("삭제", Color(0xffff6e25), "outline") { stored.deleteItem(target); arctic.deletion.target = null }
+                    RetroButton("삭제", Color(0xffff6e25), "outline") { target.parent.deleteItem(target); arctic.deletion.target = null }
                 }
             }
         } else {

@@ -28,14 +28,14 @@ import androidx.compose.ui.text.font.FontWeight
 import blackstone.states.dp
 import blackstone.states.sp
 import arctic
-import blackstone.states.common.common
+import blackstone.states.StoredDataState
 import extensions.DungeonsLevel
+import extensions.DungeonsPower
 import extensions.GameResources
 import extensions.toFixed
-import stored
 
 @Composable
-fun BottomBar() {
+fun BottomBar(stored: StoredDataState) {
     Debugging.recomposition("BottomBar")
 
     Row(
@@ -54,18 +54,18 @@ fun BottomBar() {
 
         CurrencyText(
             icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
-            value = "${stored.common.power}"
+            value = "${DungeonsPower.playerPower(stored)}"
         )
 
         CurrencyField(
             icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
-            value = "${stored.common.emeralds}",
+            value = "${stored.currencies.find { it.type == "Emerald" }?.count ?: 0}",
             onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Emerald" }?.count = it.toInt() }
         )
 
         CurrencyField(
             icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
-            value = "${stored.common.golds}",
+            value = "${stored.currencies.find { it.type == "Gold" }?.count ?: 0}",
             onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Gold" }?.count = it.toInt() }
         )
 

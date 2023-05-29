@@ -35,7 +35,6 @@ import blackstone.states.items.*
 import extensions.DungeonsPower
 import extensions.GameResources
 import extensions.toFixed
-import stored
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -84,8 +83,8 @@ private fun ItemDetailView(item: Item) {
                 Spacer(modifier = Modifier.width(7.dp))
                 AlterButton("복제") {
                     if (item.where() == arctic.view) {
-                        if (!arctic.popups.checkInventoryFull())
-                            stored.addItem(item.copy(), item)
+                        if (!arctic.alerts.checkAvailable())
+                            item.parent.addItem(item.copy(), item)
                     } else {
                         arctic.duplication.target = item
                     }

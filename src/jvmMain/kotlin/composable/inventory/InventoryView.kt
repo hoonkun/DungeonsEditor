@@ -17,41 +17,39 @@ import arctic
 import blackstone.states.items.unequipped
 import blackstone.states.Item
 import blackstone.states.items.equippedItems
-import stored
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RowScope.InventoryView() {
     Debugging.recomposition("InventoryView")
 
-    val equipped by remember { derivedStateOf { stored.equippedItems } }
-    val selected by remember { derivedStateOf { arctic.selection.selected } }
-
     AnimatedContent(
-        targetState = arctic.view,
+        targetState = arctic.stored to arctic.view,
         transitionSpec = {
             val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(50, 0) })
             val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(-50, 0) })
             enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
         },
         modifier = Modifier.fillMaxWidth().weight(0.4778181f)
-    ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            if (it == "inventory") {
-                LeftArea {
-                    EquippedItems(equipped)
-                    Divider()
-                    InventoryItems(stored.items.filter(unequipped))
+    ) { (stored, view) ->
+        if (stored != null) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                if (view == "inventory") {
+                    LeftArea {
+                        EquippedItems(stored.equippedItems)
+                        Divider()
+                        InventoryItems(stored.items.filter(unequipped))
+                    }
+                } else if (view == "storage") {
+                    LeftArea { InventoryItems(stored.storageChestItems) }
                 }
-            } else {
-                LeftArea { InventoryItems(stored.storageChestItems) }
             }
         }
     }
     RightArea {
-        AnimatorBySelectedItemExists(selected.all { it == null }) {
-            if (it) NoItemsSelectedView()
-            else ItemComparatorView(selected)
+        AnimatorBySelectedItemExists(arctic.selection.selected) {
+            if (it.any { item -> item != null }) ItemComparatorView(it)
+            else NoItemsSelectedView()
         }
     }
 }
@@ -72,7 +70,7 @@ private fun RowScope.RightArea(content: @Composable ColumnScope.() -> Unit) =
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun AnimatorBySelectedItemExists(targetState: Boolean, content: @Composable AnimatedVisibilityScope.(Boolean) -> Unit) =
+private fun <S> AnimatorBySelectedItemExists(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {

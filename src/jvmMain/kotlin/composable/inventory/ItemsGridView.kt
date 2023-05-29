@@ -149,7 +149,7 @@ fun ItemAddButton() {
         modifier = Modifier
             .size(60.dp)
             .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { if(!arctic.popups.checkInventoryFull()) arctic.creation.enable() }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { if(!arctic.alerts.checkAvailable()) arctic.creation.enable() }
             .padding(10.dp)
             .drawBehind {
                 drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(size.width / 2 - 2.dp.value, 8.dp.value), size = Size(4.dp.value, size.height - 16.dp.value))

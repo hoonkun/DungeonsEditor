@@ -20,12 +20,8 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
-import blackstone.states.dp
-import blackstone.states.sp
 import arctic
-import blackstone.states.ArmorProperty
-import blackstone.states.Item
-import blackstone.states.common.common
+import blackstone.states.*
 import blackstone.states.items.RarityColor
 import blackstone.states.items.RarityColorType
 import blackstone.states.items.addItem
@@ -34,14 +30,13 @@ import composable.inventory.drawInteractionBorder
 import extensions.DungeonsPower
 import extensions.GameResources
 import extensions.toFixed
-import stored
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemDataDetail(itemData: ItemData) {
 
     var rarity by remember { mutableStateOf(if (itemData.unique) "Unique" else "Common") }
-    var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(stored.common.power.toDouble())) }
+    var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(DungeonsPower.playerPower(arctic.requireStored).toDouble())) }
 
     val name = itemData.name
     val description = itemData.description
@@ -94,6 +89,7 @@ fun ItemDataDetail(itemData: ItemData) {
         }
         AddButton {
             val newItem = Item(
+                parent = arctic.requireStored,
                 inventoryIndex = 0,
                 power = power,
                 rarity = rarity,
@@ -103,7 +99,7 @@ fun ItemDataDetail(itemData: ItemData) {
                 armorProperties = if (itemData.variant == "Armor") itemData.builtInProperties.map { ArmorProperty(id = it.id, rarity = "Common") } else null,
                 markedNew = true
             )
-            stored.addItem(newItem)
+            newItem.parent.addItem(newItem)
             arctic.creation.disable()
             arctic.creation.target = null
         }

@@ -7,7 +7,6 @@ import arctic
 import blackstone.states.Item
 import blackstone.states.StoredDataState
 import extensions.GameResources
-import stored
 
 
 val equippedMelee: (Item) -> Boolean = { it.equipmentSlot == "MeleeGear" }
@@ -29,7 +28,7 @@ fun Item.recalculateEnchantmentPoints() {
     enchantments?.forEach { it.leveling(it.level) }
 }
 
-fun Item.where() = if (stored.items.contains(this)) "inventory" else if (stored.storageChestItems.contains(this)) "storage" else null
+fun Item.where() = if (parent.items.contains(this)) "inventory" else if (parent.storageChestItems.contains(this)) "storage" else null
 
 val StoredDataState.equippedItems get() = listOf(
     items.find(equippedMelee),
