@@ -45,7 +45,7 @@ fun ColumnScope.AnimatedItemDetailView(targetState: Item?) =
         transitionSpec = {
             val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
             val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
-            enter with exit
+            enter with exit using SizeTransform(clip = false)
         },
         contentAlignment = Alignment.Center
     ) {
