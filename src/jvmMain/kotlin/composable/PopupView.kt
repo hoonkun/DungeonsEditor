@@ -21,7 +21,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -54,6 +53,40 @@ fun BoxScope.Popups() {
 
     DeletionPopup()
     DuplicatePopup()
+
+    SaveInProgressPopup()
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun SaveInProgressPopup() {
+    val _enabled: Boolean = arctic.dialogs.fileSaveDstSelector
+
+    Backdrop(_enabled, 0.6f) {  }
+
+    AnimatedVisibility(
+        visible = _enabled,
+        enter = fadeIn() + scaleIn(initialScale = 1.1f),
+        exit = fadeOut() + scaleOut(targetScale = 1.1f)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "저장 진행 중!",
+                color = Color.White,
+                fontSize = 32.sp
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "열린 파일 탐색기에서 저장할 위치를 선택해주세요",
+                color = Color.White.copy(alpha = 0.4f),
+                fontSize = 24.sp
+            )
+        }
+    }
 }
 
 @Composable
@@ -544,9 +577,9 @@ data class ArmorPropertyDetailPopupTargetStates(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Backdrop(visible: Boolean, onClick: () -> Unit) =
+fun Backdrop(visible: Boolean, alpha: Float = 0.3764f, onClick: () -> Unit) =
     AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut(), label = "Backdrop") {
-        Box(modifier = Modifier.fillMaxSize().background(Color(0x60000000)).onClick(onClick = onClick))
+        Box(modifier = Modifier.fillMaxSize().alpha(alpha).background(Color(0xff000000)).onClick(onClick = onClick))
     }
 
 @OptIn(ExperimentalAnimationApi::class)

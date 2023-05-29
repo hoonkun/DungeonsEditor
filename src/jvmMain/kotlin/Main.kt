@@ -30,6 +30,7 @@ fun App() {
     Debugging.recomposition("App")
 
     val backdropVisible =
+        arctic.dialogs.fileSaveDstSelector ||
         arctic.enchantments.hasDetailTarget ||
         arctic.armorProperties.hasDetailTarget ||
         arctic.armorProperties.hasCreateInto ||
@@ -98,7 +99,7 @@ fun main() = application {
         Window(onCloseRequest = { arctic.dialogs.fileSaveDstSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
             Selector(
                 validator = { !it.isDirectory },
-                onSelect = { stored.save(it) }
+                onSelect = { stored.save(it); arctic.dialogs.fileSaveDstSelector = false }
             )
         }
     }
