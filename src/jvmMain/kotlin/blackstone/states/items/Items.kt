@@ -51,15 +51,15 @@ fun StoredDataState.addItem(newItem: Item, source: Item? = null) {
     }
 
     if (source != null) {
-        arctic.items.replaceSelection(source, newItem)
+        arctic.selection.replaceSelection(source, newItem)
     } else {
-        arctic.items.clearSelection()
-        arctic.items.select(newItem, 0)
+        arctic.selection.clearSelection()
+        arctic.selection.select(newItem, 0)
     }
 }
 
 fun StoredDataState.deleteItem(targetItem: Item) {
-    arctic.items.unselect(targetItem)
+    arctic.selection.unselect(targetItem)
 
     if (targetItem.where() == "inventory") {
         items.remove(targetItem)

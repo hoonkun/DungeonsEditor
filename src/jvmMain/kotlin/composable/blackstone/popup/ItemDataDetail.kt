@@ -104,8 +104,8 @@ fun ItemDataDetail(itemData: ItemData) {
                 markedNew = true
             )
             stored.addItem(newItem)
-            arctic.item.disable()
-            arctic.item.target = null
+            arctic.creation.disable()
+            arctic.creation.target = null
         }
     }
 

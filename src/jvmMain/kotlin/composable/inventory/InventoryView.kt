@@ -25,7 +25,7 @@ fun RowScope.InventoryView() {
     Debugging.recomposition("InventoryView")
 
     val equipped by remember { derivedStateOf { stored.equippedItems } }
-    val selected by remember { derivedStateOf { arctic.items.selected } }
+    val selected by remember { derivedStateOf { arctic.selection.selected } }
 
     AnimatedContent(
         targetState = arctic.view,

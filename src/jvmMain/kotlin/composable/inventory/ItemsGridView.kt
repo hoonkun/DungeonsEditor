@@ -41,7 +41,7 @@ fun EquippedItems(items: List<Item?>) {
         EquipmentItemsToggleButton(collapsed = collapsed, onClick = { collapsed = !collapsed })
         EquippedItemsToggleAnimator(collapsed) {
             ItemsGrid(columns = if (it) 6 else 3, items = items) { index, item ->
-                ItemView(item, it, -index - 1)
+                ItemView(item, it)
             }
         }
     }
@@ -111,7 +111,7 @@ fun InventoryItems(items: List<Item>) {
             setRarityFilter = { rarityFilter = if (rarityFilter == it) null else it }
         )
         ItemsGrid(items = filteredItems) { _, item ->
-            ItemView(item, index = item.inventoryIndex ?: 0)
+            ItemView(item)
         }
     }
 }
@@ -149,7 +149,7 @@ fun ItemAddButton() {
         modifier = Modifier
             .size(60.dp)
             .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { if(!arctic.popups.checkInventoryFull()) arctic.item.enable("creation") }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) { if(!arctic.popups.checkInventoryFull()) arctic.creation.enable() }
             .padding(10.dp)
             .drawBehind {
                 drawRect(Color(if(hovered) 0xffffffff else 0xff79706b), topLeft = Offset(size.width / 2 - 2f, 8f), size = Size(4f, size.height - 16f))
@@ -212,7 +212,7 @@ fun <T>ItemsGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGrid
     ) { itemsIndexed(items, itemContent = content) }
 
 @Composable
-fun <T> ItemView(item: T, simplified: Boolean = false, index: Int) where T: Item? =
+fun <T> ItemView(item: T, simplified: Boolean = false) where T: Item? =
     ItemViewInteractable(item, item != null) {
         if (item == null) DummyItemIcon()
         else ItemIcon(item, simplified)
@@ -231,11 +231,11 @@ fun ItemViewInteractable(item: Item?, enabled: Boolean = true, content: @Composa
             .aspectRatio(1f / 1f)
             .padding(5.dp)
             .hoverable(source)
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled) { if (item != null) arctic.items.select(item, 0) }
-            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), enabled = enabled) { if (item != null) arctic.items.select(item, 1) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary), enabled = enabled) { if (item != null) arctic.selection.select(item, 0) }
+            .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary), enabled = enabled) { if (item != null) arctic.selection.select(item, 1) }
             .drawBehind {
                 val brush =
-                    if (arctic.items.selected(item))
+                    if (arctic.selection.selected(item))
                         Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                     else if (hovered)
                         Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))

@@ -2,19 +2,20 @@ package blackstone.states
 
 import ItemData
 import androidx.compose.runtime.*
-import arctic
 import blackstone.states.items.*
 import extensions.replace
 import stored
 
 @Stable
-class ArcticStates(stored: StoredDataState) {
+class ArcticStates {
 
     var view by mutableStateOf("inventory")
 
-    val items = ItemsState(stored)
+    val selection = SelectionState()
 
-    val item = ItemState()
+    val creation = CreationState()
+
+    val edition = EditionState()
 
     val enchantments = EnchantmentsState()
 
@@ -44,49 +45,48 @@ class PopupsState {
 }
 
 @Stable
-class ItemState {
+class CreationState {
 
-    var enabled: String? by mutableStateOf(null)
+    var enabled: Boolean by mutableStateOf(false)
         private set
-
-    var updateTarget: Item? by mutableStateOf(null)
 
     var target: ItemData? by mutableStateOf(null)
 
     var filter: String by mutableStateOf("Melee")
 
-    fun enable(with: String, updateTarget: Item? = null) {
-        enabled = with
-        filter = updateTarget?.data?.variant ?: "Melee"
-
-        if (with == "edition" && updateTarget == null) throw RuntimeException("item selector enabled with edition mode, but update target not specified")
-        this.updateTarget = updateTarget
+    fun enable() {
+        enabled = true
+        filter = "Melee"
     }
 
     fun disable() {
-        enabled = null
-        updateTarget = null
+        enabled = false
     }
 
 }
 
 @Stable
-class ItemsState(private val stored: StoredDataState) {
+class EditionState {
 
-    private val negativeIndexItemsFactory = listOf(
-        { stored.items.find(equippedArtifact3) },
-        { stored.items.find(equippedArtifact2) },
-        { stored.items.find(equippedArtifact1) },
-        { stored.items.find(equippedRanged) },
-        { stored.items.find(equippedArmor) },
-        { stored.items.find(equippedMelee) }
-    )
+    var target: Item? by mutableStateOf(null)
+        private set
+
+    fun enable(updateTarget: Item) {
+        target = updateTarget
+    }
+
+    fun disable() {
+        target = null
+    }
+
+}
+
+@Stable
+class SelectionState {
 
     val selected = mutableStateListOf<Item?>(null, null)
 
     fun selected(item: Item?) = if (item != null) selected.contains(item) else false
-
-    fun selectedSlot(item: Item) = selected.indexOf(item)
 
     fun select(item: Item, slot: Int) {
         if (selected.contains(item))

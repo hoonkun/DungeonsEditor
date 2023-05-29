@@ -1,15 +1,12 @@
-import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Window
@@ -24,7 +21,7 @@ import io.StoredFile.Companion.readAsStoredFile
 import java.io.File
 
 val stored = StoredDataState(File(Constants.SaveDataFilePath).readAsStoredFile().root)
-val arctic = ArcticStates(stored)
+val arctic = ArcticStates()
 
 @Composable
 @Preview
@@ -35,9 +32,10 @@ fun App() {
         arctic.enchantments.hasDetailTarget ||
         arctic.armorProperties.hasDetailTarget ||
         arctic.armorProperties.hasCreateInto ||
-        arctic.item.enabled != null ||
+        arctic.creation.enabled ||
+        arctic.edition.target != null ||
         arctic.popups.inventoryFull
-    val moreBlur = arctic.item.target != null
+    val moreBlur = arctic.creation.target != null
 
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
 
