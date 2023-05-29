@@ -20,14 +20,12 @@ import blackstone.states.StoredDataState
 import composable.BottomBar
 import composable.Popups
 import composable.inventory.InventoryView
-import composable.inventory.StorageView
 import io.StoredFile.Companion.readAsStoredFile
 import java.io.File
 
 val stored = StoredDataState(File(Constants.SaveDataFilePath).readAsStoredFile().root)
 val arctic = ArcticStates(stored)
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 @Preview
 fun App() {
@@ -45,21 +43,8 @@ fun App() {
 
     AppRoot {
         MainContainer(popupBackdropBlurRadius) {
-            AnimatedContent(
-                targetState = arctic.view,
-                transitionSpec = {
-                    val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(50, 0) })
-                    val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(-50, 0) })
-                    enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
-                },
-                modifier = Modifier.fillMaxWidth().weight(1f)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth(0.725f)) {
-                        if (it == "inventory") InventoryView()
-                        else StorageView()
-                    }
-                }
+            ContentContainer {
+                InventoryView()
             }
             BottomBarContainer { BottomBar() }
         }
@@ -88,7 +73,7 @@ fun BoxScope.MainContainer(blurRadius: Dp, content: @Composable ColumnScope.() -
 fun ColumnScope.ContentContainer(content: @Composable RowScope.() -> Unit) =
     Row(
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.weight(1f).fillMaxWidth(0.7638888f).offset(x = (-35).dp),
         content = content
     )
 

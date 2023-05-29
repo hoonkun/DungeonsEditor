@@ -37,13 +37,13 @@ fun EquippedItems(items: List<Item?>) {
 
     var collapsed by remember { mutableStateOf(false) }
 
-    Box {
+    Row {
+        EquipmentItemsToggleButton(collapsed = collapsed, onClick = { collapsed = !collapsed })
         EquippedItemsToggleAnimator(collapsed) {
             ItemsGrid(columns = if (it) 6 else 3, items = items) { index, item ->
                 ItemView(item, it, -index - 1)
             }
         }
-        EquipmentItemsToggleButton(collapsed = collapsed, onClick = { collapsed = !collapsed })
     }
 }
 
@@ -74,7 +74,7 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
     Box (
         modifier = Modifier
             .size(60.dp)
-            .offset(x = (-70).dp, y = 10.dp)
+            .offset(y = 10.dp)
             .clickable(source, null, onClick = onClick)
             .hoverable(source)
             .padding(15.dp)
@@ -103,7 +103,7 @@ fun InventoryItems(items: List<Item>) {
         }
     }
 
-    Box {
+    Row {
         ItemsFilterer(
             variantFilter = variantFilter,
             rarityFilter = rarityFilter,
@@ -123,7 +123,7 @@ fun ItemsFilterer(variantFilter: String?, rarityFilter: String?, setVariantFilte
     val filterableVariants = remember { listOf("Melee", "Armor", "Ranged", "Artifact", "Enchanted") }
     val filterableRarities = remember { listOf("Unique", "Rare", "Common") }
 
-    Column(modifier = Modifier.offset(x = (-70).dp).padding(top = 15.dp), horizontalAlignment = Alignment.End) {
+    Column(modifier = Modifier.padding(top = 15.dp), horizontalAlignment = Alignment.End) {
         for (type in filterableVariants) {
             ItemVariantFilter(variant = type, selected = type == variantFilter) { setVariantFilter(type) }
             Spacer(modifier = Modifier.height(10.dp))
@@ -198,7 +198,7 @@ fun ItemRarityFilter(rarity: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 fun Divider() {
     Spacer(modifier = Modifier.height(5.dp))
-    Box(modifier = Modifier.fillMaxWidth().height(2.dp).padding(horizontal = 10.dp).background(Color(0xff666666)))
+    Box(modifier = Modifier.fillMaxWidth().height(2.dp).padding(horizontal = 10.dp).padding(start = 60.dp).background(Color(0xff666666)))
     Spacer(modifier = Modifier.height(5.dp))
 }
 
