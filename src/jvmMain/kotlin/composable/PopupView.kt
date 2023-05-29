@@ -31,6 +31,7 @@ import arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
+import blackstone.states.items.addItem
 import blackstone.states.items.data
 import blackstone.states.items.deleteItem
 import blackstone.states.items.where
@@ -51,6 +52,7 @@ fun BoxScope.Popups() {
     ItemEditionPopup()
 
     DeletionPopup()
+    DuplicatePopup()
 }
 
 @Composable
@@ -80,6 +82,59 @@ fun InventoryFullPopup() {
                 color = Color.White.copy(alpha = 0.4f),
                 fontSize = 24.sp
             )
+        }
+    }
+
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun DuplicatePopup() {
+
+    val _target: Item? = arctic.duplication.target
+
+    Backdrop(_target != null) { arctic.duplication.target = null }
+
+    AnimatedContent(
+        targetState = _target to _target?.where(),
+        transitionSpec = {
+            val enter = fadeIn() + scaleIn(initialScale = 1.1f)
+            val exit = fadeOut() + scaleOut(targetScale = 1.1f)
+            enter with exit
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { (target, where) ->
+        if (target != null) {
+            val message = "${if (where == "inventory") "인벤토리" else "창고"}에 있는 아이템이에요. 어디에 복제하시겠어요?"
+            val description = "지금은 ${if (arctic.view == "inventory") "인벤토리" else "창고"}를 보고있어요."
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = message,
+                    color = Color.White,
+                    fontSize = 32.sp
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = description,
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 24.sp
+                )
+                Spacer(modifier = Modifier.height(80.dp))
+                Row {
+                    RetroButton("원래 위치에 복제", Color(0xff3f8e4f), "outline") { stored.addItem(target.copy(), target); arctic.duplication.target = null }
+                    Spacer(modifier = Modifier.width(75.dp))
+                    RetroButton("취소", Color(0xffffffff), "overlay") { arctic.duplication.target = null }
+                    Spacer(modifier = Modifier.width(75.dp))
+                    RetroButton("여기에 복제", Color(0xff3f8e4f), "outline") { stored.addItem(target.copy()); arctic.duplication.target = null }
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize())
         }
     }
 
@@ -157,7 +212,7 @@ fun RetroButton(text: String, color: Color, hoverInteraction: String, onClick: (
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(200.dp, 70.dp)
+            .size(225.dp, 70.dp)
             .hoverable(source)
             .clickable(source, null, onClick = onClick)
     ) {

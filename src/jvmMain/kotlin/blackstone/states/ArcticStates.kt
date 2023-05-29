@@ -19,6 +19,8 @@ class ArcticStates {
 
     val deletion = DeletionState()
 
+    val duplication = DuplicationState()
+
     val enchantments = EnchantmentsState()
 
     val armorProperties = ArmorPropertiesState()
@@ -33,6 +35,13 @@ class ArcticStates {
 
 @Stable
 class DeletionState {
+
+    var target: Item? by mutableStateOf(null)
+
+}
+
+@Stable
+class DuplicationState {
 
     var target: Item? by mutableStateOf(null)
 

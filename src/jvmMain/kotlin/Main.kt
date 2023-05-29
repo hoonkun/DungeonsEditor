@@ -33,9 +33,10 @@ fun App() {
         arctic.armorProperties.hasDetailTarget ||
         arctic.armorProperties.hasCreateInto ||
         arctic.creation.enabled ||
-        arctic.edition.target != null ||
         arctic.popups.inventoryFull ||
-        arctic.deletion.target != null
+        arctic.edition.target != null ||
+        arctic.deletion.target != null ||
+        arctic.duplication.target != null
     val moreBlur = arctic.creation.target != null
 
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
