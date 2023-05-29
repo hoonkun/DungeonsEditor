@@ -38,8 +38,13 @@ val StoredDataState.equippedItems get() = listOf(
 )
 
 fun StoredDataState.addItem(newItem: Item, selected: Item? = null) {
-    items.add(6, newItem)
-    items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
+    if (arctic.view == "inventory") {
+        items.add(6, newItem)
+        items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
+    } else {
+        storageChestItems.add(0, newItem)
+        storageChestItems.forEachIndexed { index, item -> item.inventoryIndex = index }
+    }
 
     if (selected == null) return
 
@@ -54,8 +59,13 @@ fun StoredDataState.addItem(newItem: Item, selected: Item? = null) {
 fun StoredDataState.deleteItem(targetItem: Item) {
     arctic.items.unselect(targetItem)
 
-    items.remove(targetItem)
-    items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
+    if (arctic.view == "inventory") {
+        items.remove(targetItem)
+        items.filter(unequipped).forEachIndexed { index, item -> item.inventoryIndex = index }
+    } else {
+        storageChestItems.remove(targetItem)
+        storageChestItems.forEachIndexed { index, item -> item.inventoryIndex = index }
+    }
 }
 
 fun VariantFilterIcon(with: String, selected: Boolean): ImageBitmap {

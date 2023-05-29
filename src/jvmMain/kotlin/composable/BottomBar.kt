@@ -69,9 +69,12 @@ fun BottomBar() {
             onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Gold" }?.count = it.toInt() }
         )
 
+        val level = DungeonsLevel.toInGameLevel(stored.xp).toInt()
+        val inventoryPoints = stored.items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
+        val storagePoints = stored.storageChestItems.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
         CurrencyText(
             icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
-            value = "${DungeonsLevel.toInGameLevel(stored.xp).toInt() -  stored.items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }}",
+            value = "${level - inventoryPoints - storagePoints}",
             smallIcon = true
         )
 
