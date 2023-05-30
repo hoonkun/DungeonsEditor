@@ -63,6 +63,8 @@ class PopupsState(private val parent: ArcticStates) {
 
     var fileLoadFailed: String? by mutableStateOf(null)
 
+    var closeFile by mutableStateOf(false)
+
     fun checkAvailable(): Boolean {
         if (parent.requireStored.items.size >= 300) {
             inventoryFull = true

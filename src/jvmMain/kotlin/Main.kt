@@ -36,6 +36,7 @@ fun App() {
         arctic.armorProperties.hasCreateInto ||
         arctic.creation.enabled ||
         arctic.alerts.inventoryFull ||
+        arctic.alerts.closeFile ||
         arctic.alerts.fileLoadFailed != null ||
         arctic.edition.target != null ||
         arctic.deletion.target != null ||

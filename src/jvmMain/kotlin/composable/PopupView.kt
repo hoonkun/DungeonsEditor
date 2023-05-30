@@ -51,6 +51,57 @@ fun BoxScope.Popups() {
 
     InputFileProcessFailedPopup()
     SaveInProgressPopup()
+    CloseFilePopup()
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun CloseFilePopup() {
+    val _enabled = arctic.alerts.closeFile
+
+    Backdrop(_enabled) { arctic.alerts.closeFile = false }
+
+    AnimatedContent(
+        targetState = _enabled,
+        transitionSpec = {
+            val enter = fadeIn() + scaleIn(initialScale = 1.1f)
+            val exit = fadeOut() + scaleOut(targetScale = 1.1f)
+            enter with exit
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { enabled ->
+        if (enabled) {
+            val message = "정말 편집을 마치고 파일을 닫으시겠어요?"
+            val description = "마지막 저장 이후에 만든 변경사항은 저장되지 않아요"
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = message,
+                    color = Color.White,
+                    fontSize = 32.sp
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = description,
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 24.sp
+                )
+                Spacer(modifier = Modifier.height(80.dp))
+                Row {
+                    RetroButton("취소", Color(0xffffffff), "overlay") { arctic.alerts.closeFile = false }
+                    Spacer(modifier = Modifier.width(75.dp))
+                    RetroButton("닫기", Color(0xffff6e25), "outline") { arctic.stored = null; arctic.alerts.closeFile = false }
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize())
+        }
+    }
+
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -91,6 +142,8 @@ fun InputFileProcessFailedPopup() {
                     color = Color.White.copy(alpha = 0.4f),
                     fontSize = 24.sp
                 )
+                Spacer(modifier = Modifier.height(50.dp))
+                RetroButton("닫기", Color(0xffffffff), "overlay") { arctic.alerts.fileLoadFailed = null }
             }
         } else {
             Box(modifier = Modifier.fillMaxSize())

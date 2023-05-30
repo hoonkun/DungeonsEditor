@@ -91,10 +91,30 @@ fun BottomBar(stored: StoredDataState) {
 
             Spacer(modifier = Modifier.width(20.dp))
 
+            CloseFileButton()
+
+            Spacer(modifier = Modifier.width(20.dp))
+
             SaveButton()
 
         }
     }
+}
+
+@Composable
+fun CloseFileButton() {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    Image(
+        bitmap = GameResources.image { "/Game/UI/Materials/Map/Pins/dungeon_door.png" },
+        contentDescription = null,
+        modifier = Modifier
+            .size(60.dp)
+            .hoverable(source)
+            .clickable(source, null) { arctic.alerts.closeFile = true }
+            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value)) }
+            .padding(10.dp)
+    )
 }
 
 @Composable
