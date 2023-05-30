@@ -54,8 +54,8 @@ fun RowScope.InventoryView() {
         }
     }
     RightArea {
-        AnimatorBySelectedItemExists(arctic.selection.selected) {
-            if (it.any { item -> item != null }) ItemComparatorView(it)
+        AnimatorBySelectedItemExists(arctic.selection.selected.any { item -> item != null }) {
+            if (it) ItemComparatorView(arctic.selection.selected)
             else NoItemsSelectedView()
         }
     }
