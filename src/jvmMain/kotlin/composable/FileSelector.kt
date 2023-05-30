@@ -164,7 +164,10 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     }
 
     var hintTarget by remember(candidates) {
-        val newState = if (candidates.items.size == 1) candidates.items.first() else null
+        val newState =
+            if (candidates.items.size == 1) candidates.items.first().let { if (path.text.endsWith(it.name)) null else it }
+            else null
+
         if (newState != null) haveToShiftField = true
 
         mutableStateOf(newState)
