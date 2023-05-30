@@ -21,7 +21,6 @@ import composable.Popups
 import composable.Selector
 import composable.inventory.InventoryView
 import io.StoredFile.Companion.readAsStoredFile
-import java.io.File
 
 val arctic = ArcticStates()
 
@@ -90,15 +89,19 @@ fun BottomBarContainer(content: @Composable BoxScope.(StoredDataState) -> Unit) 
             val exit = fadeOut(tween(250)) + slideOut(tween(250), targetOffset = { IntOffset(0, 20.dp.value.toInt()) })
             enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
         },
-        modifier = Modifier.height(85.dp),
+        modifier = Modifier.fillMaxWidth(),
         content = {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeight(85.dp),
-                content = { if (it != null) content(it) }
-            )
+            if (it != null) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(85.dp),
+                    content = { content(it) }
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxWidth())
+            }
         }
     )
 
