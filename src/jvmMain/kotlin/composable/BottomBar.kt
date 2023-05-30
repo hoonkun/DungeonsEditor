@@ -91,11 +91,8 @@ fun BottomBar(stored: StoredDataState) {
 
             Spacer(modifier = Modifier.width(20.dp))
 
-            CloseFileButton()
-
-            Spacer(modifier = Modifier.width(20.dp))
-
             SaveButton()
+            CloseFileButton()
 
         }
     }
@@ -122,7 +119,7 @@ fun SaveButton() {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     Image(
-        bitmap = GameResources.image { "/Game/UI/Materials/Chests/unlocked_checkmark.png" },
+        bitmap = GameResources.image { "/Game/UI/Materials/Map/Pins/mapicon_chest.png" },
         contentDescription = null,
         modifier = Modifier
             .size(60.dp)
@@ -144,7 +141,7 @@ fun InventorySwitcher() {
         modifier = Modifier
             .hoverable(source)
             .clickable(source, null) { arctic.toggleView() }
-            .padding(vertical = 10.dp)
+            .height(60.dp)
             .drawBehind {
                 drawRoundRect(
                     Color.White,
@@ -168,10 +165,12 @@ fun InventorySwitcher() {
             )
         }
 
-        Image(
-            bitmap = GameResources.image { "/Game/UI/Materials/Chests/chest_locked.png" },
-            contentDescription = null,
-            modifier = Modifier.fillMaxHeight().padding(vertical = 10.dp, horizontal = 5.dp)
+        Text(
+            text = if (arctic.view == "inventory") "Inventory" else "Storage",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp,
+            modifier = Modifier.fillMaxHeight().padding(vertical = 10.dp, horizontal = 15.dp).offset(y = 3.dp)
         )
 
     }
