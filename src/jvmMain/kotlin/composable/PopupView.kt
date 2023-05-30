@@ -94,7 +94,11 @@ fun CloseFilePopup() {
                 Row {
                     RetroButton("취소", Color(0xffffffff), "overlay") { arctic.alerts.closeFile = false }
                     Spacer(modifier = Modifier.width(75.dp))
-                    RetroButton("닫기", Color(0xffff6e25), "outline") { arctic.stored = null; arctic.alerts.closeFile = false }
+                    RetroButton("닫기", Color(0xffff6e25), "outline") {
+                        arctic.selection.clearSelection()
+                        arctic.stored = null
+                        arctic.alerts.closeFile = false
+                    }
                 }
             }
         } else {

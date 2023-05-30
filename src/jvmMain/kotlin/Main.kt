@@ -131,6 +131,7 @@ fun main() = application {
                 validator = { !it.isDirectory && it.isFile },
                 onSelect = {
                     try {
+                        arctic.view = "inventory"
                         arctic.stored = StoredDataState(it.readAsStoredFile().root)
                     } catch (e: Exception) {
                         arctic.alerts.fileLoadFailed = e.message
