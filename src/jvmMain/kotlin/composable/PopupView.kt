@@ -37,8 +37,6 @@ import composable.blackstone.popup.*
 fun BoxScope.Popups() {
     Debugging.recomposition("Popups")
 
-    val stored = arctic.stored
-
     InventoryFullPopup()
     SavedPopup()
 
@@ -51,7 +49,53 @@ fun BoxScope.Popups() {
     DeletionPopup()
     DuplicatePopup()
 
+    InputFileProcessFailedPopup()
     SaveInProgressPopup()
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun InputFileProcessFailedPopup() {
+    val _enabled: String? = arctic.alerts.fileLoadFailed
+
+    Backdrop(_enabled != null, 0.6f) {  }
+
+    AnimatedContent(
+        targetState = _enabled,
+        transitionSpec = {
+            val enter = fadeIn() + scaleIn(initialScale = 1.1f)
+            val exit = fadeOut() + scaleOut(targetScale = 1.1f)
+            enter with exit
+        },
+    ) { enabled ->
+        if (enabled != null) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "파일 로드에 실패했어요",
+                    color = Color.White,
+                    fontSize = 32.sp
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "잘못된 파일이거나, 개발자가 이상한 짓을 해서 그럴 수도 있어요.",
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 24.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "$enabled",
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 24.sp
+                )
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize())
+        }
+    }
 }
 
 @OptIn(ExperimentalAnimationApi::class)

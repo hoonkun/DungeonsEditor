@@ -36,6 +36,7 @@ fun App() {
         arctic.armorProperties.hasCreateInto ||
         arctic.creation.enabled ||
         arctic.alerts.inventoryFull ||
+        arctic.alerts.fileLoadFailed != null ||
         arctic.edition.target != null ||
         arctic.deletion.target != null ||
         arctic.duplication.target != null
@@ -131,7 +132,7 @@ fun main() = application {
                     try {
                         arctic.stored = StoredDataState(it.readAsStoredFile().root)
                     } catch (e: Exception) {
-                        arctic.alerts.fileLoadFailed = true
+                        arctic.alerts.fileLoadFailed = e.message
                     } finally {
                         arctic.dialogs.fileLoadSrcSelector = false
                     }
