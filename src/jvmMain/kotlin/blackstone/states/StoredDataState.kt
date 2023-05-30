@@ -88,7 +88,7 @@ class StoredDataState(private val from: JSONObject) {
     var customized: Boolean by mutableStateOf(from.getBoolean(FIELD_CUSTOMIZED))
 
     @JsonField(FIELD_DIFFICULTIES)
-    val difficulties: Difficulties = Difficulties(from.getJSONObject(FIELD_DIFFICULTIES))
+    val difficulties: Difficulties? by mutableStateOf(from.safe { Difficulties(getJSONObject(FIELD_DIFFICULTIES)) })
 
     @JsonField(FIELD_END_GAME_CONTENT_PROGRESS)
     val endgameContentProgress: EndGameContentProgress =
