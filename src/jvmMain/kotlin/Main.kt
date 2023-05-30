@@ -86,18 +86,17 @@ fun BottomBarContainer(content: @Composable BoxScope.(StoredDataState) -> Unit) 
     AnimatedContent(
         targetState = arctic.stored,
         transitionSpec = {
-            val enter = fadeIn(tween(250)) + slideIn(tween(250), initialOffset = { IntOffset(20.dp.value.toInt(), 0) })
-            val exit = fadeOut(tween(250)) + slideOut(tween(250), targetOffset = { IntOffset(20.dp.value.toInt(), 0) })
+            val enter = fadeIn(tween(250)) + slideIn(tween(250), initialOffset = { IntOffset(0, 20.dp.value.toInt()) })
+            val exit = fadeOut(tween(250)) + slideOut(tween(250), targetOffset = { IntOffset(0, 20.dp.value.toInt()) })
             enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
         },
-        modifier = Modifier.fillMaxSize().height(85.dp),
+        modifier = Modifier.height(85.dp),
         content = {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeight(85.dp)
-                    .background(Color(0xff191919)),
+                    .requiredHeight(85.dp),
                 content = { if (it != null) content(it) }
             )
         }
@@ -116,6 +115,22 @@ fun main() = application {
             Selector(
                 validator = { !it.isDirectory },
                 onSelect = { arctic.requireStored.save(it); arctic.dialogs.fileSaveDstSelector = false }
+            )
+        }
+    }
+    if (arctic.dialogs.fileLoadSrcSelector) {
+        Window(onCloseRequest = { arctic.dialogs.fileLoadSrcSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
+            Selector(
+                validator = { !it.isDirectory && it.isFile },
+                onSelect = {
+                    try {
+                        arctic.stored = StoredDataState(it.readAsStoredFile().root)
+                    } catch (e: Exception) {
+                        arctic.alerts.fileLoadFailed = true
+                    } finally {
+                        arctic.dialogs.fileLoadSrcSelector = false
+                    }
+                }
             )
         }
     }

@@ -39,6 +39,7 @@ class ArcticStates {
 @Stable
 class DialogsState {
     var fileSaveDstSelector by mutableStateOf(false)
+    var fileLoadSrcSelector by mutableStateOf(false)
 }
 
 @Stable
@@ -59,6 +60,8 @@ class DuplicationState {
 class PopupsState(private val parent: ArcticStates) {
 
     var inventoryFull by mutableStateOf(false)
+
+    var fileLoadFailed by mutableStateOf(false)
 
     fun checkAvailable(): Boolean {
         if (parent.requireStored.items.size >= 300) {

@@ -4,6 +4,7 @@ import Debugging
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,62 +39,61 @@ import extensions.toFixed
 fun BottomBar(stored: StoredDataState) {
     Debugging.recomposition("BottomBar")
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(0.725f)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xff191919))
     ) {
-        CurrencyField(
-            value = "${DungeonsLevel.toInGameLevel(stored.xp).toFixed(3)}",
-            onValueChange = { if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(0.725f)
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                CurrencyImage(GameResources.image { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
-                Text(text = "LV.", style = TextStyle(fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold))
+            CurrencyField(
+                value = "${DungeonsLevel.toInGameLevel(stored.xp).toFixed(3)}",
+                onValueChange = { if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    CurrencyImage(GameResources.image { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
+                    Text(text = "LV.", style = TextStyle(fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold))
+                }
             }
+
+            CurrencyText(
+                icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+                value = "${DungeonsPower.playerPower(stored)}"
+            )
+
+            CurrencyField(
+                icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+                value = "${stored.currencies.find { it.type == "Emerald" }?.count ?: 0}",
+                onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Emerald" }?.count = it.toInt() }
+            )
+
+            CurrencyField(
+                icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
+                value = "${stored.currencies.find { it.type == "Gold" }?.count ?: 0}",
+                onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Gold" }?.count = it.toInt() }
+            )
+
+            val level = DungeonsLevel.toInGameLevel(stored.xp).toInt()
+            val inventoryPoints = stored.items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
+            val storagePoints = stored.storageChestItems.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
+            CurrencyText(
+                icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
+                value = "${level - inventoryPoints - storagePoints}",
+                smallIcon = true
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            InventorySwitcher()
+
+            Spacer(modifier = Modifier.width(20.dp))
+
+            SaveButton()
+
         }
-
-        CurrencyText(
-            icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
-            value = "${DungeonsPower.playerPower(stored)}"
-        )
-
-        CurrencyField(
-            icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
-            value = "${stored.currencies.find { it.type == "Emerald" }?.count ?: 0}",
-            onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Emerald" }?.count = it.toInt() }
-        )
-
-        CurrencyField(
-            icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
-            value = "${stored.currencies.find { it.type == "Gold" }?.count ?: 0}",
-            onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Gold" }?.count = it.toInt() }
-        )
-
-        val level = DungeonsLevel.toInGameLevel(stored.xp).toInt()
-        val inventoryPoints = stored.items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
-        val storagePoints = stored.storageChestItems.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
-        CurrencyText(
-            icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
-            value = "${level - inventoryPoints - storagePoints}",
-            smallIcon = true
-        )
-
-        /*
-        CurrencyField(
-            icon = "/Game/UI/Materials/Currency/T_EyeOfEnder_Currency.png",
-            value = "${stored.common.eyeOfEnder}",
-            onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "EyeOfEnder" }?.count = it.toInt() }
-        )
-        */
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        InventorySwitcher()
-
-        Spacer(modifier = Modifier.width(20.dp))
-
-        SaveButton()
-
     }
 }
 

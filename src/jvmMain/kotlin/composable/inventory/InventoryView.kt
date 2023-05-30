@@ -17,31 +17,38 @@ import arctic
 import blackstone.states.items.unequipped
 import blackstone.states.Item
 import blackstone.states.items.equippedItems
+import composable.RetroButton
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RowScope.InventoryView() {
     Debugging.recomposition("InventoryView")
 
-    AnimatedContent(
-        targetState = arctic.stored to arctic.view,
-        transitionSpec = {
-            val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(50, 0) })
-            val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(-50, 0) })
-            enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
-        },
-        modifier = Modifier.fillMaxWidth().weight(0.4778181f)
-    ) { (stored, view) ->
+    AnimatedContent(arctic.stored) { stored ->
         if (stored != null) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                if (view == "inventory") {
-                    LeftArea {
-                        EquippedItems(stored.equippedItems)
-                        Divider()
-                        InventoryItems(stored.items.filter(unequipped))
+            AnimatedContent(
+                targetState = stored to arctic.view,
+                transitionSpec = {
+                    val enter = fadeIn(tween(durationMillis = 250)) + slideIn(
+                        tween(durationMillis = 250),
+                        initialOffset = { IntOffset(50, 0) })
+                    val exit = fadeOut(tween(durationMillis = 250)) + slideOut(
+                        tween(durationMillis = 250),
+                        targetOffset = { IntOffset(-50, 0) })
+                    enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
+                },
+                modifier = Modifier.width(657.dp)
+            ) { (stored, view) ->
+                Row(modifier = Modifier.fillMaxSize()) {
+                    if (view == "inventory") {
+                        LeftArea {
+                            EquippedItems(stored.equippedItems)
+                            Divider()
+                            InventoryItems(stored.items.filter(unequipped))
+                        }
+                    } else if (view == "storage") {
+                        LeftArea { InventoryItems(stored.storageChestItems) }
                     }
-                } else if (view == "storage") {
-                    LeftArea { InventoryItems(stored.storageChestItems) }
                 }
             }
         }
@@ -64,7 +71,7 @@ private fun LeftArea(content: @Composable ColumnScope.() -> Unit) =
 @Composable
 private fun RowScope.RightArea(content: @Composable ColumnScope.() -> Unit) =
     Column(
-        modifier = Modifier.fillMaxHeight().weight(1f - 0.4778181f).padding(top = 20.dp, bottom = 20.dp, start = 75.dp),
+        modifier = Modifier.fillMaxHeight().width(718.dp).padding(top = 20.dp, bottom = 20.dp, start = 75.dp),
         content = content
     )
 
@@ -84,7 +91,9 @@ private fun <S> AnimatorBySelectedItemExists(targetState: S, content: @Composabl
 @Composable
 private fun NoItemsSelectedView() =
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("확인할 아이템을 선택해보세요!", color = Color.White, fontSize = 20.sp)
+        RetroButton("파일 선택", color = Color(0xff3f8e4f), hoverInteraction = "outline") {
+            arctic.dialogs.fileLoadSrcSelector = true
+        }
     }
 
 @Composable
