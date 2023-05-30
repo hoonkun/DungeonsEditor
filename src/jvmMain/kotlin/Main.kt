@@ -116,6 +116,7 @@ fun main() = application {
     if (arctic.dialogs.fileSaveDstSelector) {
         Window(onCloseRequest = { arctic.dialogs.fileSaveDstSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
             Selector(
+                selectText = "저장",
                 validator = { !it.isDirectory },
                 onSelect = { arctic.requireStored.save(it); arctic.dialogs.fileSaveDstSelector = false }
             )
@@ -124,6 +125,7 @@ fun main() = application {
     if (arctic.dialogs.fileLoadSrcSelector) {
         Window(onCloseRequest = { arctic.dialogs.fileLoadSrcSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
             Selector(
+                selectText = "열기",
                 validator = { !it.isDirectory && it.isFile },
                 onSelect = {
                     try {

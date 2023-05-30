@@ -143,7 +143,7 @@ enum class CandidateType(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Selector(validator: (File) -> Boolean = { true }, onSelect: (File) -> Unit) {
+fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "저장", onSelect: (File) -> Unit) {
 
     var path by remember { mutableStateOf(TextFieldValue("/", selection = TextRange(1))) }
     val entirePath by remember(path.text) { derivedStateOf { "$BasePath${path.text}" } }
@@ -267,7 +267,7 @@ fun Selector(validator: (File) -> Boolean = { true }, onSelect: (File) -> Unit) 
                 hideCursor = haveToShiftField,
                 focusRequester = requester
             )
-            Select(enabled = selected != null) { selected?.let { onSelect(it) } }
+            Select(enabled = selected != null, text = selectText) { selected?.let { onSelect(it) } }
         }
         Padded {
             if (!candidateTarget.isDirectory) return@Padded
@@ -439,10 +439,11 @@ fun RowScope.PathInput(
 
 @Composable
 fun RowScope.Select(
+    text: String,
     enabled: Boolean,
     onClick: () -> Unit
 ) {
     Box(modifier = Modifier.padding(5.dp)) {
-        RetroButton("저장", Color(0xff3f8e4f), "outline", enabled = enabled, buttonSize = 115.dp to 70.dp, onClick = onClick)
+        RetroButton(text, Color(0xff3f8e4f), "outline", enabled = enabled, buttonSize = 115.dp to 70.dp, onClick = onClick)
     }
 }
