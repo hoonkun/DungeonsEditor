@@ -138,11 +138,11 @@ private val JetbrainsMono = FontFamily(
 @Composable
 private fun TitleView() =
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().offset(x = 35.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.offset(x = (-5).dp)) {
             TitleText(Color(0xffec691f), 8.dp)
             TitleText(Color(0xddffbb33), 0.dp)
             Text(
@@ -152,12 +152,12 @@ private fun TitleView() =
                 fontFamily = JetbrainsMono,
                 modifier = Modifier.offset(x = 70.dp, y = (80).dp)
             )
-            Text(
-                text = "Minecraft Dungeons 1.17.0.0 버전과 호환",
-                fontSize = 20.sp,
-                color = Color.White.copy(alpha = 0.45f),
-                modifier = Modifier.align(Alignment.TopEnd).offset(x = (-142.5).dp, y = 20.dp)
-            )
+//            Text(
+//                text = "Minecraft Dungeons 1.17.0.0 버전과 호환",
+//                fontSize = 20.sp,
+//                color = Color.White.copy(alpha = 0.45f),
+//                modifier = Modifier.align(Alignment.TopEnd).offset(x = (-142.5).dp, y = 20.dp)
+//            )
         }
         Spacer(modifier = Modifier.height(40.dp))
         ReadmeContainer {
@@ -186,9 +186,15 @@ private fun TitleView() =
             H4("아무도 궁금해하지 않는 사항")
             Paragraph("HoonKun(GitHub) 이 만들었습니다. 심심해서요.\n절대 던전스 데이터 날려먹고 확률망겜에 지쳐서 만든 툴이 아닙니다.")
         }
-        RetroButton(if (arctic.stored == null) "파일 선택" else "다른 파일 선택", color = Color(0xff3f8e4f), hoverInteraction = "outline", modifier = Modifier.align(Alignment.End).offset(x = (-30).dp)) {
+        RetroButton(
+            text = if (arctic.stored == null) "파일 선택" else "다른 파일 선택",
+            color = Color(0xff3f8e4f),
+            hoverInteraction = "outline",
+            modifier = Modifier.align(Alignment.End).offset(x = (-50).dp)
+        ) {
             arctic.dialogs.fileLoadSrcSelector = true
         }
+        Spacer(modifier = Modifier.height(20.dp))
     }
 
 @Composable
