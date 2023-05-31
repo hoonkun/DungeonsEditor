@@ -2,13 +2,16 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import blackstone.states.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -20,6 +23,7 @@ import composable.BottomBar
 import composable.Popups
 import composable.Selector
 import composable.inventory.InventoryView
+import extensions.GameResources
 import io.StoredFile.Companion.readAsStoredFile
 
 val arctic = ArcticStates()
@@ -46,6 +50,7 @@ fun App() {
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
 
     AppRoot {
+        Background()
         MainContainer(popupBackdropBlurRadius) {
             ContentContainer {
                 InventoryView()
@@ -64,6 +69,26 @@ fun AppRoot(content: @Composable BoxScope.() -> Unit) =
             .background(Color(0xff272727)),
         content = content
     )
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun Background() =
+    AnimatedContent(
+        targetState = arctic.stored == null,
+        transitionSpec = {
+            val enter = fadeIn()
+            val exit = fadeOut()
+            enter with exit
+        },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Image(
+            bitmap = GameResources.image { "/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png" },
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().alpha(if (it) 0.6f else 0f).blur(50.dp),
+            contentDescription = null
+        )
+    }
 
 @Composable
 fun BoxScope.MainContainer(blurRadius: Dp, content: @Composable ColumnScope.() -> Unit) =

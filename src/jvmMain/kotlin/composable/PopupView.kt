@@ -334,6 +334,7 @@ fun RetroButton(
     disabledColor: Color = Color(0xff666666),
     enabled: Boolean = true,
     buttonSize: Pair<Dp, Dp> = 225.dp to 70.dp,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
 
@@ -354,7 +355,7 @@ fun RetroButton(
         modifier = Modifier
             .size(buttonSize.first, buttonSize.second)
             .hoverable(source, enabled)
-            .clickable(source, null, enabled, onClick = onClick)
+            .clickable(source, null, enabled, onClick = onClick).then(modifier)
     ) {
         Box(
             modifier = Modifier
