@@ -3,9 +3,9 @@ package blackstone.states.items
 import Database
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import arctic
 import blackstone.states.Item
 import blackstone.states.StoredDataState
+import blackstone.states.arctic
 import extensions.GameResources
 
 

@@ -4,6 +4,8 @@ import ItemData
 import androidx.compose.runtime.*
 import extensions.replace
 
+val arctic = ArcticStates()
+
 @Stable
 class ArcticStates {
 
@@ -29,6 +31,19 @@ class ArcticStates {
     val alerts = PopupsState(this)
 
     val dialogs = DialogsState()
+
+    val backdropBlur get() =
+        dialogs.fileSaveDstSelector ||
+        enchantments.hasDetailTarget ||
+        armorProperties.hasDetailTarget ||
+        armorProperties.hasCreateInto ||
+        creation.enabled ||
+        alerts.inventoryFull ||
+        alerts.closeFile ||
+        alerts.fileLoadFailed != null ||
+        edition.target != null ||
+        deletion.target != null ||
+        duplication.target != null
 
     fun toggleView() {
         view = if (view == "storage") "inventory" else "storage"

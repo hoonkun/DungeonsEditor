@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import blackstone.states.dp
 import blackstone.states.sp
-import arctic
+import blackstone.states.arctic
 import extensions.DungeonsPower
 import extensions.GameResources
 import blackstone.states.Item

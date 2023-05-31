@@ -22,7 +22,7 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import blackstone.states.dp
 import blackstone.states.sp
-import arctic
+import blackstone.states.arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Item
 import blackstone.states.items.ArmorProperty

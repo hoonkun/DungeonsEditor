@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import blackstone.states.dp
 import blackstone.states.sp
-import arctic
+import blackstone.states.arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item

@@ -28,8 +28,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import blackstone.states.dp
 import blackstone.states.sp
-import arctic
 import blackstone.states.StoredDataState
+import blackstone.states.arctic
 import extensions.DungeonsLevel
 import extensions.DungeonsPower
 import extensions.GameResources

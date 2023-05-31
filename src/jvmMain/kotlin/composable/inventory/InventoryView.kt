@@ -11,62 +11,60 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import blackstone.states.dp
 import blackstone.states.sp
-import arctic
 import blackstone.states.items.unequipped
 import blackstone.states.Item
+import blackstone.states.arctic
 import blackstone.states.items.equippedItems
-import composable.RetroButton
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RowScope.InventoryView() {
     Debugging.recomposition("InventoryView")
 
-    AnimatedContent(arctic.stored) { stored ->
+    AnimatedContent(
+        targetState = arctic.stored,
+        transitionSpec = { (fadeIn() + slideIn(initialOffset = { IntOffset(0, -50.dp.value.toInt()) }) with fadeOut() + slideOut(targetOffset = { IntOffset(0, -50.dp.value.toInt()) })) using SizeTransform(false) }
+    ) { stored ->
         if (stored != null) {
-            AnimatedContent(
-                targetState = stored to arctic.view,
-                transitionSpec = {
-                    val enter = fadeIn(tween(durationMillis = 250)) + slideIn(
-                        tween(durationMillis = 250),
-                        initialOffset = { IntOffset(50, 0) })
-                    val exit = fadeOut(tween(durationMillis = 250)) + slideOut(
-                        tween(durationMillis = 250),
-                        targetOffset = { IntOffset(-50, 0) })
-                    enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
-                },
-                modifier = Modifier.width(657.dp)
-            ) { (stored, view) ->
-                Row(modifier = Modifier.fillMaxSize()) {
-                    if (view == "inventory") {
-                        LeftArea {
-                            EquippedItems(stored.equippedItems)
-                            Divider()
-                            InventoryItems(stored.items.filter(unequipped))
+            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
+                AnimatedContent(
+                    targetState = stored to arctic.view,
+                    transitionSpec = {
+                        val enter = fadeIn(tween(durationMillis = 250)) + slideIn(tween(durationMillis = 250), initialOffset = { IntOffset(50, 0) })
+                        val exit = fadeOut(tween(durationMillis = 250)) + slideOut(tween(durationMillis = 250), targetOffset = { IntOffset(-50, 0) })
+                        enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = 250) }
+                    },
+                    modifier = Modifier.width(657.dp)
+                ) { (stored, view) ->
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        if (view == "inventory") {
+                            LeftArea {
+                                EquippedItems(stored.equippedItems)
+                                Divider()
+                                InventoryItems(stored.items.filter(unequipped))
+                            }
+                        } else if (view == "storage") {
+                            LeftArea { InventoryItems(stored.storageChestItems) }
                         }
-                    } else if (view == "storage") {
-                        LeftArea { InventoryItems(stored.storageChestItems) }
+                    }
+                }
+                RightArea {
+                    AnimatorBySelectedItemExists(arctic.selection.selected.any { item -> item != null }) {
+                        if (it) ItemComparatorView(arctic.selection.selected)
+                        else TitleView()
                     }
                 }
             }
-        }
-    }
-    RightArea {
-        AnimatorBySelectedItemExists(arctic.selection.selected.any { item -> item != null }) {
-            if (it) ItemComparatorView(arctic.selection.selected)
-            else TitleView()
+        } else {
+            Box(modifier = Modifier.fillMaxSize())
         }
     }
 }
@@ -142,59 +140,7 @@ private fun TitleView() =
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.offset(x = (-5).dp)) {
-            TitleText(Color(0xffec691f), 8.dp)
-            TitleText(Color(0xddffbb33), 0.dp)
-            Text(
-                text = "editor",
-                color = Color.White.copy(alpha = 0.65f),
-                fontSize = 35.sp,
-                fontFamily = JetbrainsMono,
-                modifier = Modifier.offset(x = 70.dp, y = (80).dp)
-            )
-//            Text(
-//                text = "Minecraft Dungeons 1.17.0.0 버전과 호환",
-//                fontSize = 20.sp,
-//                color = Color.White.copy(alpha = 0.45f),
-//                modifier = Modifier.align(Alignment.TopEnd).offset(x = (-142.5).dp, y = 20.dp)
-//            )
-        }
-        Spacer(modifier = Modifier.height(40.dp))
-        ReadmeContainer {
-            H3("README.md")
-            Paragraph("Minecraft Dungeons 의 세이브 파일 일부를 수정합니다.")
-            H4("형식적인 문장")
-            Paragraph(
-                buildAnnotatedString {
-                    append("어디까지나 연구용일 뿐입니다. 데미지 계산이라던지... \n뭐 그런 것들 말입니다. ")
-                    withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough, color = Color.White.copy(0.6f))) {
-                        append("아무도 그렇게 안씀")
-                    }
-                }
-            )
-            Paragraph("파일 선택을 시도하면 굉장히 불친절한 탐색기가 나올텐데, 그것만 어찌 잘 넘어가시면 그 이후는 편리하게 쓸 수 있도록 최선을 다했습니다.")
-            H4("최소한의 주의사항")
-            Paragraph(
-                buildAnnotatedString {
-                    append("이 툴로 편집한 이후 탄생한 무언가가 정상적인 데이터라고 보장할 수 없으므로, ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("수정을 가하시기 전 항상 백업을 따로 만들어주세요")
-                    }
-                    append(".")
-                }
-            )
-            H4("아무도 궁금해하지 않는 사항")
-            Paragraph("HoonKun(GitHub) 이 만들었습니다. 심심해서요.\n절대 던전스 데이터 날려먹고 확률망겜에 지쳐서 만든 툴이 아닙니다.")
-        }
-        RetroButton(
-            text = if (arctic.stored == null) "파일 선택" else "다른 파일 선택",
-            color = Color(0xff3f8e4f),
-            hoverInteraction = "outline",
-            modifier = Modifier.align(Alignment.End).offset(x = (-50).dp)
-        ) {
-            arctic.dialogs.fileLoadSrcSelector = true
-        }
-        Spacer(modifier = Modifier.height(20.dp))
+
     }
 
 @Composable
