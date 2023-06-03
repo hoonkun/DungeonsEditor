@@ -29,7 +29,7 @@ import composable.Popups
 import composable.Selector
 import composable.inventory.InventoryView
 import extensions.GameResources
-import io.StoredFile.Companion.readAsStoredFile
+import dungeons.readDungeonsJson
 
 @Composable
 @Preview
@@ -337,7 +337,7 @@ fun main() = application {
                 onSelect = {
                     try {
                         arctic.view = "inventory"
-                        arctic.stored = StoredDataState(it.readAsStoredFile().root)
+                        arctic.stored = StoredDataState(it.readDungeonsJson())
                     } catch (e: Exception) {
                         arctic.alerts.fileLoadFailed = e.message
                     } finally {

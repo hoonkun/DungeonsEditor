@@ -5,8 +5,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import blackstone.states.items.ArmorProperty
 import blackstone.states.items.Enchantment
+import dungeons.writeDungeonsJson
 import extensions.*
-import io.StoredFile.Companion.saveIntoStoredFile
 import org.json.JSONObject
 import java.io.File
 
@@ -223,7 +223,7 @@ class StoredDataState(private val from: JSONObject) {
         }
 
     fun save(file: File) {
-        export().saveIntoStoredFile(file)
+        file.writeDungeonsJson(export())
     }
 
 }
