@@ -30,8 +30,8 @@ import blackstone.states.dp
 import blackstone.states.sp
 import blackstone.states.StoredDataState
 import blackstone.states.arctic
-import extensions.DungeonsLevel
-import extensions.DungeonsPower
+import dungeons.DungeonsLevel
+import dungeons.DungeonsPower
 import dungeons.IngameImages
 import extensions.toFixed
 

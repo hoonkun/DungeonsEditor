@@ -32,7 +32,7 @@ import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment
 import blackstone.states.Item
 import blackstone.states.items.*
-import extensions.DungeonsPower
+import dungeons.DungeonsPower
 import dungeons.IngameImages
 import extensions.toFixed
 

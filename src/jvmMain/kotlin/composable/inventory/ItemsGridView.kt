@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.IntSize
 import blackstone.states.dp
 import blackstone.states.sp
 import blackstone.states.arctic
-import extensions.DungeonsPower
+import dungeons.DungeonsPower
 import dungeons.IngameImages
 import blackstone.states.Item
 import blackstone.states.items.*

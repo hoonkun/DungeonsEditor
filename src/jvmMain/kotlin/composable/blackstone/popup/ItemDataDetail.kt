@@ -26,7 +26,7 @@ import blackstone.states.items.RarityColorType
 import blackstone.states.items.addItem
 import composable.inventory.PowerEditField
 import composable.inventory.drawInteractionBorder
-import extensions.DungeonsPower
+import dungeons.DungeonsPower
 import dungeons.IngameImages
 import extensions.toFixed
 

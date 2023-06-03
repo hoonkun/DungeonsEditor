@@ -1,4 +1,4 @@
-package extensions
+package dungeons
 
 import blackstone.states.StoredDataState
 import blackstone.states.items.*
