@@ -14,8 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.states.Enchantment
-import blackstone.states.items.data
-import blackstone.states.items.leveling
+import arctic.states.extensions.data
+import arctic.states.extensions.leveling
 import composable.inventory.EnchantmentIcon
 import composable.inventory.LevelImage
 import composable.inventory.LevelImagePositioner

@@ -19,11 +19,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
+import arctic.states.ArmorProperty
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.arctic
 import arctic.states.Item
-import blackstone.states.items.ArmorProperty
 import dungeons.Database
 import extensions.replace
 
@@ -65,7 +65,7 @@ fun ArmorPropertySelectText(holder: Item, index: Int?, indexValid: Boolean, prop
         val properties = holder.armorProperties
             ?: throw RuntimeException("[ArmorPropertySelectText] non-null assertion failed: holder.armorProperties must not be null")
 
-        val newProperty = ArmorProperty(propertyData.id, holder)
+        val newProperty = ArmorProperty(holder, propertyData.id)
 
         if (index != null && indexValid) {
             val existing = properties[index]

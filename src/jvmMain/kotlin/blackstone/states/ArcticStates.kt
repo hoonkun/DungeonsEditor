@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 import arctic.states.ArmorProperty
 import arctic.states.Enchantment
 import arctic.states.Item
-import arctic.states.StoredDataState
+import arctic.states.DungeonsJsonState
 import extensions.replace
 
 val arctic = ArcticStates()
@@ -13,8 +13,8 @@ val arctic = ArcticStates()
 @Stable
 class ArcticStates {
 
-    var stored: StoredDataState? by mutableStateOf(null)
-    val requireStored: StoredDataState get() = stored!!
+    var stored: DungeonsJsonState? by mutableStateOf(null)
+    val requireStored: DungeonsJsonState get() = stored!!
 
     var view by mutableStateOf("inventory")
 

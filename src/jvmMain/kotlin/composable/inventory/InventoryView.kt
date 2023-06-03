@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.items.unequipped
 import arctic.states.Item
 import blackstone.states.arctic
-import blackstone.states.items.equippedItems
+import arctic.states.extensions.equippedItems
+import arctic.states.extensions.unequippedItems
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -49,7 +49,7 @@ fun RowScope.InventoryView() {
                             LeftArea {
                                 EquippedItems(stored.equippedItems)
                                 Divider()
-                                InventoryItems(stored.items.filter(unequipped))
+                                InventoryItems(stored.unequippedItems)
                             }
                         } else if (view == "storage") {
                             LeftArea { InventoryItems(stored.storageChestItems) }

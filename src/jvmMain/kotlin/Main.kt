@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.*
-import arctic.states.StoredDataState
+import arctic.states.DungeonsJsonState
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.*
@@ -291,7 +291,7 @@ fun ColumnScope.ContentContainer(content: @Composable RowScope.() -> Unit) =
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BottomBarContainer(content: @Composable BoxScope.(StoredDataState) -> Unit) =
+fun BottomBarContainer(content: @Composable BoxScope.(DungeonsJsonState) -> Unit) =
     AnimatedContent(
         targetState = arctic.stored,
         transitionSpec = {
@@ -340,7 +340,7 @@ fun main() = application {
                 onSelect = {
                     try {
                         arctic.view = "inventory"
-                        arctic.stored = StoredDataState(it.readDungeonsJson())
+                        arctic.stored = DungeonsJsonState(it.readDungeonsJson())
                     } catch (e: Exception) {
                         arctic.alerts.fileLoadFailed = e.message
                     } finally {

@@ -3,8 +3,6 @@ package arctic.states
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import blackstone.states.items.ArmorProperty
-import blackstone.states.items.Enchantment
 import dungeons.writeDungeonsJson
 import extensions.*
 import org.json.JSONObject
@@ -20,7 +18,7 @@ annotation class JsonField(val name: String)
 annotation class MustBeVerified(val message: String)
 
 @Stable
-class StoredDataState(private val from: JSONObject) {
+class DungeonsJsonState(private val from: JSONObject) {
 
     companion object {
         private const val FIELD_BONUS_PREREQUISITES = "bonus_prerequisites"
@@ -104,7 +102,7 @@ class StoredDataState(private val from: JSONObject) {
     )
 
     @JsonField(FIELD_ITEMS)
-    val items: SnapshotStateList<Item> = from.getJSONArray(FIELD_ITEMS).transformWithJsonObject { Item(this@StoredDataState, it) }.toMutableStateList()
+    val items: SnapshotStateList<Item> = from.getJSONArray(FIELD_ITEMS).transformWithJsonObject { Item(this@DungeonsJsonState, it) }.toMutableStateList()
 
     @JsonField(FIELD_ITEMS_FOUND)
     val itemsFound: SnapshotStateList<ItemType> = from.getJSONArray(FIELD_ITEMS_FOUND).toStringList().toMutableStateList()
@@ -125,7 +123,7 @@ class StoredDataState(private val from: JSONObject) {
     var mapUiState: MapUiState? by mutableStateOf(from.safe { MapUiState(getJSONObject(FIELD_MAP_UI_STATE)) })
 
     @JsonField(FIELD_MERCHANT_DATA)
-    val merchantData: MerchantDataSet = MerchantDataSet(this@StoredDataState, from.getJSONObject(FIELD_MERCHANT_DATA))
+    val merchantData: MerchantDataSet = MerchantDataSet(this@DungeonsJsonState, from.getJSONObject(FIELD_MERCHANT_DATA))
 
     @JsonField(FIELD_MOB_KILLS)
     var mobKills: SnapshotStateMap<String, Int>? by mutableStateOf(
@@ -142,7 +140,7 @@ class StoredDataState(private val from: JSONObject) {
 
     @JsonField(FIELD_PENDING_REWARD_ITEMS)
     val pendingRewardItems: SnapshotStateList<Item> = from.getJSONArray(FIELD_PENDING_REWARD_ITEMS)
-        .transformWithJsonObject { Item(this@StoredDataState, it) }
+        .transformWithJsonObject { Item(this@DungeonsJsonState, it) }
         .toMutableStateList()
 
     @JsonField(FIELD_PLAYER_ID)
@@ -176,7 +174,7 @@ class StoredDataState(private val from: JSONObject) {
     )
 
     @JsonField(FIELD_STORAGE_CHEST_ITEMS)
-    val storageChestItems: SnapshotStateList<Item> = from.getJSONArray(FIELD_STORAGE_CHEST_ITEMS).transformWithJsonObject { Item(this@StoredDataState, it) }.toMutableStateList()
+    val storageChestItems: SnapshotStateList<Item> = from.getJSONArray(FIELD_STORAGE_CHEST_ITEMS).transformWithJsonObject { Item(this@DungeonsJsonState, it) }.toMutableStateList()
 
     @JsonField(FIELD_STRONGHOLD_PROGRESS)
     val strongholdProgress: SnapshotStateMap<String, Boolean> = from.getJSONObject(FIELD_STRONGHOLD_PROGRESS).toBooleanMap().toMutableStateMap()
@@ -334,7 +332,7 @@ class FinishedObjectiveTags(decorActor: Int, rescuedVillager: Int, cannotAttachP
 
 @Stable
 class Item(
-    val parent: StoredDataState,
+    val parent: DungeonsJsonState,
     inventoryIndex: Int?,
     power: Double,
     rarity: String,
@@ -383,7 +381,7 @@ class Item(
         enchantments
             ?.onEach { it.holder = this }
             ?.toMutableList()
-            ?.padEnd(9) { Enchantment("Unset", this@Item) }
+            ?.padEnd(9) { Enchantment(this@Item, "Unset") }
             ?.toMutableStateList()
     )
 
@@ -405,7 +403,7 @@ class Item(
     @JsonField(FIELD_MARKED_NEW) @CanBeUndefined
     var markedNew: Boolean? by mutableStateOf(markedNew)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         parent,
         from.safe { getInt(FIELD_INVENTORY_INDEX) },
         from.getDouble(FIELD_POWER),
@@ -428,9 +426,9 @@ class Item(
         other.rarity,
         other.type,
         other.upgraded,
-        other.enchantments?.map { Enchantment(it) },
-        other.armorProperties?.map { ArmorProperty(it) },
-        other.netheriteEnchant?.let { Enchantment(it) },
+        other.enchantments?.map { it.copy() },
+        other.armorProperties?.map { it.copy() },
+        other.netheriteEnchant?.copy(),
         other.modified,
         other.timesModified,
         other.equipmentSlot,
@@ -471,7 +469,7 @@ class Item(
 }
 
 @Stable
-class Enchantment(
+class Enchantment private constructor(
     id: String,
     investedPoints: Int,
     level: Int
@@ -500,7 +498,10 @@ class Enchantment(
         from.getInt(FIELD_LEVEL)
     )
 
-    constructor(other: Enchantment): this(other.id, other.investedPoints, other.level)
+    constructor(holder: Item, id: String, investedPoints: Int = 0, level: Int = 0, isNetheriteEnchant: Boolean = false):
+            this(id, investedPoints, level) { this.holder = holder; this.isNetheriteEnchant = isNetheriteEnchant }
+
+    fun copy() = Enchantment(holder, id, investedPoints, level, isNetheriteEnchant)
 
     fun export(): JSONObject =
         JSONObject().apply {
@@ -511,7 +512,7 @@ class Enchantment(
 }
 
 @Stable
-class ArmorProperty(
+class ArmorProperty private constructor(
     id: String,
     rarity: String
 ) {
@@ -533,7 +534,9 @@ class ArmorProperty(
         from.getString(FIELD_RARITY)
     )
 
-    constructor(other: ArmorProperty): this(other.id, other.rarity)
+    constructor(holder: Item, id: String, rarity: String = "Common") : this(id, rarity) { this.holder = holder }
+
+    fun copy() = ArmorProperty(holder, id, rarity)
 
     fun export(): JSONObject =
         JSONObject().apply {
@@ -800,7 +803,7 @@ class MerchantDataSet(
     @JsonField(FIELD_VILLAGER) @CanBeUndefined
     var villager: VillagerMerchantData? by mutableStateOf(villager)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.safe { AdventureHubMerchantData(getJSONObject(FIELD_ADVENTURE_HUB)) },
         from.safe { BlacksmithMerchantData(parent, getJSONObject(FIELD_BLACKSMITH)) },
         from.safe { EnchantmentMerchantData(getJSONObject(FIELD_ENCHANTMENT)) },
@@ -910,7 +913,7 @@ class BlacksmithMerchantData(
     quests: BlacksmithQuests,
     slots: BlacksmithSlots
 ): MerchantData<BlacksmithQuests, BlacksmithSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         BlacksmithQuests(from.getJSONObject(FIELD_QUESTS)),
@@ -1015,7 +1018,7 @@ class BlacksmithSlots(
     @JsonField(FIELD_SLOT_3)
     val slot3: MerchantDataSlot by mutableStateOf(slot3)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_2)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_3))
@@ -1042,7 +1045,7 @@ class GiftWrapperMerchantData(
     quests: GiftWrapperQuests,
     slots: GiftWrapperSlots
 ): MerchantData<GiftWrapperQuests, GiftWrapperSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         GiftWrapperQuests(from),
@@ -1075,7 +1078,7 @@ class GiftWrapperSlots(
     @JsonField(FIELD_SLOT_1)
     val slot1: MerchantDataSlot by mutableStateOf(slot1)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_1))
     )
 }
@@ -1087,7 +1090,7 @@ class HyperMissionMerchantData(
     quests: EmptyMerchantDataQuests = EmptyMerchantDataQuests(),
     slots: HyperMissionSlots
 ): MerchantData<EmptyMerchantDataQuests, HyperMissionSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         slots = HyperMissionSlots(parent, from.getJSONObject(FIELD_SLOTS))
@@ -1120,7 +1123,7 @@ class HyperMissionSlots(
     @JsonField(FIELD_SLOT_RANGED)
     val slotRanged: MerchantDataSlot by mutableStateOf(slotRanged)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARMOR)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARTIFACT)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_MELEE)),
@@ -1135,7 +1138,7 @@ class LuxuryMerchantData(
     quests: LuxuryQuests,
     slots: LuxurySlots
 ): MerchantData<LuxuryQuests, LuxurySlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         LuxuryQuests(from.getJSONObject(FIELD_QUESTS)),
@@ -1184,7 +1187,7 @@ class PiglinMerchantData(
     quests: PiglinQuests,
     slots: PiglinSlots
 ): MerchantData<PiglinQuests, PiglinSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         PiglinQuests(from),
@@ -1247,7 +1250,7 @@ class PiglinSlots(
     @JsonField(FIELD_SLOT_3)
     val slot3: MerchantDataSlot by mutableStateOf(slot3)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_2)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_3))
@@ -1275,7 +1278,7 @@ class LuxurySlots(
     @JsonField(FIELD_SLOT_3)
     val slot3: MerchantDataSlot by mutableStateOf(slot3)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_2)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_3))
@@ -1289,7 +1292,7 @@ class TowerArtisanMerchantData(
     quests: EmptyMerchantDataQuests = EmptyMerchantDataQuests(),
     slots: TowerArtisanSlots
 ): MerchantData<EmptyMerchantDataQuests, TowerArtisanSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         slots = TowerArtisanSlots(parent, from.getJSONObject(FIELD_SLOTS))
@@ -1332,7 +1335,7 @@ class TowerArtisanSlots(
     @JsonField(FIELD_SLOT_RANGED)
     val slotRanged: MerchantDataSlot by mutableStateOf(slotRanged)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARMOR)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARTIFACT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARTIFACT_2)),
@@ -1349,7 +1352,7 @@ class TowerCompleteMerchantData(
     quests: TowerCompleteQuests,
     slots: TowerCompleteSlots
 ): MerchantData<TowerCompleteQuests, TowerCompleteSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         TowerCompleteQuests(from.getJSONObject(FIELD_QUESTS)),
@@ -1392,7 +1395,7 @@ class TowerCompleteSlots(
     @JsonField(FIELD_SLOT_3)
     val slot3: MerchantDataSlot by mutableStateOf(slot3)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_2)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_3))
@@ -1406,7 +1409,7 @@ class TowerGliderMerchantData(
     quests: EmptyMerchantDataQuests = EmptyMerchantDataQuests(),
     slots: TowerGliderSlots
 ): MerchantData<EmptyMerchantDataQuests, TowerGliderSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         slots = TowerGliderSlots(parent, from.getJSONObject(FIELD_SLOTS))
@@ -1449,7 +1452,7 @@ class TowerGliderSlots(
     @JsonField(FIELD_SLOT_RANGED)
     val slotRanged: MerchantDataSlot by mutableStateOf(slotRanged)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARMOR)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARTIFACT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_ARTIFACT_2)),
@@ -1466,7 +1469,7 @@ class VillagerMerchantData(
     quests: VillagerQuests,
     slots: VillagerSlots
 ): MerchantData<VillagerQuests, VillagerSlots>(everInteracted, pricing, quests, slots) {
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.getBoolean(FIELD_EVER_INTERACTED),
         MerchantPricing(from.getJSONObject(FIELD_PRICING)),
         VillagerQuests(from.getJSONObject(FIELD_QUESTS)),
@@ -1556,7 +1559,7 @@ class VillagerSlots(
     @JsonField(FIELD_SLOT_6)
     val slot6: MerchantDataSlot by mutableStateOf(slot6)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_1)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_2)),
         MerchantDataSlot(parent, from.getJSONObject(FIELD_SLOT_3)),
@@ -1626,7 +1629,7 @@ class MerchantDataSlot(
     @JsonField(FIELD_RESERVED)
     var reserved: Boolean by mutableStateOf(reserved)
 
-    constructor(parent: StoredDataState, from: JSONObject): this(
+    constructor(parent: DungeonsJsonState, from: JSONObject): this(
         from.safe { Item(parent, getJSONObject(FIELD_ITEM)) },
         from.getInt(FIELD_PRICE_MULTIPLIER),
         from.getInt(FIELD_REBATE_FRACTION),

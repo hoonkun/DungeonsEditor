@@ -28,7 +28,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import arctic.states.StoredDataState
+import arctic.states.DungeonsJsonState
+import arctic.states.extensions.playerPower
 import blackstone.states.arctic
 import dungeons.DungeonsLevel
 import dungeons.DungeonsPower
@@ -36,7 +37,7 @@ import dungeons.IngameImages
 import extensions.toFixed
 
 @Composable
-fun BottomBar(stored: StoredDataState) {
+fun BottomBar(stored: DungeonsJsonState) {
     Debugging.recomposition("BottomBar")
 
     Box(
@@ -61,7 +62,7 @@ fun BottomBar(stored: StoredDataState) {
 
             CurrencyText(
                 icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
-                value = "${DungeonsPower.playerPower(stored)}"
+                value = "${stored.playerPower}"
             )
 
             CurrencyField(

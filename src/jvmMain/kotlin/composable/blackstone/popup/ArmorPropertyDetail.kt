@@ -21,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.states.ArmorProperty
-import blackstone.states.items.ArmorPropertyRarityIcon
-import blackstone.states.items.data
+import arctic.ui.composables.ArmorPropertyRarityIcon
+import arctic.states.extensions.data
 
 @Composable
 fun ArmorPropertyDetail(property: ArmorProperty) {

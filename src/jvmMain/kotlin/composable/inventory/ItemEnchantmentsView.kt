@@ -17,7 +17,7 @@ import arctic.states.Enchantment
 import arctic.ui.unit.dp
 import dungeons.IngameImages
 import blackstone.states.*
-import blackstone.states.items.data
+import arctic.states.extensions.data
 
 @Composable
 fun ItemEnchantmentsView(enchantments: List<Enchantment>) {

@@ -26,8 +26,8 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.items.RarityColor
-import blackstone.states.items.RarityColorType
+import arctic.ui.composables.RarityColor
+import arctic.ui.composables.RarityColorType
 import extensions.padEnd
 
 

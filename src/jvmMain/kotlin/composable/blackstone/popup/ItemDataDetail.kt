@@ -25,9 +25,10 @@ import arctic.states.Item
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.*
-import blackstone.states.items.RarityColor
-import blackstone.states.items.RarityColorType
-import blackstone.states.items.addItem
+import arctic.ui.composables.RarityColor
+import arctic.ui.composables.RarityColorType
+import arctic.states.extensions.addItem
+import arctic.states.extensions.playerPower
 import composable.inventory.PowerEditField
 import composable.inventory.drawInteractionBorder
 import dungeons.DungeonsPower
@@ -39,7 +40,7 @@ import extensions.toFixed
 fun ItemDataDetail(itemData: ItemData) {
 
     var rarity by remember { mutableStateOf(if (itemData.unique) "Unique" else "Common") }
-    var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(DungeonsPower.playerPower(arctic.requireStored).toDouble())) }
+    var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(arctic.requireStored.playerPower.toDouble())) }
 
     val name = itemData.name
     val description = itemData.description
@@ -99,9 +100,14 @@ fun ItemDataDetail(itemData: ItemData) {
                 type = itemData.type,
                 upgraded = false,
                 enchantments = if (itemData.variant != "Artifact") listOf() else null,
-                armorProperties = if (itemData.variant == "Armor") itemData.builtInProperties.map { ArmorProperty(id = it.id, rarity = "Common") } else null,
+                armorProperties = null,
                 markedNew = true
             )
+            if (itemData.variant == "Armor")
+                newItem.armorProperties = itemData.builtInProperties
+                    .map { ArmorProperty(holder = newItem, id = it.id, rarity = "Common") }
+                    .toMutableStateList()
+
             newItem.parent.addItem(newItem)
             arctic.creation.disable()
             arctic.creation.target = null

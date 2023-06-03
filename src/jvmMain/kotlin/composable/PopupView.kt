@@ -31,10 +31,10 @@ import arctic.states.Item
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.*
-import blackstone.states.items.addItem
-import blackstone.states.items.data
-import blackstone.states.items.deleteItem
-import blackstone.states.items.where
+import arctic.states.extensions.addItem
+import arctic.states.extensions.data
+import arctic.states.extensions.deleteItem
+import arctic.states.extensions.where
 import composable.blackstone.popup.*
 
 @Composable
@@ -232,7 +232,7 @@ fun DuplicatePopup() {
     Backdrop(_target != null) { arctic.duplication.target = null }
 
     AnimatedContent(
-        targetState = _target to _target?.where(),
+        targetState = _target to _target?.where,
         transitionSpec = {
             val enter = fadeIn() + scaleIn(initialScale = 1.1f)
             val exit = fadeOut() + scaleOut(targetScale = 1.1f)
@@ -285,7 +285,7 @@ fun DeletionPopup() {
     Backdrop(_target != null) { arctic.deletion.target = null }
 
     AnimatedContent(
-        targetState = _target to _target?.where(),
+        targetState = _target to _target?.where,
         transitionSpec = {
             val enter = fadeIn() + scaleIn(initialScale = 1.1f)
             val exit = fadeOut() + scaleOut(targetScale = 1.1f)

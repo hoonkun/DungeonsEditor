@@ -31,7 +31,12 @@ import blackstone.states.arctic
 import arctic.states.ArmorProperty
 import arctic.states.Enchantment
 import arctic.states.Item
-import blackstone.states.items.*
+import arctic.states.extensions.addItem
+import arctic.states.extensions.data
+import arctic.states.extensions.where
+import arctic.ui.composables.ArmorPropertyRarityIcon
+import arctic.ui.composables.RarityColor
+import arctic.ui.composables.RarityColorType
 import dungeons.DungeonsPower
 import dungeons.IngameImages
 import extensions.toFixed
@@ -82,7 +87,7 @@ private fun ItemDetailView(item: Item) {
                 AlterButton("타입 변경") { arctic.edition.enable(item) }
                 Spacer(modifier = Modifier.width(7.dp))
                 AlterButton("복제") {
-                    if (item.where() == arctic.view) {
+                    if (item.where == arctic.view) {
                         if (!arctic.alerts.checkAvailable())
                             item.parent.addItem(item.copy(), item)
                     } else {
@@ -182,7 +187,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                 .onClick(matcher = PointerMatcher.mouse(PointerButton.Primary)) {
                     var netheriteEnchant = parentItem.netheriteEnchant
                     if (netheriteEnchant == null) {
-                        netheriteEnchant = Enchantment("Unset", parentItem, isNetheriteEnchant = true)
+                        netheriteEnchant = Enchantment(parentItem, "Unset", isNetheriteEnchant = true)
                         parentItem.netheriteEnchant = netheriteEnchant
                     }
                     arctic.enchantments.viewDetail(netheriteEnchant)

@@ -29,7 +29,11 @@ import blackstone.states.arctic
 import dungeons.DungeonsPower
 import dungeons.IngameImages
 import arctic.states.Item
-import blackstone.states.items.*
+import arctic.states.extensions.data
+import arctic.states.extensions.totalEnchantmentInvestedPoints
+import arctic.ui.composables.RarityColor
+import arctic.ui.composables.RarityColorType
+import arctic.ui.composables.VariantFilterIcon
 
 @Composable
 fun EquippedItems(items: List<Item?>) {
@@ -95,7 +99,7 @@ fun InventoryItems(items: List<Item>) {
     val filteredItems by remember(items) {
         derivedStateOf {
             items.filter {
-                val variantMatched = (variantFilter == null || (if (variantFilter == "Enchanted") it.totalInvestedEnchantmentPoints > 0 else it.data.variant == variantFilter))
+                val variantMatched = (variantFilter == null || (if (variantFilter == "Enchanted") it.totalEnchantmentInvestedPoints > 0 else it.data.variant == variantFilter))
                 val rarityMatched = (rarityFilter == null || it.rarity == rarityFilter)
 
                 variantMatched && rarityMatched
@@ -269,7 +273,7 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
 
     val rarity = item.rarity
     val power = DungeonsPower.toInGamePower(item.power).toInt()
-    val totalEnchantmentPoints = item.totalInvestedEnchantmentPoints
+    val totalEnchantmentPoints = item.totalEnchantmentInvestedPoints
 
     Image(
         bitmap = item.data.inventoryIcon,
