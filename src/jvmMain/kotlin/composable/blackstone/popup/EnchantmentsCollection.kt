@@ -1,7 +1,7 @@
 package composable.blackstone.popup
 
-import Database
-import EnchantmentData
+import dungeons.Database
+import dungeons.EnchantmentData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -31,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import blackstone.states.dp
 import blackstone.states.sp
 import blackstone.states.arctic
-import blackstone.states.Enchantment
 import blackstone.states.Item
 import blackstone.states.items.*
 import composable.inventory.BlurBehindImage

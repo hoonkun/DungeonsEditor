@@ -1,6 +1,6 @@
 package composable.blackstone.popup
 
-import ArmorPropertyData
+import dungeons.ArmorPropertyData
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -23,9 +22,9 @@ import androidx.compose.ui.text.TextStyle
 import blackstone.states.dp
 import blackstone.states.sp
 import blackstone.states.arctic
-import blackstone.states.ArmorProperty
 import blackstone.states.Item
 import blackstone.states.items.ArmorProperty
+import dungeons.Database
 import extensions.replace
 
 @Composable

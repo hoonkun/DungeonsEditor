@@ -1,6 +1,6 @@
 package blackstone.states.items
 
-import Database
+import dungeons.Database
 import blackstone.states.ArmorProperty
 import blackstone.states.Item
 import extensions.GameResources

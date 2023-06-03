@@ -1,7 +1,7 @@
 package composable.blackstone.popup
 
-import ItemData
-import Localizations
+import dungeons.ItemData
+import dungeons.Localizations
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource

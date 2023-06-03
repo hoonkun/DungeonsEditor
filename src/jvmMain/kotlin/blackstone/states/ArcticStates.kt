@@ -1,6 +1,6 @@
 package blackstone.states
 
-import ItemData
+import dungeons.ItemData
 import androidx.compose.runtime.*
 import extensions.replace
 

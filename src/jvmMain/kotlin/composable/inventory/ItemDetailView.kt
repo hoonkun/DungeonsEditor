@@ -1,6 +1,6 @@
 package composable.inventory
 
-import Localizations
+import dungeons.Localizations
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*

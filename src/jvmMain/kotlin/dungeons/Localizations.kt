@@ -1,3 +1,5 @@
+package dungeons
+
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,7 +17,7 @@ class Localizations {
         private val texts: Map<String, Map<String, String>>
 
         operator fun get(key: String): String? {
-            return this.texts[currentLocale]?.get(key)
+            return texts[currentLocale]?.get(key)
         }
 
         private val ItemCorrections = mapOf<String, String>()

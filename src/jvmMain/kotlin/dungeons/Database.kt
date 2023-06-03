@@ -1,3 +1,6 @@
+package dungeons
+
+import Constants
 import androidx.compose.ui.graphics.ImageBitmap
 import extensions.GameResources
 import kotlinx.serialization.Serializable

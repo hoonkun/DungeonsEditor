@@ -1,8 +1,9 @@
 package blackstone.states.items
 
-import Database
+import dungeons.Database
 import blackstone.states.Enchantment
 import blackstone.states.Item
+import dungeons.EnchantmentData
 
 
 val Enchantment.data get() = Database.enchantment(id) ?: throw RuntimeException("unknown enchantment $id")

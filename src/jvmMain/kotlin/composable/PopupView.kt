@@ -1,6 +1,6 @@
 package composable
 
-import ItemData
+import dungeons.ItemData
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState

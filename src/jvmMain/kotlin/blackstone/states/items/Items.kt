@@ -1,6 +1,6 @@
 package blackstone.states.items
 
-import Database
+import dungeons.Database
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import blackstone.states.Item
