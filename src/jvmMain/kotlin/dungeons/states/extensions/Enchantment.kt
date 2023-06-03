@@ -1,6 +1,6 @@
-package arctic.states.extensions
+package dungeons.states.extensions
 
-import arctic.states.Enchantment
+import dungeons.states.Enchantment
 import dungeons.EnchantmentData
 
 

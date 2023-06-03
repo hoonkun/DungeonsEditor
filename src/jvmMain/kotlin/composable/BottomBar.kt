@@ -28,11 +28,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import arctic.states.DungeonsJsonState
-import arctic.states.extensions.playerPower
+import dungeons.states.DungeonsJsonState
+import dungeons.states.extensions.playerPower
 import blackstone.states.arctic
 import dungeons.DungeonsLevel
-import dungeons.DungeonsPower
 import dungeons.IngameImages
 import extensions.toFixed
 

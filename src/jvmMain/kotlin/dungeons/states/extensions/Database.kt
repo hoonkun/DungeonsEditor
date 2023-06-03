@@ -1,8 +1,8 @@
-package arctic.states.extensions
+package dungeons.states.extensions
 
-import arctic.states.ArmorProperty
-import arctic.states.Enchantment
-import arctic.states.Item
+import dungeons.states.ArmorProperty
+import dungeons.states.Enchantment
+import dungeons.states.Item
 import dungeons.Database
 
 

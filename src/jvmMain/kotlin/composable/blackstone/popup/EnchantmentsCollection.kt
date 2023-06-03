@@ -28,14 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import arctic.states.Enchantment
+import dungeons.states.Enchantment
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.arctic
-import arctic.states.Item
-import arctic.states.extensions.data
-import arctic.states.extensions.leveling
-import arctic.states.extensions.updateEnchantmentInvestedPoints
+import dungeons.states.Item
+import dungeons.states.extensions.data
+import dungeons.states.extensions.leveling
+import dungeons.states.extensions.updateEnchantmentInvestedPoints
 import composable.inventory.BlurBehindImage
 import extensions.replace
 

@@ -20,9 +20,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import arctic.states.ArmorProperty
+import dungeons.states.ArmorProperty
 import arctic.ui.composables.ArmorPropertyRarityIcon
-import arctic.states.extensions.data
+import dungeons.states.extensions.data
 
 @Composable
 fun ArmorPropertyDetail(property: ArmorProperty) {

@@ -1,4 +1,4 @@
-package arctic.states
+package dungeons.states
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList

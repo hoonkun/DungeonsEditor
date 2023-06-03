@@ -19,11 +19,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
-import arctic.states.ArmorProperty
+import dungeons.states.ArmorProperty
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.arctic
-import arctic.states.Item
+import dungeons.states.Item
 import dungeons.Database
 import extensions.replace
 

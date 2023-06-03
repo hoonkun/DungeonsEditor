@@ -1,6 +1,6 @@
-package arctic.states.extensions
+package dungeons.states.extensions
 
-import arctic.states.Item
+import dungeons.states.Item
 
 val Item.totalEnchantmentInvestedPoints get() = enchantments?.sumOf { it.investedPoints } ?: 0
 fun Item.updateEnchantmentInvestedPoints() { enchantments?.forEach { it.leveling(it.level) } }

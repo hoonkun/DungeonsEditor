@@ -28,9 +28,9 @@ import arctic.ui.unit.sp
 import blackstone.states.arctic
 import dungeons.DungeonsPower
 import dungeons.IngameImages
-import arctic.states.Item
-import arctic.states.extensions.data
-import arctic.states.extensions.totalEnchantmentInvestedPoints
+import dungeons.states.Item
+import dungeons.states.extensions.data
+import dungeons.states.extensions.totalEnchantmentInvestedPoints
 import arctic.ui.composables.RarityColor
 import arctic.ui.composables.RarityColorType
 import arctic.ui.composables.VariantFilterIcon

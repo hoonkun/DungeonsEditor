@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import arctic.states.Item
+import dungeons.states.Item
 import blackstone.states.arctic
-import arctic.states.extensions.equippedItems
-import arctic.states.extensions.unequippedItems
+import dungeons.states.extensions.equippedItems
+import dungeons.states.extensions.unequippedItems
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

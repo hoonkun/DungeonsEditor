@@ -25,16 +25,16 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import arctic.states.ArmorProperty
-import arctic.states.Enchantment
-import arctic.states.Item
+import dungeons.states.ArmorProperty
+import dungeons.states.Enchantment
+import dungeons.states.Item
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.*
-import arctic.states.extensions.addItem
-import arctic.states.extensions.data
-import arctic.states.extensions.deleteItem
-import arctic.states.extensions.where
+import dungeons.states.extensions.addItem
+import dungeons.states.extensions.data
+import dungeons.states.extensions.deleteItem
+import dungeons.states.extensions.where
 import composable.blackstone.popup.*
 
 @Composable

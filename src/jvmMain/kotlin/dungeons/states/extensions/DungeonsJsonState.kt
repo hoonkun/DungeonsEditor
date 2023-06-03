@@ -1,7 +1,7 @@
-package arctic.states.extensions
+package dungeons.states.extensions
 
-import arctic.states.DungeonsJsonState
-import arctic.states.Item
+import dungeons.states.DungeonsJsonState
+import dungeons.states.Item
 import blackstone.states.arctic
 import dungeons.DungeonsPower
 

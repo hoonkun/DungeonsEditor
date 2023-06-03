@@ -2,10 +2,10 @@ package blackstone.states
 
 import dungeons.ItemData
 import androidx.compose.runtime.*
-import arctic.states.ArmorProperty
-import arctic.states.Enchantment
-import arctic.states.Item
-import arctic.states.DungeonsJsonState
+import dungeons.states.ArmorProperty
+import dungeons.states.Enchantment
+import dungeons.states.Item
+import dungeons.states.DungeonsJsonState
 import extensions.replace
 
 val arctic = ArcticStates()
