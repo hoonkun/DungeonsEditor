@@ -12,7 +12,7 @@ private val armorPropertyRarityIconNames = mapOf(
     "Rare" to "rare"
 )
 
-val ArmorProperty.data get() = Database.current.findArmorProperty(id) ?: throw RuntimeException("unknown armor property $id")
+val ArmorProperty.data get() = Database.armorProperty(id) ?: throw RuntimeException("unknown armor property $id")
 
 fun ArmorProperty(id: String, holder: Item, rarity: String = "Common") =
     ArmorProperty(id, rarity).apply { this.holder = holder }

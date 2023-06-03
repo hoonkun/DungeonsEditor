@@ -33,7 +33,7 @@ fun ArmorPropertyCollection(holder: Item, index: Int?, indexValid: Boolean) {
 
     val property = if (index != null && indexValid) holder.armorProperties?.get(index) else null
 
-    val sorted = remember { Database.current.armorProperties.filter { it.description != null }.sortedBy { it.description } }
+    val sorted = remember { Database.armorProperties.filter { it.description != null }.sortedBy { it.description } }
     val lazy = rememberLazyListState(
         initialFirstVisibleItemIndex = if (property != null) sorted.indexOfFirst { it.id == property.id }.coerceAtLeast(0) else 0,
         initialFirstVisibleItemScrollOffset = -602.dp.value.toInt()

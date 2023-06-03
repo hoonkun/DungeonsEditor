@@ -5,7 +5,7 @@ import blackstone.states.Enchantment
 import blackstone.states.Item
 
 
-val Enchantment.data get() = Database.current.findEnchantment(id) ?: throw RuntimeException("unknown enchantment $id")
+val Enchantment.data get() = Database.enchantment(id) ?: throw RuntimeException("unknown enchantment $id")
 
 fun Enchantment(id: String, holder: Item, investedPoints: Int = 0, level: Int = 0, isNetheriteEnchant: Boolean = false) =
     Enchantment(id, investedPoints, level).apply { this.holder = holder; this.isNetheriteEnchant = isNetheriteEnchant }

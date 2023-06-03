@@ -38,7 +38,7 @@ private fun <T> List<T>.padEndRemaining(multiplier: Int, factory: (Int) -> T) = 
 
 private const val Columns = 5
 
-private fun variants(variant: String) = Database.current.items.filter(variant(variant)).sortedBy(nameType).padEndRemaining(Columns) { null }
+private fun variants(variant: String) = Database.items.filter(variant(variant)).sortedBy(nameType).padEndRemaining(Columns) { null }
 
 private val VariantText = mapOf(
     "Melee" to "근거리",

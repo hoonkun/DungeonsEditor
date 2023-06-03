@@ -45,7 +45,7 @@ fun EnchantmentsCollection(holder: Item, index: Int, isNetheriteEnchant: Boolean
 
     val enchantments by remember(holder.data.variant) {
         derivedStateOf {
-            Database.current.enchantments.filter { it.applyFor?.contains(holder.data.variant) == true }
+            Database.enchantments.filter { it.applyFor?.contains(holder.data.variant) == true }
         }
     }
 

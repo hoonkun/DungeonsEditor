@@ -20,7 +20,7 @@ val equippedArtifact3: (Item) -> Boolean = { it.equipmentSlot == "HotbarSlot3" }
 val equipped: (Item) -> Boolean = { it.equipmentSlot != null }
 val unequipped: (Item) -> Boolean = { it.inventoryIndex != null }
 
-val Item.data get() = Database.current.findItem(type) ?: throw RuntimeException("Unknown item $type")
+val Item.data get() = Database.item(type) ?: throw RuntimeException("Unknown item $type")
 
 val Item.totalInvestedEnchantmentPoints get() = enchantments?.sumOf { it.investedPoints } ?: 0
 
