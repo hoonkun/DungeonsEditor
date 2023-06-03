@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import blackstone.states.Item
 import blackstone.states.StoredDataState
 import blackstone.states.arctic
-import extensions.GameResources
+import dungeons.IngameImages
 
 
 val equippedMelee: (Item) -> Boolean = { it.equipmentSlot == "MeleeGear" }
@@ -81,7 +81,7 @@ fun VariantFilterIcon(with: String, selected: Boolean): ImageBitmap {
         else -> throw RuntimeException("unreachable error!")
     }
     val suffix = if (selected) "" else "_default"
-    return GameResources.image { "/Game/UI/Materials/Inventory2/Filter/$filename$suffix.png" }
+    return IngameImages.get { "/Game/UI/Materials/Inventory2/Filter/$filename$suffix.png" }
 }
 
 fun RarityFilterOverlayIcon(variant: String?): ImageBitmap {
@@ -92,7 +92,7 @@ fun RarityFilterOverlayIcon(variant: String?): ImageBitmap {
         "Artifact" -> "drops_item"
         else -> "drop_unknown"
     }
-    return GameResources.image { "/Game/UI/Materials/MissionSelectMap/inspector/loot/$filename.png" }
+    return IngameImages.get { "/Game/UI/Materials/MissionSelectMap/inspector/loot/$filename.png" }
 }
 
 fun RarityFilterFrame(rarity: String): ImageBitmap {
@@ -102,7 +102,7 @@ fun RarityFilterFrame(rarity: String): ImageBitmap {
         "Unique" -> "Unique_frame"
         else -> "regular_frame"
     }
-    return GameResources.image { "/Game/UI/Materials/Notification/$filename.png" }
+    return IngameImages.get { "/Game/UI/Materials/Notification/$filename.png" }
 }
 
 enum class RarityColorType {

@@ -28,7 +28,7 @@ import composable.BottomBar
 import composable.Popups
 import composable.Selector
 import composable.inventory.InventoryView
-import extensions.GameResources
+import dungeons.IngameImages
 import dungeons.readDungeonsJson
 
 @Composable
@@ -73,7 +73,7 @@ fun Background() =
         if (isInTitle) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Image(
-                    bitmap = GameResources.image { "/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png" },
+                    bitmap = IngameImages.get { "/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png" },
                     contentScale = ContentScale.Crop,
                     contentDescription = null,
                     modifier = Modifier

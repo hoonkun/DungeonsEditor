@@ -27,7 +27,7 @@ import blackstone.states.items.addItem
 import composable.inventory.PowerEditField
 import composable.inventory.drawInteractionBorder
 import extensions.DungeonsPower
-import extensions.GameResources
+import dungeons.IngameImages
 import extensions.toFixed
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -168,7 +168,7 @@ fun BoxScope.AddButton(onClick: () -> Unit) {
 @Composable
 fun AddButtonIcon(modifier: Modifier = Modifier) {
     Image(
-        GameResources.image { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
+        IngameImages.get { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
         null,
         filterQuality = FilterQuality.None,
         modifier = modifier.then(Modifier.size(125.dp).padding(12.5.dp))

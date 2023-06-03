@@ -33,7 +33,7 @@ import blackstone.states.Enchantment
 import blackstone.states.Item
 import blackstone.states.items.*
 import extensions.DungeonsPower
-import extensions.GameResources
+import dungeons.IngameImages
 import extensions.toFixed
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -193,7 +193,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
                 .padding(4.dp)
         ) {
             Image(
-                bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" },
+                bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" },
                 contentDescription = null,
                 modifier = Modifier.size(30.dp)
             )
@@ -211,7 +211,7 @@ private fun NetheriteEnchant(parentItem: Item, enchantment: Enchantment?) {
         ) {
             Box(modifier = Modifier.size(30.dp)) {
                 Image(
-                    bitmap = GameResources.image { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
+                    bitmap = IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
                     contentDescription = null,
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
                 )
@@ -290,7 +290,7 @@ private fun BoxScope.ItemImage(item: Item) =
 @Composable
 private fun PowerIcon() =
     Image(
-        bitmap = GameResources.image { "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png" },
+        bitmap = IngameImages.get { "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png" },
         contentDescription = null,
         modifier = Modifier.size(30.dp)
     )

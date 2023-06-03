@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import blackstone.states.dp
-import extensions.GameResources
+import dungeons.IngameImages
 import blackstone.states.*
 import blackstone.states.items.data
 
@@ -104,7 +104,7 @@ fun LevelImage(level: Int, scale: Float = 1.0f) {
     if (level == 0) return
 
     Image(
-        GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
+        IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
         null,
         modifier = Modifier.fillMaxSize(0.7f).scale(scale)
     )
@@ -113,7 +113,7 @@ fun LevelImage(level: Int, scale: Float = 1.0f) {
 @Composable
 fun BoxScope.LockedSlot() =
     Image(
-        bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_row.png" },
+        bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_row.png" },
         contentDescription = null,
         modifier = Modifier.fillMaxSize().offset(x = 5.dp, y = 5.dp).scale(0.9f)
     )
@@ -121,7 +121,7 @@ fun BoxScope.LockedSlot() =
 @Composable
 fun RowScope.SlotTopIcon() =
     Image(
-        bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment2/enchant_icon.png" },
+        bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment2/enchant_icon.png" },
         contentDescription = null,
         modifier = Modifier.weight(1f).aspectRatio(1f).scale(0.5f).rotate(-45f)
     )

@@ -19,7 +19,7 @@ import blackstone.states.items.leveling
 import composable.inventory.EnchantmentIcon
 import composable.inventory.LevelImage
 import composable.inventory.LevelImagePositioner
-import extensions.GameResources
+import dungeons.IngameImages
 
 
 @Composable
@@ -79,7 +79,7 @@ private fun RowScope.SelectableLevelButton(displayLevel: Int, selectedLevel: Int
             .background(if (selectedLevel == displayLevel) Color(if (displayLevel == 0) 0x20ffffff else 0x20b442f6) else Color.Transparent, shape = RoundedCornerShape(5.dp))
             .onClick(onClick = onClick)
     ) {
-        if (displayLevel == 0) Image(bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png" }, null, modifier = Modifier.fillMaxSize(0.8f))
+        if (displayLevel == 0) Image(bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png" }, null, modifier = Modifier.fillMaxSize(0.8f))
         else LevelImage(displayLevel, 3f)
     }
 }

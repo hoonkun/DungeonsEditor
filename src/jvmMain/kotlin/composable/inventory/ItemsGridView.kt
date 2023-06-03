@@ -27,7 +27,7 @@ import blackstone.states.dp
 import blackstone.states.sp
 import blackstone.states.arctic
 import extensions.DungeonsPower
-import extensions.GameResources
+import dungeons.IngameImages
 import blackstone.states.Item
 import blackstone.states.items.*
 
@@ -67,7 +67,7 @@ private fun EquipmentItemsToggleButton(collapsed: Boolean, onClick: () -> Unit) 
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
 
-    val image = remember { GameResources.image { "/Game/UI/Materials/Menu/arrow_gamemode.png" } }
+    val image = remember { IngameImages.get { "/Game/UI/Materials/Menu/arrow_gamemode.png" } }
 
     val rotation by animateFloatAsState(if (collapsed) 180f else 0f)
 
@@ -308,7 +308,7 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
             modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 13.dp)
         ) {
             Image(
-                bitmap = GameResources.image { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
+                bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
                 contentDescription = null,
                 modifier = Modifier.size(22.dp)
             )
@@ -326,7 +326,7 @@ fun BoxScope.ItemIcon(item: Item, simplified: Boolean) {
 
     if (item.markedNew == true) {
         Image(
-            bitmap = GameResources.image { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
+            bitmap = IngameImages.get { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
             contentDescription = null,
             modifier = Modifier.align(Alignment.TopStart).fillMaxSize(0.2f).offset(2.dp, (-1.5).dp).scale(scaleX = -1f, scaleY = 1f)
         )

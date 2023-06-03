@@ -32,7 +32,7 @@ import blackstone.states.StoredDataState
 import blackstone.states.arctic
 import extensions.DungeonsLevel
 import extensions.DungeonsPower
-import extensions.GameResources
+import dungeons.IngameImages
 import extensions.toFixed
 
 @Composable
@@ -54,7 +54,7 @@ fun BottomBar(stored: StoredDataState) {
                 onValueChange = { if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) }
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    CurrencyImage(GameResources.image { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
+                    CurrencyImage(IngameImages.get { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
                     Text(text = "LV.", style = TextStyle(fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold))
                 }
             }
@@ -103,7 +103,7 @@ fun CloseFileButton() {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     Image(
-        bitmap = GameResources.image { "/Game/UI/Materials/Map/Pins/dungeon_door.png" },
+        bitmap = IngameImages.get { "/Game/UI/Materials/Map/Pins/dungeon_door.png" },
         contentDescription = null,
         modifier = Modifier
             .size(60.dp)
@@ -119,7 +119,7 @@ fun SaveButton() {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     Image(
-        bitmap = GameResources.image { "/Game/UI/Materials/Map/Pins/mapicon_chest.png" },
+        bitmap = IngameImages.get { "/Game/UI/Materials/Map/Pins/mapicon_chest.png" },
         contentDescription = null,
         modifier = Modifier
             .size(60.dp)
@@ -154,12 +154,12 @@ fun InventorySwitcher() {
 
         Box(modifier = Modifier.width(32.5.dp)) {
             Image(
-                bitmap = GameResources.image { "/Game/UI/Materials/Character/left_arrow_carousel.png" },
+                bitmap = IngameImages.get { "/Game/UI/Materials/Character/left_arrow_carousel.png" },
                 contentDescription = null,
                 modifier = Modifier.width(20.dp).align(Alignment.CenterStart)
             )
             Image(
-                bitmap = GameResources.image { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
+                bitmap = IngameImages.get { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
                 contentDescription = null,
                 modifier = Modifier.width(20.dp).align(Alignment.CenterEnd)
             )
@@ -180,7 +180,7 @@ fun InventorySwitcher() {
 private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false) {
     Debugging.recomposition("CurrencyText")
 
-    CurrencyImage(GameResources.image { icon }, smallIcon)
+    CurrencyImage(IngameImages.get { icon }, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
     Text(text = value, style = TextStyle(fontSize = 25.sp, color = Color.White), modifier = Modifier.width(100.dp))
     Spacer(modifier = Modifier.width(30.dp))
@@ -190,7 +190,7 @@ private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false
 private fun CurrencyField(icon: String, value: String, onValueChange: (String) -> Unit) {
     Debugging.recomposition("CurrencyField(String, String, (String) -> Unit)")
 
-    CurrencyImage(GameResources.image { icon }, true)
+    CurrencyImage(IngameImages.get { icon }, true)
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
     Spacer(modifier = Modifier.width(30.dp))
