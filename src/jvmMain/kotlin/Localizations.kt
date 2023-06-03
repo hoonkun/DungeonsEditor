@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 class Localizations {
 
     companion object {
+
         var currentLocale by mutableStateOf("ko-KR")
 
         private val texts: Map<String, Map<String, String>>
@@ -100,10 +101,12 @@ class Localizations {
             val newTexts = mutableMapOf<String, Map<String, String>>()
             val languages = listOf("ko-KR", "en-US")
             languages.forEach {
-                newTexts[it] = Json.decodeFromString<Map<String, String>>({}::class.java.getResource("localization_ko-KR.json")!!.readText())
+                val json = {}::class.java.getResource("localization_$it.json")!!.readText()
+                newTexts[it] = Json.decodeFromString<Map<String, String>>(json)
             }
             texts = newTexts
         }
+
     }
 
 }
