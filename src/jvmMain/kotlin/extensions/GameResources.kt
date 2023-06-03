@@ -18,3 +18,14 @@ class GameResources {
         private val SharedImages: MutableMap<String, ImageBitmap> = mutableMapOf()
     }
 }
+
+class Resources {
+    companion object {
+        fun image(key: String? = null, pathFactory: () -> String): ImageBitmap =
+            SharedImages.getOrPut(key ?: pathFactory()) {
+                ImageIO.read({}::class.java.getResource(pathFactory())!!.toURI().toURL()).toComposeImageBitmap()
+            }
+
+        private val SharedImages: MutableMap<String, ImageBitmap> = mutableMapOf()
+    }
+}
