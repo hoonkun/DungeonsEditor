@@ -28,9 +28,9 @@ import androidx.compose.ui.text.style.TextAlign
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.arctic
-import blackstone.states.ArmorProperty
-import blackstone.states.Enchantment
-import blackstone.states.Item
+import arctic.states.ArmorProperty
+import arctic.states.Enchantment
+import arctic.states.Item
 import blackstone.states.items.*
 import dungeons.DungeonsPower
 import dungeons.IngameImages

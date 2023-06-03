@@ -31,7 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.arctic
-import blackstone.states.Item
+import arctic.states.Item
 import blackstone.states.items.*
 import composable.inventory.BlurBehindImage
 import extensions.replace

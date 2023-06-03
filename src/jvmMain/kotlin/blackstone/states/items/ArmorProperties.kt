@@ -1,8 +1,8 @@
 package blackstone.states.items
 
 import dungeons.Database
-import blackstone.states.ArmorProperty
-import blackstone.states.Item
+import arctic.states.ArmorProperty
+import arctic.states.Item
 import dungeons.IngameImages
 
 

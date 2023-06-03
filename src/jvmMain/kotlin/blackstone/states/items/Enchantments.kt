@@ -1,8 +1,8 @@
 package blackstone.states.items
 
 import dungeons.Database
-import blackstone.states.Enchantment
-import blackstone.states.Item
+import arctic.states.Enchantment
+import arctic.states.Item
 import dungeons.EnchantmentData
 
 

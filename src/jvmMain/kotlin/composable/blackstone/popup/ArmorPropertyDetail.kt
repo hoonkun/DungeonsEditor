@@ -20,7 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.ArmorProperty
+import arctic.states.ArmorProperty
 import blackstone.states.items.ArmorPropertyRarityIcon
 import blackstone.states.items.data
 

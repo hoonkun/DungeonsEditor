@@ -22,7 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import blackstone.states.arctic
-import blackstone.states.Item
+import arctic.states.Item
 import blackstone.states.items.ArmorProperty
 import dungeons.Database
 import extensions.replace

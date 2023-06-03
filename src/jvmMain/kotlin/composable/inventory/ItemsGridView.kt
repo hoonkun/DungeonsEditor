@@ -28,7 +28,7 @@ import arctic.ui.unit.sp
 import blackstone.states.arctic
 import dungeons.DungeonsPower
 import dungeons.IngameImages
-import blackstone.states.Item
+import arctic.states.Item
 import blackstone.states.items.*
 
 @Composable

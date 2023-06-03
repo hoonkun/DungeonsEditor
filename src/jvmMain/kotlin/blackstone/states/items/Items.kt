@@ -3,8 +3,8 @@ package blackstone.states.items
 import dungeons.Database
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import blackstone.states.Item
-import blackstone.states.StoredDataState
+import arctic.states.Item
+import arctic.states.StoredDataState
 import blackstone.states.arctic
 import dungeons.IngameImages
 

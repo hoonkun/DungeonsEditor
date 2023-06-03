@@ -13,7 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.Enchantment
+import arctic.states.Enchantment
 import blackstone.states.items.data
 import blackstone.states.items.leveling
 import composable.inventory.EnchantmentIcon

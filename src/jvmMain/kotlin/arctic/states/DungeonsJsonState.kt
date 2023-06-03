@@ -1,4 +1,4 @@
-package blackstone.states
+package arctic.states
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList

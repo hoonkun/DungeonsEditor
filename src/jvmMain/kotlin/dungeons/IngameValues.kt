@@ -1,6 +1,6 @@
 package dungeons
 
-import blackstone.states.StoredDataState
+import arctic.states.StoredDataState
 import blackstone.states.items.*
 import kotlin.math.max
 import kotlin.math.roundToInt
