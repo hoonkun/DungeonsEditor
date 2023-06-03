@@ -26,8 +26,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import blackstone.states.dp
-import blackstone.states.sp
+import arctic.ui.unit.dp
+import arctic.ui.unit.sp
 import blackstone.states.StoredDataState
 import blackstone.states.arctic
 import dungeons.DungeonsLevel

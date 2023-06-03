@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import blackstone.states.dp
-import blackstone.states.sp
+import arctic.ui.unit.dp
+import arctic.ui.unit.sp
 import blackstone.states.items.unequipped
 import blackstone.states.Item
 import blackstone.states.arctic

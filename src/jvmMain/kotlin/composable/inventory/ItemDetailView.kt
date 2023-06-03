@@ -25,8 +25,8 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import blackstone.states.dp
-import blackstone.states.sp
+import arctic.ui.unit.dp
+import arctic.ui.unit.sp
 import blackstone.states.arctic
 import blackstone.states.ArmorProperty
 import blackstone.states.Enchantment

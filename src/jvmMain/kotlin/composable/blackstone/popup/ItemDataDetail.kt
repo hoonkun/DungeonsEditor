@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
+import arctic.ui.unit.dp
+import arctic.ui.unit.sp
 import blackstone.states.*
 import blackstone.states.items.RarityColor
 import blackstone.states.items.RarityColorType

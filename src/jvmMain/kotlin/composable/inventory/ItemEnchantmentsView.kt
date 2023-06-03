@@ -13,7 +13,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import blackstone.states.dp
+import arctic.ui.unit.dp
 import dungeons.IngameImages
 import blackstone.states.*
 import blackstone.states.items.data
