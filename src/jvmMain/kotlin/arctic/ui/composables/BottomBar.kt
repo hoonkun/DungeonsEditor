@@ -1,6 +1,5 @@
-package composable
+package arctic.ui.composables
 
-import Debugging
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -28,16 +27,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import dungeons.states.DungeonsJsonState
-import dungeons.states.extensions.playerPower
 import arctic.states.arctic
 import dungeons.DungeonsLevel
 import dungeons.IngameImages
+import dungeons.states.DungeonsJsonState
+import dungeons.states.extensions.playerLevel
+import dungeons.states.extensions.playerPower
+import dungeons.states.extensions.totalSpentEnchantmentPoints
 import extensions.toFixed
 
 @Composable
 fun BottomBar(stored: DungeonsJsonState) {
-    Debugging.recomposition("BottomBar")
+    val emerald = stored.currencies.find { it.type == "Emerald" }
+    val gold = stored.currencies.find { it.type == "Gold" }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -50,12 +52,17 @@ fun BottomBar(stored: DungeonsJsonState) {
             modifier = Modifier.fillMaxWidth(0.725f)
         ) {
             CurrencyField(
-                value = "${DungeonsLevel.toInGameLevel(stored.xp).toFixed(3)}",
-                onValueChange = { if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) }
+                value = "${stored.playerLevel.toFixed(3)}",
+                onValueChange = {
+                    if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble())
+                }
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     CurrencyImage(IngameImages.get { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
-                    Text(text = "LV.", style = TextStyle(fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold))
+                    Text(
+                        text = "LV.",
+                        style = TextStyle(fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    )
                 }
             }
 
@@ -66,22 +73,19 @@ fun BottomBar(stored: DungeonsJsonState) {
 
             CurrencyField(
                 icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
-                value = "${stored.currencies.find { it.type == "Emerald" }?.count ?: 0}",
-                onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Emerald" }?.count = it.toInt() }
+                value = "${emerald?.count ?: 0}",
+                onValueChange = { if (it.toIntOrNull() != null) emerald?.count = it.toInt() }
             )
 
             CurrencyField(
                 icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
-                value = "${stored.currencies.find { it.type == "Gold" }?.count ?: 0}",
-                onValueChange = { if (it.toIntOrNull() != null) stored.currencies.find { currency -> currency.type == "Gold" }?.count = it.toInt() }
+                value = "${gold?.count ?: 0}",
+                onValueChange = { if (it.toIntOrNull() != null) gold?.count = it.toInt() }
             )
 
-            val level = DungeonsLevel.toInGameLevel(stored.xp).toInt()
-            val inventoryPoints = stored.items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
-            val storagePoints = stored.storageChestItems.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
             CurrencyText(
                 icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
-                value = "${level - inventoryPoints - storagePoints}",
+                value = "${stored.playerLevel - stored.totalSpentEnchantmentPoints}",
                 smallIcon = true
             )
 
@@ -93,42 +97,31 @@ fun BottomBar(stored: DungeonsJsonState) {
 
             SaveButton()
             CloseFileButton()
-
         }
     }
 }
 
 @Composable
-fun CloseFileButton() {
+fun IconButton(icon: String, onClick: () -> Unit) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
+
     Image(
-        bitmap = IngameImages.get { "/Game/UI/Materials/Map/Pins/dungeon_door.png" },
+        bitmap = IngameImages.get { icon },
         contentDescription = null,
         modifier = Modifier
             .size(60.dp)
             .hoverable(source)
-            .clickable(source, null) { arctic.alerts.closeFile = true }
+            .clickable(source, null, onClick = onClick)
             .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value)) }
             .padding(10.dp)
     )
 }
 
 @Composable
-fun SaveButton() {
-    val source = remember { MutableInteractionSource() }
-    val hovered by source.collectIsHoveredAsState()
-    Image(
-        bitmap = IngameImages.get { "/Game/UI/Materials/Map/Pins/mapicon_chest.png" },
-        contentDescription = null,
-        modifier = Modifier
-            .size(60.dp)
-            .hoverable(source)
-            .clickable(source, null) { arctic.dialogs.fileSaveDstSelector = true }
-            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value)) }
-            .padding(10.dp)
-    )
-}
+fun CloseFileButton() = IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") { arctic.alerts.closeFile = true }
+@Composable
+fun SaveButton() = IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") { arctic.dialogs.fileSaveDstSelector = true }
 
 @Composable
 fun InventorySwitcher() {
@@ -144,7 +137,7 @@ fun InventorySwitcher() {
             .height(60.dp)
             .drawBehind {
                 drawRoundRect(
-                    Color.White,
+                    color = Color.White,
                     alpha = if (pressed) 0.2f else if (hovered) 0.15f else 0f,
                     cornerRadius = CornerRadius(6.dp.value, 6.dp.value)
                 )
@@ -178,8 +171,6 @@ fun InventorySwitcher() {
 
 @Composable
 private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false) {
-    Debugging.recomposition("CurrencyText")
-
     CurrencyImage(IngameImages.get { icon }, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
     Text(text = value, style = TextStyle(fontSize = 25.sp, color = Color.White), modifier = Modifier.width(100.dp))
@@ -188,8 +179,6 @@ private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false
 
 @Composable
 private fun CurrencyField(icon: String, value: String, onValueChange: (String) -> Unit) {
-    Debugging.recomposition("CurrencyField(String, String, (String) -> Unit)")
-
     CurrencyImage(IngameImages.get { icon }, true)
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
@@ -198,8 +187,6 @@ private fun CurrencyField(icon: String, value: String, onValueChange: (String) -
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit, icon: @Composable () -> Unit) {
-    Debugging.recomposition("CurrencyField(String, (String) -> Unit, @Composable () -> Unit)")
-
     icon()
     Spacer(modifier = Modifier.width(10.dp))
     CurrencyField(value = value, onValueChange = onValueChange)
@@ -212,8 +199,6 @@ private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit) {
-    Debugging.recomposition("CurrencyField(String, (String) -> Unit)")
-
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
         if (!focused) Color(0x00888888) else Color(0xffff884c),

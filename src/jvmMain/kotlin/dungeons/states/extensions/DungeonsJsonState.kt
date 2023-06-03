@@ -3,6 +3,7 @@ package dungeons.states.extensions
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
 import arctic.states.arctic
+import dungeons.DungeonsLevel
 import dungeons.DungeonsPower
 
 fun DungeonsJsonState.addItem(newItem: Item, copiedFrom: Item? = null) {
@@ -38,6 +39,11 @@ fun DungeonsJsonState.deleteItem(targetItem: Item) {
         else -> { /* This item does not exist in any available spaces. */ }
     }
 }
+
+val DungeonsJsonState.playerLevel: Double get() = DungeonsLevel.toInGameLevel(xp)
+
+val DungeonsJsonState.totalSpentEnchantmentPoints: Int get() =
+    items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 } + storageChestItems.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
 
 val DungeonsJsonState.playerPower: Int get() {
     val powerDividedBy4 = listOf(

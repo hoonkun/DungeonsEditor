@@ -17,7 +17,7 @@ import arctic.states.arctic
 import arctic.ui.composables.TitleView
 import dungeons.states.DungeonsJsonState
 import arctic.ui.unit.dp
-import composable.BottomBar
+import arctic.ui.composables.BottomBar
 import composable.Popups
 import composable.Selector
 import composable.inventory.InventoryView
