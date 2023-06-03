@@ -2,7 +2,7 @@ package dungeons.states.extensions
 
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
-import blackstone.states.arctic
+import arctic.states.arctic
 import dungeons.DungeonsPower
 
 fun DungeonsJsonState.addItem(newItem: Item, copiedFrom: Item? = null) {

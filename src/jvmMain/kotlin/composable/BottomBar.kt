@@ -30,7 +30,7 @@ import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.states.DungeonsJsonState
 import dungeons.states.extensions.playerPower
-import blackstone.states.arctic
+import arctic.states.arctic
 import dungeons.DungeonsLevel
 import dungeons.IngameImages
 import extensions.toFixed

@@ -25,12 +25,12 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import arctic.states.arctic
 import dungeons.states.ArmorProperty
 import dungeons.states.Enchantment
 import dungeons.states.Item
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.*
 import dungeons.states.extensions.addItem
 import dungeons.states.extensions.data
 import dungeons.states.extensions.deleteItem

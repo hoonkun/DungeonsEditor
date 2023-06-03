@@ -31,7 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import dungeons.states.Enchantment
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.arctic
+import arctic.states.arctic
 import dungeons.states.Item
 import dungeons.states.extensions.data
 import dungeons.states.extensions.leveling

@@ -1,4 +1,4 @@
-package blackstone.states
+package arctic.states
 
 import dungeons.ItemData
 import androidx.compose.runtime.*

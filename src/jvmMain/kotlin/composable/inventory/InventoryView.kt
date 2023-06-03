@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.IntOffset
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.states.Item
-import blackstone.states.arctic
+import arctic.states.arctic
 import dungeons.states.extensions.equippedItems
 import dungeons.states.extensions.unequippedItems
 

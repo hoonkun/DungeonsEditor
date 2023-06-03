@@ -20,11 +20,11 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
+import arctic.states.arctic
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import blackstone.states.*
 import arctic.ui.composables.RarityColor
 import arctic.ui.composables.RarityColorType
 import dungeons.states.extensions.addItem
