@@ -29,7 +29,7 @@ data class Database(
 
         fun armorProperty(id: String) = armorProperties.find { it.id == id }
 
-        private fun load(): Database? = {}::class.java.getResource("database.json")?.readText()?.let { Json.decodeFromString<Database>(it) }
+        private fun load(): Database? = Database::class.java.classLoader.getResource("database.json")?.readText()?.let { Json.decodeFromString<Database>(it) }
 
     }
 
