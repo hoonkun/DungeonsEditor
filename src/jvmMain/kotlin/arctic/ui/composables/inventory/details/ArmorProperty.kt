@@ -56,6 +56,7 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
                 }
             }
         }
+        Spacer(modifier = Modifier.width(10.dp))
         ArmorPropertyAddButton(item = item)
     }
     Spacer(modifier = Modifier.height(20.dp))
