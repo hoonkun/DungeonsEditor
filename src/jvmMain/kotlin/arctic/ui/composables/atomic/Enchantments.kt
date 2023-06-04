@@ -107,24 +107,23 @@ private fun ShinePatternMatrix(channel: Int, alpha: Float): FloatArray {
     return result.toFloatArray()
 }
 
-private val ShineAnimation = keyframes {
-    durationMillis = 700
-    delayMillis = 500
-    0.0f at 0
-    1.0f at 700
-    1.0f at 1000
-}
-
-private const val initialValue = 0f
-private const val targetValue = 1f
-private val blendMode = BlendMode.Overlay
-
 @Composable
-fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -> FloatArray) {
+private fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -> FloatArray) {
     val transition = rememberInfiniteTransition()
     val alpha by transition.animateFloat(
-        initialValue, targetValue,
-        animationSpec = infiniteRepeatable(animation = ShineAnimation, repeatMode = RepeatMode.Reverse, initialStartOffset = StartOffset(delay))
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 700
+                delayMillis = 500
+                0.0f at 0
+                1.0f at 700
+                1.0f at 1000
+            },
+            repeatMode = RepeatMode.Reverse,
+            initialStartOffset = StartOffset(delay)
+        )
     )
 
     Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f)).scale(0.5f)) {
@@ -132,7 +131,7 @@ fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -> FloatA
             image = pattern,
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
             colorFilter = ColorFilter.colorMatrix(ColorMatrix(matrix(alpha))),
-            blendMode = blendMode
+            blendMode = BlendMode.Overlay
         )
     }
 }
