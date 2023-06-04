@@ -17,7 +17,7 @@ import dungeons.states.extensions.data
 
 @Composable
 fun ItemEnchantments(enchantments: List<Enchantment>) {
-    val slots = remember(enchantments) { enchantments.chunked(3) }
+    val slots = enchantments.chunked(3)
 
     Row(modifier = Modifier.fillMaxSize()) {
         for (slot in slots) {
