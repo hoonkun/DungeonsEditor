@@ -62,12 +62,12 @@ fun SlotTopIcon() =
     Image(
         bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment2/enchant_icon.png" },
         contentDescription = null,
-        modifier = Modifier.fillMaxSize().scale(0.5f)
+        modifier = Modifier.fillMaxSize().scale(0.375f)
     )
 
 @Composable
 private fun RowScope.ActivatedSlot(content: @Composable BoxScope.() -> Unit) =
-    Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f), content = content)
+    Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f).scale(1.15f), content = content)
 
 @Composable
 private fun RowScope.OpenedSlot(
@@ -76,7 +76,7 @@ private fun RowScope.OpenedSlot(
     bottom: @Composable BoxScope.() -> Unit,
     left: @Composable BoxScope.() -> Unit,
 ) =
-    Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f)) {
+    Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f).scale(1.07f)) {
         Box(
             modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0.5f, 0f),
             content = top

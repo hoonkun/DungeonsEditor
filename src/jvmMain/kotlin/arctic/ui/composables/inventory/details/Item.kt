@@ -111,7 +111,7 @@ private fun Content(item: Item) {
 
             val enchantments = item.enchantments
             if (enchantments != null) {
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(30.dp))
                 ItemEnchantments(enchantments)
             }
         }
