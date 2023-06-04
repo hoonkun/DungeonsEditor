@@ -51,6 +51,10 @@ fun EnchantmentModificationOverlay() {
         isUnset = target?.id == "Unset"
     )
 
+    val slideEnabled: (DetailTargetStatesE, DetailTargetStatesE) -> Boolean = { initialState, targetState ->
+        !initialState.isUnset && targetState.target != null && !targetState.isUnset || initialState.target == null && targetState.target != null
+    }
+
     OverlayBackdrop(target != null) { arctic.enchantments.closeDetail() }
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -73,7 +77,7 @@ fun EnchantmentModificationOverlay() {
         }
         AnimatedContent(
             detailTargetStates,
-            transitionSpec = OverlayTransitions.detail(),
+            transitionSpec = OverlayTransitions.detail(slideEnabled = slideEnabled),
             modifier = Modifier.height(500.dp)
         ) { (target, isUnset) ->
             if (target != null && !isUnset) EnchantmentDetail(target)

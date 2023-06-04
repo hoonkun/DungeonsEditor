@@ -36,10 +36,10 @@ class OverlayTransitions {
             val slide = slideEnabled(this.initialState, this.targetState)
 
             var enter = fadeIn(tween250())
-            if (slide) enter += slideIn(tween250(), initialOffset = { IntOffset(0, 50) })
+            if (slide) enter += slideIn(tween250(), initialOffset = { IntOffset(0, 50.dp.value.toInt()) })
 
             var exit = fadeOut(tween250())
-            if (slide) exit += slideOut(tween250(), targetOffset = { IntOffset(0, -50) })
+            if (slide) exit += slideOut(tween250(), targetOffset = { IntOffset(0, -50.dp.value.toInt()) })
 
             val duration = sizeTransformDuration(this.initialState, this.targetState)
             enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = duration) }
