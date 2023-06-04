@@ -181,7 +181,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
         entire.substring(entered.length until entire.length)
     }
 
-    val value = remember(path.text, haveToShiftField, hint) {
+    val value = remember(path.text, path.selection, haveToShiftField, hint) {
         val newText = "${path.text}${hint}"
         val annotatedText = AnnotatedString(
             text = newText,
