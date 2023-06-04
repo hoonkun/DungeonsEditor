@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import arctic.states.arctic
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
-import composable.Selector
+import arctic.ui.composables.Selector
 import dungeons.readDungeonsJson
 import dungeons.states.DungeonsJsonState
 
