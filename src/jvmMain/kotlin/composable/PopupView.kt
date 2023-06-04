@@ -8,7 +8,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -16,16 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import arctic.states.arctic
+import arctic.ui.composables.atomic.RetroButton
 import dungeons.states.ArmorProperty
 import dungeons.states.Enchantment
 import dungeons.states.Item
@@ -328,78 +324,6 @@ fun DeletionPopup() {
         }
     }
 
-}
-
-@Composable
-fun RetroButton(
-    text: String,
-    color: Color,
-    hoverInteraction: String,
-    disabledColor: Color = Color(0xff666666),
-    enabled: Boolean = true,
-    buttonSize: Pair<Dp, Dp> = 225.dp to 70.dp,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-
-    val source = remember { MutableInteractionSource() }
-    val hovered by source.collectIsHoveredAsState()
-    val pressed by source.collectIsPressedAsState()
-
-    val radius = 8.dp.value
-    val stroke = 5.dp.value
-
-    val drawMain: DrawScope.() -> Unit = {
-        drawRect(if (enabled) color else disabledColor, topLeft = Offset(stroke, stroke + radius), size = Size(size.width - 2 * stroke, size.height - 2 * (stroke + radius)))
-        drawRect(if (enabled) color else disabledColor, topLeft = Offset(stroke + radius, stroke), size = Size(size.width - 2 * (stroke + radius), size.height - 2 * stroke))
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(buttonSize.first, buttonSize.second)
-            .hoverable(source, enabled)
-            .clickable(source, null, enabled, onClick = onClick).then(modifier)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(if (hoverInteraction == "overlay") 0.2f else 1f)
-                .drawBehind {
-                    if (!hovered) return@drawBehind
-
-                    if (hoverInteraction == "outline") {
-                        drawRect(Color.White, topLeft = Offset(radius, 0f), size = Size(size.width - 2 * radius, size.height))
-                        drawRect(Color.White, topLeft = Offset(0f, radius), size = Size(size.width, size.height - 2 * radius))
-                    }
-
-                    if (hoverInteraction == "overlay") {
-                        drawMain()
-                    }
-                }
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .drawBehind {
-                    if (hoverInteraction == "overlay") return@drawBehind
-
-                    drawMain()
-                }
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(0.25f)
-                .drawBehind {
-                    if (!pressed) return@drawBehind
-
-                    drawRect(Color.Black, topLeft = Offset(radius, 0f), size = Size(size.width - 2 * radius, size.height))
-                    drawRect(Color.Black, topLeft = Offset(0f, radius), size = Size(size.width, size.height - 2 * radius))
-                }
-        )
-        Text(text = text, fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold)
-    }
 }
 
 @Composable

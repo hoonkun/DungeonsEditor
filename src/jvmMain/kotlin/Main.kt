@@ -18,6 +18,7 @@ import arctic.ui.composables.TitleView
 import dungeons.states.DungeonsJsonState
 import arctic.ui.unit.dp
 import arctic.ui.composables.BottomBar
+import arctic.ui.composables.overlays.Overlays
 import composable.Popups
 import composable.Selector
 import composable.inventory.InventoryView
@@ -36,12 +37,10 @@ fun App() {
     AppRoot {
         TitleView()
         MainContainer(popupBackdropBlurRadius) {
-            ContentContainer {
-                InventoryView()
-            }
+            ContentContainer { InventoryView() }
             BottomBarContainer { stored -> BottomBar(stored) }
         }
-        Popups()
+        Overlays()
     }
 }
 
