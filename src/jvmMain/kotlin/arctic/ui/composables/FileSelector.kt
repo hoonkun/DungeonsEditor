@@ -30,6 +30,7 @@ import arctic.ui.composables.atomic.RetroButton
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import java.io.File
+import kotlin.reflect.KProperty
 
 
 private class SelectorColors {
@@ -141,6 +142,14 @@ enum class CandidateType(
     File("files", SelectorColors.Files, { !it.isDirectory })
 }
 
+private class Ref<T>(initialValue: T) {
+    var value: T = initialValue
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, newValue: T) { value = newValue }
+}
+private fun <T>mutableRefOf(value: T): Ref<T> = Ref(value)
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ìž¥", onSelect: (File) -> Unit) {
@@ -151,6 +160,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     val keys = remember { KeySet(ctrl = false, shift = false) }
 
     var haveToShiftField by remember { mutableStateOf(false) }
+    var isFieldShifting by remember<Ref<Boolean>> { mutableRefOf(false) }
 
     val candidateTarget = remember(entirePath) {
         File(entirePath.removeSuffixes(".").substring(0, entirePath.lastIndexOf('/')))
@@ -168,7 +178,10 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
             if (candidates.items.size == 1) candidates.items.first().let { if (path.text.endsWith(it.name)) null else it }
             else null
 
-        if (newState != null) haveToShiftField = true
+        if (newState != null) {
+            haveToShiftField = true
+            isFieldShifting = true
+        }
 
         mutableStateOf(newState)
     }
@@ -195,6 +208,9 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
             if (haveToShiftField) TextRange(path.selection.start + hint.length)
             else path.selection
 
+        if (isFieldShifting && !haveToShiftField)
+            isFieldShifting = false
+
         TextFieldValue(annotatedText, selection)
     }
 
@@ -205,7 +221,11 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     val requester = remember { FocusRequester() }
 
     val value2path: (TextFieldValue) -> TextFieldValue = transform@ {
-        val newPath = it.text.removeSuffix(hint).replace("//", "/")
+        var newPath =
+            if (isFieldShifting) it.text.slice(0 until it.text.length - 1)
+            else it.text
+        newPath = newPath.removeSuffix(hint).replace("//", "/")
+        if (isFieldShifting) newPath += it.text.last()
 
         TextFieldValue(
             text = newPath,
@@ -241,6 +261,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
                         else candidates.items[candidates.items.indexOf(hintTarget) - 1]
                     }
                 haveToShiftField = true
+                isFieldShifting = true
             }
             requester.requestFocus()
         } else if (it.key == Key.Enter && it.type == KeyEventType.KeyUp) {
