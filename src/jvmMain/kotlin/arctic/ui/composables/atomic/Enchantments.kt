@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import arctic.ui.composables.rememberMutableInteractionSource
+import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.EnchantmentData

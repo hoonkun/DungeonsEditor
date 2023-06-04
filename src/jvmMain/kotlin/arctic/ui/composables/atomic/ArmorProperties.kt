@@ -1,4 +1,4 @@
-package arctic.ui.composables
+package arctic.ui.composables.atomic
 
 import androidx.compose.ui.graphics.ImageBitmap
 import dungeons.IngameImages

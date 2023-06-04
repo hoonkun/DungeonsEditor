@@ -21,9 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import arctic.states.arctic
-import arctic.ui.composables.ArmorPropertyRarityIcon
+import arctic.ui.composables.atomic.ArmorPropertyRarityIcon
 import arctic.ui.composables.overlays.OverlayBackdrop
-import arctic.ui.composables.rememberMutableInteractionSource
+import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.ArmorPropertyData

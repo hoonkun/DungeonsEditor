@@ -31,9 +31,9 @@ import dungeons.IngameImages
 import dungeons.states.Item
 import dungeons.states.extensions.data
 import dungeons.states.extensions.totalEnchantmentInvestedPoints
-import arctic.ui.composables.RarityColor
-import arctic.ui.composables.RarityColorType
-import arctic.ui.composables.VariantFilterIcon
+import arctic.ui.composables.atomic.RarityColor
+import arctic.ui.composables.atomic.RarityColorType
+import arctic.ui.composables.atomic.VariantFilterIcon
 
 @Composable
 fun EquippedItems(items: List<Item?>) {

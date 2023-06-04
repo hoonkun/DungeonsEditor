@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.states.ArmorProperty
-import arctic.ui.composables.ArmorPropertyRarityIcon
+import arctic.ui.composables.atomic.ArmorPropertyRarityIcon
 import dungeons.states.extensions.data
 
 @Composable

@@ -1,4 +1,4 @@
-package arctic.ui.composables
+package arctic.ui.utils
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable

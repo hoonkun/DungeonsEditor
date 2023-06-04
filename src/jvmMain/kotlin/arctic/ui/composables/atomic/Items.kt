@@ -1,4 +1,4 @@
-package arctic.ui.composables
+package arctic.ui.composables.atomic
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap

@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerButton
-import arctic.ui.composables.rememberMutableInteractionSource
+import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 

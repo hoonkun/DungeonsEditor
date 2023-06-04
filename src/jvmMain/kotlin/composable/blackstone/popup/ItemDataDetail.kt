@@ -25,8 +25,8 @@ import dungeons.states.ArmorProperty
 import dungeons.states.Item
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import arctic.ui.composables.RarityColor
-import arctic.ui.composables.RarityColorType
+import arctic.ui.composables.atomic.RarityColor
+import arctic.ui.composables.atomic.RarityColorType
 import dungeons.states.extensions.addItem
 import dungeons.states.extensions.playerPower
 import composable.inventory.PowerEditField

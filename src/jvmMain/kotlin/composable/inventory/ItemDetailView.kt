@@ -34,9 +34,9 @@ import dungeons.states.Item
 import dungeons.states.extensions.addItem
 import dungeons.states.extensions.data
 import dungeons.states.extensions.where
-import arctic.ui.composables.ArmorPropertyRarityIcon
-import arctic.ui.composables.RarityColor
-import arctic.ui.composables.RarityColorType
+import arctic.ui.composables.atomic.ArmorPropertyRarityIcon
+import arctic.ui.composables.atomic.RarityColor
+import arctic.ui.composables.atomic.RarityColorType
 import dungeons.DungeonsPower
 import dungeons.IngameImages
 import extensions.toFixed

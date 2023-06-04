@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.states.arctic
 import arctic.ui.composables.atomic.*
 import arctic.ui.composables.overlays.OverlayBackdrop
-import arctic.ui.composables.rememberMutableInteractionSource
+import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.Database
