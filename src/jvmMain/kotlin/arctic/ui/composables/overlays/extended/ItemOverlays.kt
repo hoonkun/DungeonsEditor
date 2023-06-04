@@ -86,21 +86,23 @@ private fun <S>ItemDataCollectionOverlay(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize().blur(blurRadius)
     ) {
-        AnimatedContent(
-            targetState = targetState,
-            transitionSpec = OverlayTransitions.collection(),
-            modifier = Modifier.width(160.dp).padding(top = 54.dp)
-        ) { targetState ->
-            if (targetState != null) ItemCreationVariantFilters(if (filterEnabled) null else variant(targetState))
-            else Spacer(modifier = Modifier.requiredWidth(160.dp).fillMaxHeight())
-        }
-        AnimatedContent(
-            targetState = targetState to variant,
-            transitionSpec = OverlayTransitions.collection(),
-            modifier = Modifier.width(1050.dp)
-        ) { (targetState, variant) ->
-            if (targetState != null) ItemDataCollection(variant(targetState), onItemSelect = onSelect)
-            else Box(modifier = Modifier.requiredWidth(1050.dp).fillMaxHeight())
+        Box {
+            AnimatedContent(
+                targetState = targetState,
+                transitionSpec = OverlayTransitions.collection(reversed = true),
+                modifier = Modifier.width(160.dp).offset(x = (-120).dp)
+            ) { targetState ->
+                if (targetState != null) ItemCreationVariantFilters(if (filterEnabled) null else variant(targetState))
+                else Spacer(modifier = Modifier.requiredWidth(160.dp).fillMaxHeight())
+            }
+            AnimatedContent(
+                targetState = targetState to (if (targetState != null) variant(targetState) else null),
+                transitionSpec = OverlayTransitions.collection(reversed = true),
+                modifier = Modifier.width(1050.dp)
+            ) { (targetState, variant) ->
+                if (targetState != null && variant != null) ItemDataCollection(variant, onItemSelect = onSelect)
+                else Box(modifier = Modifier.requiredWidth(1050.dp).fillMaxHeight())
+            }
         }
     }
 }

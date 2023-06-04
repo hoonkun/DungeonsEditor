@@ -22,8 +22,8 @@ class OverlayTransitions {
     companion object {
 
         @OptIn(ExperimentalAnimationApi::class)
-        fun <S>collection(): AnimatedContentScope<S>.() -> ContentTransform = {
-            val enter = fadeIn(tween250()) + slideIn(tween250(), initialOffset = { IntOffset(-70.dp.value.toInt(), 0) })
+        fun <S>collection(reversed: Boolean = false): AnimatedContentScope<S>.() -> ContentTransform = {
+            val enter = fadeIn(tween250()) + slideIn(tween250(), initialOffset = { IntOffset((if (reversed) 1 else -1) * 70.dp.value.toInt(), 0) })
             val exit = fadeOut(tween250())
             enter with exit
         }
