@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.Dp
 import arctic.ui.composables.atomic.RetroButton
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import arctic.ui.utils.getValue
+import arctic.ui.utils.mutableRefOf
+import arctic.ui.utils.setValue
 import java.io.File
 import kotlin.reflect.KProperty
 
@@ -142,14 +145,6 @@ enum class CandidateType(
     File("files", SelectorColors.Files, { !it.isDirectory })
 }
 
-private class Ref<T>(initialValue: T) {
-    var value: T = initialValue
-
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, newValue: T) { value = newValue }
-}
-private fun <T>mutableRefOf(value: T): Ref<T> = Ref(value)
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "저장", onSelect: (File) -> Unit) {
@@ -160,7 +155,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "저�
     val keys = remember { KeySet(ctrl = false, shift = false) }
 
     var haveToShiftField by remember { mutableStateOf(false) }
-    var isFieldShifting by remember<Ref<Boolean>> { mutableRefOf(false) }
+    var isFieldShifting by remember { mutableRefOf(false) }
 
     val candidateTarget = remember(entirePath) {
         File(entirePath.removeSuffixes(".").substring(0, entirePath.lastIndexOf('/')))
