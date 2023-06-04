@@ -46,9 +46,13 @@ fun DrawScope.drawUniqueIndicator() {
 
 @Stable
 fun DrawScope.drawEnchantmentIconBorder(alpha: Float) {
+    val scale = 0.825f
+
     drawRect(
         Color.White,
         alpha = alpha,
+        topLeft = Offset(size.width * (1f - scale) * 0.5f, size.height * (1f - scale) * 0.5f),
+        size = Size(size.width * scale, size.height * scale),
         style = Stroke(width = 6.dp.value)
     )
 }

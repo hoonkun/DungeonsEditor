@@ -42,15 +42,15 @@ fun EnchantmentIconImage(
         bitmap = data.icon,
         enabled = data.id != "Unset",
         containerModifier = modifier
+            .scale(1f / sqrt(2.0f))
+            .clickable(interaction, null) { onClick(data) }
+            .hoverable(interaction)
+            .rotate(45f)
             .drawBehind {
                 if (!indicatorEnabled) return@drawBehind
                 if (!hovered && !selected) return@drawBehind
                 drawEnchantmentIconBorder(if (selected) 0.8f else 0.4f)
-            }
-            .scale(1f / sqrt(2.0f))
-            .clickable(interaction, null) { onClick(data) }
-            .hoverable(interaction)
-            .rotate(45f),
+            },
         imageModifier = Modifier
             .rotate(-45f)
             .scale(sqrt(2.0f))
