@@ -130,6 +130,7 @@ private fun ItemNetheriteEnchantButton(holder: Item) {
 
     ItemAlterButton(
         color = Color(if (enchantment == null || enchantment.id == "Unset") 0x15ffffff else 0x40ffc847),
+        horizontalPadding = if (enchantment == null || enchantment.id == "Unset") 4.dp else 10.dp,
         onClick = onClick
     ) {
         if (enchantment == null || enchantment.id == "Unset") {

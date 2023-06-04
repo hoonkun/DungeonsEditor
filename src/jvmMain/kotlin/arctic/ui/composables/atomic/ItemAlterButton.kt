@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerButton
+import androidx.compose.ui.unit.Dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -54,7 +55,13 @@ fun ItemAlterButton(text: String, color: Color = Color(0x15ffffff), enabled: Boo
 }
 
 @Composable
-fun ItemAlterButton(color: Color = Color(0x15ffffff), enabled: Boolean = true, onClick: () -> Unit, content: @Composable RowScope.() -> Unit) {
+fun ItemAlterButton(
+    color: Color = Color(0x15ffffff),
+    enabled: Boolean = true,
+    horizontalPadding: Dp = 10.dp,
+    onClick: () -> Unit,
+    content: @Composable RowScope.() -> Unit
+) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -66,7 +73,7 @@ fun ItemAlterButton(color: Color = Color(0x15ffffff), enabled: Boolean = true, o
             .hoverable(interaction, enabled)
             .background(color, shape = RoundedCornerShape(6.dp))
             .drawBehind { drawInteractionBorder(hovered, false) }
-            .padding(vertical = 4.dp, horizontal = 10.dp),
+            .padding(vertical = 4.dp, horizontal = horizontalPadding),
         content = content
     )
 }
