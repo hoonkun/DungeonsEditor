@@ -1,5 +1,6 @@
 package arctic.ui.composables.overlays
 
+import LocalData
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -32,6 +33,9 @@ private fun Content() {
                 try {
                     arctic.view = "inventory"
                     arctic.stored = DungeonsJsonState(it.readDungeonsJson())
+
+                    LocalData.recentFiles.add(it.absolutePath)
+                    LocalData.save()
                 } catch (e: Exception) {
                     arctic.alerts.fileLoadFailed = e.message
                 } finally {

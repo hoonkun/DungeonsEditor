@@ -1,6 +1,8 @@
 package arctic.ui.composables
 
+import LocalData
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateSizeAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +26,11 @@ import arctic.states.arctic
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import dungeons.DungeonsJsonFile
 import dungeons.IngameImages
+import extensions.lengthEllipsisMiddle
+import utils.separatePathAndName
+import java.io.File
 
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
@@ -77,13 +83,27 @@ fun TitleView(blurRadius: Dp) =
 
                 Column(modifier = Modifier.align(Alignment.TopStart).fillMaxHeight().offset(x = 100.dp), verticalArrangement = Arrangement.Center) {
                     SelectSectionHeader("main_icon_history.svg", "Recent Files")
-                    SelectCandidateText(text = "6762E9EB4A8B0A1ECF7989917F3E5366.dat", subtext = "~/minecraft/DungeonsData/SaveData")
-                    SelectCandidateText(text = "AC9E38AD4D442E3EFD5BFC9177A2EBB9.dat", subtext = "~/minecraft/DungeonsData/SaveData")
+                    for (path in LocalData.recentFiles) {
+                        val (text, subtext) = separatePathAndName(path)
+                        SelectCandidateText(
+                            text = text,
+                            subtext = subtext
+                        )
+                    }
+                    if (LocalData.recentFiles.size == 0) {
+                        NoCandidateText(text = "최근 파일이 없어요!")
+                    }
 
                     Spacer(modifier = Modifier.height(125.dp))
 
                     SelectSectionHeader("main_icon_detected_files.svg", "Detected Files")
-                    SelectCandidateText(text = "6762E9EB4A8B0A1ECF7989917F3E5366.dat", subtext = "~/minecraft/DungeonsData/SaveData")
+                    for (path in DungeonsJsonFile.detected) {
+                        val (text, subtext) = separatePathAndName(path)
+                        SelectCandidateText(
+                            text = text,
+                            subtext = subtext
+                        )
+                    }
                 }
 
             }
@@ -157,7 +177,7 @@ fun BoxScope.BottomEndDescriptions(content: @Composable ColumnScope.() -> Unit) 
     )
 
 @Composable
-fun ColumnScope.BottomEndDescription(text: String) =
+fun BottomEndDescription(text: String) =
     Text(
         text = text,
         color = Color.White.copy(alpha = 0.45f),
@@ -167,7 +187,7 @@ fun ColumnScope.BottomEndDescription(text: String) =
     )
 
 @Composable
-fun ColumnScope.SelectSectionHeader(iconResource: String, title: String) {
+fun SelectSectionHeader(iconResource: String, title: String) {
     Box {
         Box(
             contentAlignment = Alignment.CenterStart,
@@ -213,7 +233,7 @@ fun SelectCandidateText(text: String, subtext: String, selected: Boolean = false
         Spacer(modifier = Modifier.width(35.dp))
         Column {
             Text(
-                text = subtext,
+                text = subtext.lengthEllipsisMiddle(40),
                 color = Color.White.copy(alpha = 0.5f),
                 fontSize = 20.sp,
                 fontFamily = JetbrainsMono,
@@ -228,6 +248,17 @@ fun SelectCandidateText(text: String, subtext: String, selected: Boolean = false
             )
         }
     }
+}
+
+@Composable
+fun NoCandidateText(text: String) {
+    Text(
+        text = text,
+        color = Color.White.copy(alpha = 0.4f),
+        fontSize = 22.sp,
+        fontFamily = JetbrainsMono,
+        modifier = Modifier.padding(bottom = 15.dp, start = 35.dp)
+    )
 }
 
 operator fun Offset.minus(other: Size): Offset = this.minus(Offset(other.width, other.height))
