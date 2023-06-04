@@ -85,71 +85,76 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
                 )
             }
     ) {
-        if (item == null) return@Box EmptyEquippedSlot()
+        if (item == null) {
+            EmptyEquippedSlot()
+        } else {
+            val totalEnchantPoints = item.totalEnchantmentInvestedPoints
 
-        val totalEnchantPoints = item.totalEnchantmentInvestedPoints
+            Image(
+                bitmap = item.data.inventoryIcon,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .drawWithContent {
+                        drawRect(RarityBackgroundGradient(item.rarity))
+                        if (item.netheriteEnchant != null) drawRect(GlidedItemBackgroundGradient())
 
-        Image(
-            bitmap = item.data.inventoryIcon,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .drawWithContent {
-                    drawRect(RarityBackgroundGradient(item.rarity))
-                    if (item.netheriteEnchant != null) drawRect(GlidedItemBackgroundGradient())
+                        drawContent()
 
-                    drawContent()
+                        drawRect(PowerBackgroundGradient())
+                        if (totalEnchantPoints > 0) drawRect(EnchantmentPointsBackgroundGradient())
 
-                    drawRect(PowerBackgroundGradient())
-                    if (totalEnchantPoints > 0) drawRect(EnchantmentPointsBackgroundGradient())
+                        drawRect(RarityBorderGradient1(item.rarity), style = Stroke(5.dp.value))
+                        drawRect(
+                            RarityBorderGradient2(item.rarity, size.width, size.height),
+                            style = Stroke(5.dp.value)
+                        )
+                    }
+                    .padding(if (simplified) 12.5.dp else 20.dp)
+            )
 
-                    drawRect(RarityBorderGradient1(item.rarity), style = Stroke(5.dp.value))
-                    drawRect(RarityBorderGradient2(item.rarity, size.width, size.height), style = Stroke(5.dp.value))
-                }
-                .padding(if (simplified) 12.5.dp else 20.dp)
-        )
-
-        if (simplified) return@Box
-
-        Text(
-            text = "${DungeonsPower.toInGamePower(item.power).toInt()}",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 25.sp,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 13.dp)
-        )
-
-        if (totalEnchantPoints != 0) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 13.dp)
-            ) {
-                Image(
-                    bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
+            if (!simplified) {
                 Text(
-                    text = "$totalEnchantPoints",
+                    text = "${DungeonsPower.toInGamePower(item.power).toInt()}",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp,
-                    modifier = Modifier.offset(y = (-2).dp)
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 13.dp)
                 )
-            }
-        }
 
-        if (item.markedNew == true) {
-            Image(
-                bitmap = IngameImages.get { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxSize(0.2f)
-                    .offset(2.dp, (-1.5).dp)
-                    .scale(scaleX = -1f, scaleY = 1f)
-            )
+                if (totalEnchantPoints != 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 13.dp)
+                    ) {
+                        Image(
+                            bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "$totalEnchantPoints",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 25.sp,
+                            modifier = Modifier.offset(y = (-2).dp)
+                        )
+                    }
+                }
+
+                if (item.markedNew == true) {
+                    Image(
+                        bitmap = IngameImages.get { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .fillMaxSize(0.2f)
+                            .offset(2.dp, (-1.5).dp)
+                            .scale(scaleX = -1f, scaleY = 1f)
+                    )
+                }
+            }
         }
     }
 }
