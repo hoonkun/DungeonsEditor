@@ -50,11 +50,13 @@ fun EnchantmentIconImage(
                 if (!indicatorEnabled) return@drawBehind
                 if (!hovered && !selected) return@drawBehind
                 drawEnchantmentIconBorder(if (selected) 0.8f else 0.4f)
-            },
+            }
+            .scale(2f),
         imageModifier = Modifier
             .rotate(-45f)
             .scale(sqrt(2.0f))
             .scale(if (data.id == "Unset") 0.7f else 1f)
+            .scale(0.5f)
     ) {
         val pattern = data.shinePattern
         if (pattern != null) {
@@ -125,7 +127,7 @@ fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -> FloatA
         animationSpec = infiniteRepeatable(animation = ShineAnimation, repeatMode = RepeatMode.Reverse, initialStartOffset = StartOffset(delay))
     )
 
-    Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f))) {
+    Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f)).scale(0.5f)) {
         drawImage(
             image = pattern,
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
