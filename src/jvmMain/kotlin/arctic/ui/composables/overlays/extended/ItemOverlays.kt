@@ -28,6 +28,7 @@ import arctic.ui.composables.RarityColor
 import arctic.ui.composables.RarityColorType
 import arctic.ui.composables.atomic.ItemRarityButton
 import arctic.ui.composables.atomic.PowerEditField
+import arctic.ui.composables.atomic.drawUniqueIndicator
 import arctic.ui.composables.overlays.OverlayBackdrop
 import arctic.ui.composables.rememberMutableInteractionSource
 import arctic.ui.unit.dp
@@ -229,6 +230,11 @@ private fun ItemDataIcon(data: ItemData?, onItemSelect: (ItemData) -> Unit) {
 
     val behindBlurAlpha by animateFloatAsState(if (hovered) 1f else 0f)
 
+    val DrawUniqueIndicatorModifier = Modifier
+        .rotate(-20f)
+        .drawBehind { drawUniqueIndicator() }
+        .rotate(20f)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -257,34 +263,6 @@ private fun ItemDataIcon(data: ItemData?, onItemSelect: (ItemData) -> Unit) {
 @Composable
 private fun ItemDataIconImage(data: ItemData, modifier: Modifier = Modifier) =
     Image(data.inventoryIcon, null, modifier = Modifier.fillMaxSize().then(modifier))
-
-private val drawUniqueIndicator: DrawScope.() -> Unit = {
-    val color = RarityColor("Unique", RarityColorType.Opaque)
-    drawRect(
-        Brush.linearGradient(
-            0f to color.copy(alpha = 0f),
-            0.5f to color.copy(alpha = 0.75f),
-            1f to color.copy(alpha = 0f),
-            start = Offset(0f, size.height / 2f),
-            end = Offset(size.width, size.height / 2f)
-        ),
-        topLeft = Offset(0f, size.height / 2 - 3.dp.value),
-        size = Size(size.width, 6.dp.value)
-    )
-    drawCircle(
-        Brush.radialGradient(
-            0f to color.copy(alpha = 0.45f),
-            1f to color.copy(alpha = 0f),
-            center = Offset(size.width / 2f, size.height / 2f),
-        )
-    )
-}
-
-private val DrawUniqueIndicatorModifier = Modifier
-    .rotate(-20f)
-    .drawBehind(drawUniqueIndicator)
-    .rotate(20f)
-
 
 @Composable
 fun ItemDataDetail(data: ItemData) {

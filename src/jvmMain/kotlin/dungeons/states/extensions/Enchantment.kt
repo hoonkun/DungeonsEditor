@@ -4,7 +4,7 @@ import dungeons.states.Enchantment
 import dungeons.EnchantmentData
 
 
-fun Enchantment.leveling(newLevel: Int) {
+fun Enchantment.leveling(newLevel: Int = this.level) {
     level = newLevel
 
     val nonGlided = holder.netheriteEnchant == null || holder.netheriteEnchant?.id == "Unset"
