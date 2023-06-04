@@ -85,7 +85,7 @@ fun ArmorPropertyModificationOverlay() {
             targetState = detailTargetStates,
             transitionSpec = OverlayTransitions.detail(slideEnabled, sizeTransformDuration),
             modifier = Modifier.height(500.dp)
-        ) {
+        ) { (_, target, created) ->
             if (target != null) ArmorPropertyDetail(target)
             else Box(modifier = Modifier.size(0.dp, 500.dp))
 
@@ -184,7 +184,7 @@ private fun ArmorPropertyCollectionItem(
 private fun ArmorPropertyDetail(property: ArmorProperty) {
     Column(
         modifier = Modifier
-            // .wrapContentSize()
+            .wrapContentSize()
             .requiredWidth(675.dp)
             .background(Color(0xff080808))
             .padding(30.dp)
