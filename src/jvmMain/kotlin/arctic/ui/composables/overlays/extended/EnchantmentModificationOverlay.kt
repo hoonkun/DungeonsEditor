@@ -180,11 +180,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
                 indicatorEnabled = false,
                 modifier = Modifier.fillMaxSize()
             )
-            EnchantmentLevelImage(
-                level = enchantment.level,
-                positionerSize = 0.3f,
-                scale = 1.5f
-            )
+            EnchantmentLevelImage(level = enchantment.level)
         }
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {

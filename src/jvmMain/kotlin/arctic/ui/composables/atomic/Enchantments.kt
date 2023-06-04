@@ -59,16 +59,14 @@ fun EnchantmentIconImage(
 }
 
 @Composable
-fun BoxScope.EnchantmentLevelImage(level: Int, positionerSize: Float = 0.3f, scale: Float = 1.0f) {
-    Debugging.recomposition("LevelImage")
-
+fun BoxScope.EnchantmentLevelImage(level: Int, positionerSize: Float = 0.45f, scale: Float = 1.0f) {
     if (level == 0) return
 
     LevelImagePositioner(size = positionerSize) {
         Image(
             IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
             null,
-            modifier = Modifier.fillMaxSize().scale(scale)
+            modifier = Modifier.fillMaxSize().scale(scale).padding(10.dp)
         )
     }
 }
