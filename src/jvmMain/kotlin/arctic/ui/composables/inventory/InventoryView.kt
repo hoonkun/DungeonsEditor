@@ -70,7 +70,7 @@ private fun <S>RootAnimator(targetState: S, content: @Composable AnimatedVisibil
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun <S>LeftAreaAnimator(targetState: S, content: AnimatedVisibilityScope.(S) -> Unit) =
+private fun <S>LeftAreaAnimator(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {

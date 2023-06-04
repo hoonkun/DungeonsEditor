@@ -52,6 +52,7 @@ private fun RootAnimator(targetState: Item?, content: @Composable AnimatedVisibi
         content = content
     )
 
+@Composable
 private fun Content(item: Item) {
     Box(modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
         Image(
