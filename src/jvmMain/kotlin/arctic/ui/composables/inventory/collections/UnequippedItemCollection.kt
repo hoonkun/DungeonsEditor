@@ -63,12 +63,12 @@ private fun UnequippedItemFilterer(
         modifier = Modifier.padding(top = 15.dp)
     ) {
         for (item in variants) {
-            VariantFilterButton(item, item == variant) { variant = item }
+            VariantFilterButton(item, item == variant) { variant = if (variant == item) null else item }
             Spacer(modifier = Modifier.height(10.dp))
         }
         Spacer(modifier = Modifier.height(10.dp))
         for (item in rarities) {
-            RarityFilterButton(item, item == rarity) { rarity = item }
+            RarityFilterButton(item, item == rarity) { rarity = if (rarity == item) null else item }
             Spacer(modifier = Modifier.height(10.dp))
         }
         Spacer(modifier = Modifier.weight(1f))
