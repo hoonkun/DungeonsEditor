@@ -103,7 +103,7 @@ class Localizations {
             val newTexts = mutableMapOf<String, Map<String, String>>()
             val languages = listOf("ko-KR", "en-US")
             languages.forEach {
-                val json = {}::class.java.getResource("localization_$it.json")!!.readText()
+                val json = Localizations::class.java.classLoader.getResource("localization_$it.json")!!.readText()
                 newTexts[it] = Json.decodeFromString<Map<String, String>>(json)
             }
             texts = newTexts
