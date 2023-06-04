@@ -163,6 +163,7 @@ private fun EnchantmentDataCollectionItem(data: EnchantmentData, enabled: Boolea
         EnchantmentIconImage(
             data = data,
             selected = selected,
+            disableInteraction = !enabled,
             modifier = Modifier.fillMaxWidth().aspectRatio(1f / 1f),
             onClick = { onItemSelect(data) }
         )
@@ -182,7 +183,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
         Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
             EnchantmentIconImage(
                 data = enchantment.data,
-                indicatorEnabled = false,
+                hideIndicator = true,
                 modifier = Modifier.fillMaxSize()
             )
             EnchantmentLevelImage(level = enchantment.level)

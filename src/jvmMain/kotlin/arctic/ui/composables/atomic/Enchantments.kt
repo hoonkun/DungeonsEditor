@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -30,7 +31,8 @@ import kotlin.math.sqrt
 @Composable
 fun EnchantmentIconImage(
     data: EnchantmentData,
-    indicatorEnabled: Boolean = true,
+    hideIndicator: Boolean = false,
+    disableInteraction: Boolean = false,
     selected: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: (EnchantmentData) -> Unit = { }
@@ -43,15 +45,16 @@ fun EnchantmentIconImage(
         enabled = data.id != "Unset",
         containerModifier = modifier
             .scale(1f / sqrt(2.0f))
-            .clickable(interaction, null) { onClick(data) }
-            .hoverable(interaction)
+            .clickable(interaction, null, enabled = !disableInteraction) { onClick(data) }
+            .hoverable(interaction, enabled = !disableInteraction)
             .rotate(45f)
             .drawBehind {
-                if (!indicatorEnabled) return@drawBehind
+                if (hideIndicator) return@drawBehind
                 if (!hovered && !selected) return@drawBehind
                 drawEnchantmentIconBorder(if (selected) 0.8f else 0.4f)
             }
-            .scale(2f),
+            .scale(2f)
+            .alpha(if (disableInteraction && !selected) 0.25f else 1f),
         imageModifier = Modifier
             .rotate(-45f)
             .scale(sqrt(2.0f))
@@ -116,10 +119,10 @@ private fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -
         animationSpec = infiniteRepeatable(
             animation = keyframes {
                 durationMillis = 700
-                delayMillis = 500
+                delayMillis = 750
                 0.0f at 0
+                1.0f at 500
                 1.0f at 700
-                1.0f at 1000
             },
             repeatMode = RepeatMode.Reverse,
             initialStartOffset = StartOffset(delay)
