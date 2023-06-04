@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import arctic.states.arctic
 import arctic.ui.composables.atomic.ItemAlterButton
 import arctic.ui.composables.atomic.ItemRarityButton
@@ -144,7 +145,10 @@ private fun ItemNetheriteEnchantButton(holder: Item) {
                 modifier = Modifier
                     .size(30.dp)
                     .drawBehind {
-                        drawImage(IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" })
+                        drawImage(
+                            image = IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
+                            dstSize = IntSize(size.width.toInt(), size.height.toInt())
+                        )
                     }
             )
             Spacer(modifier = Modifier.width(5.dp))
