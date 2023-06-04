@@ -2,6 +2,7 @@ package arctic.ui.composables.atomic
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,9 +19,11 @@ fun BlurEffectedImage(
     scale: Float = 1.0f,
     enabled: Boolean = true,
     containerModifier: Modifier = Modifier,
-    imageModifier: Modifier = Modifier
+    imageModifier: Modifier = Modifier,
+    overlays: @Composable BoxScope.() -> Unit = { }
 ) =
     Box(modifier = containerModifier) {
         if (enabled) Image(bitmap, null, modifier = Modifier.fillMaxSize().scale(scale + 0.05f).blur(10.dp).then(imageModifier), alpha = 0.85f * alpha)
         Image(bitmap, null, alpha = alpha, modifier = Modifier.fillMaxSize().scale(scale).then(imageModifier))
+        overlays()
     }

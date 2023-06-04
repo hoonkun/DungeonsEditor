@@ -111,8 +111,12 @@ data class EnchantmentData(
 
     val icon: ImageBitmap get() =
         retrieveImage(id) { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
+            ?: throw RuntimeException("no image resource found: {$id}!")
 
-    private fun retrieveImage(cacheKey: String, criteria: (File) -> Boolean): ImageBitmap {
+    val shinePattern: ImageBitmap? get() =
+        retrieveImage("${id}_shine") { it.name.lowercase().endsWith("shine_icon.png") }
+
+    private fun retrieveImage(cacheKey: String, criteria: (File) -> Boolean): ImageBitmap? {
         if (id == "Unset") return IngameImages.get("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
 
         val cached = IngameImages.cached(cacheKey)
@@ -121,9 +125,8 @@ data class EnchantmentData(
         val imagePath = Database.enchantment(id)?.dataPath ?: throw RuntimeException("unknown enchantment id!")
         val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
         val imageFile = dataDirectory.listFiles()?.find { it.extension == "png" && criteria(it) }
-            ?: throw RuntimeException("no image resource found: {$id}!")
 
-        return IngameImages.get(cacheKey, false) { imageFile.absolutePath }
+        return if(imageFile != null) IngameImages.get(cacheKey, false) { imageFile.absolutePath } else null
     }
 
     companion object {

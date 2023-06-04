@@ -1,13 +1,12 @@
 package arctic.ui.composables.atomic
 
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,9 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -55,7 +55,14 @@ fun EnchantmentIconImage(
             .rotate(-45f)
             .scale(sqrt(2.0f))
             .scale(if (data.id == "Unset") 0.7f else 1f)
-    )
+    ) {
+        val pattern = data.shinePattern
+        if (pattern != null) {
+            EnchantmentShine(pattern, 0) { ShinePatternMatrix(0, it) }
+            EnchantmentShine(pattern, 500) { ShinePatternMatrix(1, it) }
+            EnchantmentShine(pattern, 1000) { ShinePatternMatrix(2, it) }
+        }
+    }
 }
 
 @Composable
@@ -87,3 +94,43 @@ fun PowerfulEnchantmentIndicator() =
         modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
     )
 
+
+private fun ShinePatternMatrix(channel: Int, alpha: Float): FloatArray {
+    val result = MutableList(20) { 0f }
+    result[channel] = 1f
+    result[channel + 5] = 1f
+    result[channel + 10] = 1f
+    result[channel + 15] = alpha
+
+    return result.toFloatArray()
+}
+
+private val ShineAnimation = keyframes {
+    durationMillis = 700
+    delayMillis = 500
+    0.0f at 0
+    1.0f at 700
+    1.0f at 1000
+}
+
+private const val initialValue = 0f
+private const val targetValue = 1f
+private val blendMode = BlendMode.Overlay
+
+@Composable
+fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -> FloatArray) {
+    val transition = rememberInfiniteTransition()
+    val alpha by transition.animateFloat(
+        initialValue, targetValue,
+        animationSpec = infiniteRepeatable(animation = ShineAnimation, repeatMode = RepeatMode.Reverse, initialStartOffset = StartOffset(delay))
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f))) {
+        drawImage(
+            image = pattern,
+            dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix(matrix(alpha))),
+            blendMode = blendMode
+        )
+    }
+}
