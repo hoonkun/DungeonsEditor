@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import arctic.states.arctic
@@ -238,5 +239,6 @@ private fun RowScope.EnchantmentLevelSelectorItem(enchantment: Enchantment, leve
                 shape = RoundedCornerShape(5.dp)
             )
             .clickable(interaction, null) { enchantment.leveling(level) }
+            .scale(if (level == 0) 0.9f else 2f)
     )
 }
