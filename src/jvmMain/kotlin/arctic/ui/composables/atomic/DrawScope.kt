@@ -13,7 +13,7 @@ import arctic.ui.unit.dp
 
 
 @Stable
-fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean) {
+fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean = false) {
     if (!hovered && !selected) return
     drawRoundRect(
         brush = SolidColor(if (selected) Color.White else Color.White.copy(0.35f)),

@@ -283,11 +283,7 @@ fun ItemDataDetail(data: ItemData) {
                 )
                 Spacer(modifier = Modifier.width(25.dp))
                 Column {
-                    ItemRarityButton(
-                        text = "${if (data.limited) "시즌한정 " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
-                        enabled = !data.unique,
-                        color = RarityColor(rarity, RarityColorType.Translucent)
-                    ) { rarity = if (rarity == "Common") "Rare" else "Common" }
+                    ItemRarityButton(data, rarity) { rarity = it }
                     Text(
                         text = data.name ?: "알 수 없는 아이템",
                         color = Color.White,
