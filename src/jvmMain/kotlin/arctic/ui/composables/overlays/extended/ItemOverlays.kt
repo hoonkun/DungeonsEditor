@@ -61,6 +61,7 @@ fun ItemEditionOverlay() {
         targetState = arctic.edition.target,
         variant = { it.data.variant },
         onExit = { arctic.edition.disable() },
+        filterEnabled = false,
         onSelect = {
             arctic.edition.target?.type = it.type
             arctic.edition.disable()
@@ -151,7 +152,7 @@ private fun ItemCreationVariantFilter(text: String, variant: String, enabled: Bo
         modifier = Modifier
             .padding(bottom = 10.dp)
             .hoverable(interaction, enabled = enabled)
-            .clickable(interaction, null, onClick = onClick)
+            .clickable(interaction, null, enabled = enabled, onClick = onClick)
     ) {
         VariantFilterText(text, modifier = Modifier.blur(10.dp).alpha(blurAlpha))
         VariantFilterText(text, modifier = Modifier.alpha(overlayAlpha))
