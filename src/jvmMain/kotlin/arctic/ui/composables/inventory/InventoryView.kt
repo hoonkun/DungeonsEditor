@@ -136,7 +136,7 @@ private fun SomeTips() =
 private fun ItemComparator(items: List<Item?>) {
     val scroll = rememberScrollState()
     val adapter = rememberScrollbarAdapter(scroll)
-    Box(modifier = Modifier.fillMaxSize().padding(top = 40.dp, bottom = 40.dp, start = 75.dp)) {
+    Box(modifier = Modifier.fillMaxSize().padding(start = 75.dp)) {
         Column(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize().verticalScroll(scroll)
