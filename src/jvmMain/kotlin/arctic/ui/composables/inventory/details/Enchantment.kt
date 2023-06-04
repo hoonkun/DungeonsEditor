@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.layout
 import arctic.states.arctic
 import arctic.ui.composables.atomic.EnchantmentIconImage
 import arctic.ui.composables.atomic.EnchantmentLevelImage
+import arctic.ui.unit.dp
 import dungeons.IngameImages
 import dungeons.states.Enchantment
 import dungeons.states.extensions.data
@@ -77,36 +78,34 @@ private fun RowScope.OpenedSlot(
 ) =
     Box(modifier = Modifier.weight(1f).aspectRatio(1f / 1f)) {
         Box(
-            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0.5f, 0.5f, 0f, 0f),
+            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0.5f, 0f),
             content = top
         )
         Box(
-            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0f, 0f, 0.5f, 0.5f),
+            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0f, 0.5f),
             content = left
         )
         Box(
-            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0.5f, 0.5f, 1f, 1f),
+            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(0.5f, 1f),
             content = bottom
         )
         Box(
-            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(1f, 1f, 0.5f, 0.5f),
+            modifier = Modifier.fillMaxSize(0.5f).offsetRelative(1f, 0.5f),
             content = right
         )
     }
 
 private fun Modifier.offsetRelative(
     x: Float = 0f,
-    xAnchor: Float = 0.5f,
     y: Float = 0f,
-    yAnchor: Float = 0.5f
 ): Modifier =
     layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
 
-        layout(constraints.maxWidth, constraints.maxHeight) {
+        layout((constraints.maxWidth).dp.value.toInt(), (constraints.maxHeight).dp.value.toInt()) {
             placeable.placeRelative(
-                x = (constraints.maxWidth * x - placeable.width * xAnchor).toInt(),
-                y = (constraints.maxHeight * y - placeable.height * yAnchor).toInt()
+                x = (constraints.maxWidth * x).dp.value.toInt(),
+                y = (constraints.maxHeight * y).dp.value.toInt()
             )
         }
     }
