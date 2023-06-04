@@ -18,8 +18,6 @@ import arctic.ui.composables.overlays.extended.tween250
 import arctic.ui.unit.dp
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
-import dungeons.states.extensions.equippedItems
-import dungeons.states.extensions.unequippedItems
 
 @Composable
 fun InventoryView() {

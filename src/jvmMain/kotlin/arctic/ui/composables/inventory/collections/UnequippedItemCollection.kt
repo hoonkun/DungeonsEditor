@@ -26,12 +26,15 @@ fun UnequippedItemCollection(items: List<Item>) {
     val variantFilter = remember { mutableStateOf<String?>(null) }
     val rarityFilter = remember { mutableStateOf<String?>(null) }
 
-    val datasets = remember(items, variantFilter.value, rarityFilter.value) {
-        items.filter {
-            val variantMatched = (variantFilter.value == null || (if (variantFilter.value == "Enchanted") it.totalEnchantmentInvestedPoints > 0 else it.data.variant == variantFilter.value))
-            val rarityMatched = (rarityFilter.value == null || it.rarity == rarityFilter.value)
+    val datasets by remember(items) {
+        derivedStateOf {
+            items.filter {
+                val variantMatched =
+                    (variantFilter.value == null || (if (variantFilter.value == "Enchanted") it.totalEnchantmentInvestedPoints > 0 else it.data.variant == variantFilter.value))
+                val rarityMatched = (rarityFilter.value == null || it.rarity == rarityFilter.value)
 
-            variantMatched && rarityMatched
+                variantMatched && rarityMatched
+            }
         }
     }
 

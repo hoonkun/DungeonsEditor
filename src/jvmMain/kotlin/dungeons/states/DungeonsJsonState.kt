@@ -212,6 +212,22 @@ class DungeonsJsonState(private val from: JSONObject) {
     @JsonField(FIELD_XP)
     var xp: Long by mutableStateOf(from.getLong(FIELD_XP))
 
+
+    val equippedMelee by derivedStateOf { items.find { it.equipmentSlot == "MeleeGear" } }
+    val equippedRanged by derivedStateOf { items.find { it.equipmentSlot == "RangedGear" } }
+    val equippedArmor by derivedStateOf { items.find { it.equipmentSlot == "ArmorGear" } }
+    val equippedArtifact1 by derivedStateOf { items.find { it.equipmentSlot == "HotbarSlot1" } }
+    val equippedArtifact2 by derivedStateOf { items.find { it.equipmentSlot == "HotbarSlot2" } }
+    val equippedArtifact3 by derivedStateOf { items.find { it.equipmentSlot == "HotbarSlot3" } }
+
+    val equippedItems by derivedStateOf {
+        listOf(
+            equippedMelee, equippedArmor, equippedRanged,
+            equippedArtifact1, equippedArtifact2, equippedArtifact3
+        )
+    }
+    val unequippedItems by derivedStateOf { items.filter { it.inventoryIndex != null } }
+
     fun export(): JSONObject =
         JSONObject(from.toString()).apply {
             replace(FIELD_ITEMS, items.map { it.export() })

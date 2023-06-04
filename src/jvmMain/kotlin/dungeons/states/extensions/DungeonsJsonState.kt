@@ -47,34 +47,16 @@ val DungeonsJsonState.totalSpentEnchantmentPoints: Int get() =
 
 val DungeonsJsonState.playerPower: Int get() {
     val powerDividedBy4 = listOf(
-        items.find(equippedMelee),
-        items.find(equippedArmor),
-        items.find(equippedRanged)
+        equippedMelee,
+        equippedArmor,
+        equippedRanged
     ).sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) } / 4.0
 
     val powerDividedBy12 = listOf(
-        items.find(equippedArtifact1),
-        items.find(equippedArtifact2),
-        items.find(equippedArtifact3)
+        equippedArtifact1,
+        equippedArtifact2,
+        equippedArtifact3
     ).sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) } / 12.0
 
     return (powerDividedBy4 + powerDividedBy12).toInt()
 }
-
-val DungeonsJsonState.equippedItems get() = listOf(
-    items.find(equippedMelee),
-    items.find(equippedArmor),
-    items.find(equippedRanged),
-    items.find(equippedArtifact1),
-    items.find(equippedArtifact2),
-    items.find(equippedArtifact3)
-)
-
-val DungeonsJsonState.unequippedItems get() = items.filter { it.inventoryIndex != null }
-
-private val equippedMelee: (Item) -> Boolean = { it.equipmentSlot == "MeleeGear" }
-private val equippedRanged: (Item) -> Boolean = { it.equipmentSlot == "RangedGear" }
-private val equippedArmor: (Item) -> Boolean = { it.equipmentSlot == "ArmorGear" }
-private val equippedArtifact1: (Item) -> Boolean = { it.equipmentSlot == "HotbarSlot1" }
-private val equippedArtifact2: (Item) -> Boolean = { it.equipmentSlot == "HotbarSlot2" }
-private val equippedArtifact3: (Item) -> Boolean = { it.equipmentSlot == "HotbarSlot3" }
