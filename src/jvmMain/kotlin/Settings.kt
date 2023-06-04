@@ -4,14 +4,21 @@ class Settings {
 
     companion object {
 
-        var globalScale: Float = 0.5f
+        val globalScale: Float
 
         init {
-            val settingsFile = File("./settings.arctic")
-            if (settingsFile.exists()) {
-                val map = settingsFile.readText().trim().split("\n").associate { it.split("=").let { seg -> seg[0] to seg[1] } }
-                globalScale = map["scale"]?.toFloat()?.coerceIn(0.4f..1f) ?: 0.5f
-            }
+            val file = File("./settings.arctic")
+            val settings =
+                if (file.exists())
+                    file
+                        .readText()
+                        .trim()
+                        .split("\n")
+                        .associate { it.split("=").let { segments -> segments[0] to segments[1] } }
+                else
+                    emptyMap()
+
+            globalScale = settings["scale"]?.toFloat()?.coerceIn(0.4f..1f) ?: 0.5f
         }
 
     }
