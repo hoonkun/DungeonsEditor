@@ -9,7 +9,7 @@ import dungeons.DungeonsPower
 fun DungeonsJsonState.addItem(newItem: Item, copiedFrom: Item? = null) {
     val where = copiedFrom?.where ?: arctic.view
     if (where == "inventory") {
-        items.add(6, newItem)
+        items.add(6.coerceAtMost(items.size), newItem)
         unequippedItems.forEachIndexed { index, item -> item.inventoryIndex = index }
     } else {
         storageChestItems.add(0, newItem)
