@@ -85,7 +85,7 @@ fun BottomBar(stored: DungeonsJsonState) {
 
             CurrencyText(
                 icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
-                value = "${stored.playerLevel - stored.totalSpentEnchantmentPoints}",
+                value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
                 smallIcon = true
             )
 
