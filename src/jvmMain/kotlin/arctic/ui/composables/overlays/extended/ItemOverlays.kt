@@ -16,11 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import arctic.states.arctic
@@ -33,11 +30,7 @@ import arctic.ui.composables.overlays.OverlayBackdrop
 import arctic.ui.composables.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import composable.blackstone.popup.AddButtonIcon
-import dungeons.Database
-import dungeons.DungeonsPower
-import dungeons.ItemData
-import dungeons.Localizations
+import dungeons.*
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
 import dungeons.states.extensions.addItem
@@ -386,4 +379,14 @@ fun BoxScope.AddButton(onClick: () -> Unit) {
                 .alpha(baseAlpha)
         )
     }
+}
+
+@Composable
+private fun AddButtonIcon(modifier: Modifier = Modifier) {
+    Image(
+        bitmap = IngameImages.get { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
+        contentDescription = null,
+        filterQuality = FilterQuality.None,
+        modifier = modifier.then(Modifier.size(125.dp).padding(12.5.dp))
+    )
 }

@@ -142,7 +142,7 @@ private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment) {
             .background(Color(0xff080808))
     ) {
         items(datasets, key = { it.id }) { data ->
-            EnchantmentDataItem(
+            EnchantmentDataCollectionItem(
                 data = data,
                 enabled = data.multipleAllowed || (holder.enchantments?.all { it.id != data.id } ?: true),
                 selected = applyTarget.id == data.id,
@@ -153,7 +153,7 @@ private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment) {
 }
 
 @Composable
-private fun EnchantmentDataItem(data: EnchantmentData, enabled: Boolean, selected: Boolean, onItemSelect: (EnchantmentData) -> Unit) {
+private fun EnchantmentDataCollectionItem(data: EnchantmentData, enabled: Boolean, selected: Boolean, onItemSelect: (EnchantmentData) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         EnchantmentIconImage(
             data = data,
