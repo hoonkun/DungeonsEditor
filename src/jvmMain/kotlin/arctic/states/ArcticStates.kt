@@ -38,6 +38,7 @@ class ArcticStates {
 
     val backdropBlur get() =
         dialogs.fileSaveDstSelector ||
+        dialogs.fileLoadSrcSelector ||
         enchantments.hasDetailTarget ||
         armorProperties.hasDetailTarget ||
         armorProperties.hasCreateInto ||

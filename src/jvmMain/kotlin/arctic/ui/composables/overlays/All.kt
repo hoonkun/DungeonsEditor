@@ -22,6 +22,8 @@ fun Overlays() {
     ComplicatedOverlays()
 
     FileSaveOverlay()
+    FileLoadOverlay()
+
     FileCloseConfirmOverlay()
     FileOpenFailureOverlay()
 

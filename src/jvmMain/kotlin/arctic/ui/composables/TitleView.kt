@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import arctic.states.arctic
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
@@ -28,11 +29,11 @@ import dungeons.IngameImages
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun TitleView() =
+fun TitleView(blurRadius: Dp) =
     AnimatedContent(
         targetState = arctic.stored == null,
         transitionSpec = { fadeIn() with fadeOut() },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().blur(blurRadius)
     ) { isInTitle ->
         if (isInTitle) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

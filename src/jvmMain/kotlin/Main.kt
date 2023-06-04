@@ -19,8 +19,6 @@ import arctic.ui.composables.BottomBar
 import arctic.ui.composables.inventory.InventoryView
 import arctic.ui.composables.overlays.Overlays
 import arctic.ui.unit.dp
-import composable.Selector
-import dungeons.readDungeonsJson
 import dungeons.states.DungeonsJsonState
 
 @Composable
@@ -34,7 +32,7 @@ fun App() {
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
 
     AppRoot {
-        TitleView()
+        TitleView(popupBackdropBlurRadius)
         MainContainer(popupBackdropBlurRadius) {
             ContentContainer { InventoryView() }
             BottomBarContainer { stored -> BottomBar(stored) }
@@ -101,32 +99,5 @@ fun main() = application {
         resizable = false
     ) {
         App()
-    }
-    if (arctic.dialogs.fileSaveDstSelector) {
-        Window(onCloseRequest = { arctic.dialogs.fileSaveDstSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
-            Selector(
-                selectText = "저장",
-                validator = { !it.isDirectory },
-                onSelect = { arctic.requireStored.save(it); arctic.dialogs.fileSaveDstSelector = false }
-            )
-        }
-    }
-    if (arctic.dialogs.fileLoadSrcSelector) {
-        Window(onCloseRequest = { arctic.dialogs.fileLoadSrcSelector = false }, state = rememberWindowState(size = DpSize(1050.dp, 620.dp)), resizable = false) {
-            Selector(
-                selectText = "열기",
-                validator = { !it.isDirectory && it.isFile },
-                onSelect = {
-                    try {
-                        arctic.view = "inventory"
-                        arctic.stored = DungeonsJsonState(it.readDungeonsJson())
-                    } catch (e: Exception) {
-                        arctic.alerts.fileLoadFailed = e.message
-                    } finally {
-                        arctic.dialogs.fileLoadSrcSelector = false
-                    }
-                }
-            )
-        }
     }
 }

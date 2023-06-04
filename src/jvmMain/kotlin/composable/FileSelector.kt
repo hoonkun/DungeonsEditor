@@ -355,7 +355,6 @@ fun SelectorRoot(
         modifier = Modifier
             .fillMaxSize()
             .requiredWidthIn(min = 1000.dp)
-            .background(SelectorColors.Background)
             .padding(start = 25.dp, end = 25.dp, top = 32.dp)
     ) {
         Column(
