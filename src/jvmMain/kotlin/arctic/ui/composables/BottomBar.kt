@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.states.arctic
+import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsLevel
 import dungeons.IngameImages
 import dungeons.states.DungeonsJsonState
@@ -103,7 +104,7 @@ fun BottomBar(stored: DungeonsJsonState) {
 
 @Composable
 fun IconButton(icon: String, onClick: () -> Unit) {
-    val source = remember { MutableInteractionSource() }
+    val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
 
     Image(
@@ -125,7 +126,7 @@ fun SaveButton() = IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {
 
 @Composable
 fun InventorySwitcher() {
-    val source = remember { MutableInteractionSource() }
+    val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
 

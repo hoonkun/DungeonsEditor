@@ -2,7 +2,6 @@ package arctic.ui.composables.atomic
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -24,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import arctic.ui.utils.rememberMutableInteractionSource
 
 
 private val radius = 8.dp.value
@@ -41,7 +40,7 @@ fun RetroButton(
     onClick: () -> Unit
 ) {
 
-    val source = remember { MutableInteractionSource() }
+    val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
 
