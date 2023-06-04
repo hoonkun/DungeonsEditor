@@ -14,8 +14,6 @@ import dungeons.Localizations
 
 @Composable
 fun PowerEditField(value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
-    Debugging.recomposition("PowerEditField")
-
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         PowerIcon()
         Spacer(modifier = Modifier.width(10.dp))

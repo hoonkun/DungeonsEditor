@@ -24,8 +24,6 @@ import dungeons.states.DungeonsJsonState
 @Composable
 @Preview
 fun App() {
-    Debugging.recomposition("App")
-
     val backdropVisible = arctic.backdropBlur
     val moreBlur = arctic.creation.target != null
 
