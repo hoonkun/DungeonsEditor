@@ -54,6 +54,7 @@ fun EnchantmentIconImage(
         imageModifier = Modifier
             .rotate(-45f)
             .scale(sqrt(2.0f))
+            .scale(if (data.id == "Unset") 0.7f else 1f)
     )
 }
 
