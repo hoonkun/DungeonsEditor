@@ -33,12 +33,10 @@ import arctic.ui.utils.getValue
 import arctic.ui.utils.mutableRefOf
 import arctic.ui.utils.setValue
 import java.io.File
-import kotlin.reflect.KProperty
 
 
 private class SelectorColors {
     companion object {
-        val Background = Color(0xff2b2b2b)
         val OnBackground = Color(0xffa9b7c6)
         val Directories = Color(0xffffc660)
         val Files = Color(0xffa9b7c6)
@@ -308,7 +306,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
 }
 
 @Composable
-fun ColumnScope.Candidates(
+fun Candidates(
     type: CandidateType,
     candidates: StateFileList,
     hintTarget: StateFile?
@@ -351,7 +349,7 @@ fun RowScope.Candidate(
 }
 
 @Composable
-fun ColumnScope.Remaining(
+fun Remaining(
     count: Int,
     type: CandidateType
 ) = Text(
@@ -379,13 +377,13 @@ fun SelectorRoot(
 }
 
 @Composable
-fun ColumnScope.Padded(
+fun Padded(
     top: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit
 ) = Column(modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = top), content = content)
 
 @Composable
-fun ColumnScope.BasePathDocumentation(text: String) =
+fun BasePathDocumentation(text: String) =
     Text(
         text = text,
         color = SelectorColors.IdeDocumentation,
@@ -395,7 +393,7 @@ fun ColumnScope.BasePathDocumentation(text: String) =
     )
 
 @Composable
-fun ColumnScope.BasePathProperty(key: String, value: String) =
+fun BasePathProperty(key: String, value: String) =
     Text(
         AnnotatedString(
             text = "$key = $value",
@@ -413,7 +411,7 @@ fun ColumnScope.BasePathProperty(key: String, value: String) =
     )
 
 @Composable
-fun ColumnScope.PathInputBox(content: @Composable RowScope.() -> Unit) =
+fun PathInputBox(content: @Composable RowScope.() -> Unit) =
     Box(
         modifier = Modifier.padding(vertical = 20.dp)
     ) {
@@ -456,7 +454,7 @@ fun RowScope.PathInput(
 )
 
 @Composable
-fun RowScope.Select(
+fun Select(
     text: String,
     enabled: Boolean,
     onClick: () -> Unit
