@@ -91,8 +91,13 @@ fun TitleView(blurRadius: Dp) {
                     modifier = Modifier
                         .hoverable(interaction)
                         .clickable(interaction, null) {
-                            if (selectedState == null) arctic.dialogs.fileLoadSrcSelector = true
-                            else arctic.stored = selectedState
+                            val path = selectedPath
+                            if (path == null || selectedState == null) {
+                                arctic.dialogs.fileLoadSrcSelector = true
+                            } else {
+                                arctic.stored = selectedState
+                                LocalData.updateRecentFiles(path)
+                            }
                         }
                 )
 

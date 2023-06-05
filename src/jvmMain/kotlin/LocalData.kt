@@ -26,6 +26,15 @@ data class LocalData(
                 }
         }
 
+        fun updateRecentFiles(path: String) {
+            if (!recentFiles.contains(path)) recentFiles.add(0, path)
+            else recentFiles.add(0, recentFiles.removeAt(recentFiles.indexOf(path)))
+
+            if (recentFiles.size > 4) recentFiles.removeRange(4, recentFiles.size)
+
+            save()
+        }
+
         fun save() {
             localDataFile().writeText(Json.encodeToString(LocalData(recentFiles)))
         }

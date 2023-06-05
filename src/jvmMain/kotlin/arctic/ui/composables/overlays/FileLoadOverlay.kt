@@ -34,10 +34,7 @@ private fun Content() {
                     arctic.view = "inventory"
                     arctic.stored = DungeonsJsonState(it.readDungeonsJson())
 
-                    if (!LocalData.recentFiles.contains(it.absolutePath)) LocalData.recentFiles.add(0, it.absolutePath)
-                    else LocalData.recentFiles.add(0, LocalData.recentFiles.removeAt(LocalData.recentFiles.indexOf(it.absolutePath)))
-
-                    LocalData.save()
+                    LocalData.updateRecentFiles(it.absolutePath)
                 } catch (e: Exception) {
                     arctic.alerts.fileLoadFailed = e.message
                 } finally {
