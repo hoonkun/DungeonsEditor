@@ -43,7 +43,7 @@ fun File.writeDungeonsJson(json: JSONObject) {
 }
 
 fun File.readDungeonsSummary(): Triple<String, DungeonsJsonState, DungeonsSummary> {
-    val state = DungeonsJsonState(readDungeonsJson())
+    val state = DungeonsJsonState(readDungeonsJson(), this)
     return Triple(
         path,
         state,

@@ -7,6 +7,7 @@ import dungeons.writeDungeonsJson
 import extensions.*
 import org.json.JSONObject
 import java.io.File
+import java.time.LocalDateTime
 
 @Target(AnnotationTarget.PROPERTY)
 annotation class CanBeUndefined
@@ -18,7 +19,7 @@ annotation class JsonField(val name: String)
 annotation class MustBeVerified(val message: String)
 
 @Stable
-class DungeonsJsonState(private val from: JSONObject) {
+class DungeonsJsonState(private val from: JSONObject, private val source: File) {
 
     companion object {
         private const val FIELD_BONUS_PREREQUISITES = "bonus_prerequisites"
@@ -237,7 +238,18 @@ class DungeonsJsonState(private val from: JSONObject) {
         }
 
     fun save(file: File) {
-        file.writeDungeonsJson(export())
+        val date = LocalDateTime.now().run {
+            val year = year - 2000
+            val date = listOf(monthValue, dayOfMonth, hour, minute, second).joinToString("") { "$it".padStart(2, '0') }
+            "$year$date"
+        }
+        if (file.isDirectory) {
+            source.copyTo(File("${file.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
+            File("${file.absolutePath}/${source.name}").writeDungeonsJson(export())
+        } else {
+            source.copyTo(File("${file.parentFile.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
+            file.writeDungeonsJson(export())
+        }
     }
 
 }

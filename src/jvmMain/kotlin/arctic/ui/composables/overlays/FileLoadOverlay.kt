@@ -34,7 +34,7 @@ private fun Content() {
             Selector(selectText = "열기", validator = { !it.isDirectory && it.isFile }) {
                 try {
                     arctic.view = "inventory"
-                    arctic.stored = DungeonsJsonState(it.readDungeonsJson())
+                    arctic.stored = DungeonsJsonState(it.readDungeonsJson(), it)
 
                     LocalData.updateRecentFiles(Path(it.absolutePath).normalize().absolutePathString())
                 } catch (e: Exception) {
