@@ -1,5 +1,6 @@
 package arctic.ui.composables
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
@@ -7,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -27,10 +29,12 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import arctic.ui.composables.atomic.RetroButton
+import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.getValue
 import arctic.ui.utils.mutableRefOf
+import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.utils.setValue
 import java.io.File
 
@@ -46,6 +50,7 @@ private class SelectorColors {
         val IdeDocumentation = Color(0xff629755)
         val IdeFunctionProperty = Color(0xff467cda)
         val IdeGeneral = Color(0xffa9b7c6)
+        val IdeKeyword = Color(0xffcc7832)
     }
 }
 
@@ -147,8 +152,10 @@ enum class CandidateType(
 @Composable
 fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ìž¥", onSelect: (File) -> Unit) {
 
+    var useBasePath by remember { mutableStateOf(true) }
+
     var path by remember { mutableStateOf(TextFieldValue("/", selection = TextRange(1))) }
-    val entirePath by remember(path.text) { derivedStateOf { "$BasePath${path.text}" } }
+    val entirePath by remember(path.text) { derivedStateOf { "${if (useBasePath) BasePath else ""}${path.text}" } }
 
     val keys = remember { KeySet(ctrl = false, shift = false) }
 
@@ -156,7 +163,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     var isFieldShifting by remember { mutableRefOf(false) }
 
     val candidateTarget = remember(entirePath) {
-        File(entirePath.removeSuffixes(".").substring(0, entirePath.lastIndexOf('/')))
+        File(entirePath.removeSuffixes(".").substring(0, entirePath.lastIndexOf('/')).let { if (it == "") "/" else it })
     }
     val candidates = remember(candidateTarget, entirePath) {
         (candidateTarget.listFiles() ?: arrayOf())
@@ -207,8 +214,8 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
         TextFieldValue(annotatedText, selection)
     }
 
-    val selected = remember(path.text) {
-        File("$BasePath${path.text}").takeIf(validator)
+    val selected = remember(path.text, useBasePath) {
+        File("${if (useBasePath) BasePath else ""}${path.text}").takeIf(validator)
     }
 
     val requester = remember { FocusRequester() }
@@ -219,6 +226,10 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
             else it.text
         newPath = newPath.removeSuffix(hint).replace("//", "/")
         if (isFieldShifting) newPath += it.text.last()
+
+        if (newPath.length - path.text.length > 2 && newPath.startsWith(BasePath) && useBasePath) {
+            useBasePath = false
+        }
 
         TextFieldValue(
             text = newPath,
@@ -274,7 +285,11 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     SelectorRoot {
         Padded {
             BasePathDocumentation(text = "/** you can use '..' to go parent directory */")
-            BasePathProperty(key = "basePath", value = BasePath)
+            Row {
+                BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") { useBasePath = it }
+                Spacer(modifier = Modifier.width(30.dp))
+                BasePathProperty(key = "basePath", value = BasePath, disabled = !useBasePath)
+            }
         }
         PathInputBox {
             PathInput(
@@ -393,7 +408,7 @@ fun BasePathDocumentation(text: String) =
     )
 
 @Composable
-fun BasePathProperty(key: String, value: String) =
+fun BasePathProperty(key: String, value: String, disabled: Boolean) =
     Text(
         AnnotatedString(
             text = "$key = $value",
@@ -407,7 +422,29 @@ fun BasePathProperty(key: String, value: String) =
         ),
         color = SelectorColors.IdeGeneral,
         fontSize = 24.sp,
-        modifier = Modifier.padding(bottom = 2.dp)
+        fontFamily = JetbrainsMono,
+        modifier = Modifier.padding(bottom = 2.dp).alpha(if (disabled) 0.35f else 1f)
+    )
+
+@Composable
+fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean) -> Unit) =
+    Text(
+        AnnotatedString(
+            text = "$key = ${value.padEnd(5, ' ')}",
+            spanStyles = listOf(
+                AnnotatedString.Range(
+                    item = SpanStyle(color = SelectorColors.IdeFunctionProperty),
+                    start = 0,
+                    end = key.length + 2
+                )
+            )
+        ),
+        color = SelectorColors.IdeKeyword,
+        fontSize = 24.sp,
+        fontFamily = JetbrainsMono,
+        modifier = Modifier
+            .padding(bottom = 2.dp)
+            .clickable(rememberMutableInteractionSource(), null) { onClick(value == "false") }
     )
 
 @Composable
