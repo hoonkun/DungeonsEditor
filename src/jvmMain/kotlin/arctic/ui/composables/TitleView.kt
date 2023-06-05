@@ -5,6 +5,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -54,8 +55,9 @@ fun TitleView(blurRadius: Dp) {
 
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
 
-    val goAlpha by animateFloatAsState(if (hovered) 0.4f else 0.3f)
+    val goAlpha by animateFloatAsState(if (pressed) 0.55f else if (hovered) 0.4f else 0.3f)
     val summaryOffset by animateFloatAsState(if (hovered) 50f else 0f)
     val summaryContainerOffset by animateFloatAsState(if (hovered) -20f else 0f)
 
