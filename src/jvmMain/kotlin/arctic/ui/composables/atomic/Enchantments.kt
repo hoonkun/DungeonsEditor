@@ -45,7 +45,7 @@ fun EnchantmentIconImage(
         enabled = data.id != "Unset",
         containerModifier = modifier
             .scale(1f / sqrt(2.0f))
-            .clickable(interaction, null, enabled = !disableInteraction) { onClick(data) }
+            .clickable(interaction, null, enabled = (!disableInteraction || selected)) { onClick(data) }
             .hoverable(interaction, enabled = !disableInteraction)
             .rotate(45f)
             .drawBehind {
