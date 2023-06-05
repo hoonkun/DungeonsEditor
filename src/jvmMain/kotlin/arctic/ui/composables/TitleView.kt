@@ -257,22 +257,25 @@ private fun CurrenciesSummary(summary: DungeonsSummary) {
 @Composable
 private fun CurrencyText(icon: String, value: String, small: Boolean = false) {
     CurrencyImage(IngameImages.get { icon }, small)
-    Spacer(modifier = Modifier.width(10.dp))
-    Text(text = value, fontFamily = JetbrainsMono, fontSize = 30.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
-    Spacer(modifier = Modifier.width(30.dp))
+    CurrencyTextContent(value)
 }
 
 @Composable
 private fun CurrencyText(value: String, icon: @Composable () -> Unit) {
     icon()
+    CurrencyTextContent(value)
+}
+
+@Composable
+private fun CurrencyTextContent(value: String) {
     Spacer(modifier = Modifier.width(10.dp))
-    Text(text = value, fontFamily = JetbrainsMono, fontSize = 30.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
+    Text(text = value, fontFamily = JetbrainsMono, fontSize = 24.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
     Spacer(modifier = Modifier.width(30.dp))
 }
 
 @Composable
 private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
-    Image(image, null, modifier = Modifier.size(if (small) 35.dp else 42.5.dp))
+    Image(image, null, modifier = Modifier.size(if (small) 28.dp else 35.dp))
 
 @Composable
 private fun EquipmentSummary(summary: DungeonsSummary) {
@@ -299,6 +302,8 @@ private fun EquipmentSummaryEach(item: Item?) {
                     )
                 }
                 .padding(10.dp)
+                .scale(2f),
+            imageModifier = Modifier.scale(0.5f)
         )
     } else {
         Box(
