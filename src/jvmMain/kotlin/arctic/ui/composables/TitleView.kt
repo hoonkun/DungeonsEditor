@@ -206,7 +206,7 @@ private fun BoxScope.Summary(
 ) =
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.requiredSize(1200.dp, 800.dp).align(Alignment.CenterEnd).offset(x = 225.dp, y = 335.dp).then(rootModifier)
+        modifier = Modifier.requiredSize(1200.dp, 800.dp).align(Alignment.CenterEnd).offset(x = 225.dp, y = 400.dp).then(rootModifier)
     ) {
         Text(
             text = "->",
@@ -214,7 +214,7 @@ private fun BoxScope.Summary(
             fontSize = 825.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xff191919),
-            modifier = Modifier.offset(y = (-300).dp)
+            modifier = Modifier.offset(y = (-320).dp)
         )
         AnimatedContent(
             targetState = targetState,
@@ -273,13 +273,13 @@ private fun CurrencyText(value: String, icon: @Composable () -> Unit) {
 @Composable
 private fun CurrencyTextContent(value: String) {
     Spacer(modifier = Modifier.width(10.dp))
-    Text(text = value, fontFamily = JetbrainsMono, fontSize = 24.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
+    Text(text = value, fontFamily = JetbrainsMono, fontSize = 20.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
     Spacer(modifier = Modifier.width(30.dp))
 }
 
 @Composable
 private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
-    Image(image, null, modifier = Modifier.size(if (small) 28.dp else 35.dp))
+    Image(image, null, modifier = Modifier.size(if (small) 22.dp else 28.dp))
 
 @Composable
 private fun EquipmentSummary(summary: DungeonsSummary) {
