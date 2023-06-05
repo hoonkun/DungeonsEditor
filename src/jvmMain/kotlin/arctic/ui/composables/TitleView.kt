@@ -4,6 +4,7 @@ import LocalData
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -56,10 +57,11 @@ fun TitleView(blurRadius: Dp) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
+    val focused by interaction.collectIsFocusedAsState()
 
-    val goAlpha by animateFloatAsState(if (pressed) 0.55f else if (hovered) 0.4f else 0.3f)
-    val summaryOffset by animateFloatAsState(if (hovered) 50f else 0f)
-    val summaryContainerOffset by animateFloatAsState(if (hovered) -20f else 0f)
+    val goAlpha by animateFloatAsState(if (pressed) 0.55f else if (hovered || focused) 0.4f else 0.3f)
+    val summaryOffset by animateFloatAsState(if (hovered || focused) 50f else 0f)
+    val summaryContainerOffset by animateFloatAsState(if (hovered || focused) -20f else 0f)
 
     AnimatedContent(
         targetState = arctic.stored == null,
@@ -439,13 +441,14 @@ private fun SelectSectionHeader(iconResource: String, title: String) {
 private fun SelectCandidateText(text: String, subtext: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
+    val focused by interaction.collectIsFocusedAsState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .hoverable(interaction)
             .clickable(interaction, null, onClick = onClick)
-            .background(Color.White.copy(alpha = if (selected) 0.1f else if (hovered) 0.075f else 0.0f))
+            .background(Color.White.copy(alpha = if (selected) 0.1f else if (hovered || focused) 0.075f else 0.0f))
             .padding(start = 100.dp)
     ) {
         Column {
