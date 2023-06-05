@@ -4,10 +4,13 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import arctic.states.arctic
 import arctic.ui.composables.inventory.collections.EquippedItemCollection
@@ -16,6 +19,7 @@ import arctic.ui.composables.inventory.details.ItemDetail
 import arctic.ui.composables.overlays.SizeMeasureDummy
 import arctic.ui.composables.overlays.extended.tween250
 import arctic.ui.unit.dp
+import arctic.ui.unit.sp
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
 
@@ -123,12 +127,27 @@ private fun Divider() {
 @Composable
 private fun SomeTips() =
     Column(
-        modifier = Modifier.fillMaxSize().offset(x = 35.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize().offset(x = 35.dp).alpha(0.85f)
     ) {
-
+        TipsTitle()
+        Tip("이 영역에는 좌클릭/우클릭으로 최대 두 개의 아이템을 표시할 수 있습니다.")
+        Tip("활성화된 효과부여 슬롯에서 나머지 비활성화된 슬롯을 수정하려면 먼저 활성화된 효과부여를 0레벨로 변경하여 비활성화합니다.")
+        Tip("이미 추가된 효과, 방어구 속성을 삭제하려면 목록에서 선택된 항목을 다시 한 번 누릅니다.")
+        Tip("대체로, 닫기 버튼이 없는 팝업 화면에서 빠져나가려면 주변의 빈 공간을 누르면 됩니다.")
+        Tip("파일을 찾거나 저장할 때 보이는 파일 선택기에는 직접 입력하기보다는 기존 탐색기에서 경로를 복사해 붙혀넣는 것이 편리합니다.")
+        Tip("수정 후 나온 결과물을 실제 게임 클라이언트가 받아줄 거라는 보장이 없으므로, 반드시 항상 백업을 만들어주세요.")
     }
+
+@Composable
+private fun TipsTitle() {
+    Text(text = "아마추어 팁", fontSize = 48.sp, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 60.dp, vertical = 30.dp))
+}
+
+@Composable
+private fun Tip(text: String) {
+    Text(text = text, fontSize = 24.sp, color = Color.White, modifier = Modifier.padding(horizontal = 60.dp, vertical = 20.dp))
+}
 
 @Composable
 private fun ItemComparator(items: List<Item?>) {
