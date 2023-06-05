@@ -87,6 +87,7 @@ fun BottomBar(stored: DungeonsJsonState) {
             CurrencyText(
                 icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
                 value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
+                valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
                 smallIcon = true
             )
 
@@ -171,10 +172,10 @@ fun InventorySwitcher() {
 }
 
 @Composable
-private fun CurrencyText(icon: String, value: String, smallIcon: Boolean = false) {
+private fun CurrencyText(icon: String, value: String, valid: Boolean = true, smallIcon: Boolean = false) {
     CurrencyImage(IngameImages.get { icon }, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
-    Text(text = value, style = TextStyle(fontSize = 25.sp, color = Color.White), modifier = Modifier.width(100.dp))
+    Text(text = value, fontSize = 25.sp, color = if (valid) Color.White else Color(0xffff5e14), modifier = Modifier.width(100.dp))
     Spacer(modifier = Modifier.width(30.dp))
 }
 
