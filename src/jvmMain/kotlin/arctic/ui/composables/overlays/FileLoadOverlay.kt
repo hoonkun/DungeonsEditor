@@ -11,6 +11,8 @@ import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.composables.Selector
 import dungeons.readDungeonsJson
 import dungeons.states.DungeonsJsonState
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 
 @Composable
 fun FileLoadOverlay() {
@@ -34,7 +36,7 @@ private fun Content() {
                     arctic.view = "inventory"
                     arctic.stored = DungeonsJsonState(it.readDungeonsJson())
 
-                    LocalData.updateRecentFiles(it.absolutePath)
+                    LocalData.updateRecentFiles(Path(it.absolutePath).normalize().absolutePathString())
                 } catch (e: Exception) {
                     arctic.alerts.fileLoadFailed = e.message
                 } finally {
