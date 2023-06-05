@@ -62,6 +62,7 @@ fun File.readDungeonsSummary(): Triple<String, DungeonsJsonState, DungeonsSummar
 class DungeonsJsonFile {
     companion object {
         val detected = detectDungeonsJson()
+            .let { it.slice(0 until 3.coerceAtMost(it.size)) }
             .mapNotNull {
                 try { File(it).readDungeonsSummary() }
                 catch (e: Exception) { null }
