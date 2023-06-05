@@ -7,7 +7,8 @@ class Settings {
         val globalScale: Float
 
         init {
-            val file = File("./settings.arctic")
+            val pwd = System.getenv("APPIMAGE")?.let { it.dropLast(it.length - it.lastIndexOf('/')) } ?: "."
+            val file = File("$pwd/settings.arctic")
             val settings =
                 if (file.exists())
                     file

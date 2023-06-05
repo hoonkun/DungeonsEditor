@@ -46,3 +46,5 @@ bin/
 src/jvmMain/kotlin/Constants.kt
 src/jvmMain/resources/
 src/jvmTest/kotlin/
+
+dist

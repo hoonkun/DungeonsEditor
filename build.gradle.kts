@@ -50,9 +50,12 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "MCD-Editor"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.AppImage)
+            packageName = "DungeonsEditor"
             packageVersion = "1.0.0"
+            linux {
+                iconFile.set(project.file("src/jvmMain/resources/_icon.png"))
+            }
         }
     }
 }
