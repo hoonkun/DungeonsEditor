@@ -1,4 +1,7 @@
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.toMutableStateList
+import dungeons.readDungeonsSummary
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -14,6 +17,14 @@ data class LocalData(
         private var current = getOrCreateLocalData()
 
         val recentFiles = current.recentFiles.toMutableStateList()
+
+        val recentSummaries by derivedStateOf {
+            recentFiles
+                .mapNotNull { path ->
+                    try { File(path).readDungeonsSummary() }
+                    catch (e: Exception) { null }
+                }
+        }
 
         fun save() {
             localDataFile().writeText(Json.encodeToString(LocalData(recentFiles)))

@@ -1,5 +1,9 @@
 package dungeons
 
+import dungeons.states.DungeonsJsonState
+import dungeons.states.Item
+import dungeons.states.extensions.playerLevel
+import dungeons.states.extensions.playerPower
 import org.json.JSONObject
 import java.io.File
 import java.nio.file.Files
@@ -38,11 +42,43 @@ fun File.writeDungeonsJson(json: JSONObject) {
     writeBytes(byteArrayOf(*Magic1, *Magic2, *content))
 }
 
+fun File.readDungeonsSummary(): Triple<String, DungeonsJsonState, DungeonsSummary> {
+    val state = DungeonsJsonState(readDungeonsJson())
+    return Triple(
+        path,
+        state,
+        DungeonsSummary(
+            state.playerLevel.toInt(),
+            state.playerPower,
+            state.currencies.find { it.type == "Emerald" }?.count ?: 0,
+            state.currencies.find { it.type == "Gold" }?.count ?: 0,
+            state.equippedMelee,
+            state.equippedArmor,
+            state.equippedRanged
+        )
+    )
+}
+
 class DungeonsJsonFile {
     companion object {
         val detected = detectDungeonsJson()
+            .mapNotNull {
+                try { File(it).readDungeonsSummary() }
+                catch (e: Exception) { null }
+            }
     }
 }
+
+class DungeonsSummary(
+    val level: Int,
+    val power: Int,
+    val emerald: Int,
+    val gold: Int,
+    val melee: Item?,
+    val armor: Item?,
+    val ranged: Item?
+)
+
 
 private fun detectDungeonsJson(): List<String> {
     val windowsFiles = detectWindows()

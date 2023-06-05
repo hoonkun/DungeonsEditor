@@ -2,14 +2,12 @@ package arctic.ui.composables
 
 import LocalData
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateSizeAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.onClick
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
@@ -17,25 +15,50 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import arctic.states.arctic
+import arctic.ui.composables.atomic.BlurEffectedImage
+import arctic.ui.composables.atomic.drawItemFrame
 import arctic.ui.composables.fonts.JetbrainsMono
+import arctic.ui.composables.overlays.extended.tween250
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsJsonFile
+import dungeons.DungeonsSummary
 import dungeons.IngameImages
+import dungeons.states.DungeonsJsonState
+import dungeons.states.Item
+import dungeons.states.extensions.data
+import dungeons.states.extensions.totalEnchantmentInvestedPoints
 import extensions.lengthEllipsisMiddle
 import utils.separatePathAndName
-import java.io.File
 
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
+private typealias DungeonsFileInfo = Triple<String, DungeonsJsonState, DungeonsSummary>
+private fun findDungeonsFileInfo(key: String?): DungeonsFileInfo? =
+    LocalData.recentSummaries.find { it.first == key } ?: DungeonsJsonFile.detected.find { it.first == key }
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun TitleView(blurRadius: Dp) =
+fun TitleView(blurRadius: Dp) {
+    var selectedPath by remember { mutableStateOf<String?>(null) }
+    val selectedState by derivedStateOf { findDungeonsFileInfo(selectedPath)?.second }
+    val selectedSummary by derivedStateOf { findDungeonsFileInfo(selectedPath)?.third }
+
+    val interaction = rememberMutableInteractionSource()
+    val hovered by interaction.collectIsHoveredAsState()
+
+    val goAlpha by animateFloatAsState(if (hovered) 0.4f else 0.3f)
+    val summaryOffset by animateFloatAsState(if (hovered) 50f else 0f)
+    val summaryContainerOffset by animateFloatAsState(if (hovered) -20f else 0f)
+
     AnimatedContent(
         targetState = arctic.stored == null,
         transitionSpec = { fadeIn() with fadeOut() },
@@ -61,8 +84,17 @@ fun TitleView(blurRadius: Dp) =
                 ArrowDecor(modifier = Modifier.align(Alignment.CenterEnd).offset(x = (500).dp, y = (-650).dp))
                 ArrowDecor(modifier = Modifier.align(Alignment.CenterStart).offset(x = (-300).dp, y = 425.dp))
 
-                Go(color = Color(0x55ff8800), modifier = Modifier.blur(125.dp))
-                Go(color = Color(0xff090500), modifier = Modifier.onClick { arctic.dialogs.fileLoadSrcSelector = true })
+                Go(color = Color(0xffff8800), modifier = Modifier.blur(125.dp).alpha(goAlpha))
+                Go(color = Color(0xff090500))
+
+                Clickable(
+                    modifier = Modifier
+                        .hoverable(interaction)
+                        .clickable(interaction, null) {
+                            if (selectedState == null) arctic.dialogs.fileLoadSrcSelector = true
+                            else arctic.stored = selectedState
+                        }
+                )
 
                 GoOverlay(
                     text = "Getting Started",
@@ -81,28 +113,60 @@ fun TitleView(blurRadius: Dp) =
                     BottomEndDescription("Compatible with Minecraft Dungeons 1.17.0.0")
                 }
 
-                Column(modifier = Modifier.align(Alignment.TopStart).fillMaxHeight().offset(x = 100.dp), verticalArrangement = Arrangement.Center) {
+                Summary(
+                    selectedSummary,
+                    rootModifier = Modifier.offset { IntOffset(x = summaryOffset.dp.value.toInt(), y = 0) },
+                    contentModifier = Modifier.offset { IntOffset(x = summaryContainerOffset.dp.value.toInt(), y = 0) }
+                ) { summary ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.offset(x = (-80).dp)
+                    ) {
+                        CurrenciesSummary(summary)
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.offset(x = (-15).dp)
+                    ) {
+                        EquipmentSummary(summary)
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.align(Alignment.TopStart).fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center
+                ) {
                     SelectSectionHeader("main_icon_history.svg", "Recent Files")
-                    for (path in LocalData.recentFiles) {
+                    for (recent in LocalData.recentSummaries) {
+                        val (path) = recent
                         val (text, subtext) = separatePathAndName(path)
                         SelectCandidateText(
                             text = text,
-                            subtext = subtext
+                            subtext = subtext,
+                            selected = selectedPath == path,
+                            onClick = { selectedPath = if (selectedPath == path) null else path }
                         )
                     }
-                    if (LocalData.recentFiles.size == 0) {
+                    if (LocalData.recentFiles.isEmpty()) {
                         NoCandidateText(text = "최근 파일이 없어요!")
                     }
 
                     Spacer(modifier = Modifier.height(125.dp))
 
                     SelectSectionHeader("main_icon_detected_files.svg", "Detected Files")
-                    for (path in DungeonsJsonFile.detected) {
+                    for (detected in DungeonsJsonFile.detected) {
+                        val (path) = detected
                         val (text, subtext) = separatePathAndName(path)
                         SelectCandidateText(
                             text = text,
-                            subtext = subtext
+                            subtext = subtext,
+                            selected = selectedPath == path,
+                            onClick = { selectedPath = if (selectedPath == path) null else path }
                         )
+                    }
+                    if (DungeonsJsonFile.detected.isEmpty()) {
+                        NoCandidateText(text = "탐지된 세이브파일이 없어요!")
                     }
                 }
 
@@ -111,9 +175,141 @@ fun TitleView(blurRadius: Dp) =
             Box(modifier = Modifier.fillMaxSize())
         }
     }
+}
 
 @Composable
-fun BoxScope.Divider(alignment: Alignment.Vertical) =
+private fun BoxScope.Clickable(modifier: Modifier) =
+    Spacer(
+        modifier = Modifier
+            .size(825.dp, 500.dp)
+            .offset(y = 200.dp)
+            .align(Alignment.CenterEnd)
+            .then(modifier)
+    )
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun BoxScope.Summary(
+    targetState: DungeonsSummary?,
+    rootModifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
+    content: @Composable ColumnScope.(DungeonsSummary) -> Unit
+) =
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.requiredSize(1200.dp, 800.dp).align(Alignment.CenterEnd).offset(x = 225.dp, y = 335.dp).then(rootModifier)
+    ) {
+        Text(
+            text = "->",
+            fontFamily = JetbrainsMono,
+            fontSize = 825.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xff191919),
+            modifier = Modifier.offset(y = (-300).dp)
+        )
+        AnimatedContent(
+            targetState = targetState,
+            transitionSpec = {
+                val enter = fadeIn(tween250()) + slideIn(tween250()) { IntOffset(-50.dp.value.toInt(), 0) }
+                val exit = fadeOut(tween250())
+                enter with exit using SizeTransform(false)
+            },
+            modifier = Modifier.fillMaxSize()
+        ) { summary ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize().offset(x = (-60).dp, y = (-275).dp).scale(1.35f).then(contentModifier)
+            ) {
+                if (summary != null) content(summary)
+            }
+        }
+    }
+
+@Composable
+private fun CurrenciesSummary(summary: DungeonsSummary) {
+    CurrencyText(value = "${summary.level}") {
+        Box(contentAlignment = Alignment.Center) {
+            CurrencyImage(IngameImages.get { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
+            Text(text = "LV.", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        }
+    }
+    CurrencyText(
+        icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+        value = "${summary.power}"
+    )
+    CurrencyText(
+        icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+        value = "${summary.emerald}",
+        small = true
+    )
+    CurrencyText(
+        icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
+        value = "${summary.gold}"
+    )
+}
+
+@Composable
+private fun CurrencyText(icon: String, value: String, small: Boolean = false) {
+    CurrencyImage(IngameImages.get { icon }, small)
+    Spacer(modifier = Modifier.width(10.dp))
+    Text(text = value, fontFamily = JetbrainsMono, fontSize = 30.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
+    Spacer(modifier = Modifier.width(30.dp))
+}
+
+@Composable
+private fun CurrencyText(value: String, icon: @Composable () -> Unit) {
+    icon()
+    Spacer(modifier = Modifier.width(10.dp))
+    Text(text = value, fontFamily = JetbrainsMono, fontSize = 30.sp, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.wrapContentWidth())
+    Spacer(modifier = Modifier.width(30.dp))
+}
+
+@Composable
+private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
+    Image(image, null, modifier = Modifier.size(if (small) 35.dp else 42.5.dp))
+
+@Composable
+private fun EquipmentSummary(summary: DungeonsSummary) {
+    EquipmentSummaryEach(summary.melee)
+    Spacer(modifier = Modifier.width(30.dp))
+    EquipmentSummaryEach(summary.armor)
+    Spacer(modifier = Modifier.width(30.dp))
+    EquipmentSummaryEach(summary.ranged)
+}
+
+@Composable
+private fun EquipmentSummaryEach(item: Item?) {
+    if (item != null) {
+        BlurEffectedImage(
+            bitmap = item.data.inventoryIcon,
+            containerContentAlignment = Alignment.Center,
+            containerModifier = Modifier
+                .size(120.dp)
+                .drawWithContent {
+                    drawItemFrame(
+                        rarity = item.rarity,
+                        glided = item.netheriteEnchant != null,
+                        enchanted = item.totalEnchantmentInvestedPoints > 0
+                    )
+                }
+                .padding(10.dp)
+        )
+    } else {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(120.dp)
+                .drawWithContent { drawItemFrame(rarity = "Common", glided = false, enchanted = false) }
+        ) {
+            Text("/", fontSize = 30.sp, color = Color.White.copy(alpha = 0.45f), fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+
+@Composable
+private fun BoxScope.Divider(alignment: Alignment.Vertical) =
     Spacer(
         modifier = Modifier
             .size(50.dp, 1.dp)
@@ -123,7 +319,7 @@ fun BoxScope.Divider(alignment: Alignment.Vertical) =
     )
 
 @Composable
-fun ArrowDecor(modifier: Modifier = Modifier) =
+private fun ArrowDecor(modifier: Modifier = Modifier) =
     Text(
         text = "->",
         fontSize = 1000.sp,
@@ -135,7 +331,7 @@ fun ArrowDecor(modifier: Modifier = Modifier) =
     )
 
 @Composable
-fun BoxScope.Go(color: Color, modifier: Modifier = Modifier) =
+private fun BoxScope.Go(color: Color, modifier: Modifier = Modifier) =
     Text(
         text = "GO",
         fontSize = 1000.sp,
@@ -148,7 +344,7 @@ fun BoxScope.Go(color: Color, modifier: Modifier = Modifier) =
     )
 
 @Composable
-fun BoxScope.GoOverlay(text: String, color: Color, modifier: Modifier = Modifier) =
+private fun BoxScope.GoOverlay(text: String, color: Color, modifier: Modifier = Modifier) =
     Text(
         text = text,
         fontSize = 32.sp,
@@ -159,7 +355,7 @@ fun BoxScope.GoOverlay(text: String, color: Color, modifier: Modifier = Modifier
     )
 
 @Composable
-fun BoxScope.BottomUnderlayGradient() =
+private fun BoxScope.BottomUnderlayGradient() =
     Spacer(
         modifier = Modifier
             .fillMaxHeight(0.25f)
@@ -169,7 +365,7 @@ fun BoxScope.BottomUnderlayGradient() =
     )
 
 @Composable
-fun BoxScope.BottomEndDescriptions(content: @Composable ColumnScope.() -> Unit) =
+private fun BoxScope.BottomEndDescriptions(content: @Composable ColumnScope.() -> Unit) =
     Column(
         horizontalAlignment = Alignment.End,
         modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 40.dp).padding(end = 40.dp),
@@ -177,7 +373,7 @@ fun BoxScope.BottomEndDescriptions(content: @Composable ColumnScope.() -> Unit) 
     )
 
 @Composable
-fun BottomEndDescription(text: String) =
+private fun BottomEndDescription(text: String) =
     Text(
         text = text,
         color = Color.White.copy(alpha = 0.45f),
@@ -187,8 +383,8 @@ fun BottomEndDescription(text: String) =
     )
 
 @Composable
-fun SelectSectionHeader(iconResource: String, title: String) {
-    Box {
+private fun SelectSectionHeader(iconResource: String, title: String) {
+    Box(modifier = Modifier.padding(start = 100.dp)) {
         Box(
             contentAlignment = Alignment.CenterStart,
             modifier = Modifier
@@ -228,9 +424,18 @@ fun SelectSectionHeader(iconResource: String, title: String) {
 }
 
 @Composable
-fun SelectCandidateText(text: String, subtext: String, selected: Boolean = false) {
-    Row {
-        Spacer(modifier = Modifier.width(35.dp))
+private fun SelectCandidateText(text: String, subtext: String, selected: Boolean, onClick: () -> Unit) {
+    val interaction = rememberMutableInteractionSource()
+    val hovered by interaction.collectIsHoveredAsState()
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .hoverable(interaction)
+            .clickable(interaction, null, onClick = onClick)
+            .background(Color.White.copy(alpha = if (selected) 0.1f else if (hovered) 0.075f else 0.0f))
+            .padding(start = 100.dp)
+    ) {
         Column {
             Text(
                 text = subtext.lengthEllipsisMiddle(40),
@@ -247,11 +452,12 @@ fun SelectCandidateText(text: String, subtext: String, selected: Boolean = false
                 modifier = Modifier.padding(bottom = 15.dp)
             )
         }
+        Spacer(modifier = Modifier.width(30.dp))
     }
 }
 
 @Composable
-fun NoCandidateText(text: String) {
+private fun NoCandidateText(text: String) {
     Text(
         text = text,
         color = Color.White.copy(alpha = 0.4f),

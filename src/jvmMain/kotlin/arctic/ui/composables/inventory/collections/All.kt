@@ -21,13 +21,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.font.FontWeight
 import arctic.states.arctic
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
+import arctic.ui.composables.atomic.drawItemFrame
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
@@ -95,21 +95,7 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
-                    .drawWithContent {
-                        drawRect(RarityBackgroundGradient(item.rarity))
-                        if (item.netheriteEnchant != null) drawRect(GlidedItemBackgroundGradient())
-
-                        drawContent()
-
-                        drawRect(PowerBackgroundGradient())
-                        if (totalEnchantPoints > 0) drawRect(EnchantmentPointsBackgroundGradient())
-
-                        drawRect(RarityBorderGradient1(item.rarity), style = Stroke(5.dp.value))
-                        drawRect(
-                            RarityBorderGradient2(item.rarity, size.width, size.height),
-                            style = Stroke(5.dp.value)
-                        )
-                    }
+                    .drawWithContent { drawItemFrame(item.rarity, item.netheriteEnchant != null, item.totalEnchantmentInvestedPoints > 0) }
                     .padding(if (simplified) 12.5.dp else 20.dp)
             )
 
@@ -168,31 +154,3 @@ private fun EmptyEquippedSlot() =
             .border(7.dp, Brush.linearGradient(listOf(RarityColor("Common", RarityColorType.Opaque), Color.Transparent, RarityColor("Common", RarityColorType.Opaque))), shape = RectangleShape)
             .padding(20.dp)
     )
-
-@Stable
-private fun PowerBackgroundGradient() =
-    Brush.linearGradient(0f to Color.Transparent, 0.5f to Color.Transparent, 1f to Color(0x70000000))
-
-@Stable
-private fun DrawScope.EnchantmentPointsBackgroundGradient() =
-    Brush.linearGradient(
-        0f to Color.Transparent, 0.6f to Color.Transparent, 1f to Color(0x60b442f6),
-        start = Offset(0f, this.size.height),
-        end = Offset(this.size.width, 0f)
-    )
-
-@Stable
-private fun GlidedItemBackgroundGradient() =
-    Brush.linearGradient(0f to Color.Transparent, 0.5f to Color.Transparent, 1f to Color(0xaaffc847))
-
-@Stable
-private fun RarityBackgroundGradient(rarity: String) = Brush.linearGradient(listOf(RarityColor(rarity, RarityColorType.Translucent), Color.Transparent))
-
-@Stable
-private fun RarityBorderGradient1(rarity: String) =
-    Brush.linearGradient(listOf(RarityColor(rarity, RarityColorType.Opaque), Color.Transparent, RarityColor(rarity, RarityColorType.Opaque).copy(alpha = 0.75f)))
-
-@Stable
-private fun RarityBorderGradient2(rarity: String, width: Float, height: Float) =
-    Brush.linearGradient(listOf(RarityColor(rarity, RarityColorType.Opaque).copy(alpha = 0.5f), Color.Transparent), start = Offset(width, 0f), end = Offset(0f, height))
-
