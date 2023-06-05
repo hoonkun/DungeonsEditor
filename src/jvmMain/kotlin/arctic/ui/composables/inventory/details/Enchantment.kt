@@ -35,7 +35,7 @@ private fun RowScope.ItemEnchantmentSlot(slot: List<Enchantment>) {
     if (activatedEnchantment != null) {
         ActivatedSlot {
             EnchantmentIconImage(activatedEnchantment)
-            EnchantmentLevelImage(activatedEnchantment.level)
+            EnchantmentLevelImage(activatedEnchantment.level, scale = 1.2f)
         }
     } else {
         OpenedSlot(

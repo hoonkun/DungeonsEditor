@@ -1,5 +1,6 @@
 package arctic.ui.composables.atomic
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
@@ -70,16 +72,33 @@ fun EnchantmentIconImage(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BoxScope.EnchantmentLevelImage(level: Int, positionerSize: Float = 0.45f, scale: Float = 1.0f) {
-    if (level == 0) return
-
     LevelImagePositioner(size = positionerSize) {
-        Image(
-            IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
-            null,
-            modifier = Modifier.fillMaxSize().scale(scale).padding(10.dp)
-        )
+        AnimatedContent(
+            targetState = level,
+            transitionSpec = {
+                val enter = fadeIn() +
+                    if (initialState < targetState) slideIn { IntOffset(0, -20.dp.value.toInt()) }
+                    else slideIn { IntOffset(0, 20.dp.value.toInt()) }
+                val exit = fadeOut() +
+                    if (initialState < targetState) slideOut { IntOffset(0, 20.dp.value.toInt()) }
+                    else slideOut { IntOffset(0, -20.dp.value.toInt()) }
+                enter with exit using SizeTransform(false)
+            },
+            modifier = Modifier.fillMaxSize().padding(10.dp)
+        ) { level ->
+            if (level != 0) {
+                Image(
+                    IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
+                    null,
+                    modifier = Modifier.fillMaxSize().scale(scale).padding(10.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.fillMaxSize().scale(scale).padding(10.dp))
+            }
+        }
     }
 }
 
