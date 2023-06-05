@@ -28,6 +28,7 @@ import arctic.states.arctic
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
 import arctic.ui.composables.atomic.drawItemFrame
+import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
@@ -102,16 +103,16 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
             if (!simplified) {
                 Text(
                     text = "${DungeonsPower.toInGamePower(item.power).toInt()}",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 13.dp)
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 22.sp,
+                    fontFamily = JetbrainsMono,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 10.dp)
                 )
 
                 if (totalEnchantPoints != 0) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 13.dp)
+                        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 10.dp)
                     ) {
                         Image(
                             bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
@@ -121,10 +122,9 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = "$totalEnchantPoints",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 25.sp,
-                            modifier = Modifier.offset(y = (-2).dp)
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 22.sp,
+                            fontFamily = JetbrainsMono
                         )
                     }
                 }
