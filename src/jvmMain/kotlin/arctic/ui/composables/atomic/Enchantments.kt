@@ -64,7 +64,7 @@ fun EnchantmentIconImage(
             .scale(0.5f)
     ) {
         val pattern = data.shinePattern
-        if (pattern != null) {
+        if (pattern != null && data.id != "Unset") {
             EnchantmentShine(pattern, 0) { ShinePatternMatrix(0, it) }
             EnchantmentShine(pattern, 500) { ShinePatternMatrix(1, it) }
             EnchantmentShine(pattern, 1000) { ShinePatternMatrix(2, it) }
