@@ -52,5 +52,5 @@ private fun getOrCreateLocalData(): LocalData {
         local.writeText("{}")
     }
     val raw = Json.decodeFromString<LocalData>(local.readText())
-    return LocalData(raw.recentFiles.filter { File(it).exists() })
+    return LocalData(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) })
 }
