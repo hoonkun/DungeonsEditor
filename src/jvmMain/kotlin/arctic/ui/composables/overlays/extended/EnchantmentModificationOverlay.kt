@@ -224,7 +224,7 @@ private fun EnchantmentLevelSelector(enchantment: Enchantment) {
 }
 
 
-val ZeroLevelImage = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png" }
+val ZeroLevelImage get() = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png" }
 fun LevelImage(level: Int) = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" }
 
 @Composable

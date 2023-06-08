@@ -32,6 +32,7 @@ fun Overlays() {
     ItemDeletionConfirmOverlay()
     ItemDuplicateLocationConfirmOverlay()
 
+    PakIndexingOverlay()
 }
 
 @OptIn(ExperimentalAnimationApi::class)
