@@ -2,6 +2,7 @@ package arctic.ui.composables.overlays
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import dungeons.Database
 import dungeons.Localizations
 import dungeons.PakRegistry
 import kotlinx.coroutines.delay
@@ -17,6 +18,17 @@ fun PakIndexingOverlay() {
         delay(100)
         PakRegistry.initialize()
         Localizations.initialize()
+
+        if (!Settings.preloadTextures) return@LaunchedEffect
+
+        Database.items.forEach {
+            it.inventoryIcon
+            it.largeIcon
+        }
+        Database.enchantments.forEach {
+            it.icon
+            it.shinePattern
+        }
     }
 }
 

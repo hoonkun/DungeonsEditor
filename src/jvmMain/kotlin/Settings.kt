@@ -6,6 +6,8 @@ class Settings {
 
         val globalScale: Float
 
+        val preloadTextures: Boolean
+
         init {
             val pwd = System.getenv("APPIMAGE")?.let { it.dropLast(it.length - it.lastIndexOf('/')) } ?: "."
             val file = File("$pwd/settings.arctic")
@@ -20,6 +22,7 @@ class Settings {
                     emptyMap()
 
             globalScale = settings["scale"]?.toFloat()?.coerceIn(0.4f..1.35f) ?: 0.5f
+            preloadTextures = settings["preload_textures"] == "true"
         }
 
     }
