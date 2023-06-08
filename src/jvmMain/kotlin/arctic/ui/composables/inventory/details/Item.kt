@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -35,7 +36,7 @@ import extensions.toFixed
 fun ItemDetail(item: Item?) {
     RootAnimator(item) {
         if (it != null) Content(it)
-        else Box(modifier = Modifier.fillMaxWidth())
+        else Box(modifier = Modifier.fillMaxWidth().scale(1f / 1.3f))
     }
 }
 
@@ -50,12 +51,13 @@ private fun RootAnimator(targetState: Item?, content: @Composable AnimatedVisibi
             enter with exit using SizeTransform(clip = false)
         },
         contentAlignment = Alignment.Center,
+        modifier = Modifier.scale(1.3f),
         content = content
     )
 
 @Composable
 private fun Content(item: Item) {
-    Box(modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
+    Box(modifier = Modifier.wrapContentHeight().fillMaxWidth().scale(1f / 1.3f)) {
         Image(
             item.data.largeIcon,
             null,
