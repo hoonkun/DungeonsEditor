@@ -12,7 +12,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "MCD-Editor"
+rootProject.name = "DungeonsEditor"
 
 include(":PakReader")
 project(":PakReader").projectDir = file("../PakReaderMultiplatform")
