@@ -22,7 +22,7 @@ class Settings {
                     emptyMap()
 
             globalScale = settings["scale"]?.toFloat()?.coerceIn(0.4f..1.35f) ?: 0.5f
-            preloadTextures = settings["preload_textures"] == "true"
+            preloadTextures = settings["preload_textures"].let { it == "true" || it == null }
         }
 
     }

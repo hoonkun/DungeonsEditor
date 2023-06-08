@@ -64,8 +64,7 @@ data class ItemData(
         val cached = IngameImages.cached(cacheKey)
         if (cached != null) return cached
 
-        val imagePath = Database.item(type)?.dataPath?.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
-            ?: throw RuntimeException("unknown item type!")
+        val imagePath = dataPath.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
 
         val indexes = PakRegistry.index.filter { it.startsWith("$imagePath/") }
 
