@@ -34,12 +34,13 @@ fun PakIndexingOverlay() {
     var progressText by remember { mutableStateOf("") }
     var progress by remember { mutableStateOf(0) }
     var totalProgress by remember { mutableStateOf(1) }
+    var completed by remember { mutableStateOf(false) }
 
     var initialized by remember { mutableRefOf(false) }
 
     OverlayBackdrop(!arctic.initialized && !arctic.pakNotFound, 0.6f)
     OverlayAnimator(!arctic.initialized && !arctic.pakNotFound) {
-        Content(stateText = stateText, progressText = progressText, progress = progress, totalProgress = totalProgress)
+        Content(stateText = stateText, progressText = progressText, progress = progress, totalProgress = totalProgress, completed = completed)
     }
 
     LaunchedEffect(LocalData.customPakLocation) {
@@ -82,7 +83,7 @@ fun PakIndexingOverlay() {
                 }
             }
 
-            progress++
+            completed = true
             stateText = "완료되었습니다!"
             progressText = "정리 중"
 
@@ -94,7 +95,7 @@ fun PakIndexingOverlay() {
 }
 
 @Composable
-private fun Content(stateText: String, progressText: String, progress: Int, totalProgress: Int) {
+private fun Content(stateText: String, progressText: String, progress: Int, totalProgress: Int, completed: Boolean) {
     val progressPercentage = (progress.toFloat() / totalProgress.toFloat() * 56).roundToInt()
 
     ContentRoot {
@@ -106,13 +107,13 @@ private fun Content(stateText: String, progressText: String, progress: Int, tota
             Spacer(modifier = Modifier.height(50.dp))
             Column(modifier = Modifier.width(696.dp)) {
                 Row {
-                    Text(text = stateText, color = Color.White, fontSize = 20.sp)
+                    Text(text = " $stateText", color = Color.White, fontSize = 20.sp)
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(color = Color.White.copy(alpha = 0.5f))) { append(progressText) }
                             append("   ")
-                            withStyle(SpanStyle(color = Color.White)) { append("${(progress.toFloat() / totalProgress.toFloat() * 100).roundToInt()}% ") }
+                            withStyle(SpanStyle(color = Color.White)) { append("${if (completed) 100 else (progress.toFloat() / totalProgress.toFloat() * 100).roundToInt()}% ") }
                         },
                         color = Color.White,
                         fontSize = 20.sp
@@ -127,7 +128,7 @@ private fun Content(stateText: String, progressText: String, progress: Int, tota
                         withStyle(SpanStyle(color = Color.White.copy(alpha = 0.5f))) {
                             val remaining = 56 - progressPercentage
                             if (remaining % 2 == 0) {
-                                append("o ".repeat(remaining / 2 - 1))
+                                append("o ".repeat((remaining / 2 - 1).coerceAtLeast(0)))
                                 append("o")
                             } else {
                                 append(" o".repeat(remaining / 2))
