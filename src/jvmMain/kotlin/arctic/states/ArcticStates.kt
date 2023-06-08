@@ -18,6 +18,8 @@ class ArcticStates {
 
     var view by mutableStateOf("inventory")
 
+    var initializing by mutableStateOf(true)
+
     val selection = SelectionState()
 
     val creation = CreationState()

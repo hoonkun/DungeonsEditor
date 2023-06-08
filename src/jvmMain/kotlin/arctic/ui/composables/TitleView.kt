@@ -72,7 +72,7 @@ fun TitleView(blurRadius: Dp) {
         if (isInTitle) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 AnimatedVisibility(
-                    visible = PakRegistry.initialized,
+                    visible = !arctic.initializing,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {

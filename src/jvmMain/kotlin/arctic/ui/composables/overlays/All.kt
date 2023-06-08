@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import arctic.ui.composables.overlays.extended.ComplicatedOverlays
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -79,7 +80,8 @@ fun OverlayDescriptionText(text: String) =
     Text(
         text = text,
         color = Color.White.copy(alpha = 0.4f),
-        fontSize = 24.sp
+        fontSize = 24.sp,
+        textAlign = TextAlign.Center
     )
 
 @Composable

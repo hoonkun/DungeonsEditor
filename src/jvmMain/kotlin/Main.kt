@@ -26,8 +26,8 @@ import dungeons.states.DungeonsJsonState
 @Composable
 @Preview
 fun App() {
-    val backdropVisible = !PakRegistry.initialized || arctic.backdropBlur
-    val moreBlur = !PakRegistry.initialized || arctic.creation.target != null
+    val backdropVisible = arctic.initializing || arctic.backdropBlur
+    val moreBlur = arctic.initializing || arctic.creation.target != null
 
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
 
