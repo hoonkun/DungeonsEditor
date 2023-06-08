@@ -70,7 +70,7 @@ data class ItemData(
         val imagePath = Database.item(type)?.dataPath?.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
             ?: throw RuntimeException("unknown item type!")
 
-        val indexes = PakRegistry.index.filter { it.startsWith(imagePath) }
+        val indexes = PakRegistry.index.filter { it.startsWith("$imagePath/") }
 
         val candidate1 = indexes.find { criteria(it.lowercase().replaceAfterLast('.', "").removeSuffix(".")) }
         if (candidate1 != null)
