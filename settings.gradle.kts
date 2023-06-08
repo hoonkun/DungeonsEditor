@@ -14,3 +14,5 @@ pluginManagement {
 
 rootProject.name = "MCD-Editor"
 
+include(":PakReader")
+project(":PakReader").projectDir = file("../PakReaderMultiplatform")

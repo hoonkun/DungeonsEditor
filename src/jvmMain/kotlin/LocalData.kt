@@ -9,9 +9,11 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 @Serializable
-data class LocalData(
-    val recentFiles: List<String> = emptyList()
-) {
+data class LocalDataRaw(
+    val recentFiles: List<String>
+)
+
+class LocalData {
     companion object {
 
         private var current = getOrCreateLocalData()
@@ -36,7 +38,7 @@ data class LocalData(
         }
 
         fun save() {
-            localDataFile().writeText(Json.encodeToString(LocalData(recentFiles)))
+            localDataFile().writeText(Json.encodeToString(LocalDataRaw(recentFiles)))
         }
 
     }
@@ -44,13 +46,13 @@ data class LocalData(
 
 private fun localDataFile() = File("${System.getProperty("user.home")}/.dungeons_editor/saved_local.json")
 
-private fun getOrCreateLocalData(): LocalData {
+private fun getOrCreateLocalData(): LocalDataRaw {
     val local = localDataFile()
     if (!local.exists()) {
         local.parentFile.mkdirs()
         local.createNewFile()
         local.writeText("{}")
     }
-    val raw = Json.decodeFromString<LocalData>(local.readText())
-    return LocalData(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) })
+    val raw = Json.decodeFromString<LocalDataRaw>(local.readText())
+    return LocalDataRaw(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) })
 }

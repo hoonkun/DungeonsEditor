@@ -1,9 +1,9 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.6.21"
-    id("org.jetbrains.compose")
+    kotlin("multiplatform") version "1.8.20"
+    kotlin("plugin.serialization") version "1.6.20"
+    id("org.jetbrains.compose") version "1.4.0"
 }
 
 group = "kiwi.hoonkun.app.editor.dungeons"
@@ -32,6 +32,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
                 implementation("io.coil-kt:coil:2.3.0")
                 implementation("io.coil-kt:coil-compose:2.3.0")
+                implementation(project(":PakReader"))
                 implementation(kotlin("reflect"))
             }
         }
