@@ -1,9 +1,9 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("multiplatform") version "1.8.20"
+    kotlin("multiplatform") version "1.8.0"
     kotlin("plugin.serialization") version "1.6.20"
-    id("org.jetbrains.compose") version "1.4.0"
+    id("org.jetbrains.compose")
 }
 
 group = "kiwi.hoonkun.app.editor.dungeons"

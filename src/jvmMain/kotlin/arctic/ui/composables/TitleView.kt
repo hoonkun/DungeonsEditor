@@ -35,6 +35,7 @@ import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsJsonFile
 import dungeons.DungeonsSummary
 import dungeons.IngameImages
+import dungeons.PakRegistry
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
 import dungeons.states.extensions.data
@@ -70,18 +71,24 @@ fun TitleView(blurRadius: Dp) {
     ) { isInTitle ->
         if (isInTitle) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Image(
-                    bitmap = IngameImages.get { "/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png" },
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .blur(50.dp)
-                        .drawWithContent {
-                            drawContent()
-                            drawRect(Color.Black.copy(alpha = 0.6f))
-                        }
-                )
+                AnimatedVisibility(
+                    visible = PakRegistry.initialized,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Image(
+                        bitmap = IngameImages.get { "/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png" },
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .blur(50.dp)
+                            .drawWithContent {
+                                drawContent()
+                                drawRect(Color.Black.copy(alpha = 0.6f))
+                            }
+                    )
+                }
 
                 BottomUnderlayGradient()
 

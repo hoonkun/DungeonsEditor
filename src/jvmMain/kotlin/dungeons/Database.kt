@@ -3,8 +3,9 @@ package dungeons
 import Constants
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import java.awt.Color
+import java.awt.Graphics2D
+import java.awt.image.BufferedImage
 import java.io.File
 
 @Serializable
@@ -16,20 +17,23 @@ data class Database(
 
     companion object {
 
-        private val _current = load()
+        private var _current: Database? = null
         private val current get() = _current!!
 
         val armorProperties get() = current.armorProperties
         val enchantments get() = current.enchantments
         val items get() = current.items
 
+        fun register(database: Database) {
+            if (_current != null) return
+            _current = database
+        }
+
         fun item(type: String) = items.find { it.type == type }
 
         fun enchantment(id: String) = enchantments.find { it.id == id }
 
         fun armorProperty(id: String) = armorProperties.find { it.id == id }
-
-        private fun load(): Database? = Database::class.java.classLoader.getResource("database.json")?.readText()?.let { Json.decodeFromString<Database>(it) }
 
     }
 
@@ -53,30 +57,30 @@ data class ItemData(
     val description get() = Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"]
 
     val inventoryIcon: ImageBitmap get() =
-        retrieveImage("Inventory") { it.endsWith("_icon_inventory.png") }
+        retrieveImage("Inventory") { it.endsWith("_icon_inventory") }
 
     val largeIcon: ImageBitmap get() =
-        retrieveImage("Large", fallback = { it.endsWith("_icon_inventory.png") }) { it.endsWith("_icon.png") }
+        retrieveImage("Large", fallback = { it.endsWith("_icon_inventory") }) { it.endsWith("_icon") }
 
     private fun retrieveImage(key: String, fallback: ((String) -> Boolean)? = null, criteria: (String) -> Boolean): ImageBitmap {
         val cacheKey = "$type-$key"
         val cached = IngameImages.cached(cacheKey)
         if (cached != null) return cached
 
-        val imagePath = Database.item(type)?.dataPath ?: throw RuntimeException("unknown item type!")
-        val files = File("${Constants.GameDataDirectoryPath}${imagePath}").listFiles()
-            ?: throw RuntimeException("could not list files to retrieve item image: $type")
+        val imagePath = Database.item(type)?.dataPath?.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
+            ?: throw RuntimeException("unknown item type!")
 
-        val candidate1 = files.find { it.extension == "png" && criteria(it.name.lowercase()) }
+        val indexes = PakRegistry.index.filter { it.startsWith("$imagePath/") }
+
+        val candidate1 = indexes.find { criteria(it.lowercase().replaceAfterLast('.', "").removeSuffix(".")) }
         if (candidate1 != null)
-            return IngameImages.get(cacheKey, false) { candidate1.absolutePath }
+            return IngameImages.get(cacheKey) { candidate1 }
 
         if (fallback == null) throw RuntimeException("no image resource found with item $type, which type is $key")
 
-        val candidate2 = files.find { it.extension == "png" && fallback(it.name.lowercase()) }
-
+        val candidate2 = indexes.find { fallback(it.lowercase().replaceAfterLast('.', "").removeSuffix(".")) }
         if (candidate2 != null)
-            return IngameImages.get(cacheKey, false) { candidate2.absolutePath }
+            return IngameImages.get(cacheKey) { candidate2 }
 
         throw RuntimeException("no image resource found with item $type, which type is $key")
     }
@@ -110,23 +114,40 @@ data class EnchantmentData(
         else 1.425f
 
     val icon: ImageBitmap get() =
-        retrieveImage(id) { it.name.lowercase().endsWith("_icon.png") && !it.name.lowercase().endsWith("shine_icon.png") }
+        retrieveImage(id) { it.startsWith("t_") && it.endsWith("_icon") && !it.endsWith("shine_icon") }
             ?: throw RuntimeException("no image resource found: {$id}!")
 
     val shinePattern: ImageBitmap? get() =
-        retrieveImage("${id}_shine") { it.name.lowercase().endsWith("shine_icon.png") }
+        retrieveImage("${id}_shine") { it.startsWith("t_") && it.endsWith("shine_icon") }
 
-    private fun retrieveImage(cacheKey: String, criteria: (File) -> Boolean): ImageBitmap? {
+    private fun retrieveImage(cacheKey: String, criteria: (String) -> Boolean): ImageBitmap? {
         if (id == "Unset") return IngameImages.get("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
 
         val cached = IngameImages.cached(cacheKey)
         if (cached != null) return cached
 
-        val imagePath = Database.enchantment(id)?.dataPath ?: throw RuntimeException("unknown enchantment id!")
-        val dataDirectory = File("${Constants.GameDataDirectoryPath}${imagePath}")
-        val imageFile = dataDirectory.listFiles()?.find { it.extension == "png" && criteria(it) }
+        val imagePath = Database.enchantment(id)?.dataPath?.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
+            ?: throw RuntimeException("unknown enchantment id!")
 
-        return if(imageFile != null) IngameImages.get(cacheKey, false) { imageFile.absolutePath } else null
+        val indexes = PakRegistry.index.filter { it.startsWith(imagePath) }
+        val pakPath = indexes.find { criteria(it.replaceBeforeLast('/', "").removePrefix("/").replaceAfterLast(".", "").removeSuffix(".").lowercase()) }
+
+        val preprocess: (BufferedImage) -> BufferedImage =
+            if (cacheKey.endsWith("_shine")) {
+                {
+                    val newImage = BufferedImage(it.width, it.height, BufferedImage.TYPE_INT_RGB)
+                    val graphics = newImage.createGraphics()
+                    graphics.color = Color.BLACK
+                    graphics.fillRect(0, 0, newImage.width, newImage.height)
+                    graphics.drawImage(it, 0, 0, null)
+                    graphics.dispose()
+                    newImage
+                }
+            } else {
+                { it }
+            }
+
+        return if (pakPath != null) IngameImages.get(cacheKey, preprocess) { pakPath } else null
     }
 
     companion object {
