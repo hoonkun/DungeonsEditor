@@ -19,7 +19,7 @@ class Settings {
                 else
                     emptyMap()
 
-            globalScale = settings["scale"]?.toFloat()?.coerceIn(0.4f..1f) ?: 0.5f
+            globalScale = settings["scale"]?.toFloat()?.coerceIn(0.4f..1.35f) ?: 0.5f
         }
 
     }
