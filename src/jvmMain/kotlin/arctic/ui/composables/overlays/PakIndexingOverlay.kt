@@ -2,7 +2,7 @@ package arctic.ui.composables.overlays
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
+import dungeons.Localizations
 import dungeons.PakRegistry
 import kotlinx.coroutines.delay
 
@@ -16,6 +16,7 @@ fun PakIndexingOverlay() {
     LaunchedEffect(true) {
         delay(100)
         PakRegistry.initialize()
+        Localizations.initialize()
     }
 }
 

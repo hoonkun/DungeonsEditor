@@ -4,8 +4,11 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import extensions.LocalizationResource
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import java.io.ByteArrayInputStream
+import java.io.DataInputStream
 
 @Stable
 class Localizations {
@@ -14,7 +17,8 @@ class Localizations {
 
         var currentLocale by mutableStateOf("ko-KR")
 
-        private val texts: Map<String, Map<String, String>>
+        private var _texts: Map<String, Map<String, String>>? = null
+        val texts get() = _texts!!
 
         operator fun get(key: String): String? {
             return texts[currentLocale]?.get(key)
@@ -99,14 +103,15 @@ class Localizations {
             "BagOfSouls" to "BagOfSoul"
         )
 
-        init {
+        fun initialize() {
             val newTexts = mutableMapOf<String, Map<String, String>>()
             val languages = listOf("ko-KR", "en-US")
             languages.forEach {
-                val json = Localizations::class.java.classLoader.getResource("localization_$it.json")!!.readText()
-                newTexts[it] = Json.decodeFromString<Map<String, String>>(json)
+                val locresBytes = PakRegistry.index.getFileBytes("/Dungeons/Content/Localization/Game/ko-KR/Game.locres")
+                val stream = DataInputStream(ByteArrayInputStream(locresBytes))
+                newTexts[it] = LocalizationResource.read(stream)
             }
-            texts = newTexts
+            _texts = newTexts
         }
 
     }
