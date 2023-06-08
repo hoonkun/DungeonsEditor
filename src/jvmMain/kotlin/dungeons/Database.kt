@@ -3,6 +3,9 @@ package dungeons
 import Constants
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.serialization.Serializable
+import java.awt.Color
+import java.awt.Graphics2D
+import java.awt.image.BufferedImage
 import java.io.File
 
 @Serializable
@@ -129,7 +132,22 @@ data class EnchantmentData(
         val indexes = PakRegistry.index.filter { it.startsWith(imagePath) }
         val pakPath = indexes.find { criteria(it.replaceBeforeLast('/', "").removePrefix("/").replaceAfterLast(".", "").removeSuffix(".").lowercase()) }
 
-        return if (pakPath != null) IngameImages.get(cacheKey) { pakPath } else null
+        val preprocess: (BufferedImage) -> BufferedImage =
+            if (cacheKey.endsWith("_shine")) {
+                {
+                    val newImage = BufferedImage(it.width, it.height, BufferedImage.TYPE_INT_RGB)
+                    val graphics = newImage.createGraphics()
+                    graphics.color = Color.BLACK
+                    graphics.fillRect(0, 0, newImage.width, newImage.height)
+                    graphics.drawImage(it, 0, 0, null)
+                    graphics.dispose()
+                    newImage
+                }
+            } else {
+                { it }
+            }
+
+        return if (pakPath != null) IngameImages.get(cacheKey, preprocess) { pakPath } else null
     }
 
     companion object {
