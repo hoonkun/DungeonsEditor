@@ -35,7 +35,6 @@ import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsJsonFile
 import dungeons.DungeonsSummary
 import dungeons.IngameImages
-import dungeons.PakRegistry
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
 import dungeons.states.extensions.data
@@ -72,7 +71,7 @@ fun TitleView(blurRadius: Dp) {
         if (isInTitle) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 AnimatedVisibility(
-                    visible = !arctic.initializing,
+                    visible = arctic.readyForStart,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {

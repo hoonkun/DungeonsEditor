@@ -20,14 +20,13 @@ import arctic.ui.composables.BottomBar
 import arctic.ui.composables.inventory.InventoryView
 import arctic.ui.composables.overlays.Overlays
 import arctic.ui.unit.dp
-import dungeons.PakRegistry
 import dungeons.states.DungeonsJsonState
 
 @Composable
 @Preview
 fun App() {
-    val backdropVisible = arctic.initializing || arctic.backdropBlur
-    val moreBlur = arctic.initializing || arctic.creation.target != null
+    val backdropVisible = !arctic.readyForStart || arctic.backdropBlur
+    val moreBlur = !arctic.readyForStart || arctic.creation.target != null
 
     val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
 

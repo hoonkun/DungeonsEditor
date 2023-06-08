@@ -92,11 +92,11 @@ private fun detectDungeonsJson(): List<String> {
     return result
 }
 
-private const val DirectoryIdentifier = "/Saved Games/Mojang Studios/Dungeons"
+private val DirectoryIdentifier = "/Saved Games/Mojang Studios/Dungeons".replace("/", File.separator)
 
 private fun detectWindows(base: String = System.getProperty("user.home")): List<String> {
     val location = "$base$DirectoryIdentifier"
-    val characters = File(location).listFiles()?.flatMap { File("${it.absolutePath}/Characters").listFiles()?.toList() ?: emptyList() } ?: emptyList()
+    val characters = File(location).listFiles()?.flatMap { File("${it.absolutePath}${File.separator}Characters").listFiles()?.toList() ?: emptyList() } ?: emptyList()
     return characters.map { it.absolutePath }
 }
 

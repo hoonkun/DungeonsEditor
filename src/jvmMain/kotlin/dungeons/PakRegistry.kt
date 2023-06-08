@@ -1,5 +1,6 @@
 package dungeons
 
+import LocalData
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +9,10 @@ import pak.PakIndex
 import pak.PathPakFilter
 import parsers.objects.fields.Guid
 import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
+import kotlin.jvm.optionals.getOrNull
 
 
 
@@ -17,12 +22,11 @@ class PakRegistry {
 
         private var _index: PakIndex? by mutableStateOf(null)
         val index by derivedStateOf { _index!! }
-        val initialized by derivedStateOf { _index != null }
 
-        fun initialize() {
-            if (_index != null) return
+        fun initialize(): Boolean {
+            if (_index != null) return true
 
-            val pakPath = findPakPath()
+            val pakPath = findPakPath() ?: return false
 
             val newIndex = PakIndex(
                 File(pakPath).listFiles()!!.sortedBy { it.name },
@@ -35,10 +39,27 @@ class PakRegistry {
             _index = newIndex
 
             Database.register(DatabaseGenerator.parsePak(newIndex))
+
+            return true
         }
 
-        fun findPakPath() =
-            "/home/hoonkun/.local/share/Steam/steamapps/compatdata/2764086203/pfx/drive_c/users/steamuser/AppData/Local/Mojang/products/dungeons/dungeons/Dungeons/Content/Paks"
+        fun findPakPath(): String? {
+            val customPakLocation = LocalData.customPakLocation
+            if (customPakLocation != null && File(customPakLocation).exists()) return customPakLocation
+
+            val candidates = listOf(
+                "${System.getProperty("user.home")}/AppData/Local/Mojang/products/dungeons/dungeons/Dungeons/Content/Paks",
+                "${System.getenv("ProgramFiles(x86)")}/Steam/steamapps/common/MinecraftDungeons/Dungeons/Content/Paks",
+                "C:/XboxGames/Minecraft Dungeons/Content/Dungeons/Content/Paks"
+            )
+            val candidate = candidates.find { File(it.split("/").joinToString(File.separator)).exists() }
+            if (candidate != null) return candidate
+
+            val files = Files.walk(Path("/home/hoonkun/.local/share/Steam/steamapps/compatdata"))
+            val found = files.filter { it.absolutePathString().endsWith("/Dungeons/Content/Paks") }.findFirst()
+
+            return found.getOrNull()?.absolutePathString()
+        }
 
     }
 

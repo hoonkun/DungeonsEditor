@@ -1,5 +1,6 @@
 package arctic.ui.composables.overlays
 
+import LocalData
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
@@ -20,19 +21,29 @@ val scope = CoroutineScope(Dispatchers.IO)
 @Composable
 fun PakIndexingOverlay() {
     var stateText by remember { mutableStateOf("") }
-    var initializing by remember { mutableRefOf(false) }
 
-    OverlayBackdrop(arctic.initializing, 0.6f)
-    OverlayAnimator(arctic.initializing) { Content(stateText = stateText) }
+    var initialized by remember { mutableRefOf(false) }
 
-    LaunchedEffect(true) {
-        if (initializing) return@LaunchedEffect
-        initializing = true
+    OverlayBackdrop(!arctic.initialized && !arctic.pakNotFound, 0.6f)
+    OverlayAnimator(!arctic.initialized && !arctic.pakNotFound) { Content(stateText = stateText) }
+
+    LaunchedEffect(LocalData.customPakLocation) {
+        if (initialized) return@LaunchedEffect
+
+        println("initializing PakRegistry")
+
+        initialized = true
 
         scope.launch {
             stateText = "Pak 파일을 읽고있습니다"
 
-            PakRegistry.initialize()
+            if (!PakRegistry.initialize()) {
+                arctic.initialized = false
+                arctic.pakNotFound = true
+                initialized = false
+
+                return@launch
+            }
 
             stateText = "현지화 파일을 읽고있습니다"
 
@@ -52,7 +63,7 @@ fun PakIndexingOverlay() {
                 }
             }
 
-            arctic.initializing = false
+            arctic.initialized = true
         }
     }
 }

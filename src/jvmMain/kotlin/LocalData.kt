@@ -1,6 +1,4 @@
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.toMutableStateList
+import androidx.compose.runtime.*
 import dungeons.readDungeonsSummary
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -10,7 +8,8 @@ import java.io.File
 
 @Serializable
 data class LocalDataRaw(
-    val recentFiles: List<String>
+    val recentFiles: List<String>,
+    val customPakLocation: String? = null
 )
 
 class LocalData {
@@ -19,6 +18,8 @@ class LocalData {
         private var current = getOrCreateLocalData()
 
         val recentFiles = current.recentFiles.toMutableStateList()
+
+        var customPakLocation by mutableStateOf(current.customPakLocation)
 
         val recentSummaries by derivedStateOf {
             recentFiles
@@ -38,7 +39,7 @@ class LocalData {
         }
 
         fun save() {
-            localDataFile().writeText(Json.encodeToString(LocalDataRaw(recentFiles)))
+            localDataFile().writeText(Json.encodeToString(LocalDataRaw(recentFiles, customPakLocation)))
         }
 
     }
@@ -54,5 +55,5 @@ private fun getOrCreateLocalData(): LocalDataRaw {
         local.writeText("{}")
     }
     val raw = Json.decodeFromString<LocalDataRaw>(local.readText())
-    return LocalDataRaw(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) })
+    return LocalDataRaw(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) }, raw.customPakLocation)
 }

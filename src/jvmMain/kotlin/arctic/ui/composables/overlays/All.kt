@@ -34,6 +34,7 @@ fun Overlays() {
     ItemDuplicateLocationConfirmOverlay()
 
     PakIndexingOverlay()
+    PakNotFoundOverlay()
 }
 
 @OptIn(ExperimentalAnimationApi::class)

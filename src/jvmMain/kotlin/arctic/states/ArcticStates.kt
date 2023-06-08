@@ -18,7 +18,10 @@ class ArcticStates {
 
     var view by mutableStateOf("inventory")
 
-    var initializing by mutableStateOf(true)
+    var initialized by mutableStateOf(false)
+    var pakNotFound by mutableStateOf(false)
+
+    val readyForStart by derivedStateOf { initialized && !pakNotFound }
 
     val selection = SelectionState()
 
