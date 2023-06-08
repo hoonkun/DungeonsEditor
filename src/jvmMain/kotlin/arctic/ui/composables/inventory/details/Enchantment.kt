@@ -102,10 +102,10 @@ private fun Modifier.offsetRelative(
     layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
 
-        layout((constraints.maxWidth).dp.value.toInt(), (constraints.maxHeight).dp.value.toInt()) {
+        layout(constraints.maxWidth, constraints.maxHeight) {
             placeable.placeRelative(
-                x = (constraints.maxWidth * x).dp.value.toInt(),
-                y = (constraints.maxHeight * y).dp.value.toInt()
+                x = (constraints.maxWidth * x).toInt(),
+                y = (constraints.maxHeight * y).toInt()
             )
         }
     }
