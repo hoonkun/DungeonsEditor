@@ -177,7 +177,7 @@ class DatabaseGenerator {
                 val _path = Path(pathString)
                 val path = pathString.replaceAfterLast('.', "").removeSuffix(".")
                 val pathLowercase = path.lowercase()
-                val parentPath = "/Game".plus(_path.parent.pathString.removePrefix("/Dungeons/Content"))/*.replace(Constants.GameDataDirectoryPath, "")*/
+                val parentPath = "/Game".plus(_path.parent.pathString.replace("\\", "/").removePrefix("/Dungeons/Content"))
                 val parentName = _path.parent.name
 
                 if (path.contains("ArmorProperties") && !path.contains("Cues")) {

@@ -11,6 +11,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 
 
@@ -102,6 +103,7 @@ private fun detectWindows(base: String = System.getProperty("user.home")): List<
 
 private fun detectLinux(): List<String> {
     val baseLocation = Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata/")
+    if (!baseLocation.exists()) return emptyList()
     val bases = Files.walk(baseLocation)
         .filter { it.absolutePathString().endsWith(DirectoryIdentifier) && it.isDirectory() }
     val characters = mutableListOf<String>()
