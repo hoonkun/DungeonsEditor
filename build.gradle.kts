@@ -30,8 +30,6 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation("org.json:json:20230227")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-                implementation("io.coil-kt:coil:2.3.0")
-                implementation("io.coil-kt:coil-compose:2.3.0")
                 implementation(project(":PakReader"))
                 implementation(kotlin("reflect"))
             }
@@ -41,7 +39,6 @@ kotlin {
                 implementation("org.jetbrains.kotlin:kotlin-test:1.5.31")
                 implementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-                implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.0")
             }
         }
     }
@@ -51,11 +48,15 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.AppImage)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.AppImage)
             packageName = "DungeonsEditor"
             packageVersion = "1.0.0"
             linux {
                 iconFile.set(project.file("src/jvmMain/resources/_icon.png"))
+            }
+            windows {
+                iconFile.set(project.file("src/jvmMain/resources/_icon.ico"))
+                upgradeUuid = "effd1d5e-d6c3-4057-a210-5f115f619126"
             }
         }
     }
