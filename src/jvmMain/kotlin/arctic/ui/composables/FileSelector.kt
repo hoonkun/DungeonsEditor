@@ -29,6 +29,7 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import arctic.ui.composables.atomic.RetroButton
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -148,13 +149,16 @@ enum class CandidateType(
     File("files", SelectorColors.Files, { !it.isDirectory })
 }
 
+val isWindows = File.separator == "\\"
+val isLinux = File.separator == "/"
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ìž¥", onSelect: (File) -> Unit) {
 
     var useBasePath by remember { mutableStateOf(true) }
 
-    var path by remember { mutableStateOf(TextFieldValue("/", selection = TextRange(1))) }
+    var path by remember { mutableStateOf(TextFieldValue(File.separator, selection = TextRange(1))) }
     val entirePath by remember(path.text) { derivedStateOf { "${if (useBasePath) BasePath else ""}${path.text}" } }
 
     val keys = remember { KeySet(ctrl = false, shift = false) }
@@ -163,7 +167,12 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     var isFieldShifting by remember { mutableRefOf(false) }
 
     val candidateTarget = remember(entirePath) {
-        File(entirePath.removeSuffixes(".").substring(0, entirePath.lastIndexOf('/')).let { if (it == "") "/" else it })
+        File(
+            entirePath
+                .removeSuffixes(".")
+                .substring(0, (entirePath.lastIndexOf(File.separator) + 1))
+                .let { if (it == "" && isLinux) File.separator else it }
+        )
     }
     val candidates = remember(candidateTarget, entirePath) {
         (candidateTarget.listFiles() ?: arrayOf())
@@ -188,7 +197,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
     val hint = remember(path.text, hintTarget) {
         val target = hintTarget ?: return@remember ""
 
-        val entered = path.text.let { it.substring(it.lastIndexOf('/') + 1, it.length) }
+        val entered = path.text.let { it.substring(it.lastIndexOf(File.separator) + 1, it.length) }
         val entire = target.name
 
         entire.substring(entered.length until entire.length)
@@ -227,8 +236,12 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
         newPath = newPath.removeSuffix(hint).replace("//", "/")
         if (isFieldShifting) newPath += it.text.last()
 
-        if (newPath.length - path.text.length > 2 && newPath.startsWith(BasePath) && useBasePath) {
+        val pasted = newPath.length - path.text.length > 2
+        if (pasted && newPath.startsWith(BasePath) && useBasePath) {
             useBasePath = false
+        }
+        if (pasted && newPath.startsWith("\\$BasePath") && useBasePath) {
+            newPath = newPath.replace("\\$BasePath", "")
         }
 
         TextFieldValue(
@@ -242,7 +255,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
 
     val complete = complete@ {
         val target = hintTarget ?: return@complete false
-        val newPath = "${path.text}$hint${if (target.isDirectory) "/"  else ""}"
+        val newPath = "${path.text}$hint${if (target.isDirectory) File.separator  else ""}"
         path = TextFieldValue(text = newPath, selection = TextRange(newPath.length))
         hintTarget = null
         true
@@ -286,7 +299,11 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
         Padded {
             BasePathDocumentation(text = "/** you can use '..' to go parent directory */")
             Row {
-                BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") { useBasePath = it }
+                BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") {
+                    if (it && isWindows && path.text.isEmpty()) path = path.copy(text = "\\")
+                    else if (isWindows && path.text == File.separator) path = path.copy(text = "")
+                    useBasePath = it
+                }
                 Spacer(modifier = Modifier.width(30.dp))
                 BasePathProperty(key = "basePath", value = BasePath, disabled = !useBasePath)
             }
@@ -294,7 +311,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
         PathInputBox {
             PathInput(
                 value = value,
-                onValueChange = { if (it.text.isNotEmpty()) path = value2path(it) },
+                onValueChange = { if (it.text.isNotEmpty() || (isWindows && !useBasePath)) path = value2path(it) },
                 onKeyEvent = onKeyEvent,
                 hideCursor = haveToShiftField,
                 focusRequester = requester
@@ -458,8 +475,8 @@ fun PathInputBox(content: @Composable RowScope.() -> Unit) =
                 .fillMaxWidth()
                 .height(80.dp)
                 .drawBehind {
-                    drawRect(SelectorColors.PathInput, topLeft = Offset(0f, 7.dp.value), size = Size(size.width, size.height - 14.dp.value))
-                    drawRect(SelectorColors.PathInput, topLeft = Offset(7.dp.value, 0f), size = Size(size.width - 14.dp.value, size.height))
+                    drawRect(SelectorColors.PathInput, topLeft = Offset(0f, densityDp(7)), size = Size(size.width, size.height - densityDp(14)))
+                    drawRect(SelectorColors.PathInput, topLeft = Offset(densityDp(7), 0f), size = Size(size.width - densityDp(14), size.height))
                 },
             content = content
         )

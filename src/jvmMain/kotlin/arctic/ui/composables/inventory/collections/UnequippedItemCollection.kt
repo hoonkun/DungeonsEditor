@@ -15,6 +15,7 @@ import arctic.states.arctic
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
 import arctic.ui.composables.atomic.VariantFilterIcon
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.states.Item
@@ -104,19 +105,17 @@ private fun RarityFilterButton(rarity: String, selected: Boolean, onClick: () ->
 
     Spacer(
         modifier = Modifier
-            .size(60.dp)
+            .size(60.dp, 40.dp)
             .hoverable(interaction)
             .clickable(interaction, null, onClick = onClick)
-            .rotate(-20f)
             .drawBehind {
                 drawRoundRect(
                     RarityColor(rarity, RarityColorType.Opaque).copy(alpha = alpha),
-                    topLeft = Offset(10.dp.value, size.height / 2 - 6.dp.value),
-                    size = Size(size.width - 20.dp.value, 12.dp.value),
-                    cornerRadius = CornerRadius(3.dp.value)
+                    topLeft = Offset(densityDp(10), size.height / 2 - densityDp(6)),
+                    size = Size(size.width - densityDp(20), densityDp(12)),
+                    cornerRadius = CornerRadius(densityDp(3))
                 )
             }
-            .rotate(20f)
     )
 }
 
@@ -134,13 +133,13 @@ private fun AddItemButton() {
             .drawBehind {
                 drawRect(
                     color = Color(if(hovered) 0xffffffff else 0xff79706b),
-                    topLeft = Offset(size.width / 2 - 2.dp.value, 8.dp.value),
-                    size = Size(4.dp.value, size.height - 16.dp.value)
+                    topLeft = Offset(size.width / 2 - densityDp(2), densityDp(8)),
+                    size = Size(densityDp(4), size.height - densityDp(16))
                 )
                 drawRect(
                     Color(if(hovered) 0xffffffff else 0xff79706b),
-                    topLeft = Offset(8.dp.value, size.height / 2 - 2.dp.value),
-                    size = Size(size.width - 16.dp.value, 4.dp.value)
+                    topLeft = Offset(densityDp(8), size.height / 2 - densityDp(2)),
+                    size = Size(size.width - densityDp(16), densityDp(4))
                 )
             }
     )

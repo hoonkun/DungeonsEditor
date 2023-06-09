@@ -13,13 +13,17 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import arctic.ui.unit.dp
 
 
+fun DrawScope.densityDp(value: Int): Float = value.dp.value * density
+fun DrawScope.densityDp(value: Float): Float = value.dp.value * density
+fun DrawScope.densityDp(value: Double): Float = value.dp.value * density
+
 @Stable
 fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean = false) {
     if (!hovered && !selected) return
     drawRoundRect(
         brush = SolidColor(if (selected) Color.White else Color.White.copy(0.35f)),
-        cornerRadius = CornerRadius(6.dp.value, 6.dp.value),
-        style = Stroke(3.dp.value)
+        cornerRadius = CornerRadius(densityDp(6), densityDp(6)),
+        style = Stroke(densityDp(3))
     )
 }
 
@@ -33,8 +37,8 @@ fun ContentDrawScope.drawItemFrame(rarity: String, glided: Boolean, enchanted: B
     drawRect(PowerBackgroundGradient())
     if (enchanted) drawRect(EnchantmentPointsBackgroundGradient())
 
-    drawRect(RarityBorderGradient1(rarity), style = Stroke(5.dp.value))
-    drawRect(RarityBorderGradient2(rarity, size.width, size.height), style = Stroke(5.dp.value))
+    drawRect(RarityBorderGradient1(rarity), style = Stroke(densityDp(5)))
+    drawRect(RarityBorderGradient2(rarity, size.width, size.height), style = Stroke(densityDp(5)))
 }
 
 @Stable
@@ -77,8 +81,8 @@ fun DrawScope.drawUniqueIndicator() {
             start = Offset(0f, size.height / 2f),
             end = Offset(size.width, size.height / 2f)
         ),
-        topLeft = Offset(0f, size.height / 2 - 3.dp.value),
-        size = Size(size.width, 6.dp.value)
+        topLeft = Offset(0f, size.height / 2 - densityDp(3)),
+        size = Size(size.width, densityDp(6))
     )
     drawCircle(
         Brush.radialGradient(
@@ -98,6 +102,6 @@ fun DrawScope.drawEnchantmentIconBorder(alpha: Float) {
         alpha = alpha,
         topLeft = Offset(size.width * (1f - scale) * 0.5f, size.height * (1f - scale) * 0.5f),
         size = Size(size.width * scale, size.height * scale),
-        style = Stroke(width = 6.dp.value)
+        style = Stroke(width = densityDp(6))
     )
 }

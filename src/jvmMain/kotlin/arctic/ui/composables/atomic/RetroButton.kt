@@ -25,8 +25,8 @@ import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
 
 
-private val radius = 8.dp.value
-private val stroke = 5.dp.value
+private const val radius = 8
+private const val stroke = 5
 
 @Composable
 fun RetroButton(
@@ -74,13 +74,13 @@ private fun Outline(color: Color, alpha: Float = 1f) {
             .drawBehind {
                 drawRect(
                     color = color,
-                    topLeft = Offset(radius, 0f),
-                    size = Size(size.width - 2 * radius, size.height)
+                    topLeft = Offset(densityDp(radius), 0f),
+                    size = Size(size.width - 2 * densityDp(radius), size.height)
                 )
                 drawRect(
                     color = color,
-                    topLeft = Offset(0f, radius),
-                    size = Size(size.width, size.height - 2 * radius)
+                    topLeft = Offset(0f, densityDp(radius)),
+                    size = Size(size.width, size.height - 2 * densityDp(radius))
                 )
             }
     )
@@ -95,13 +95,13 @@ private fun Solid(color: Color, alpha: Float = 1f) {
             .drawBehind {
                 drawRect(
                     color = color,
-                    topLeft = Offset(stroke, stroke + radius),
-                    size = Size(size.width - 2 * stroke, size.height - 2 * (stroke + radius))
+                    topLeft = Offset(densityDp(stroke), densityDp(stroke) + densityDp(radius)),
+                    size = Size(size.width - 2 * densityDp(stroke), size.height - 2 * (densityDp(stroke) + densityDp(radius)))
                 )
                 drawRect(
                     color = color,
-                    topLeft = Offset(stroke + radius, stroke),
-                    size = Size(size.width - 2 * (stroke + radius), size.height - 2 * stroke)
+                    topLeft = Offset(densityDp(stroke) + densityDp(radius), densityDp(stroke)),
+                    size = Size(size.width - 2 * (densityDp(stroke) + densityDp(radius)), size.height - 2 * densityDp(stroke))
                 )
             }
     )

@@ -8,7 +8,7 @@ import java.io.File
 
 @Serializable
 data class LocalDataRaw(
-    val recentFiles: List<String>,
+    val recentFiles: List<String> = emptyList(),
     val customPakLocation: String? = null
 )
 

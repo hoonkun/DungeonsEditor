@@ -4,6 +4,7 @@ import LocalData
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -11,6 +12,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import arctic.states.arctic
 import arctic.ui.composables.fonts.JetbrainsMono
@@ -105,15 +107,15 @@ private fun Content(stateText: String, progressText: String, progress: Int, tota
         )
         if (Settings.preloadTextures) {
             Spacer(modifier = Modifier.height(50.dp))
-            Column(modifier = Modifier.width(696.dp)) {
-                Row {
-                    Text(text = " $stateText", color = Color.White, fontSize = 20.sp)
+            Column(modifier = Modifier.width(700.dp)) {
+                Row(modifier = Modifier.padding(horizontal = 4.dp)) {
+                    Text(text = stateText, color = Color.White, fontSize = 20.sp)
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(color = Color.White.copy(alpha = 0.5f))) { append(progressText) }
                             append("   ")
-                            withStyle(SpanStyle(color = Color.White)) { append("${if (completed) 100 else (progress.toFloat() / totalProgress.toFloat() * 100).roundToInt()}% ") }
+                            withStyle(SpanStyle(color = Color.White)) { append("${if (completed) 100 else (progress.toFloat() / totalProgress.toFloat() * 100).roundToInt()}%") }
                         },
                         color = Color.White,
                         fontSize = 20.sp
@@ -138,8 +140,9 @@ private fun Content(stateText: String, progressText: String, progress: Int, tota
                     },
                     fontSize = 20.sp,
                     fontFamily = JetbrainsMono,
-                    modifier = Modifier.alpha(if (progress == 0) 0.4f else 1f),
+                    modifier = Modifier.alpha(if (progress == 0) 0.4f else 1f).fillMaxWidth(),
                     style = TextStyle(
+                        textAlign = TextAlign.Center,
                         fontFeatureSettings = "liga 0"
                     )
                 )

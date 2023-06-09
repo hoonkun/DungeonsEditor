@@ -37,7 +37,7 @@ fun LabeledField(label: String, value: String, onValueChange: (String) -> Unit) 
             modifier = Modifier
                 .onFocusChanged { focused = it.hasFocus }
                 .drawBehind {
-                    drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 3.dp.value))
+                    drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, densityDp(3)))
                 }
         )
     }
@@ -61,7 +61,7 @@ fun UnlabeledField(value: String, onValueChange: (String) -> Unit) {
             .onFocusChanged { focused = it.hasFocus }
             .width(35.dp)
             .drawBehind {
-                drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 3.dp.value))
+                drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, densityDp(3)))
             }
     )
 }
