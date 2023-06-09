@@ -39,7 +39,7 @@ class LocalData {
         }
 
         fun save() {
-            localDataFile().writeText(Json.encodeToString(LocalDataRaw(recentFiles, customPakLocation)))
+            localDataFile().writeText(Json.encodeToString(LocalDataRaw.serializer(), LocalDataRaw(recentFiles, customPakLocation)))
         }
 
     }
@@ -54,6 +54,6 @@ private fun getOrCreateLocalData(): LocalDataRaw {
         local.createNewFile()
         local.writeText("{}")
     }
-    val raw = Json.decodeFromString<LocalDataRaw>(local.readText())
+    val raw = Json.decodeFromString(LocalDataRaw.serializer(), local.readText())
     return LocalDataRaw(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) }, raw.customPakLocation)
 }
