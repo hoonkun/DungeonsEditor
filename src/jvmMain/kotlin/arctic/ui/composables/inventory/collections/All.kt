@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.states.arctic
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.atomic.drawItemFrame
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
@@ -80,9 +81,9 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
 
                 drawRect(
                     brush = brush,
-                    topLeft = Offset(-10.dp.value, -10.dp.value),
-                    size = Size(size.width + 20.dp.value, size.height + 20.dp.value),
-                    style = Stroke(width = 4.dp.value)
+                    topLeft = Offset(densityDp(-10), densityDp(-10)),
+                    size = Size(size.width + densityDp(20), size.height + densityDp(20)),
+                    style = Stroke(width = densityDp(4))
                 )
             }
     ) {

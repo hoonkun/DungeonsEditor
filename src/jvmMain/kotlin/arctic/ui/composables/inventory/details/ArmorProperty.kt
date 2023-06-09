@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import arctic.states.arctic
 import arctic.ui.composables.atomic.ArmorPropertyRarityIcon
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
@@ -75,9 +76,9 @@ private fun RowScope.ArmorPropertyItem(property: ArmorProperty) {
             .drawBehind {
                 drawRoundRect(
                     color = Color.White.copy(alpha = if (selected) 0.2f else if (hovered) 0.1f else 0.0f),
-                    topLeft = Offset(-10.dp.value, 0f),
-                    size = Size(size.width + 20.dp.value, size.height),
-                    cornerRadius = CornerRadius(6.dp.value, 6.dp.value)
+                    topLeft = Offset(densityDp(-10), 0f),
+                    size = Size(size.width + densityDp(20), size.height),
+                    cornerRadius = CornerRadius(densityDp(6))
                 )
             }
             .hoverable(interaction)
@@ -106,9 +107,9 @@ private fun ArmorPropertyAddButton(item: Item) {
         modifier = Modifier
             .size(35.dp)
             .drawBehind {
-                if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value, 6.dp.value))
-                drawRect(Color.White, topLeft = Offset(size.width / 2 - 2f, 8f), size = Size(4f, size.height - 16f))
-                drawRect(Color.White, topLeft = Offset(8f, size.height / 2 - 2f), size = Size(size.width - 16f, 4f))
+                if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(densityDp(6)))
+                drawRect(Color.White, topLeft = Offset(size.width / 2 - densityDp(2), densityDp(8)), size = Size(densityDp(4), size.height - densityDp(16)))
+                drawRect(Color.White, topLeft = Offset(densityDp(8), size.height / 2 - densityDp(2)), size = Size(size.width - densityDp(16), densityDp(4)))
             }
             .hoverable(interaction)
             .clickable(interaction, null) { arctic.armorProperties.requestCreate(item) }

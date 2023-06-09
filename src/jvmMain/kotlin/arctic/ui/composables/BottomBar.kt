@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.states.arctic
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsLevel
 import dungeons.IngameImages
@@ -115,7 +116,7 @@ fun IconButton(icon: String, onClick: () -> Unit) {
             .size(60.dp)
             .hoverable(source)
             .clickable(source, null, onClick = onClick)
-            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.value)) }
+            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(densityDp(6))) }
             .padding(10.dp)
     )
 }
@@ -141,7 +142,7 @@ fun InventorySwitcher() {
                 drawRoundRect(
                     color = Color.White,
                     alpha = if (pressed) 0.2f else if (hovered) 0.15f else 0f,
-                    cornerRadius = CornerRadius(6.dp.value, 6.dp.value)
+                    cornerRadius = CornerRadius(densityDp(6), densityDp(6))
                 )
             }
             .padding(start = 15.dp)
@@ -217,7 +218,7 @@ private fun CurrencyField(value: String, onValueChange: (String) -> Unit) {
             .onFocusChanged { focused = it.hasFocus }
             .width(100.dp)
             .drawBehind {
-                drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 3.dp.value))
+                drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, densityDp(3)))
             }
     )
 }

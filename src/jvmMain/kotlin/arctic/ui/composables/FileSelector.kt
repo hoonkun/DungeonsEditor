@@ -29,6 +29,7 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import arctic.ui.composables.atomic.RetroButton
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -474,8 +475,8 @@ fun PathInputBox(content: @Composable RowScope.() -> Unit) =
                 .fillMaxWidth()
                 .height(80.dp)
                 .drawBehind {
-                    drawRect(SelectorColors.PathInput, topLeft = Offset(0f, 7.dp.value), size = Size(size.width, size.height - 14.dp.value))
-                    drawRect(SelectorColors.PathInput, topLeft = Offset(7.dp.value, 0f), size = Size(size.width - 14.dp.value, size.height))
+                    drawRect(SelectorColors.PathInput, topLeft = Offset(0f, densityDp(7)), size = Size(size.width, size.height - densityDp(14)))
+                    drawRect(SelectorColors.PathInput, topLeft = Offset(densityDp(7), 0f), size = Size(size.width - densityDp(14), size.height))
                 },
             content = content
         )

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import arctic.states.arctic
 import arctic.ui.composables.atomic.BlurEffectedImage
+import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.atomic.drawItemFrame
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.composables.overlays.extended.tween250
@@ -427,11 +428,11 @@ private fun SelectSectionHeader(iconResource: String, title: String) {
                 .size(125.dp)
                 .drawBehind {
                     val color = Color(0xffff8800)
-                    val verticalSize = Size(20.dp.value, 50.dp.value)
-                    val horizontalSize = Size(50.dp.value, 20.dp.value)
+                    val verticalSize = Size(densityDp(20), densityDp(50))
+                    val horizontalSize = Size(densityDp(50), densityDp(20))
 
-                    val topLeft = Offset(-30.dp.value, -30.dp.value)
-                    val bottomRight = Offset(size.width + 30.dp.value, size.height + 30.dp.value)
+                    val topLeft = Offset(densityDp(-30), densityDp(-30))
+                    val bottomRight = Offset(size.width + densityDp(30), size.height + densityDp(30))
 
                     drawRect(color = color, topLeft = topLeft, size = horizontalSize)
                     drawRect(color = color, topLeft = topLeft, size = verticalSize)
