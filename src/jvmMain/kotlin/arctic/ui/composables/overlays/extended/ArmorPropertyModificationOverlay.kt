@@ -1,7 +1,6 @@
 package arctic.ui.composables.overlays.extended
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,9 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import arctic.states.arctic
-import arctic.ui.composables.atomic.ArmorPropertyRarityIcon
+import androidx.compose.ui.unit.IntOffset
+import arctic.states.Arctic
+import arctic.states.ItemArmorPropertyOverlayState
+import arctic.ui.composables.atomic.rememberArmorPropertyIconAsState
 import arctic.ui.composables.overlays.OverlayBackdrop
+import arctic.ui.composables.overlays.SizeMeasureDummy
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -30,92 +32,64 @@ import dungeons.ArmorPropertyData
 import dungeons.Database
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
-import dungeons.states.extensions.data
 import extensions.replace
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ArmorPropertyModificationOverlay() {
-    val target = arctic.armorProperties.detailTarget
-    val into = arctic.armorProperties.createInto
-    val created = arctic.armorProperties.created
+    val armorPropertyOverlay = Arctic.overlayState.armorProperty
 
-    val hasTarget = target != null
-    val hasInto = into != null
-
-    val collectionTargetStates =
-        if (hasInto)
-            CollectionTargetStatesA(holder = into, index = into?.armorProperties?.size)
-        else
-            CollectionTargetStatesA(holder = target?.holder, index = target?.holder?.armorProperties?.indexOf(target))
-    val detailTargetStates = DetailTargetStatesA(
-        holder = collectionTargetStates.holder,
-        target = target,
-        created = created
-    )
-
-    val slideEnabled: (DetailTargetStatesA, DetailTargetStatesA) -> Boolean = { initialState, targetState ->
-        initialState.target != null && targetState.holder != null && targetState.target != null || initialState.holder == null && targetState.holder != null
+    OverlayBackdrop(armorPropertyOverlay != null) { Arctic.overlayState.armorProperty = null }
+    AnimatedContent(
+        targetState = armorPropertyOverlay,
+        transitionSpec = { fadeIn() with fadeOut() using SizeTransform(false) },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (it != null)
+            ArmorPropertyModificationOverlayContent(
+                it,
+                collectionModifier = Modifier.animateEnterExit(enter = slideIn { IntOffset(-60.dp.value.toInt(), 0) }, exit = ExitTransition.None),
+                previewModifier = Modifier.animateEnterExit(enter = slideIn { IntOffset(0, 60.dp.value.toInt()) }, exit = ExitTransition.None)
+            )
+        else SizeMeasureDummy()
     }
-    val sizeTransformDuration: (DetailTargetStatesA, DetailTargetStatesA) -> Int = { initialState, targetState ->
-        if ((initialState.holder == null && initialState.created && !targetState.created) || (initialState.holder == null && initialState.target == null && targetState.created)) 0
-        else 250
-    }
+}
 
-    OverlayBackdrop(hasTarget || hasInto) {
-        if (hasTarget) arctic.armorProperties.closeDetail()
-        else if (hasInto) arctic.armorProperties.cancelCreation()
-    }
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ArmorPropertyModificationOverlayContent(
+    armorPropertyOverlay: ItemArmorPropertyOverlayState,
+    collectionModifier: Modifier = Modifier,
+    previewModifier: Modifier = Modifier
+) {
+    val preview = armorPropertyOverlay.preview
+    val target = armorPropertyOverlay.target
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
     ) {
+        ArmorPropertyDataCollection(target, preview, armorPropertyOverlay, modifier = collectionModifier)
+        Spacer(modifier = Modifier.width(40.dp))
         AnimatedContent(
-            targetState = collectionTargetStates,
-            transitionSpec = OverlayTransitions.collection(),
-            modifier = Modifier.width(750.dp)
-        ) { (holder, index) ->
-            val indexValid = index != null && index < (holder?.armorProperties?.size ?: 0)
-
-            if (holder != null) ArmorPropertyDataCollection(holder, index, indexValid)
-            else Box(modifier = Modifier.width(700.dp).fillMaxHeight())
-        }
-        AnimatedContent(
-            targetState = detailTargetStates,
-            transitionSpec = OverlayTransitions.detail(slideEnabled, sizeTransformDuration),
-            modifier = Modifier.height(500.dp)
-        ) { (_, target, created) ->
-            if (target != null) ArmorPropertyDetail(target)
+            targetState = preview,
+            transitionSpec = OverlayTransitions.detail(slideEnabled = { i, t -> i != null && t != null }),
+            modifier = Modifier.height(500.dp).then(previewModifier)
+        ) { preview ->
+            if (preview != null) ArmorPropertyDetail(preview)
             else Box(modifier = Modifier.size(0.dp, 500.dp))
-
-            if (target == null && created) {
-                Box(modifier = Modifier.width(675.dp).height(500.dp))
-            } else if (target == null) {
-                Box(modifier = Modifier.width(0.dp).height(500.dp))
-            }
         }
     }
 }
 
-private data class CollectionTargetStatesA(
-    val holder: Item?,
-    val index: Int?
-)
-
-private data class DetailTargetStatesA(
-    val holder: Item?,
-    val target: ArmorProperty?,
-    val created: Boolean
-)
-
 @Composable
-private fun ArmorPropertyDataCollection(holder: Item, index: Int?, indexValid: Boolean) {
-    val property = if (index != null && indexValid) holder.armorProperties?.get(index) else null
-
+private fun ArmorPropertyDataCollection(holder: Item, property: ArmorProperty?, armorPropertyOverlay: ItemArmorPropertyOverlayState, modifier: Modifier = Modifier) {
     val datasets = remember { Database.armorProperties.filter { it.description != null }.sortedBy { it.id } }
 
-    val initialFirstVisibleItemIndex = if (property != null) datasets.indexOfFirst { it.id == property.id }.coerceAtLeast(0) else 0
+    val initialFirstVisibleItemIndex = remember(datasets, property) {
+        if (property != null) datasets.indexOfFirst { it.id == property.id }.coerceAtLeast(0) else 0
+    }
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = initialFirstVisibleItemIndex,
         initialFirstVisibleItemScrollOffset = -602.dp.value.toInt()
@@ -127,10 +101,11 @@ private fun ArmorPropertyDataCollection(holder: Item, index: Int?, indexValid: B
         modifier = Modifier
             .requiredWidth(700.dp)
             .fillMaxHeight()
+            .then(modifier)
             .background(Color(0xff080808))
     ) {
         items(datasets, key = { it.id }) { data ->
-            ArmorPropertyCollectionItem(holder, index, indexValid, data)
+            ArmorPropertyCollectionItem(holder, data, property, armorPropertyOverlay)
         }
     }
 }
@@ -138,32 +113,30 @@ private fun ArmorPropertyDataCollection(holder: Item, index: Int?, indexValid: B
 @Composable
 private fun ArmorPropertyCollectionItem(
     holder: Item,
-    index: Int?,
-    indexValid: Boolean,
-    data: ArmorPropertyData
+    data: ArmorPropertyData,
+    replaceFrom: ArmorProperty?,
+    armorPropertyOverlay: ItemArmorPropertyOverlayState
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
-    val selected = index != null && indexValid && holder.armorProperties?.get(index)?.id == data.id
+    val selected = replaceFrom != null && replaceFrom.id == data.id
 
     val onItemClick: () -> Unit = {
         val properties = holder.armorProperties!!
 
         val newProperty = ArmorProperty(holder, data.id)
 
-        if (index != null && indexValid) {
-            val existing = properties[index]
-            if (existing.id == newProperty.id) {
-                properties.remove(existing)
-                arctic.armorProperties.closeDetail()
-                arctic.armorProperties.requestCreate(existing.holder)
+        if (replaceFrom != null) {
+            if (replaceFrom.id == data.id) {
+                properties.remove(replaceFrom)
+                armorPropertyOverlay.preview = null
             } else {
-                properties.replace(properties[index], newProperty)
-                arctic.armorProperties.viewDetail(newProperty)
+                properties.replace(replaceFrom, newProperty)
+                armorPropertyOverlay.preview = newProperty
             }
         } else {
             properties.add(newProperty)
-            arctic.armorProperties.viewDetail(newProperty)
+            armorPropertyOverlay.preview = newProperty
         }
     }
 
@@ -209,8 +182,10 @@ private fun ArmorPropertyRarityToggle(property: ArmorProperty) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
+    val rarityIcon by rememberArmorPropertyIconAsState(property)
+
     Image(
-        bitmap = ArmorPropertyRarityIcon(property.rarity),
+        bitmap = rarityIcon,
         contentDescription = null,
         modifier = Modifier
             .size(41.dp)

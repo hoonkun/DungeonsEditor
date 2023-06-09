@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -25,23 +24,22 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import arctic.states.*
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import arctic.states.arctic
 import arctic.ui.composables.atomic.densityDp
 import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsLevel
 import dungeons.IngameImages
-import dungeons.states.DungeonsJsonState
-import dungeons.states.extensions.playerLevel
-import dungeons.states.extensions.playerPower
-import dungeons.states.extensions.totalSpentEnchantmentPoints
-import extensions.toFixed
 
 @Composable
-fun BottomBar(stored: DungeonsJsonState) {
-    val emerald = stored.currencies.find { it.type == "Emerald" }
-    val gold = stored.currencies.find { it.type == "Gold" }
+fun BottomBar(editor: EditorState) {
+    val stored = remember(editor) { editor.stored }
+
+    val emerald by remember(editor) { derivedStateOf { editor.stored.currencies.find { it.type == "Emerald" } } }
+    val gold by remember(editor) { derivedStateOf { editor.stored.currencies.find { it.type == "Gold" } } }
+
+    val levelIcon = remember { IngameImages.get { "/Game/UI/Materials/Character/STATS_LV_frame.png" } }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -54,17 +52,15 @@ fun BottomBar(stored: DungeonsJsonState) {
             modifier = Modifier.fillMaxWidth(0.725f)
         ) {
             CurrencyField(
-                value = "${stored.playerLevel.toFixed(3)}",
+                value = "${stored.playerLevel}",
                 onValueChange = {
-                    if (it.toDoubleOrNull() != null) stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble())
+                    if (it.toDoubleOrNull() != null)
+                        stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble())
                 }
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    CurrencyImage(IngameImages.get { "/Game/UI/Materials/Character/STATS_LV_frame.png" })
-                    Text(
-                        text = "LV.",
-                        style = TextStyle(fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                    )
+                    CurrencyImage(levelIcon)
+                    Text(text = "LV.", fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -94,7 +90,7 @@ fun BottomBar(stored: DungeonsJsonState) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            InventorySwitcher()
+            InventorySwitcher(editor)
 
             Spacer(modifier = Modifier.width(20.dp))
 
@@ -109,8 +105,10 @@ fun IconButton(icon: String, onClick: () -> Unit) {
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
 
+    val bitmap = remember(icon) { IngameImages.get { icon } }
+
     Image(
-        bitmap = IngameImages.get { icon },
+        bitmap = bitmap,
         contentDescription = null,
         modifier = Modifier
             .size(60.dp)
@@ -122,21 +120,27 @@ fun IconButton(icon: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun CloseFileButton() = IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") { arctic.alerts.closeFile = true }
-@Composable
-fun SaveButton() = IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") { arctic.dialogs.fileSaveDstSelector = true }
+fun CloseFileButton() =
+    IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") { Arctic.overlayState.fileClose = true }
 
 @Composable
-fun InventorySwitcher() {
+fun SaveButton() =
+    IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") { Arctic.overlayState.fileSaveDstSelector = true }
+
+@Composable
+fun InventorySwitcher(editor: EditorState) {
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
+
+    val leftArrow = remember { IngameImages.get { "/Game/UI/Materials/Character/left_arrow_carousel.png" } }
+    val rightArrow = remember { IngameImages.get { "/Game/UI/Materials/Character/right_arrow_carousel.png" } }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .hoverable(source)
-            .clickable(source, null) { arctic.toggleView() }
+            .clickable(source, null) { editor.view = editor.view.other() }
             .height(60.dp)
             .drawBehind {
                 drawRoundRect(
@@ -150,19 +154,19 @@ fun InventorySwitcher() {
 
         Box(modifier = Modifier.width(32.5.dp)) {
             Image(
-                bitmap = IngameImages.get { "/Game/UI/Materials/Character/left_arrow_carousel.png" },
+                bitmap = leftArrow,
                 contentDescription = null,
                 modifier = Modifier.width(20.dp).align(Alignment.CenterStart)
             )
             Image(
-                bitmap = IngameImages.get { "/Game/UI/Materials/Character/right_arrow_carousel.png" },
+                bitmap = rightArrow,
                 contentDescription = null,
                 modifier = Modifier.width(20.dp).align(Alignment.CenterEnd)
             )
         }
 
         Text(
-            text = if (arctic.view == "inventory") "Inventory" else "Storage",
+            text = editor.view.name,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
@@ -173,8 +177,14 @@ fun InventorySwitcher() {
 }
 
 @Composable
+private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
+    Image(image, null, modifier = Modifier.size(if (small) 40.dp else 50.dp))
+
+@Composable
 private fun CurrencyText(icon: String, value: String, valid: Boolean = true, smallIcon: Boolean = false) {
-    CurrencyImage(IngameImages.get { icon }, smallIcon)
+    val bitmap = remember(icon) { IngameImages.get { icon } }
+
+    CurrencyImage(bitmap, smallIcon)
     Spacer(modifier = Modifier.width(10.dp))
     Text(text = value, fontSize = 25.sp, color = if (valid) Color.White else Color(0xffff5e14), modifier = Modifier.width(100.dp))
     Spacer(modifier = Modifier.width(30.dp))
@@ -182,29 +192,23 @@ private fun CurrencyText(icon: String, value: String, valid: Boolean = true, sma
 
 @Composable
 private fun CurrencyField(icon: String, value: String, onValueChange: (String) -> Unit) {
-    CurrencyImage(IngameImages.get { icon }, true)
-    Spacer(modifier = Modifier.width(10.dp))
-    CurrencyField(value = value, onValueChange = onValueChange)
-    Spacer(modifier = Modifier.width(30.dp))
+    val bitmap = remember(icon) { IngameImages.get { icon } }
+    CurrencyField(value, onValueChange) { CurrencyImage(bitmap, true) }
 }
 
 @Composable
 private fun CurrencyField(value: String, onValueChange: (String) -> Unit, icon: @Composable () -> Unit) {
     icon()
     Spacer(modifier = Modifier.width(10.dp))
-    CurrencyField(value = value, onValueChange = onValueChange)
+    CurrencyFieldInput(value = value, onValueChange = onValueChange)
     Spacer(modifier = Modifier.width(30.dp))
 }
 
 @Composable
-private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
-    Image(image, null, modifier = Modifier.size(if (small) 40.dp else 50.dp))
-
-@Composable
-private fun CurrencyField(value: String, onValueChange: (String) -> Unit) {
+private fun CurrencyFieldInput(value: String, onValueChange: (String) -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
-        if (!focused) Color(0x00888888) else Color(0xffff884c),
+        targetValue = if (!focused) Color(0x00888888) else Color(0xffff884c),
         animationSpec = tween(durationMillis = 250)
     )
 

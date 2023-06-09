@@ -15,16 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.ArcticState
+import arctic.states.EditorState
 import arctic.ui.composables.atomic.BlurEffectedImage
 import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.atomic.drawItemFrame
@@ -38,8 +37,6 @@ import dungeons.DungeonsSummary
 import dungeons.IngameImages
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
-import dungeons.states.extensions.data
-import dungeons.states.extensions.totalEnchantmentInvestedPoints
 import extensions.lengthEllipsisMiddle
 import utils.separatePathAndName
 
@@ -50,7 +47,7 @@ private fun findDungeonsFileInfo(key: String?): DungeonsFileInfo? =
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun TitleView(blurRadius: Dp) {
+fun TitleView(modifier: Modifier = Modifier) {
     var selectedPath by remember { mutableStateOf<String?>(null) }
     val selectedState by derivedStateOf { findDungeonsFileInfo(selectedPath)?.second }
     val selectedSummary by derivedStateOf { findDungeonsFileInfo(selectedPath)?.third }
@@ -65,14 +62,14 @@ fun TitleView(blurRadius: Dp) {
     val summaryContainerOffset by animateFloatAsState(if (hovered || focused) -20f else 0f)
 
     AnimatedContent(
-        targetState = arctic.stored == null,
+        targetState = Arctic.editorState == null,
         transitionSpec = { fadeIn() with fadeOut() },
-        modifier = Modifier.fillMaxSize().blur(blurRadius)
+        modifier = Modifier.fillMaxSize().then(modifier)
     ) { isInTitle ->
         if (isInTitle) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 AnimatedVisibility(
-                    visible = arctic.readyForStart,
+                    visible = Arctic.pakState == ArcticState.PakState.Initialized,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
@@ -82,7 +79,7 @@ fun TitleView(blurRadius: Dp) {
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
-                            .blur(50.dp)
+                            .graphicsLayer { renderEffect = BlurEffect(50.dp.value, 50.dp.value) }
                             .drawWithContent {
                                 drawContent()
                                 drawRect(Color.Black.copy(alpha = 0.6f))
@@ -95,18 +92,19 @@ fun TitleView(blurRadius: Dp) {
                 ArrowDecor(modifier = Modifier.align(Alignment.CenterEnd).offset(x = (500).dp, y = (-650).dp))
                 ArrowDecor(modifier = Modifier.align(Alignment.CenterStart).offset(x = (-300).dp, y = 425.dp))
 
-                Go(color = Color(0xffff8800), modifier = Modifier.blur(125.dp).alpha(goAlpha))
+                Go(color = Color(0xffff8800), modifier = Modifier.graphicsLayer { renderEffect = BlurEffect(125.dp.value, 125.dp.value) }.graphicsLayer { alpha = goAlpha })
                 Go(color = Color(0xff090500))
 
                 Clickable(
                     modifier = Modifier
                         .hoverable(interaction)
                         .clickable(interaction, null) {
+                            val json = selectedState
                             val path = selectedPath
-                            if (path == null || selectedState == null) {
-                                arctic.dialogs.fileLoadSrcSelector = true
+                            if (path == null || json == null) {
+                                Arctic.overlayState.fileLoadSrcSelector = true
                             } else {
-                                arctic.stored = selectedState
+                                Arctic.editorState = EditorState(json)
                                 LocalData.updateRecentFiles(path)
                             }
                         }

@@ -12,63 +12,44 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
-import arctic.states.arctic
+import arctic.states.EditorState
 import arctic.ui.composables.inventory.collections.EquippedItemCollection
 import arctic.ui.composables.inventory.collections.UnequippedItemCollection
 import arctic.ui.composables.inventory.details.ItemDetail
-import arctic.ui.composables.overlays.SizeMeasureDummy
 import arctic.ui.composables.overlays.extended.tween250
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
-import dungeons.states.DungeonsJsonState
-import dungeons.states.Item
 
 @Composable
-fun InventoryView() {
-    RootAnimator(arctic.stored) { stored ->
-        if (stored != null) Content(stored)
-        else SizeMeasureDummy()
-    }
+fun InventoryView(editor: EditorState) {
+    Content(editor)
 }
 
 @Composable
-private fun Content(stored: DungeonsJsonState) {
+private fun Content(editor: EditorState) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        LeftAreaAnimator(stored to arctic.view) { (stored, view) ->
+        LeftAreaAnimator(editor.view) { view ->
             LeftArea {
-                if (view == "inventory") {
-                    EquippedItemCollection(stored.equippedItems)
+                if (view == EditorState.EditorView.Inventory) {
+                    EquippedItemCollection(editor.stored.equippedItems, editor.selection)
                     Divider()
-                    UnequippedItemCollection(stored.unequippedItems)
-                } else if (view == "storage") {
-                    UnequippedItemCollection(stored.storageChestItems)
+                    UnequippedItemCollection(editor.stored.unequippedItems, editor.selection, editor.noSpaceInInventory)
+                } else if (view == EditorState.EditorView.Storage) {
+                    UnequippedItemCollection(editor.stored.storageChestItems, editor.selection, editor.noSpaceInInventory)
                 }
             }
         }
-        RightAreaAnimator(arctic.selection.selected.any { item -> item != null }) {
+        RightAreaAnimator(editor.selection.hasSelection) {
             RightArea {
-                if (it) ItemComparator(arctic.selection.selected)
+                if (it) ItemComparator(editor)
                 else SomeTips()
             }
         }
     }
 }
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-private fun <S>RootAnimator(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
-    AnimatedContent(
-        targetState = targetState,
-        transitionSpec = {
-            val enter = fadeIn(tween250()) + slideIn(tween250(), initialOffset = { IntOffset(0, -50.dp.value.toInt()) })
-            val exit = fadeOut(tween250()) + slideOut(tween250(), targetOffset = { IntOffset(0, -50.dp.value.toInt()) })
-            enter with exit using SizeTransform(false)
-        },
-        content = content
-    )
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -150,7 +131,7 @@ private fun Tip(text: String) {
 }
 
 @Composable
-private fun ItemComparator(items: List<Item?>) {
+private fun ItemComparator(editor: EditorState) {
     val scroll = rememberScrollState()
     val adapter = rememberScrollbarAdapter(scroll)
     Box(modifier = Modifier.fillMaxSize().padding(start = 75.dp)) {
@@ -158,9 +139,9 @@ private fun ItemComparator(items: List<Item?>) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize().verticalScroll(scroll)
         ) {
-            ItemDetail(items[0])
+            ItemDetail(editor.selection.primary, editor)
             Spacer(modifier = Modifier.height(20.dp))
-            ItemDetail(items[1])
+            ItemDetail(editor.selection.secondary, editor)
         }
         VerticalScrollbar(
             adapter = adapter,

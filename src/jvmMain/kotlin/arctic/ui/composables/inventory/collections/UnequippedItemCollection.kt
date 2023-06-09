@@ -11,7 +11,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import arctic.states.arctic
+import arctic.states.*
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
 import arctic.ui.composables.atomic.VariantFilterIcon
@@ -19,11 +19,9 @@ import arctic.ui.composables.atomic.densityDp
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.states.Item
-import dungeons.states.extensions.data
-import dungeons.states.extensions.totalEnchantmentInvestedPoints
 
 @Composable
-fun UnequippedItemCollection(items: List<Item>) {
+fun UnequippedItemCollection(items: List<Item>, selection: EditorSelectionState, noSpaceInInventory: Boolean) {
     val variantFilter = remember { mutableStateOf<String?>(null) }
     val rarityFilter = remember { mutableStateOf<String?>(null) }
 
@@ -31,7 +29,7 @@ fun UnequippedItemCollection(items: List<Item>) {
         derivedStateOf {
             items.filter {
                 val variantMatched =
-                    (variantFilter.value == null || (if (variantFilter.value == "Enchanted") it.totalEnchantmentInvestedPoints > 0 else it.data.variant == variantFilter.value))
+                    (variantFilter.value == null || (if (variantFilter.value == "Enchanted") it.enchanted else it.data.variant == variantFilter.value))
                 val rarityMatched = (rarityFilter.value == null || it.rarity == rarityFilter.value)
 
                 variantMatched && rarityMatched
@@ -40,9 +38,16 @@ fun UnequippedItemCollection(items: List<Item>) {
     }
 
     Row {
-        UnequippedItemFilterer(variantFilter, rarityFilter)
+        UnequippedItemFilterer(
+            variantFilter = variantFilter,
+            rarityFilter = rarityFilter,
+            onCreateItem = {
+                if (noSpaceInInventory) Arctic.overlayState.inventoryFull = true
+                else Arctic.overlayState.itemCreation = ItemCreationOverlayState()
+            }
+        )
         ItemsLazyGrid(items = datasets) { _, item ->
-            ItemGridItem(item)
+            ItemGridItem(item, selection = selection)
         }
     }
 }
@@ -50,7 +55,8 @@ fun UnequippedItemCollection(items: List<Item>) {
 @Composable
 private fun UnequippedItemFilterer(
     variantFilter: MutableState<String?>,
-    rarityFilter: MutableState<String?>
+    rarityFilter: MutableState<String?>,
+    onCreateItem: () -> Unit
 ) {
 
     var variant by variantFilter
@@ -73,7 +79,7 @@ private fun UnequippedItemFilterer(
             Spacer(modifier = Modifier.height(10.dp))
         }
         Spacer(modifier = Modifier.weight(1f))
-        AddItemButton()
+        AddItemButton(onCreateItem)
         Spacer(modifier = Modifier.height(20.dp))
     }
 
@@ -120,7 +126,7 @@ private fun RarityFilterButton(rarity: String, selected: Boolean, onClick: () ->
 }
 
 @Composable
-private fun AddItemButton() {
+private fun AddItemButton(onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -128,7 +134,7 @@ private fun AddItemButton() {
         modifier = Modifier
             .size(60.dp)
             .hoverable(interaction)
-            .clickable(interaction, null) { if(!arctic.alerts.checkAvailable()) arctic.creation.enable() }
+            .clickable(interaction, null, onClick = onClick)
             .padding(10.dp)
             .drawBehind {
                 drawRect(

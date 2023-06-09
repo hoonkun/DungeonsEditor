@@ -1,15 +1,13 @@
 package arctic.states
 
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 
 @Stable
 class ArcticState {
 
-    val pakState: PakState by mutableStateOf(PakState.Uninitialized)
+    var pakState: PakState by mutableStateOf(PakState.Uninitialized)
 
-    val editorState: EditorState? by mutableStateOf(null)
+    var editorState: EditorState? by mutableStateOf(null)
 
     val overlayState: OverlayState = OverlayState()
 
@@ -18,3 +16,5 @@ class ArcticState {
     }
 
 }
+
+val Arctic = ArcticState()

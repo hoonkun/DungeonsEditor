@@ -4,16 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import arctic.states.arctic
+import arctic.states.Arctic
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
 
 @Composable
 fun FileOpenFailureOverlay() {
-    val exception = arctic.alerts.fileLoadFailed
+    val exception = Arctic.overlayState.fileLoadFailed
 
     OverlayBackdrop(exception != null, 0.6f)
-
     OverlayAnimator(exception) {
         if (it != null) Content(it)
         else SizeMeasureDummy()
@@ -23,7 +22,7 @@ fun FileOpenFailureOverlay() {
 @Composable
 private fun Content(exception: String) {
 
-    val onNeutral = { arctic.alerts.fileLoadFailed = null }
+    val onNeutral = { Arctic.overlayState.fileLoadFailed = null }
 
     ContentRoot {
         OverlayTitleDescription(

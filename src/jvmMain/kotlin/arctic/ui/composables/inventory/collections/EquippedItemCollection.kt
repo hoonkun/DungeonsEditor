@@ -13,20 +13,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import arctic.states.EditorSelectionState
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.IngameImages
 import dungeons.states.Item
 
 @Composable
-fun EquippedItemCollection(items: List<Item?>) {
+fun EquippedItemCollection(items: List<Item?>, selection: EditorSelectionState) {
     var collapsed by remember { mutableStateOf(false) }
 
     Row {
         EquippedItemCollectionToggleButton(collapsed) { collapsed = !collapsed }
         EquippedItemCollectionToggleAnimator(collapsed) { collapsed ->
             ItemsLazyGrid(columns = if (collapsed) 6 else 3, items = items) { _, item ->
-                ItemGridItem(item, collapsed)
+                ItemGridItem(item, collapsed, selection)
             }
         }
     }

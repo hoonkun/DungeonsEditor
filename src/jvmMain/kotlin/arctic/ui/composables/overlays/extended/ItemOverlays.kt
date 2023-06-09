@@ -1,7 +1,6 @@
 package arctic.ui.composables.overlays.extended
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
@@ -16,17 +15,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import arctic.states.arctic
-import arctic.ui.composables.atomic.RarityColor
-import arctic.ui.composables.atomic.RarityColorType
+import androidx.compose.ui.unit.IntOffset
+import arctic.states.Arctic
+import arctic.states.EditorState
+import arctic.states.ItemCreationOverlayState
 import arctic.ui.composables.atomic.ItemRarityButton
 import arctic.ui.composables.atomic.PowerEditField
 import arctic.ui.composables.atomic.drawUniqueIndicator
 import arctic.ui.composables.overlays.OverlayBackdrop
+import arctic.ui.composables.overlays.SizeMeasureDummy
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -34,113 +36,119 @@ import dungeons.*
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
 import dungeons.states.extensions.addItem
-import dungeons.states.extensions.data
-import dungeons.states.extensions.playerPower
 import extensions.padEndRemaining
 import extensions.toFixed
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ItemCreationOverlay() {
-    ItemDataCollectionOverlay(
-        targetState = arctic.creation.enabled.takeIf { it },
-        variant = { arctic.creation.filter },
-        blur = arctic.creation.target != null,
-        onExit = { arctic.creation.disable() },
-        onSelect = { arctic.creation.target = it }
-    )
+fun ItemCreationOverlay(editorState: EditorState) {
+    val itemCreationOverlay = Arctic.overlayState.itemCreation
 
-    ItemDataDetailOverlay(
-        target = arctic.creation.target
-    )
-}
-
-@Composable
-fun ItemEditionOverlay() {
-    ItemDataCollectionOverlay(
-        targetState = arctic.edition.target,
-        variant = { it.data.variant },
-        onExit = { arctic.edition.disable() },
-        filterEnabled = false,
-        onSelect = {
-            arctic.edition.target?.type = it.type
-            arctic.edition.disable()
-        }
-    )
+    OverlayBackdrop(itemCreationOverlay != null) { Arctic.overlayState.itemCreation = null }
+    AnimatedContent(
+        targetState = itemCreationOverlay,
+        transitionSpec = { fadeIn() with fadeOut() using SizeTransform(false) },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (it != null) ItemCreationOverlayContent(it, editorState)
+        else SizeMeasureDummy()
+    }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun <S>ItemDataCollectionOverlay(
-    targetState: S?,
-    variant: (S) -> String,
-    filterEnabled: Boolean = true,
-    blur: Boolean = false,
-    onExit: () -> Unit,
-    onSelect: (ItemData) -> Unit
-) {
-    val enabled = targetState != null
-    val blurRadius by animateDpAsState(if (blur) 75.dp else 0.dp)
+fun ItemCreationOverlayContent(itemCreationOverlay: ItemCreationOverlayState, editorState: EditorState) {
+    val blurRadius by animateDpAsState(if (itemCreationOverlay.preview != null) 75.dp else 0.dp)
+    val variantFilter = remember { mutableStateOf("Melee") }
 
-    OverlayBackdrop(enabled, onClick = onExit)
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize().blur(blurRadius)
+        modifier = Modifier.fillMaxSize()/*.blur(blurRadius)*/.graphicsLayer { renderEffect = if (blurRadius != 0.dp) BlurEffect(blurRadius.value, blurRadius.value) else null }
     ) {
         Box {
+            ItemCreationVariantFilters(fixed = null, filter = variantFilter, modifier = Modifier.offset(x = (-180).dp))
             AnimatedContent(
-                targetState = targetState,
-                transitionSpec = OverlayTransitions.collection(reversed = true),
-                modifier = Modifier.width(160.dp).offset(x = (-120).dp)
-            ) { targetState ->
-                if (targetState != null) ItemCreationVariantFilters(if (filterEnabled) null else variant(targetState))
-                else Spacer(modifier = Modifier.requiredWidth(160.dp).fillMaxHeight())
+                targetState = variantFilter.value,
+                transitionSpec = {
+                    val enter = fadeIn() + slideIn { IntOffset(30.dp.value.toInt(), 0) }
+                    val exit = fadeOut() + slideOut { IntOffset(30.dp.value.toInt(), 0) }
+                    enter with exit using SizeTransform(false)
+                }
+            ) { variant ->
+                ItemDataCollection(variant, onItemSelect = { itemCreationOverlay.preview = it })
             }
-            AnimatedContent(
-                targetState = targetState to (if (targetState != null) variant(targetState) else null),
-                transitionSpec = OverlayTransitions.collection(reversed = true),
-                modifier = Modifier.width(1050.dp)
-            ) { (targetState, variant) ->
-                if (targetState != null && variant != null) ItemDataCollection(variant, onItemSelect = onSelect)
-                else Box(modifier = Modifier.requiredWidth(1050.dp).fillMaxHeight())
-            }
+        }
+    }
+
+    ItemDataDetailOverlay(itemCreationOverlay, editorState)
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ItemEditionOverlay() {
+    val itemEditionOverlay = Arctic.overlayState.itemEdition
+
+    OverlayBackdrop(itemEditionOverlay != null) { Arctic.overlayState.itemEdition = null }
+    AnimatedContent(
+        targetState = itemEditionOverlay,
+        transitionSpec = { fadeIn() with fadeOut() using SizeTransform(false) },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (it != null) ItemEditionOverlayContent(it)
+        else SizeMeasureDummy()
+    }
+}
+
+@Composable
+fun ItemEditionOverlayContent(itemEditionTarget: Item) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Box {
+            ItemCreationVariantFilters(fixed = itemEditionTarget.data.variant, filter = null, modifier = Modifier.offset(x = (-180).dp))
+            ItemDataCollection(
+                variant = itemEditionTarget.data.variant,
+                onItemSelect = { itemEditionTarget.type = it.type; Arctic.overlayState.itemEdition = null }
+            )
         }
     }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun ItemDataDetailOverlay(target: ItemData?) {
-    OverlayBackdrop(target != null) { arctic.creation.target = null }
+private fun ItemDataDetailOverlay(itemCreationOverlay: ItemCreationOverlayState, editorState: EditorState) {
+    OverlayBackdrop(itemCreationOverlay.preview != null) { itemCreationOverlay.preview = null }
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
         AnimatedContent(
-            targetState = target,
+            targetState = itemCreationOverlay.preview,
             transitionSpec = OverlayTransitions.detail(),
             modifier = Modifier.fillMaxWidth().height(550.dp)
         ) { target ->
-            if (target != null) ItemDataDetail(target)
+            if (target != null) ItemDataDetail(target, editorState)
             else Box(modifier = Modifier.fillMaxSize())
         }
     }
 }
 
 @Composable
-private fun ItemCreationVariantFilters(fixed: String?) {
-    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 54.dp)) {
-        ItemCreationVariantFilter("근거리", "Melee", fixed == null || fixed == "Melee")
-        ItemCreationVariantFilter("원거리", "Ranged", fixed == null || fixed == "Ranged")
-        ItemCreationVariantFilter("방어구", "Armor", fixed == null || fixed == "Armor")
-        ItemCreationVariantFilter("유물", "Artifact", fixed == null || fixed == "Artifact")
+private fun ItemCreationVariantFilters(fixed: String?, filter: MutableState<String>?, modifier: Modifier = Modifier) {
+    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 54.dp).then(modifier)) {
+        ItemCreationVariantFilter("근거리", "Melee", filter, fixed == null || fixed == "Melee")
+        ItemCreationVariantFilter("원거리", "Ranged", filter, fixed == null || fixed == "Ranged")
+        ItemCreationVariantFilter("방어구", "Armor", filter, fixed == null || fixed == "Armor")
+        ItemCreationVariantFilter("유물", "Artifact", filter, fixed == null || fixed == "Artifact")
     }
 }
 
 @Composable
-private fun ItemCreationVariantFilter(text: String, variant: String, enabled: Boolean = true) {
-    val selected = arctic.creation.filter == variant
-    val onClick = { arctic.creation.filter = variant }
+private fun ItemCreationVariantFilter(text: String, variant: String, filter: MutableState<String>?, enabled: Boolean = true) {
+    val selected = filter?.value == variant
+    val onClick = { filter?.value = variant }
 
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
@@ -154,8 +162,8 @@ private fun ItemCreationVariantFilter(text: String, variant: String, enabled: Bo
             .hoverable(interaction, enabled = enabled)
             .clickable(interaction, null, enabled = enabled, onClick = onClick)
     ) {
-        VariantFilterText(text, modifier = Modifier.blur(10.dp).alpha(blurAlpha))
-        VariantFilterText(text, modifier = Modifier.alpha(overlayAlpha))
+        VariantFilterText(text, modifier = Modifier.blur(10.dp).graphicsLayer { alpha = blurAlpha })
+        VariantFilterText(text, modifier = Modifier.graphicsLayer { alpha = overlayAlpha })
     }
 }
 
@@ -244,7 +252,7 @@ private fun ItemDataIcon(data: ItemData?, onItemSelect: (ItemData) -> Unit) {
                 .padding(20.dp)
                 .then(if (data.unique) DrawUniqueIndicatorModifier else Modifier)
         ) {
-            ItemDataIconImage(data, modifier = Modifier.scale(1.1f).blur(10.dp).alpha(behindBlurAlpha))
+            ItemDataIconImage(data, modifier = Modifier.scale(1.1f).graphicsLayer { alpha = behindBlurAlpha; renderEffect = BlurEffect(10.dp.value, 10.dp.value) })
             ItemDataIconImage(data)
         }
         Text(
@@ -261,9 +269,9 @@ private fun ItemDataIconImage(data: ItemData, modifier: Modifier = Modifier) =
     Image(data.inventoryIcon, null, modifier = Modifier.fillMaxSize().then(modifier))
 
 @Composable
-fun ItemDataDetail(data: ItemData) {
+fun ItemDataDetail(data: ItemData, editorState: EditorState) {
     var rarity by remember { mutableStateOf(if (data.unique) "Unique" else "Common") }
-    var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(arctic.requireStored.playerPower.toDouble())) }
+    var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(editorState.stored.playerPower.toDouble())) }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -320,7 +328,7 @@ fun ItemDataDetail(data: ItemData) {
         }
         AddButton {
             val newItem = Item(
-                parent = arctic.requireStored,
+                parent = editorState.stored,
                 inventoryIndex = 0,
                 power = power,
                 rarity = rarity,
@@ -335,9 +343,8 @@ fun ItemDataDetail(data: ItemData) {
                     .map { ArmorProperty(holder = newItem, id = it.id, rarity = "Common") }
                     .toMutableStateList()
 
-            newItem.parent.addItem(newItem)
-            arctic.creation.disable()
-            arctic.creation.target = null
+            newItem.parent.addItem(editorState, newItem)
+            Arctic.overlayState.itemCreation = null
         }
     }
 }
@@ -365,8 +372,8 @@ fun BoxScope.AddButton(onClick: () -> Unit) {
             .graphicsLayer { clip = false }
     ) {
         Box(modifier = Modifier.size(150.dp), contentAlignment = Alignment.Center) {
-            AddButtonIcon(modifier = Modifier.blur(10.dp).alpha(hoverAlpha))
-            AddButtonIcon(modifier = Modifier.alpha(baseAlpha))
+            AddButtonIcon(modifier = Modifier.blur(10.dp).graphicsLayer { alpha = hoverAlpha })
+            AddButtonIcon(modifier = Modifier.graphicsLayer { alpha = baseAlpha })
         }
         Text(
             text = "추가",
@@ -375,7 +382,7 @@ fun BoxScope.AddButton(onClick: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .offset(y = 25.dp)
-                .alpha(baseAlpha)
+                .graphicsLayer { alpha = baseAlpha }
         )
     }
 }

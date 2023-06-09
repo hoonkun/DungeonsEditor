@@ -7,36 +7,45 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.*
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.ArcticState
+import arctic.states.EditorState
 import arctic.ui.composables.TitleView
 import arctic.ui.composables.BottomBar
 import arctic.ui.composables.inventory.InventoryView
-import arctic.ui.composables.overlays.Overlays
+import arctic.ui.composables.overlays.EditorOverlays
+import arctic.ui.composables.overlays.GlobalOverlays
+import arctic.ui.composables.overlays.SizeMeasureDummy
+import arctic.ui.composables.overlays.extended.tween250
 import arctic.ui.unit.dp
-import dungeons.states.DungeonsJsonState
 
 @Composable
 @Preview
 fun App() {
-    val backdropVisible = !arctic.readyForStart || arctic.backdropBlur
-    val moreBlur = !arctic.readyForStart || arctic.creation.target != null
+    val overlayState = Arctic.overlayState
+    val pakIndexing = Arctic.pakState != ArcticState.PakState.Initialized
 
-    val popupBackdropBlurRadius by animateDpAsState(if (moreBlur) 100.dp else if (backdropVisible) 50.dp else 0.dp, tween(durationMillis = 250))
+    val blur by animateDpAsState(
+        targetValue =
+            if (overlayState.visible && overlayState.nested || pakIndexing) 100.dp
+            else if (overlayState.visible) 50.dp
+            else 0.dp,
+        tween(durationMillis = 250)
+    )
 
     AppRoot {
-        TitleView(popupBackdropBlurRadius)
-        MainContainer(popupBackdropBlurRadius) {
-            ContentContainer { InventoryView() }
-            BottomBarContainer { stored -> BottomBar(stored) }
+        TitleView(modifier = Modifier/*.blur(blur)*/.graphicsLayer { renderEffect = if (blur != 0.dp) BlurEffect(blur.value, blur.value) else null })
+        MainContainer(modifier = Modifier/*.blur(blur)*/.graphicsLayer { renderEffect = if (blur != 0.dp) BlurEffect(blur.value, blur.value) else null }) {
+            EditorAnimator(Arctic.editorState) { editor -> InventoryView(editor) }
+            BottomBarAnimator(Arctic.editorState) { editor -> BottomBar(editor) }
         }
-        Overlays()
+        EditorOverlayAnimator(Arctic.editorState) { editor -> EditorOverlays(editor) }
+        GlobalOverlays()
     }
 }
 
@@ -50,26 +59,18 @@ fun AppRoot(content: @Composable BoxScope.() -> Unit) =
     )
 
 @Composable
-fun MainContainer(blurRadius: Dp, content: @Composable ColumnScope.() -> Unit) =
+fun MainContainer(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) =
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize().blur(blurRadius),
-        content = content
-    )
-
-@Composable
-fun ColumnScope.ContentContainer(content: @Composable RowScope.() -> Unit) =
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.weight(1f).fillMaxWidth(0.7638888f).offset(x = (-35).dp),
+        modifier = Modifier.fillMaxSize().then(modifier),
         content = content
     )
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BottomBarContainer(content: @Composable BoxScope.(DungeonsJsonState) -> Unit) =
+fun BottomBarAnimator(targetState: EditorState?, content: @Composable BoxScope.(EditorState) -> Unit) =
     AnimatedContent(
-        targetState = arctic.stored,
+        targetState = targetState,
         transitionSpec = {
             val enter = fadeIn(tween(250)) + slideIn(tween(250), initialOffset = { IntOffset(0, 20.dp.value.toInt()) })
             val exit = fadeOut(tween(250)) + slideOut(tween(250), targetOffset = { IntOffset(0, 20.dp.value.toInt()) })
@@ -80,15 +81,47 @@ fun BottomBarContainer(content: @Composable BoxScope.(DungeonsJsonState) -> Unit
             if (it != null) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeight(85.dp),
+                    modifier = Modifier.fillMaxWidth().requiredHeight(85.dp),
                     content = { content(it) }
                 )
             } else {
                 Box(modifier = Modifier.fillMaxWidth())
             }
         }
+    )
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun <S>ColumnScope.EditorAnimator(targetState: S?, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
+    AnimatedContent(
+        targetState = targetState,
+        transitionSpec = {
+            val enter = fadeIn(tween250()) + slideIn(tween250(), initialOffset = { IntOffset(0, -50.dp.value.toInt()) })
+            val exit = fadeOut(tween250()) + slideOut(tween250(), targetOffset = { IntOffset(0, -50.dp.value.toInt()) })
+            enter with exit using SizeTransform(false)
+        },
+        modifier = Modifier.weight(1f).fillMaxWidth(0.7638888f).offset(x = (-35).dp),
+        content = { ContentContainer { if (it != null) content(it) else SizeMeasureDummy() } }
+    )
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun EditorOverlayAnimator(targetState: EditorState?, content: @Composable (EditorState) -> Unit) =
+    AnimatedContent(
+        targetState = targetState,
+        transitionSpec = { fadeIn() with fadeOut() using SizeTransform(false) },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (it != null) content(it)
+        else SizeMeasureDummy()
+    }
+
+@Composable
+private fun ContentContainer(content: @Composable RowScope.() -> Unit) =
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize(),
+        content = content
     )
 
 fun main() = application {

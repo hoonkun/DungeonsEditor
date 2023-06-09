@@ -4,43 +4,43 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.EditorState
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
 import dungeons.states.Item
 import dungeons.states.extensions.addItem
-import dungeons.states.extensions.where
 
 @Composable
-fun ItemDuplicateLocationConfirmOverlay() {
-    val target = arctic.duplication.target
+fun ItemDuplicateLocationConfirmOverlay(editor: EditorState) {
+    val target = Arctic.overlayState.itemDuplication
 
-    OverlayBackdrop(target != null) { arctic.duplication.target = null }
+    OverlayBackdrop(target != null) { Arctic.overlayState.itemDuplication = null }
     OverlayAnimator(target to target?.where) { (target, where) ->
-        if (target != null && where != null) Content(target, where)
+        if (target != null && where != null) Content(editor, target, where)
         else SizeMeasureDummy()
     }
 }
 
 @Composable
-private fun Content(target: Item, where: String) {
+private fun Content(editor: EditorState, target: Item, where: EditorState.EditorView) {
 
-    val onClose = { arctic.duplication.target = null }
+    val onClose = { Arctic.overlayState.itemDuplication = null }
 
     val onOriginalSelected = {
-        target.parent.addItem(target.copy(), target)
+        target.parent.addItem(editor, target.copy(), target)
         onClose()
     }
 
     val onHereSelected = {
-        target.parent.addItem(target.copy())
+        target.parent.addItem(editor, target.copy())
         onClose()
     }
 
     ContentRoot {
         OverlayTitleDescription(
-            title = "${whereName(where)}에 있는 아이템이에요. 어디에 복제하시겠어요?",
-            description = "지금은 ${whereName(arctic.view)}를 보고있어요."
+            title = "${where.localizedName}에 있는 아이템이에요. 어디에 복제하시겠어요?",
+            description = "지금은 ${editor.view.localizedName}를 보고있어요."
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {

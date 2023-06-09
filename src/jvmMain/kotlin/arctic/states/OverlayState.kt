@@ -12,7 +12,8 @@ class OverlayState {
     val visible by derivedStateOf {
         fileLoadSrcSelector ||
         fileSaveDstSelector ||
-        fileLoadFailed ||
+        fileLoadFailed != null ||
+        fileClose ||
         inventoryFull ||
         itemCreation != null ||
         itemEdition != null ||
@@ -24,20 +25,20 @@ class OverlayState {
 
     val nested by derivedStateOf { itemCreation?.preview != null }
 
-    val fileLoadSrcSelector by mutableStateOf(false)
-    val fileSaveDstSelector by mutableStateOf(false)
+    var fileLoadSrcSelector by mutableStateOf(false)
+    var fileSaveDstSelector by mutableStateOf(false)
+    var fileClose by mutableStateOf(false)
+    var fileLoadFailed: String? by mutableStateOf(null)
 
-    val fileLoadFailed by mutableStateOf(false)
-
-    val inventoryFull by mutableStateOf(false)
+    var inventoryFull by mutableStateOf(false)
 
     var itemCreation: ItemCreationOverlayState? by mutableStateOf(null)
     var itemEdition: Item? by mutableStateOf(null)
-    val itemDuplication: Item? by mutableStateOf(null)
-    val itemDeletion: Item? by mutableStateOf(null)
+    var itemDuplication: Item? by mutableStateOf(null)
+    var itemDeletion: Item? by mutableStateOf(null)
 
     var enchantment: ItemEnchantmentOverlayState? by mutableStateOf(null)
-    var armorProperty: ItemArmorPropertyState? by mutableStateOf(null)
+    var armorProperty: ItemArmorPropertyOverlayState? by mutableStateOf(null)
 
 }
 
@@ -47,12 +48,11 @@ class ItemCreationOverlayState {
 }
 
 @Stable
-class ItemEnchantmentOverlayState(preview: Enchantment? = null) {
-    var preview: Enchantment? by mutableStateOf(preview)
+class ItemEnchantmentOverlayState(val target: Item, preview: Enchantment) {
+    var preview: Enchantment by mutableStateOf(preview)
 }
 
 @Stable
-class ItemArmorPropertyState(target: Item) {
-    var preview: ArmorProperty? by mutableStateOf(null)
-    var target: Item by mutableStateOf(target)
+class ItemArmorPropertyOverlayState(val target: Item, preview: ArmorProperty? = null) {
+    var preview: ArmorProperty? by mutableStateOf(preview)
 }

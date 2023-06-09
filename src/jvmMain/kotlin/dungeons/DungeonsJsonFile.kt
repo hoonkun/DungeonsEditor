@@ -2,8 +2,6 @@ package dungeons
 
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
-import dungeons.states.extensions.playerLevel
-import dungeons.states.extensions.playerPower
 import org.json.JSONObject
 import java.io.File
 import java.nio.file.Files

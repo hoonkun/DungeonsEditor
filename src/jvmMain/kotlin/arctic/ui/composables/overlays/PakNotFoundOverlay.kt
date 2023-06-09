@@ -8,15 +8,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.ArcticState
 import arctic.ui.composables.Selector
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 
 @Composable
 fun PakNotFoundOverlay() {
-    OverlayBackdrop(arctic.pakNotFound)
-    OverlayAnimator(arctic.pakNotFound) { Content() }
+    OverlayBackdrop(Arctic.pakState == ArcticState.PakState.NotFound)
+    OverlayAnimator(Arctic.pakState == ArcticState.PakState.NotFound) { Content() }
 }
 
 @Composable
@@ -34,8 +35,7 @@ private fun Content() {
                     it.isDirectory && it.listFiles()?.any { file -> file.extension == "pak" } == true
                 }
             ) {
-                arctic.pakNotFound = false
-                arctic.initialized = false
+                Arctic.pakState = ArcticState.PakState.Uninitialized
 
                 LocalData.customPakLocation = it.absolutePath
                 LocalData.save()

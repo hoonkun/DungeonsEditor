@@ -1,9 +1,11 @@
 package arctic.ui.composables.atomic
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import dungeons.IngameImages
 
+@Stable
 fun VariantFilterIcon(with: String, selected: Boolean): ImageBitmap {
     val filename = when (with) {
         "Melee" -> "filter_melee"
@@ -17,10 +19,7 @@ fun VariantFilterIcon(with: String, selected: Boolean): ImageBitmap {
     return IngameImages.get { "/Game/UI/Materials/Inventory2/Filter/$filename$suffix.png" }
 }
 
-enum class RarityColorType {
-    Translucent, Opaque
-}
-
+@Stable
 fun RarityColor(rarity: String, type: RarityColorType): Color {
     return when (rarity) {
         "Common" ->
@@ -40,4 +39,8 @@ fun RarityColor(rarity: String, type: RarityColorType): Color {
             }
         else -> throw RuntimeException("invalid rarity: $rarity")
     }
+}
+
+enum class RarityColorType {
+    Translucent, Opaque
 }

@@ -10,7 +10,9 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -18,6 +20,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -33,14 +36,20 @@ import kotlin.math.sqrt
 @Composable
 fun EnchantmentIconImage(
     data: EnchantmentData,
+    onClick: (EnchantmentData) -> Unit = { },
     hideIndicator: Boolean = false,
     disableInteraction: Boolean = false,
     selected: Boolean = false,
-    modifier: Modifier = Modifier,
-    onClick: (EnchantmentData) -> Unit = { }
+    modifier: Modifier = Modifier
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
+
+    val pattern = remember(data) { data.shinePattern }
+
+    val matrixR = remember { ShinePatternMatrix(0) }
+    val matrixG = remember { ShinePatternMatrix(1) }
+    val matrixB = remember { ShinePatternMatrix(2) }
 
     BlurEffectedImage(
         bitmap = data.icon,
@@ -63,11 +72,8 @@ fun EnchantmentIconImage(
             .scale(if (data.id == "Unset") 0.7f else 1f)
             .scale(0.5f)
     ) {
-        val pattern = data.shinePattern
         if (pattern != null && data.id != "Unset") {
-            EnchantmentShine(pattern, 0) { ShinePatternMatrix(0, it) }
-            EnchantmentShine(pattern, 500) { ShinePatternMatrix(1, it) }
-            EnchantmentShine(pattern, 1000) { ShinePatternMatrix(2, it) }
+            EnchantmentShine(pattern, listOf(matrixR, matrixG, matrixB))
         }
     }
 }
@@ -91,8 +97,8 @@ fun BoxScope.EnchantmentLevelImage(level: Int, positionerSize: Float = 0.45f, sc
         ) { level ->
             if (level != 0) {
                 Image(
-                    IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
-                    null,
+                    bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" },
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize().scale(scale).padding(10.dp)
                 )
             } else {
@@ -118,23 +124,20 @@ fun PowerfulEnchantmentIndicator() =
         modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
     )
 
-
-private fun ShinePatternMatrix(channel: Int, alpha: Float): FloatArray {
-    val result = MutableList(20) { 0f }
+@Stable
+private fun ShinePatternMatrix(channel: Int): FloatArray {
+    val result = FloatArray(20) { 0f }
     result[channel] = 1f
     result[channel + 5] = 1f
     result[channel + 10] = 1f
-    result[channel + 15] = alpha
 
-    return result.toFloatArray()
+    return result
 }
 
 @Composable
-private fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -> FloatArray) {
-    val transition = rememberInfiniteTransition()
-    val alpha by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
+fun animateShine(transition: InfiniteTransition, delay: Int) =
+    transition.animateFloat(
+        initialValue = 0f, targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = keyframes {
                 durationMillis = 700
@@ -144,16 +147,29 @@ private fun EnchantmentShine(pattern: ImageBitmap, delay: Int, matrix: (Float) -
                 1.0f at 700
             },
             repeatMode = RepeatMode.Reverse,
-            initialStartOffset = StartOffset(delay)
+            initialStartOffset = StartOffset(1000 + delay)
         )
     )
 
-    Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f)).scale(0.5f)) {
+@Composable
+private fun EnchantmentShine(pattern: ImageBitmap, matrix: List<FloatArray>) {
+    val transition = rememberInfiniteTransition()
+    val alphaR by animateShine(transition, 500 * 0)
+    val alphaG by animateShine(transition, 500 * 1)
+    val alphaB by animateShine(transition, 500 * 2)
+
+    val drawShine: DrawScope.(Int, Float) -> Unit = { index, alpha ->
         drawImage(
             image = pattern,
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-            colorFilter = ColorFilter.colorMatrix(ColorMatrix(matrix(alpha))),
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix(matrix[index].apply { set(index + 15, alpha) })),
             blendMode = BlendMode.Overlay
         )
+    }
+
+    Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f)).scale(0.5f)) {
+        drawShine(0, alphaR)
+        drawShine(1, alphaG)
+        drawShine(2, alphaB)
     }
 }
