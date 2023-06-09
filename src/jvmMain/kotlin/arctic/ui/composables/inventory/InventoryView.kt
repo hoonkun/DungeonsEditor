@@ -119,7 +119,7 @@ private fun Divider() {
         modifier = Modifier
             .fillMaxWidth()
             .height(12.dp)
-            .padding(start = 60.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
+            .padding(start = 75.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
             .background(Color(0xff666666))
     )
 }
