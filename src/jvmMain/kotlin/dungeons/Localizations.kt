@@ -1,5 +1,6 @@
 package dungeons
 
+import ByteArrayReader
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -108,7 +109,7 @@ class Localizations {
             val languages = listOf("ko-KR", "en-US")
             languages.forEach {
                 val locresBytes = PakRegistry.index.getFileBytes("/Dungeons/Content/Localization/Game/ko-KR/Game.locres")
-                val stream = DataInputStream(ByteArrayInputStream(locresBytes))
+                val stream = ByteArrayReader(ByteArrayInputStream(locresBytes))
                 newTexts[it] = LocalizationResource.read(stream)
             }
             _texts = newTexts
