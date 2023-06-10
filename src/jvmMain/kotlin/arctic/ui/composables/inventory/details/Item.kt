@@ -144,23 +144,25 @@ private fun ItemNetheriteEnchantButton(holder: Item) {
             Image(
                 bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" },
                 contentDescription = null,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(28.dp)
             )
         } else {
             Image(
                 bitmap = enchantment.data.icon,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(28.dp)
+                    .offset(x = (-2).dp)
                     .drawBehind {
                         drawImage(
                             image = IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
                             dstSize = IntSize(size.width.toInt(), size.height.toInt())
                         )
                     }
+                    .scale(1.2f)
             )
             Spacer(modifier = Modifier.width(5.dp))
-            Text(text = Localizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 20.sp, color = Color.White)
+            Text(text = Localizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 18.sp, color = Color.White)
         }
     }
 }
@@ -173,13 +175,13 @@ private fun ItemModifiedButton(holder: Item) {
         color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
         onClick = { holder.modified = !modified }
     ) {
-        Text(text = if (modified) "효과 변경" else "_", fontSize = 20.sp, color = Color.White)
+        Text(text = if (modified) "효과 변경" else "_", fontSize = 18.sp, color = Color.White)
         if (!modified) return@ItemAlterButton
         ItemTimesModifiedField("${holder.timesModified ?: 0}") { newValue ->
             if (newValue.toIntOrNull() != null)
                 holder.timesModified = newValue.toInt().takeIf { it != 0 }
         }
-        Text(text = "번", fontSize = 20.sp, color = Color.White)
+        Text(text = "번", fontSize = 18.sp, color = Color.White)
     }
 }
 
@@ -194,7 +196,7 @@ fun ItemTimesModifiedField(value: String, onValueChange: (String) -> Unit) {
     BasicTextField(
         value,
         onValueChange,
-        textStyle = TextStyle(fontSize = 20.sp, color = Color.White, textAlign = TextAlign.End),
+        textStyle = TextStyle(fontSize = 18.sp, color = Color.White, textAlign = TextAlign.End),
         singleLine = true,
         cursorBrush = SolidColor(Color.White),
         modifier = Modifier
