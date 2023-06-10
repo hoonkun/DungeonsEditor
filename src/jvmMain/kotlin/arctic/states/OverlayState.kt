@@ -48,6 +48,7 @@ class OverlayState {
         val result = visible
         if (fileLoadSrcSelector) fileLoadSrcSelector = false
         if (fileSaveDstSelector) fileSaveDstSelector = false
+        if (fileLoadFailed != null) fileLoadFailed = null
         if (fileClose) fileClose = false
 
         if (inventoryFull) inventoryFull = false

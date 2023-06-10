@@ -13,7 +13,7 @@ import dungeons.Localizations
 fun FileOpenFailureOverlay() {
     val exception = Arctic.overlayState.fileLoadFailed
 
-    OverlayBackdrop(exception != null, 0.6f)
+    OverlayBackdrop(exception != null, 0.6f) { Arctic.overlayState.fileLoadFailed = null }
     OverlayAnimator(exception) {
         if (it != null) Content(it)
         else SizeMeasureDummy()
