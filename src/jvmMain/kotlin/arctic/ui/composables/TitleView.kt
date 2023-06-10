@@ -483,7 +483,7 @@ private fun NoCandidateText(text: String) {
         color = Color.White.copy(alpha = 0.4f),
         fontSize = 22.sp,
         fontFamily = JetbrainsMono,
-        modifier = Modifier.padding(bottom = 15.dp, start = 35.dp)
+        modifier = Modifier.padding(bottom = 15.dp, start = 100.dp)
     )
 }
 
