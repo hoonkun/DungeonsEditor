@@ -133,14 +133,14 @@ private fun ShinePatternMatrix(channel: Int): FloatArray {
 @Composable
 fun animateShine(transition: InfiniteTransition, delay: Int) =
     transition.animateFloat(
-        initialValue = 0f, targetValue = 0.85f,
+        initialValue = 0f, targetValue = 0.75f,
         animationSpec = infiniteRepeatable(
             animation = keyframes {
                 durationMillis = 700
-                delayMillis = 750
+                delayMillis = 1000
                 0.0f at 0
-                1.0f at 500
-                1.0f at 700
+                0.75f at 500
+                0.75f at 700
             },
             repeatMode = RepeatMode.Reverse,
             initialStartOffset = StartOffset(1000 + delay)
