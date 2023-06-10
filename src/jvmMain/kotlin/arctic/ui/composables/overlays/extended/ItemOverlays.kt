@@ -137,11 +137,11 @@ private fun ItemDataDetailOverlay(itemCreationOverlay: ItemCreationOverlayState,
 
 @Composable
 private fun ItemCreationVariantFilters(fixed: String?, filter: MutableState<String>?, modifier: Modifier = Modifier) {
+    val items = listOf("Melee", "Ranged", "Armor", "Artifact")
     Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 58.dp).then(modifier)) {
-        ItemCreationVariantFilter("근거리", "Melee", filter, fixed == null || fixed == "Melee")
-        ItemCreationVariantFilter("원거리", "Ranged", filter, fixed == null || fixed == "Ranged")
-        ItemCreationVariantFilter("방어구", "Armor", filter, fixed == null || fixed == "Armor")
-        ItemCreationVariantFilter("유물", "Artifact", filter, fixed == null || fixed == "Artifact")
+        for (item in items) {
+            ItemCreationVariantFilter(Localizations.UiText(item.lowercase()), item, filter, fixed == null || fixed == item)
+        }
     }
 }
 
@@ -206,15 +206,7 @@ private fun ItemDataCollection(variant: String, onItemSelect: (ItemData) -> Unit
 
 @Composable
 private fun CollectionCategoryHeader(variant: String) {
-    val category = remember(variant) {
-        when(variant) {
-            "Melee" -> "근거리"
-            "Ranged" -> "원거리"
-            "Armor" -> "방어구"
-            "Artifact" -> "유물"
-            else -> throw RuntimeException("unknown variant to display data collection")
-        }
-    }
+    val category = remember(variant) { Localizations.UiText(variant.lowercase()) }
     Row(
         verticalAlignment = Alignment.Bottom,
         modifier = Modifier
@@ -256,7 +248,7 @@ private fun ItemDataIcon(data: ItemData?, onItemSelect: (ItemData) -> Unit) {
             ItemDataIconImage(data)
         }
         Text(
-            text = data.name ?: "알 수 없는 아이템",
+            text = data.name ?: Localizations.UiText("unknown_item"),
             color = Color.White,
             fontSize = 16.sp,
             modifier = Modifier.offset(y = (-10).dp)
@@ -296,7 +288,7 @@ fun ItemDataDetail(data: ItemData, editorState: EditorState) {
                 Column {
                     ItemRarityButton(data, rarity) { rarity = it }
                     Text(
-                        text = data.name ?: "알 수 없는 아이템",
+                        text = data.name ?: Localizations.UiText("unknown_item"),
                         color = Color.White,
                         fontSize = 50.sp,
                         fontWeight = FontWeight.Bold
@@ -322,8 +314,8 @@ fun ItemDataDetail(data: ItemData, editorState: EditorState) {
                 }
             }
             Column(horizontalAlignment = Alignment.End, modifier = Modifier.offset(y = 365.dp)) {
-                if (data.variant != "Artifact") WarningText(text = "다른 옵션들은 추가한 뒤에 우측 영역에서 수정할 수 있어요!")
-                if (data.variant == "Armor") WarningText(text = "추가 후 표시되는 기본 ArmorProperty 값은 수기로 기록된 것으로, 정확하지 않을 수 있습니다.")
+                if (data.variant != "Artifact") WarningText(text = Localizations.UiText("item_creation_other_options_description"))
+                if (data.variant == "Armor") WarningText(text = Localizations.UiText("item_creation_armor_property_description"))
             }
         }
         AddButton {
@@ -376,7 +368,7 @@ fun BoxScope.AddButton(onClick: () -> Unit) {
             AddButtonIcon(modifier = Modifier.graphicsLayer { alpha = baseAlpha })
         }
         Text(
-            text = "추가",
+            text = Localizations.UiText("add"),
             color = Color.White,
             fontSize = 18.sp,
             modifier = Modifier

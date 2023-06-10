@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import arctic.states.Arctic
 import arctic.states.ItemEnchantmentOverlayState
@@ -155,10 +156,10 @@ private fun EnchantmentDataCollectionItem(data: EnchantmentData, enabled: Boolea
             modifier = Modifier.fillMaxWidth().aspectRatio(1f / 1f),
             onClick = { onItemSelect(data) }
         )
-        Text(
+        AutosizeText(
             text = data.name,
             color = Color.White.copy(alpha = if (enabled || selected) 1f else 0.5f),
-            fontSize = 19.sp,
+            maxFontSize = 19.sp,
             fontWeight = if (enabled || selected) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.offset(y = (-12).dp)
         )
@@ -178,7 +179,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
         }
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
-                Text(text = enchantment.data.name, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                EnchantmentNameText(enchantment.data.name, wide = !enchantment.data.powerful)
                 if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
             }
 
@@ -199,6 +200,16 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
         }
     }
 }
+
+@Composable
+private fun EnchantmentNameText(text: String, wide: Boolean) =
+    AutosizeText(
+        text = text,
+        maxFontSize = 40.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.White,
+        modifier = Modifier.requiredWidthIn(max = if (wide) Dp.Companion.Unspecified else 250.dp)
+    )
 
 @Composable
 private fun EnchantmentLevelSelector(enchantment: Enchantment) {

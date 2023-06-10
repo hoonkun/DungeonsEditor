@@ -114,9 +114,9 @@ private fun BoxScope.LevelImagePositioner(size: Float = 0.3f, content: @Composab
 
 @Composable
 fun PowerfulEnchantmentIndicator() =
-    Text(
+    AutosizeText(
         text = Localizations["/enchantment_rarity_powerful"]!!,
-        style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color(0xffe5247e)),
+        maxFontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color(0xffe5247e),
         modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
     )
 

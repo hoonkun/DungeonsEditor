@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import arctic.states.Arctic
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
+import dungeons.Localizations
 
 @Composable
 fun FileOpenFailureOverlay() {
@@ -26,14 +27,14 @@ private fun Content(exception: String) {
 
     ContentRoot {
         OverlayTitleDescription(
-            title = "파일 로드에 실패했어요",
-            description = "잘못된 파일이거나, 개발자가 이상한 짓을 해서 그럴 수도 있어요."
+            title = Localizations.UiText("file_load_failed_title"),
+            description = Localizations.UiText("file_load_failed_description")
         )
         Spacer(modifier = Modifier.height(10.dp))
         OverlayDescriptionText(text = exception)
         Spacer(modifier = Modifier.height(50.dp))
         RetroButton(
-            text = "닫기",
+            text = Localizations.UiText("close"),
             color = Color(0xffffffff),
             hoverInteraction = "overlay",
             onClick = onNeutral

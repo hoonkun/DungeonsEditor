@@ -81,9 +81,9 @@ private fun Content(item: Item, editor: EditorState) {
                     ItemModifiedButton(item)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                ItemAlterButton("타입 변경") { Arctic.overlayState.itemEdition = item }
+                ItemAlterButton(Localizations.UiText("change_type")) { Arctic.overlayState.itemEdition = item }
                 Spacer(modifier = Modifier.width(7.dp))
-                ItemAlterButton("복제") {
+                ItemAlterButton(Localizations.UiText("duplicate")) {
                     if (item.where == editor.view) {
                         if (editor.noSpaceInInventory)
                             Arctic.overlayState.inventoryFull = true
@@ -94,10 +94,10 @@ private fun Content(item: Item, editor: EditorState) {
                     }
                 }
                 Spacer(modifier = Modifier.width(7.dp))
-                ItemAlterButton("삭제") { Arctic.overlayState.itemDeletion = item }
+                ItemAlterButton(Localizations.UiText("delete")) { Arctic.overlayState.itemDeletion = item }
             }
 
-            ItemName(item.data.name ?: "알 수 없는 아이템")
+            ItemName(item.data.name ?: Localizations.UiText("unknown_item"))
 
             ItemDescription(item.data.flavour)
             ItemDescription(item.data.description)
@@ -175,13 +175,13 @@ private fun ItemModifiedButton(holder: Item) {
         color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
         onClick = { holder.modified = !modified }
     ) {
-        Text(text = if (modified) "효과 변경" else "_", fontSize = 18.sp, color = Color.White)
+        Text(text = if (modified) Localizations.UiText("modified") else "_", fontSize = 18.sp, color = Color.White)
         if (!modified) return@ItemAlterButton
         ItemTimesModifiedField("${holder.timesModified ?: 0}") { newValue ->
             if (newValue.toIntOrNull() != null)
                 holder.timesModified = newValue.toInt().takeIf { it != 0 }
         }
-        Text(text = "번", fontSize = 18.sp, color = Color.White)
+        Text(text = Localizations.UiText("times"), fontSize = 18.sp, color = Color.White)
     }
 }
 
@@ -210,9 +210,9 @@ fun ItemTimesModifiedField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 private fun ItemName(text: String) =
-    Text(
+    AutosizeText(
         text = text,
-        fontSize = 60.sp,
+        maxFontSize = 60.sp,
         fontWeight = FontWeight.Bold,
         color = Color.White,
         style = TextStyle(shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 5f)),

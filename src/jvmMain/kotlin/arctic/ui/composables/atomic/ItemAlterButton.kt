@@ -25,7 +25,7 @@ import dungeons.Localizations
 @Composable
 fun ItemRarityButton(data: ItemData, rarity: String, onClick: (String) -> Unit) {
     ItemAlterButton(
-        text = "${if (data.limited) "시즌한정 " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
+        text = "${if (data.limited) "${Localizations.UiText("seasom_limited")} " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
         color = RarityColor(rarity, RarityColorType.Translucent),
         enabled = !data.unique,
         onClick = { onClick(if (rarity == "Common") "Rare" else "Common") }

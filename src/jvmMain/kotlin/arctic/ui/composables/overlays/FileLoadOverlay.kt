@@ -10,6 +10,7 @@ import arctic.states.EditorState
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.composables.Selector
+import dungeons.Localizations
 import dungeons.readDungeonsJson
 import dungeons.states.DungeonsJsonState
 import kotlin.io.path.Path
@@ -27,12 +28,12 @@ fun FileLoadOverlay() {
 private fun Content() {
     ContentRoot {
         OverlayTitleDescription(
-            title = "수정할 파일을 선택해주세요!",
-            description = "아마도 다른 탐색기로 경로를 복사해서 붙혀넣는게 편할 수도 있어요..."
+            title = Localizations.UiText("file_load_src_title"),
+            description = Localizations.UiText("file_load_src_description")
         )
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.size(1050.dp, 640.dp).clickable(rememberMutableInteractionSource(), null) { }) {
-            Selector(selectText = "열기", validator = { !it.isDirectory && it.isFile }) {
+            Selector(selectText = Localizations.UiText("open"), validator = { !it.isDirectory && it.isFile }) {
                 try {
                     Arctic.editorState = EditorState(DungeonsJsonState(it.readDungeonsJson(), it))
 

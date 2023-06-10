@@ -8,6 +8,7 @@ import arctic.states.Arctic
 import arctic.states.EditorState
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
+import dungeons.Localizations
 import dungeons.states.Item
 import dungeons.states.extensions.addItem
 
@@ -39,27 +40,27 @@ private fun Content(editor: EditorState, target: Item, where: EditorState.Editor
 
     ContentRoot {
         OverlayTitleDescription(
-            title = "${where.localizedName}에 있는 아이템이에요. 어디에 복제하시겠어요?",
-            description = "지금은 ${editor.view.localizedName}를 보고있어요."
+            title = Localizations.UiText("inventory_duplicate_title", where.localizedName),
+            description = Localizations.UiText("inventory_duplicate_description", editor.view.localizedName)
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = "원래 위치에 복제",
+                text = Localizations.UiText("inventory_duplicate_button_source"),
                 color = Color(0xff3f8e4f),
                 hoverInteraction = "outline",
                 onClick = onOriginalSelected
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = "취소",
+                text = Localizations.UiText("cancel"),
                 color = Color(0xffffffff),
                 hoverInteraction = "overlay",
                 onClick = onClose
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = "여기에 복제",
+                text = Localizations.UiText("inventory_duplicate_button_here"),
                 color = Color(0xff3f8e4f),
                 hoverInteraction = "outline",
                 onClick = onHereSelected

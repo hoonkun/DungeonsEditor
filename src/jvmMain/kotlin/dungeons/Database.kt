@@ -106,12 +106,12 @@ data class EnchantmentData(
     }
 
     val description: String? by lazy {
-        if (id == "Unset") "이 슬롯을 비활성화 상태로 변경합니다.\n'화려한'에 설정된 효과 부여의 경우 금박이 지워진 상태로 변경됩니다."
+        if (id == "Unset") Localizations.UiText("enchantment_unset")
         else Localizations["Enchantment/${Localizations.EnchantmentDescriptionCorrections[id] ?: id}_desc"]
     }
 
     val effect: String? by lazy {
-        if (id == "Unset") "{0} 확률로 아무것도 하지 않습니다?"
+        if (id == "Unset") Localizations.UiText("enchantment_unset_effect")
         else Localizations[Localizations.EnchantmentFixedEffectCorrections[id] ?: "Enchantment/${Localizations.EnchantmentEffectCorrections[id] ?: id}_effect"]
     }
 

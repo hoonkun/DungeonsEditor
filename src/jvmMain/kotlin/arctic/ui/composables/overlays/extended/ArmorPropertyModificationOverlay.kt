@@ -30,6 +30,7 @@ import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.ArmorPropertyData
 import dungeons.Database
+import dungeons.Localizations
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
 import extensions.replace
@@ -162,7 +163,7 @@ private fun ArmorPropertyDetail(property: ArmorProperty) {
             .background(Color(0xff080808))
             .padding(30.dp)
     ) {
-        Text(text = "방어구 속성", fontSize = 18.sp, color = Color.White)
+        Text(text = Localizations.UiText("armor_property"), fontSize = 18.sp, color = Color.White)
         Spacer(modifier = Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             ArmorPropertyRarityToggle(property)

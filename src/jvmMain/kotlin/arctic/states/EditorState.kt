@@ -1,6 +1,7 @@
 package arctic.states
 
 import androidx.compose.runtime.*
+import dungeons.Localizations
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
 
@@ -15,9 +16,10 @@ class EditorState(json: DungeonsJsonState) {
 
     val noSpaceInInventory by derivedStateOf { stored.items.size >= 300 }
 
-    enum class EditorView(val localizedName: String) {
-        Inventory("인벤토리"), Storage("창고");
+    enum class EditorView {
+        Inventory, Storage;
 
+        val localizedName get() = if (this == Inventory) Localizations.UiText("inventory") else Localizations.UiText("storage")
         fun other() = if (this == Inventory) Storage else Inventory
     }
 

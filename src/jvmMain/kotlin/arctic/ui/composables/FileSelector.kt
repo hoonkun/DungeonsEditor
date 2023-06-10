@@ -37,6 +37,7 @@ import arctic.ui.utils.getValue
 import arctic.ui.utils.mutableRefOf
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.utils.setValue
+import dungeons.Localizations
 import java.io.File
 
 
@@ -154,7 +155,7 @@ val isLinux = File.separator == "/"
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "저장", onSelect: (File) -> Unit) {
+fun Selector(validator: (File) -> Boolean = { true }, selectText: String = Localizations.UiText("save"), onSelect: (File) -> Unit) {
 
     var useBasePath by remember { mutableStateOf(true) }
 

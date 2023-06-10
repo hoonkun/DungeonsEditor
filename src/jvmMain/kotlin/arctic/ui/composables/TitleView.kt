@@ -35,6 +35,7 @@ import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsJsonFile
 import dungeons.DungeonsSummary
 import dungeons.IngameImages
+import dungeons.Localizations
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
 import extensions.lengthEllipsisMiddle
@@ -163,7 +164,7 @@ fun TitleView(modifier: Modifier = Modifier) {
                         )
                     }
                     if (LocalData.recentFiles.isEmpty()) {
-                        NoCandidateText(text = "최근 파일이 없어요!")
+                        NoCandidateText(text = Localizations.UiText("no_recent_files"))
                     }
 
                     Spacer(modifier = Modifier.height(125.dp))
@@ -180,7 +181,7 @@ fun TitleView(modifier: Modifier = Modifier) {
                         )
                     }
                     if (DungeonsJsonFile.detected.isEmpty()) {
-                        NoCandidateText(text = "탐지된 세이브파일이 없어요!")
+                        NoCandidateText(text = Localizations.UiText("no_detected_files"))
                     }
                 }
 

@@ -8,6 +8,7 @@ import arctic.states.Arctic
 import arctic.states.EditorState
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
+import dungeons.Localizations
 import dungeons.states.Item
 import dungeons.states.extensions.deleteItem
 
@@ -33,20 +34,20 @@ private fun Content(editor: EditorState, target: Item, where: EditorState.Editor
 
     ContentRoot {
         OverlayTitleDescription(
-            title = "${if (where != editor.view) "${where.localizedName}에 있는 아이템이에요." else ""} 정말 이 아이템을 삭제하시겠어요?",
-            description = "게임 내에서 분해하면 에메랄드 보상을 받을 수 있지만, 여기서는 받을 수 없어요."
+            title = Localizations.UiText("inventory_delete_title", if (where != editor.view) Localizations.UiText("inventory_delete_title_arg", where.localizedName) else ""),
+            description = Localizations.UiText("inventory_delete_description")
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = "취소",
+                text = Localizations.UiText("cancel"),
                 color = Color(0xffffffff),
                 hoverInteraction = "overlay",
                 onClick = onNegative
             )
             Spacer(modifier = Modifier.width(150.dp))
             RetroButton(
-                text = "삭제",
+                text = Localizations.UiText("delete"),
                 color = Color(0xffff6e25),
                 hoverInteraction = "outline",
                 onClick = onPositive

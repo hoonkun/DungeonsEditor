@@ -60,7 +60,7 @@ fun PakIndexingOverlay() {
                 return@launch
             }
 
-            stateText = "현지화 파일을 읽고있습니다"
+            stateText = Localizations.UiText("progress_text_reading_localization")
 
             Localizations.initialize()
 
@@ -68,7 +68,7 @@ fun PakIndexingOverlay() {
                 totalProgress = Database.items.size + Database.enchantments.size
 
                 for (item in Database.items.filter { it.name != null }) {
-                    stateText = "아이템 텍스쳐를 읽고있습니다"
+                    stateText = Localizations.UiText("progress_text_item_texture")
                     progressText = item.name!!
                     progress++
                     item.inventoryIcon
@@ -76,7 +76,7 @@ fun PakIndexingOverlay() {
                 }
 
                 for (enchantment in Database.enchantments) {
-                    stateText = "효과 텍스쳐를 읽고있습니다"
+                    stateText = Localizations.UiText("progress_text_enchantment_texture")
                     progressText = enchantment.name
                     progress++
                     enchantment.icon
@@ -85,8 +85,8 @@ fun PakIndexingOverlay() {
             }
 
             completed = true
-            stateText = "완료되었습니다!"
-            progressText = "정리 중"
+            stateText = Localizations.UiText("progress_text_completed")
+            progressText = Localizations.UiText("cleaning_up")
 
             delay(500)
 
@@ -101,8 +101,8 @@ private fun Content(stateText: String, progressText: String, progress: Int, tota
 
     ContentRoot {
         OverlayTitleDescription(
-            title = "게임 리소스를 읽는 중입니다",
-            description = "다소 시간이 걸릴 수 있으니 조금만 기다려주세요."
+            title = Localizations.UiText("pak_indexing_title"),
+            description = Localizations.UiText("pak_indexing_description")
         )
         if (Settings.preloadTextures) {
             Spacer(modifier = Modifier.height(50.dp))

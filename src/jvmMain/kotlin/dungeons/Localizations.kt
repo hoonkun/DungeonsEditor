@@ -104,11 +104,135 @@ class Localizations {
             "BagOfSouls" to "BagOfSoul"
         )
 
+        private val EnUiTexts = mapOf(
+            "season_limited" to "SeasonLimited",
+            "change_type" to "Change Type",
+            "duplicate" to "Duplicate",
+            "delete" to "Delete",
+            "unknown_item" to "Unknown Item",
+            "modified" to "Modified",
+            "times" to "times",
+            "melee" to "Melee",
+            "armor" to "Armor",
+            "ranged" to "ranged",
+            "artifact" to "artifact",
+            "armor_property" to "Armor Property",
+            "close_file_title" to "Do you really want to finish editing and close file?",
+            "close_file_description" to "Changes made after last save will not be applied",
+            "file_load_src_title" to "Select file to edit!",
+            "file_load_src_description" to "May be using another explorer to pasting path is more convenient",
+            "file_load_failed_title" to "Failed to load file",
+            "file_load_failed_description" to "Selected file may have invalid format, or developer's fault. Please file an issue!",
+            "file_save_title" to "Select path to save!",
+            "file_save_description" to "Selecting directory will save file in that location which have same name with input file,\nselecting file will save exactly in that file",
+            "inventory_full_title" to "Inventory is too heavy to add new Item! Try move items to storage!",
+            "inventory_delete_title" to "{0}Do you really want to delete this item?",
+            "inventory_delete_title_arg" to "This item is in {0}. ",
+            "inventory_delete_description" to "You can get emeralds if you salvage this in game, but deleting here can't.",
+            "inventory_duplicate_title" to "This item is in {0}. Where do you want to dupliate this item?",
+            "inventory_duplicate_description" to "You are viewing {0} now.",
+            "inventory_duplicate_button_here" to "Duplicate in Here",
+            "inventory_duplicate_button_source" to "Duplicate in Original Location",
+            "close" to "Close",
+            "ok" to "Ok",
+            "cancel" to "Cancel",
+            "save" to "Save",
+            "progress_text_item_texture" to "Reading item textures",
+            "progress_text_enchantment_texture" to "Reading enchantment textures",
+            "progress_text_reading_pak" to "Reading .pak files",
+            "progress_text_reading_localization" to "Reading localization files",
+            "progress_text_completed" to "Completed!",
+            "cleaning_up" to "cleaning up",
+            "pak_indexing_title" to "Reading game resources",
+            "pak_indexing_description" to "This may take a bit, please wait until finishes!",
+            "no_recent_files" to "No Recent Files!",
+            "no_detected_files" to "No Detected Files!",
+            "pak_not_found_title" to "Cannot find game resources.",
+            "pak_not_found_description" to "Editor could not find game resources in predictable locations.\nPlease set game resources(.pak) directory manually.",
+            "inventory" to "Inventory",
+            "storage" to "Storage",
+            "tap_to_close" to "Click anywhere to close",
+            "select" to "select",
+            "open" to "Open",
+            "add" to "Add",
+            "item_creation_other_options_description" to "You can edit other properties after adding this item!",
+            "item_creation_armor_property_description" to "Default set of armor properties are manually hard coded, so it may not accurate.",
+            "enchantment_unset" to "Set this slot as inactivated.\nApplying this to netherite enchantment will delete this item's glided property.",
+            "enchantment_unset_effect" to "Do nothing in {0}% possibilities"
+        )
+        private val KoUiTexts = mapOf(
+            "season_limited" to "시즌한정",
+            "change_type" to "타입 변경",
+            "duplicate" to "복제",
+            "delete" to "삭제",
+            "unknown_item" to "알 수 없는 아이템",
+            "modified" to "효과 변경",
+            "times" to "번",
+            "melee" to "근거리",
+            "armor" to "방어구",
+            "ranged" to "원거리",
+            "artifact" to "유물",
+            "armor_property" to "방어구 속성",
+            "close_file_title" to "정말 편집을 마치고 파일을 닫으시겠어요?",
+            "close_file_description" to "마지막 저장 이후에 만든 변경사항은 저장되지 않아요",
+            "file_load_src_title" to "수정할 파일을 선택해주세요!",
+            "file_load_src_description" to "아마 다른 탐색기를 통해 경로를 복사하는게 더 편리할 수도 있어요...",
+            "file_load_failed_title" to "파일 로드에 실패했어요",
+            "file_load_failed_description" to "잘못된 파일이거나, 개발자가 이상한 짓을 해서 그럴 수도 있어요",
+            "file_save_title" to "저장할 위치를 선택해주세요!",
+            "file_save_description" to "디렉터리를 선택하면 기존 파일의 이름을 그대로 사용하여 선택한 디렉터리에 저장하고,\n그렇지 않을 경우 입력한 경로의 파일에 저장합니다.",
+            "inventory_full_title" to "인벤토리가 가득 차서 더 이상 추가할 수 없어요. 먼저 아이템을 삭제하거나 창고로 옮겨보세요!",
+            "inventory_delete_title" to "{0}정말 이 아이템을 삭제하시겠어요?",
+            "inventory_delete_title_arg" to "{0}에 있는 아이템이에요. ",
+            "inventory_delete_description" to "게임 내에서 분해하면 에메랄드 보상을 받을 수 있지만, 여기서는 받을 수 없어요",
+            "inventory_duplicate_title" to "{0}에 있는 아이템이에요. 어디에 복제하시겠어요?",
+            "inventory_duplicate_description" to "지금은 {0}를 보고있어요.",
+            "inventory_duplicate_button_here" to "여기에 복제",
+            "inventory_duplicate_button_source" to "원래 위치에 복제",
+            "close" to "닫기",
+            "ok" to "확인",
+            "cancel" to "취소",
+            "save" to "저장",
+            "progress_text_item_texture" to "아이템 텍스쳐를 읽는 중입니다",
+            "progress_text_enchantment_texture" to "효과 텍스쳐를 읽는 중입니다",
+            "progress_text_reading_pak" to "Pak 파일을 읽는 중입니다",
+            "progress_text_reading_localization" to "현지화 파일을 읽는 중입니다",
+            "progress_text_completed" to "완료되었습니다!",
+            "cleaning_up" to "정리 중",
+            "pak_indexing_title" to "게임 리소스를 읽는 중입니다",
+            "pak_indexing_description" to "다소 시간이 걸릴 수 있으니 조금만 기다려주세요",
+            "no_recent_files" to "최근 파일이 없어요!",
+            "no_detected_files" to "탐지된 세이브파일이 없어요!",
+            "pak_not_found_title" to "게임 리소스를 찾을 수 없습니다",
+            "pak_not_found_description" to "예측 가능한 위치에서 게임파일을 찾지 못했습니다.\n게임 내 리소스 파일(.pak) 디렉터리의 경로를 입력해주세요.",
+            "inventory" to "인벤토리",
+            "storage" to "창고",
+            "tap_to_close" to "닫으려면 아무 곳이나 누르세요",
+            "select" to "선택",
+            "open" to "열기",
+            "add" to "추가",
+            "item_creation_other_options_description" to "다른 옵션들은 추가한 뒤에 우측 영역에서 수정할 수 있어요!",
+            "item_creation_armor_property_description" to "추가 후 표시되는 기본 ArmorProperty 값은 수기로 기록된 것으로, 정확하지 않을 수 있습니다.",
+            "enchantment_unset" to "이 슬롯을 비활성화 상태로 변경합니다.\n'화려한'에 설정된 효과 부여의 경우 금박이 지워진 상태로 변경됩니다.",
+            "enchantment_unset_effect" to "{0}% 확률로 아무것도 하지 않습니다?"
+        )
+
+        val UiTexts = mapOf(
+            "en" to EnUiTexts,
+            "ko-KR" to KoUiTexts
+        )
+
+        fun UiText(key: String, vararg args: String): String {
+            var text = UiTexts.getValue(currentLocale)[key.lowercase()] ?: key
+            args.forEachIndexed { index, s -> text = text.replace("{$index}", s) }
+            return text
+        }
+
         fun initialize() {
             val newTexts = mutableMapOf<String, Map<String, String>>()
-            val languages = listOf("ko-KR", "en-US")
+            val languages = listOf("ko-KR", "en")
             languages.forEach {
-                val locresBytes = PakRegistry.index.getFileBytes("/Dungeons/Content/Localization/Game/ko-KR/Game.locres")
+                val locresBytes = PakRegistry.index.getFileBytes("/Dungeons/Content/Localization/Game/$it/Game.locres")
                 val stream = ByteArrayReader(ByteArrayInputStream(locresBytes))
                 newTexts[it] = LocalizationResource.read(stream)
             }

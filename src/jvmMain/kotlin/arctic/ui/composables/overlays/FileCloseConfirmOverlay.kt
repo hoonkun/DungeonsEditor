@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import arctic.states.Arctic
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
+import dungeons.Localizations
 
 @Composable
 fun FileCloseConfirmOverlay() {
@@ -27,20 +28,20 @@ private fun Content() {
 
     ContentRoot {
         OverlayTitleDescription(
-            title = "정말 편집을 마치고 파일을 닫으시겠어요?",
-            description = "마지막 저장 이후에 만든 변경사항은 저장되지 않아요"
+            title = Localizations.UiText("close_file_title"),
+            description = Localizations.UiText("close_file_description")
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = "취소",
+                text = Localizations.UiText("cancel"),
                 color = Color(0xffffffff),
                 hoverInteraction = "overlay",
                 onClick = onNegative
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = "닫기",
+                text = Localizations.UiText("close"),
                 color = Color(0xffff6e25),
                 hoverInteraction = "outline",
                 onClick = onPositive
