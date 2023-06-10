@@ -201,7 +201,7 @@ fun ItemTimesModifiedField(value: String, onValueChange: (String) -> Unit) {
         cursorBrush = SolidColor(Color.White),
         modifier = Modifier
             .onFocusChanged { focused = it.hasFocus }
-            .width(35.dp)
+            .requiredWidth(28.dp)
             .drawBehind {
                 drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, densityDp(3)))
             }
