@@ -137,7 +137,7 @@ private fun ItemDataDetailOverlay(itemCreationOverlay: ItemCreationOverlayState,
 
 @Composable
 private fun ItemCreationVariantFilters(fixed: String?, filter: MutableState<String>?, modifier: Modifier = Modifier) {
-    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 54.dp).then(modifier)) {
+    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 58.dp).then(modifier)) {
         ItemCreationVariantFilter("근거리", "Melee", filter, fixed == null || fixed == "Melee")
         ItemCreationVariantFilter("원거리", "Ranged", filter, fixed == null || fixed == "Ranged")
         ItemCreationVariantFilter("방어구", "Armor", filter, fixed == null || fixed == "Armor")
