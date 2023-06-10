@@ -17,9 +17,12 @@
 ## 다운로드 및 설치
 Release 섹션에서 운영체제에 맞는 설치파일을 다운받습니다.
 - Linux: DungeonsEditor.AppImage
-- Windows: DungeonsEditor.exe
-  - Windows의 경우 installer 이므로, 설치 적절히 원하는 디렉터리에 설치를 진행합니다.
-  - 제거할 때는 직접 Program Files에서 지우지 않고 제어판에서 삭제해야합니다.
+- Windows: DungeonsEditor.zip
+  - 적절한 위치에 압축을 해제하면, DungeonsEditor.exe 라는 파일을 통해 실행할 수 있습니다.
+
+## 완전히 삭제
+- Linux: AppImage 파일을 삭제하고, `~/.dungeons-editor` 디렉터리를 삭제합니다.
+- Windows: 압축을 해제했던 디렉터리를 모두 삭제하고, `%HOMEDRIVE%%HOMEPATH$/.dungeons-editor` 를 삭제합니다. (일반적으로 `C:\Users\{{사용자명}}\.dungeons-editor`입니다.)
 
 ## 사용
 ### 파일 열기
