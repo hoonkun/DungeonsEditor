@@ -3,17 +3,15 @@ package arctic.ui.composables.inventory.details
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.layout
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.ItemEnchantmentOverlayState
 import arctic.ui.composables.atomic.EnchantmentIconImage
 import arctic.ui.composables.atomic.EnchantmentLevelImage
-import arctic.ui.unit.dp
 import dungeons.IngameImages
 import dungeons.states.Enchantment
-import dungeons.states.extensions.data
 
 
 @Composable
@@ -51,9 +49,8 @@ private fun RowScope.ItemEnchantmentSlot(slot: List<Enchantment>) {
 fun EnchantmentIconImage(enchantment: Enchantment) {
     EnchantmentIconImage(
         data = enchantment.data,
-        selected = arctic.enchantments.detailTarget == enchantment,
         modifier = Modifier.fillMaxSize(),
-        onClick = { arctic.enchantments.viewDetail(enchantment) }
+        onClick = { Arctic.overlayState.enchantment = ItemEnchantmentOverlayState(enchantment.holder, enchantment) }
     )
 }
 

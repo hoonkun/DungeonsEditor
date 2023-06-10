@@ -15,15 +15,15 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import arctic.states.arctic
-import arctic.ui.composables.atomic.ArmorPropertyRarityIcon
+import arctic.states.Arctic
+import arctic.states.ItemArmorPropertyOverlayState
 import arctic.ui.composables.atomic.densityDp
+import arctic.ui.composables.atomic.rememberArmorPropertyIconAsState
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
-import dungeons.states.extensions.data
 
 @Composable
 fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
@@ -51,7 +51,7 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
             for (propertyRow in groupedProperties) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     for (property in propertyRow) {
-                        ArmorPropertyItem(property)
+                        ArmorPropertyItem(item, property)
                         if (propertyRow.indexOf(property) == 0) Spacer(modifier = Modifier.width(20.dp))
                     }
                 }
@@ -64,10 +64,13 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
 }
 
 @Composable
-private fun RowScope.ArmorPropertyItem(property: ArmorProperty) {
+private fun RowScope.ArmorPropertyItem(item: Item, property: ArmorProperty) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
-    val selected = arctic.armorProperties.detailTarget == property
+
+    val propertyRarityIcon by rememberArmorPropertyIconAsState(property)
+
+    val overlayState = Arctic.overlayState
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -75,17 +78,17 @@ private fun RowScope.ArmorPropertyItem(property: ArmorProperty) {
             .weight(1f)
             .drawBehind {
                 drawRoundRect(
-                    color = Color.White.copy(alpha = if (selected) 0.2f else if (hovered) 0.1f else 0.0f),
+                    color = Color.White.copy(alpha = if (hovered) 0.1f else 0.0f),
                     topLeft = Offset(densityDp(-10), 0f),
                     size = Size(size.width + densityDp(20), size.height),
                     cornerRadius = CornerRadius(densityDp(6))
                 )
             }
             .hoverable(interaction)
-            .clickable(interaction, null) { arctic.armorProperties.viewDetail(property) }
+            .clickable(interaction, null) { overlayState.armorProperty = ItemArmorPropertyOverlayState(item, property) }
     ) {
         Image(
-            bitmap = ArmorPropertyRarityIcon(property.rarity),
+            bitmap = propertyRarityIcon,
             contentDescription = null,
             modifier = Modifier.size(30.dp)
         )
@@ -112,7 +115,7 @@ private fun ArmorPropertyAddButton(item: Item) {
                 drawRect(Color.White, topLeft = Offset(densityDp(8), size.height / 2 - densityDp(2)), size = Size(size.width - densityDp(16), densityDp(4)))
             }
             .hoverable(interaction)
-            .clickable(interaction, null) { arctic.armorProperties.requestCreate(item) }
+            .clickable(interaction, null) { Arctic.overlayState.armorProperty = ItemArmorPropertyOverlayState(item) }
     )
 }
 

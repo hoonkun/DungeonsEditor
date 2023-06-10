@@ -48,5 +48,6 @@ src/jvmTest/kotlin/
 dist
 
 Keyset.kt
+settings.arctic
 
 wix311

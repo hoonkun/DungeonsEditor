@@ -1,6 +1,9 @@
 package dungeons
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.serialization.Serializable
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -37,27 +40,30 @@ data class Database(
 }
 
 @Serializable
+@Immutable
 data class ItemData(
     val type: String,
     val dataPath: String,
     val variant: String
 ) {
 
-    val unique get() = variant != "Artifact" && listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) }
+    val unique by lazy { variant != "Artifact" && listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) } }
 
-    val limited get() = listOf("_Spooky", "_Winter", "_Year").any { type.contains(it) }
+    val limited by lazy { listOf("_Spooky", "_Winter", "_Year").any { type.contains(it) } }
 
-    val builtInProperties get() = Database.armorProperties.filter { it.defaultIn.contains(type) }
+    val builtInProperties by lazy { Database.armorProperties.filter { it.defaultIn.contains(type) } }
 
-    val name get() = Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"]
-    val flavour get() = Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"]
-    val description get() = Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"]
+    val name by lazy { Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"] }
+    val flavour by lazy { Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"] }
+    val description by lazy { Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"] }
 
-    val inventoryIcon: ImageBitmap get() =
+    val inventoryIcon: ImageBitmap by lazy {
         retrieveImage("Inventory") { it.endsWith("_icon_inventory") }
+    }
 
-    val largeIcon: ImageBitmap get() =
+    val largeIcon: ImageBitmap by lazy {
         retrieveImage("Large", fallback = { it.endsWith("_icon_inventory") }) { it.endsWith("_icon") }
+    }
 
     private fun retrieveImage(key: String, fallback: ((String) -> Boolean)? = null, criteria: (String) -> Boolean): ImageBitmap {
         val cacheKey = "$type-$key"
@@ -84,6 +90,7 @@ data class ItemData(
 }
 
 @Serializable
+@Immutable
 data class EnchantmentData(
     val id: String,
     val dataPath: String,
@@ -94,27 +101,54 @@ data class EnchantmentData(
     val specialDescValues: List<String>? = null
 ) {
 
-    val name: String get() =
+    val name: String by lazy {
         Localizations["Enchantment/${Localizations.EnchantmentNameCorrections[id] ?: id}"] ?: "???"
+    }
 
-    val description: String? get() =
+    val description: String? by lazy {
         if (id == "Unset") "이 슬롯을 비활성화 상태로 변경합니다.\n'화려한'에 설정된 효과 부여의 경우 금박이 지워진 상태로 변경됩니다."
         else Localizations["Enchantment/${Localizations.EnchantmentDescriptionCorrections[id] ?: id}_desc"]
+    }
 
-    val effect: String? get() =
+    val effect: String? by lazy {
         if (id == "Unset") "{0} 확률로 아무것도 하지 않습니다?"
         else Localizations[Localizations.EnchantmentFixedEffectCorrections[id] ?: "Enchantment/${Localizations.EnchantmentEffectCorrections[id] ?: id}_effect"]
+    }
 
-    val iconScale: Float get() =
-        if (id == "Unset") 1.05f
-        else 1.425f
-
-    val icon: ImageBitmap get() =
+    val icon: ImageBitmap by lazy {
         retrieveImage(id) { it.startsWith("t_") && it.endsWith("_icon") && !it.endsWith("shine_icon") }
             ?: throw RuntimeException("no image resource found: {$id}!")
+    }
 
-    val shinePattern: ImageBitmap? get() =
+    private val shinePattern: ImageBitmap? by lazy {
         retrieveImage("${id}_shine") { it.startsWith("t_") && it.endsWith("shine_icon") }
+    }
+
+    private val shinePatternR: ImageBitmap? by lazy { filterShineColor(2) }
+    private val shinePatternG: ImageBitmap? by lazy { filterShineColor(1) }
+    private val shinePatternB: ImageBitmap? by lazy { filterShineColor(0) }
+
+    val shinePatterns: List<ImageBitmap>? by lazy {
+        val r = shinePatternR
+        val g = shinePatternG
+        val b = shinePatternB
+        if (r != null && g != null && b != null) listOf(r, g, b)
+        else null
+    }
+
+    private fun filterShineColor(channel: Int): ImageBitmap? {
+        val original = shinePattern?.toAwtImage() ?: return null
+        val new = BufferedImage(original.width, original.height, original.type)
+        val pixels = original.getRGB(0, 0, original.width, original.height, null, 0, original.width)
+        val mask = (0xff000000u or (0xffu shl (channel * 2 * 4)))
+        for (i in pixels.indices) {
+            val filtered = pixels[i].toUInt() and mask
+            val value = (filtered and 0x00ffffffu) shr (channel * 2 * 4)
+            pixels[i] = ((value shl 6 * 4) or (value shl 4 * 4) or (value shl 2 * 4) or value).toInt()
+        }
+        new.setRGB(0, 0, original.width, original.height, pixels, 0, original.width)
+        return new.toComposeImageBitmap()
+    }
 
     private fun retrieveImage(cacheKey: String, criteria: (String) -> Boolean): ImageBitmap? {
         if (id == "Unset") return IngameImages.get("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
@@ -156,12 +190,13 @@ data class EnchantmentData(
 }
 
 @Serializable
+@Immutable
 data class ArmorPropertyData(
     val id: String,
     val defaultIn: List<String> = emptyList()
 ) {
 
-    val description get() =
+    val description by lazy {
         (Localizations["ArmorProperties/${Localizations.ArmorPropertyCorrections[id] ?: id}_description"])
             ?.replace("{0}", "")
             ?.replace("{1}", "")
@@ -170,5 +205,6 @@ data class ArmorPropertyData(
             ?.replace("만큼", "")
             ?.replace("  ", " ")
             ?.trim()
+    }
 
 }

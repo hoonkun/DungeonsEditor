@@ -1,25 +1,30 @@
 package arctic.ui.composables.inventory.details
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
-import arctic.states.arctic
-import arctic.ui.composables.atomic.ItemAlterButton
-import arctic.ui.composables.atomic.ItemRarityButton
-import arctic.ui.composables.atomic.PowerEditField
-import arctic.ui.composables.atomic.UnlabeledField
+import arctic.states.Arctic
+import arctic.states.EditorState
+import arctic.states.ItemEnchantmentOverlayState
+import arctic.ui.composables.atomic.*
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.DungeonsPower
@@ -28,14 +33,12 @@ import dungeons.Localizations
 import dungeons.states.Enchantment
 import dungeons.states.Item
 import dungeons.states.extensions.addItem
-import dungeons.states.extensions.data
-import dungeons.states.extensions.where
 import extensions.toFixed
 
 @Composable
-fun ItemDetail(item: Item?) {
+fun ItemDetail(item: Item?, editor: EditorState) {
     RootAnimator(item) {
-        if (it != null) Content(it)
+        if (it != null) Content(it, editor)
         else Box(modifier = Modifier.fillMaxWidth().scale(1f / 1.3f))
     }
 }
@@ -56,7 +59,7 @@ private fun RootAnimator(targetState: Item?, content: @Composable AnimatedVisibi
     )
 
 @Composable
-private fun Content(item: Item) {
+private fun Content(item: Item, editor: EditorState) {
     Box(modifier = Modifier.wrapContentHeight().fillMaxWidth().scale(1f / 1.3f)) {
         Image(
             item.data.largeIcon,
@@ -78,18 +81,20 @@ private fun Content(item: Item) {
                     ItemModifiedButton(item)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                ItemAlterButton("타입 변경") { arctic.edition.enable(item) }
+                ItemAlterButton("타입 변경") { Arctic.overlayState.itemEdition = item }
                 Spacer(modifier = Modifier.width(7.dp))
                 ItemAlterButton("복제") {
-                    if (item.where == arctic.view) {
-                        if (!arctic.alerts.checkAvailable())
-                            item.parent.addItem(item.copy(), item)
+                    if (item.where == editor.view) {
+                        if (editor.noSpaceInInventory)
+                            Arctic.overlayState.inventoryFull = true
+                        else
+                            item.parent.addItem(editor, item.copy(), item)
                     } else {
-                        arctic.duplication.target = item
+                        Arctic.overlayState.itemDuplication = item
                     }
                 }
                 Spacer(modifier = Modifier.width(7.dp))
-                ItemAlterButton("삭제") { arctic.deletion.target = item }
+                ItemAlterButton("삭제") { Arctic.overlayState.itemDeletion = item }
             }
 
             ItemName(item.data.name ?: "알 수 없는 아이템")
@@ -127,7 +132,7 @@ private fun ItemNetheriteEnchantButton(holder: Item) {
     val onClick = {
         val target = enchantment
             ?: Enchantment(holder, "Unset", isNetheriteEnchant = true).also { holder.netheriteEnchant = it }
-        arctic.enchantments.viewDetail(target)
+        Arctic.overlayState.enchantment = ItemEnchantmentOverlayState(holder, target)
     }
 
     ItemAlterButton(
@@ -139,23 +144,25 @@ private fun ItemNetheriteEnchantButton(holder: Item) {
             Image(
                 bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" },
                 contentDescription = null,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(28.dp)
             )
         } else {
             Image(
                 bitmap = enchantment.data.icon,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(28.dp)
+                    .offset(x = (-2).dp)
                     .drawBehind {
                         drawImage(
                             image = IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
                             dstSize = IntSize(size.width.toInt(), size.height.toInt())
                         )
                     }
+                    .scale(1.2f)
             )
             Spacer(modifier = Modifier.width(5.dp))
-            Text(text = Localizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 20.sp, color = Color.White)
+            Text(text = Localizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 18.sp, color = Color.White)
         }
     }
 }
@@ -168,14 +175,37 @@ private fun ItemModifiedButton(holder: Item) {
         color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
         onClick = { holder.modified = !modified }
     ) {
-        Text(text = if (modified) "효과 변경" else "_", fontSize = 20.sp, color = Color.White)
+        Text(text = if (modified) "효과 변경" else "_", fontSize = 18.sp, color = Color.White)
         if (!modified) return@ItemAlterButton
-        UnlabeledField("${holder.timesModified ?: 0}") { newValue ->
+        ItemTimesModifiedField("${holder.timesModified ?: 0}") { newValue ->
             if (newValue.toIntOrNull() != null)
                 holder.timesModified = newValue.toInt().takeIf { it != 0 }
         }
-        Text(text = "번", fontSize = 20.sp, color = Color.White)
+        Text(text = "번", fontSize = 18.sp, color = Color.White)
     }
+}
+
+@Composable
+fun ItemTimesModifiedField(value: String, onValueChange: (String) -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val lineColor by animateColorAsState(
+        targetValue = if (!focused) Color(0x00b2a4ff) else Color(0xffb2a4ff),
+        animationSpec = tween(durationMillis = 250)
+    )
+
+    BasicTextField(
+        value,
+        onValueChange,
+        textStyle = TextStyle(fontSize = 18.sp, color = Color.White, textAlign = TextAlign.End),
+        singleLine = true,
+        cursorBrush = SolidColor(Color.White),
+        modifier = Modifier
+            .onFocusChanged { focused = it.hasFocus }
+            .requiredWidth(28.dp)
+            .drawBehind {
+                drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, densityDp(3)))
+            }
+    )
 }
 
 @Composable

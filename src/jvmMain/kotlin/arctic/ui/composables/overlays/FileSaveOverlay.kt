@@ -4,21 +4,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.EditorState
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.composables.Selector
 
 @Composable
-fun FileSaveOverlay() {
-    val enabled = arctic.dialogs.fileSaveDstSelector
+fun FileSaveOverlay(editor: EditorState) {
+    val enabled = Arctic.overlayState.fileSaveDstSelector
 
-    OverlayBackdrop(enabled, 0.6f) { arctic.dialogs.fileSaveDstSelector = false }
-    OverlayAnimator(enabled) { Content() }
+    OverlayBackdrop(enabled, 0.6f) { Arctic.overlayState.fileSaveDstSelector = false }
+    OverlayAnimator(enabled) { Content(editor) }
 }
 
 @Composable
-private fun Content() {
+private fun Content(editor: EditorState) {
     ContentRoot {
         OverlayTitleDescription(
             title = "저장할 위치를 선택해주세요!",
@@ -27,7 +28,8 @@ private fun Content() {
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.size(1050.dp, 640.dp).clickable(rememberMutableInteractionSource(), null) { }) {
             Selector(selectText = "저장") {
-                arctic.requireStored.save(it); arctic.dialogs.fileSaveDstSelector = false
+                editor.stored.save(it)
+                Arctic.overlayState.fileSaveDstSelector = false
             }
         }
     }

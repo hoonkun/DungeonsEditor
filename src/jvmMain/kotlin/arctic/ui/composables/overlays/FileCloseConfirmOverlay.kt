@@ -4,26 +4,25 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import arctic.states.arctic
+import arctic.states.Arctic
 import arctic.ui.unit.dp
 import arctic.ui.composables.atomic.RetroButton
 
 @Composable
 fun FileCloseConfirmOverlay() {
-    val enabled = arctic.alerts.closeFile
+    val enabled = Arctic.overlayState.fileClose
 
-    OverlayBackdrop(enabled) { arctic.alerts.closeFile = false }
+    OverlayBackdrop(enabled) { Arctic.overlayState.fileClose = false }
     OverlayAnimator(enabled) { Content() }
 }
 
 @Composable
 private fun Content() {
 
-    val onNegative = { arctic.alerts.closeFile = false }
+    val onNegative = { Arctic.overlayState.fileClose = false }
     val onPositive = {
-        arctic.selection.clearSelection()
-        arctic.stored = null
-        arctic.alerts.closeFile = false
+        Arctic.editorState = null
+        Arctic.overlayState.fileClose = false
     }
 
     ContentRoot {

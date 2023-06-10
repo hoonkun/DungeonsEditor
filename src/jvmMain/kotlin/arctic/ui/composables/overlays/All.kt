@@ -12,17 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import arctic.ui.composables.overlays.extended.ComplicatedOverlays
+import arctic.states.EditorState
+import arctic.ui.composables.overlays.extended.*
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 
 
 @Composable
-fun Overlays() {
-
-    ComplicatedOverlays()
-
-    FileSaveOverlay()
+fun GlobalOverlays() {
     FileLoadOverlay()
 
     FileCloseConfirmOverlay()
@@ -30,11 +27,22 @@ fun Overlays() {
 
     InventoryFullOverlay()
 
-    ItemDeletionConfirmOverlay()
-    ItemDuplicateLocationConfirmOverlay()
-
     PakIndexingOverlay()
     PakNotFoundOverlay()
+}
+
+@Composable
+fun EditorOverlays(editor: EditorState) {
+    FileSaveOverlay(editor)
+
+    ItemDeletionConfirmOverlay(editor)
+    ItemDuplicateLocationConfirmOverlay(editor)
+
+    ItemEditionOverlay()
+    ItemCreationOverlay(editor)
+
+    EnchantmentModificationOverlay()
+    ArmorPropertyModificationOverlay()
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -108,5 +116,3 @@ fun ContentRoot(content: @Composable ColumnScope.() -> Unit) =
 
 @Composable
 fun SizeMeasureDummy() = Box(modifier = Modifier.fillMaxSize())
-
-fun whereName(where: String): String = if (where == "inventory") "인벤토리" else "창고"

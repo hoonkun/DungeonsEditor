@@ -5,7 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.EditorState
 import arctic.ui.unit.dp
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.composables.Selector
@@ -16,9 +17,9 @@ import kotlin.io.path.absolutePathString
 
 @Composable
 fun FileLoadOverlay() {
-    val enabled = arctic.dialogs.fileLoadSrcSelector
+    val enabled = Arctic.overlayState.fileLoadSrcSelector
 
-    OverlayBackdrop(enabled, 0.6f) { arctic.dialogs.fileLoadSrcSelector = false }
+    OverlayBackdrop(enabled, 0.6f) { Arctic.overlayState.fileLoadSrcSelector = false }
     OverlayAnimator(enabled) { Content() }
 }
 
@@ -33,14 +34,13 @@ private fun Content() {
         Box(modifier = Modifier.size(1050.dp, 640.dp).clickable(rememberMutableInteractionSource(), null) { }) {
             Selector(selectText = "열기", validator = { !it.isDirectory && it.isFile }) {
                 try {
-                    arctic.view = "inventory"
-                    arctic.stored = DungeonsJsonState(it.readDungeonsJson(), it)
+                    Arctic.editorState = EditorState(DungeonsJsonState(it.readDungeonsJson(), it))
 
                     LocalData.updateRecentFiles(Path(it.absolutePath).normalize().absolutePathString())
                 } catch (e: Exception) {
-                    arctic.alerts.fileLoadFailed = e.message
+                    Arctic.overlayState.fileLoadFailed = e.message
                 } finally {
-                    arctic.dialogs.fileLoadSrcSelector = false
+                    Arctic.overlayState.fileLoadSrcSelector = false
                 }
             }
         }

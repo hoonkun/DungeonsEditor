@@ -7,17 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import arctic.ui.unit.dp
 
 
 @Composable
 fun BlurEffectedImage(
     bitmap: ImageBitmap,
-    alpha: Float = 1.0f,
-    scale: Float = 1.0f,
     enabled: Boolean = true,
     containerContentAlignment: Alignment = Alignment.TopStart,
     containerModifier: Modifier = Modifier,
@@ -25,7 +24,24 @@ fun BlurEffectedImage(
     overlays: @Composable BoxScope.() -> Unit = { }
 ) =
     Box(contentAlignment = containerContentAlignment, modifier = containerModifier) {
-        if (enabled) Image(bitmap, null, modifier = Modifier.fillMaxSize().scale(scale + 0.05f).blur(10.dp).then(imageModifier), alpha = 0.85f * alpha)
-        Image(bitmap, null, alpha = alpha, modifier = Modifier.fillMaxSize().scale(scale).then(imageModifier))
+        if (enabled) {
+            Image(
+                bitmap = bitmap,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scale(1.05f)
+                    .graphicsLayer { renderEffect = BlurEffect(10.dp.value, 10.dp.value) }
+                    .then(imageModifier),
+                alpha = 0.85f
+            )
+        }
+        Image(
+            bitmap = bitmap,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .then(imageModifier)
+        )
         overlays()
     }

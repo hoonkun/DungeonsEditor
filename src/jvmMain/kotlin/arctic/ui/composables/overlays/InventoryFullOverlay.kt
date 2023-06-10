@@ -1,13 +1,13 @@
 package arctic.ui.composables.overlays
 
 import androidx.compose.runtime.Composable
-import arctic.states.arctic
+import arctic.states.Arctic
 
 @Composable
 fun InventoryFullOverlay() {
-    val enabled = arctic.alerts.inventoryFull
+    val enabled = Arctic.overlayState.inventoryFull
 
-    OverlayBackdrop(enabled) { arctic.alerts.inventoryFull = false }
+    OverlayBackdrop(enabled) { Arctic.overlayState.inventoryFull = false }
     OverlayAnimator(enabled) { Content() }
 }
 

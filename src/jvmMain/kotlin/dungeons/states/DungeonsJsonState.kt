@@ -3,6 +3,11 @@ package dungeons.states
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import arctic.states.EditorState
+import dungeons.Database
+import dungeons.DungeonsLevel
+import dungeons.DungeonsPower
+import dungeons.states.extensions.leveling
 import dungeons.writeDungeonsJson
 import extensions.*
 import org.json.JSONObject
@@ -229,6 +234,33 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
     }
     val unequippedItems by derivedStateOf { items.filter { it.inventoryIndex != null } }
 
+    val playerPower by derivedStateOf {
+        val powerDividedBy4 = listOf(
+            equippedMelee,
+            equippedArmor,
+            equippedRanged
+        ).sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) } / 4.0
+
+        val powerDividedBy12 = listOf(
+            equippedArtifact1,
+            equippedArtifact2,
+            equippedArtifact3
+        ).sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) } / 12.0
+
+        (powerDividedBy4 + powerDividedBy12).toInt()
+    }
+
+    val playerLevel by derivedStateOf {
+        DungeonsLevel.toInGameLevel(xp).toFixed(3)
+    }
+
+    val totalSpentEnchantmentPoints by derivedStateOf {
+        val inventorySum = items.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
+        val storageSum = storageChestItems.sumOf { it.enchantments?.sumOf { en -> en.investedPoints } ?: 0 }
+
+        inventorySum + storageSum
+    }
+
     fun export(): JSONObject =
         JSONObject(from.toString()).apply {
             replace(FIELD_ITEMS, items.map { it.export() })
@@ -431,6 +463,20 @@ class Item(
     @JsonField(FIELD_MARKED_NEW) @CanBeUndefined
     var markedNew: Boolean? by mutableStateOf(markedNew)
 
+    val data by derivedStateOf { Database.item(this.type) ?: throw RuntimeException("unknown item type $type") }
+
+    val totalEnchantmentInvestedPoints by derivedStateOf { enchantments?.sumOf { it.investedPoints } ?: 0 }
+
+    val enchanted by derivedStateOf { totalEnchantmentInvestedPoints > 0 }
+
+    val glided by derivedStateOf { netheriteEnchant != null && netheriteEnchant.id != "Unset" }
+
+    val where by derivedStateOf {
+        if (parent.items.contains(this)) EditorState.EditorView.Inventory
+        else if (parent.storageChestItems.contains(this)) EditorState.EditorView.Storage
+        else null
+    }
+
     constructor(parent: DungeonsJsonState, from: JSONObject): this(
         parent,
         from.safe { getInt(FIELD_INVENTORY_INDEX) },
@@ -462,6 +508,10 @@ class Item(
         other.equipmentSlot,
         other.markedNew
     )
+
+    fun updateEnchantmentInvestedPoints() {
+        enchantments?.forEach { it.leveling(it.level) }
+    }
 
     fun copy(): Item = Item(this).apply {
         equipmentSlot = null
@@ -520,6 +570,8 @@ class Enchantment private constructor(
     @JsonField(FIELD_LEVEL)
     var level: Int by mutableStateOf(level)
 
+    val data by derivedStateOf { Database.enchantment(id) ?: throw RuntimeException("unknown enchantment id $id") }
+
     constructor(from: JSONObject): this(
         from.getString(FIELD_ID),
         from.getInt(FIELD_INVESTED_POINTS),
@@ -556,6 +608,8 @@ class ArmorProperty private constructor(
 
     @JsonField(FIELD_RARITY)
     var rarity: String by mutableStateOf(rarity)
+
+    val data by derivedStateOf { Database.armorProperty(id) ?: throw RuntimeException("unknown armor property id $id") }
 
     constructor(from: JSONObject): this(
         from.getString(FIELD_ID),

@@ -4,7 +4,6 @@ import LocalData
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -14,7 +13,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import arctic.states.arctic
+import arctic.states.Arctic
+import arctic.states.ArcticState
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -40,8 +40,8 @@ fun PakIndexingOverlay() {
 
     var initialized by remember { mutableRefOf(false) }
 
-    OverlayBackdrop(!arctic.initialized && !arctic.pakNotFound, 0.6f)
-    OverlayAnimator(!arctic.initialized && !arctic.pakNotFound) {
+    OverlayBackdrop(Arctic.pakState == ArcticState.PakState.Uninitialized, 0.6f)
+    OverlayAnimator(Arctic.pakState == ArcticState.PakState.Uninitialized) {
         Content(stateText = stateText, progressText = progressText, progress = progress, totalProgress = totalProgress, completed = completed)
     }
 
@@ -54,8 +54,7 @@ fun PakIndexingOverlay() {
             stateText = "Pak 파일을 읽고있습니다"
 
             if (!PakRegistry.initialize()) {
-                arctic.initialized = false
-                arctic.pakNotFound = true
+                Arctic.pakState = ArcticState.PakState.NotFound
                 initialized = false
 
                 return@launch
@@ -81,7 +80,7 @@ fun PakIndexingOverlay() {
                     progressText = enchantment.name
                     progress++
                     enchantment.icon
-                    enchantment.shinePattern
+                    enchantment.shinePatterns
                 }
             }
 
@@ -91,7 +90,7 @@ fun PakIndexingOverlay() {
 
             delay(500)
 
-            arctic.initialized = true
+            Arctic.pakState = ArcticState.PakState.Initialized
         }
     }
 }

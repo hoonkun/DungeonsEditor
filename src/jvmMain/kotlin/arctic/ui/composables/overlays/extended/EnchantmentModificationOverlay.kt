@@ -1,7 +1,6 @@
 package arctic.ui.composables.overlays.extended
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,9 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import arctic.states.arctic
+import androidx.compose.ui.unit.IntOffset
+import arctic.states.Arctic
+import arctic.states.ItemEnchantmentOverlayState
 import arctic.ui.composables.atomic.*
 import arctic.ui.composables.overlays.OverlayBackdrop
+import arctic.ui.composables.overlays.SizeMeasureDummy
 import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -30,80 +32,65 @@ import dungeons.EnchantmentData
 import dungeons.IngameImages
 import dungeons.states.Enchantment
 import dungeons.states.Item
-import dungeons.states.extensions.data
 import dungeons.states.extensions.leveling
-import dungeons.states.extensions.updateEnchantmentInvestedPoints
 import extensions.replace
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EnchantmentModificationOverlay() {
-    val target = arctic.enchantments.detailTarget
-    val shadow = arctic.enchantments.shadowDetailTarget
+    val enchantmentOverlay = Arctic.overlayState.enchantment
 
-    val collectionTargetStates = CollectionTargetStatesE(
-        holder = target?.holder,
-        index = target?.holder?.enchantments?.indexOf(target),
-        isNetheriteEnchant = target?.isNetheriteEnchant == true
-    )
-    val detailTargetStates = DetailTargetStatesE(
-        target = target,
-        isUnset = target?.id == "Unset"
-    )
-
-    val slideEnabled: (DetailTargetStatesE, DetailTargetStatesE) -> Boolean = { initialState, targetState ->
-        !initialState.isUnset && targetState.target != null && !targetState.isUnset || initialState.target == null && targetState.target != null
+    OverlayBackdrop(enchantmentOverlay != null) { Arctic.overlayState.enchantment = null }
+    AnimatedContent(
+        targetState = enchantmentOverlay,
+        transitionSpec = { fadeIn() with fadeOut() using SizeTransform(false) },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (it != null)
+            EnchantmentModificationOverlayContent(
+                enchantmentOverlay = it,
+                collectionModifier = Modifier.animateEnterExit(enter = slideIn { IntOffset(-60.dp.value.toInt(), 0) }, exit = ExitTransition.None),
+                previewModifier = Modifier.animateEnterExit(enter = slideIn { IntOffset(0, 60.dp.value.toInt()) }, exit = ExitTransition.None)
+            )
+        else SizeMeasureDummy()
     }
+}
 
-    OverlayBackdrop(target != null) { arctic.enchantments.closeDetail() }
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun EnchantmentModificationOverlayContent(
+    enchantmentOverlay: ItemEnchantmentOverlayState,
+    collectionModifier: Modifier = Modifier,
+    previewModifier: Modifier = Modifier
+) {
+    val preview = enchantmentOverlay.preview
+    val target = enchantmentOverlay.target
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
     ) {
+        EnchantmentDataCollection(
+            holder = target,
+            applyTarget = preview,
+            enchantmentOverlay = enchantmentOverlay,
+            modifier = collectionModifier
+        )
+        Spacer(modifier = Modifier.width(40.dp))
         AnimatedContent(
-            collectionTargetStates,
-            transitionSpec = OverlayTransitions.collection(),
-            modifier = Modifier.width(750.dp)
-        ) { (holder, index, isNetheriteEnchant) ->
-            if (holder != null && index != null)
-                EnchantmentDataCollection(
-                    holder = holder,
-                    applyTarget =
-                        if (isNetheriteEnchant) holder.netheriteEnchant!!
-                        else holder.enchantments!![index]
-                )
-            else Box(modifier = Modifier.requiredWidth(750.dp).fillMaxHeight())
-        }
-        AnimatedContent(
-            detailTargetStates,
-            transitionSpec = OverlayTransitions.detail(slideEnabled = slideEnabled),
-            modifier = Modifier.height(500.dp)
-        ) { (target, isUnset) ->
-            if (target != null && !isUnset) EnchantmentDetail(target)
+            targetState = preview,
+            transitionSpec = OverlayTransitions.detail(slideEnabled = { i, t -> i.id != "Unset" && t.id != "Unset" }),
+            modifier = Modifier.height(500.dp).then(previewModifier)
+        ) { preview ->
+            if (preview.id != "Unset") EnchantmentDetail(preview)
             else Box(modifier = Modifier.width(0.dp).height(500.dp))
-
-            if (target == null && shadow != null && shadow.id != "Unset")
-                Box(modifier = Modifier.width(675.dp).height(500.dp))
-            else if (target == null && shadow != null && shadow.id == "Unset")
-                Box(modifier = Modifier.width(0.dp).height(500.dp))
         }
     }
 }
 
-private data class CollectionTargetStatesE(
-    val holder: Item?,
-    val index: Int?,
-    val isNetheriteEnchant: Boolean
-)
-
-private data class DetailTargetStatesE(
-    val target: Enchantment?,
-    val isUnset: Boolean
-)
-
 @Composable
-private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment) {
+private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment, enchantmentOverlay: ItemEnchantmentOverlayState, modifier: Modifier) {
     val datasets = remember(holder.data.variant) {
         Database.enchantments.filter { it.applyFor?.contains(holder.data.variant) == true }
     }
@@ -134,7 +121,7 @@ private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment) {
         }
 
         holder.updateEnchantmentInvestedPoints()
-        arctic.enchantments.viewDetail(newEnchantment)
+        enchantmentOverlay.preview = newEnchantment
     }
 
     LazyVerticalGrid(
@@ -144,6 +131,7 @@ private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment) {
         modifier = Modifier
             .requiredWidth(700.dp)
             .fillMaxHeight()
+            .then(modifier)
             .background(Color(0xff080808))
     ) {
         items(datasets, key = { it.id }) { data ->
@@ -191,7 +179,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(text = enchantment.data.name, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                PowerfulEnchantmentIndicator()
+                if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
             }
 
             val description = enchantment.data.description
@@ -224,8 +212,8 @@ private fun EnchantmentLevelSelector(enchantment: Enchantment) {
 }
 
 
-val ZeroLevelImage get() = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png" }
-fun LevelImage(level: Int) = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" }
+private val ZeroLevelImage get() = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png" }
+private fun LevelImage(level: Int) = IngameImages.get { "/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png" }
 
 @Composable
 private fun RowScope.EnchantmentLevelSelectorItem(enchantment: Enchantment, level: Int) {

@@ -9,8 +9,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -23,8 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
-import androidx.compose.ui.text.font.FontWeight
-import arctic.states.arctic
+import arctic.states.EditorSelectionState
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
 import arctic.ui.composables.atomic.densityDp
@@ -36,8 +35,6 @@ import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.DungeonsPower
 import dungeons.IngameImages
 import dungeons.states.Item
-import dungeons.states.extensions.data
-import dungeons.states.extensions.totalEnchantmentInvestedPoints
 
 @Composable
 fun <T>ItemsLazyGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGridItemScope.(Int, T) -> Unit) where T: Item? =
@@ -51,7 +48,7 @@ fun <T>ItemsLazyGrid(columns: Int = 3, items: List<T>, content: @Composable Lazy
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
+fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorSelectionState) where T: Item? {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -63,16 +60,16 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Primary),
                 enabled = item != null,
-                onClick = { if (item != null) arctic.selection.select(item, 0) }
+                onClick = { if (item != null) selection.select(item, EditorSelectionState.EditorSelectionSlot.Primary) }
             )
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Secondary),
                 enabled = item != null,
-                onClick = { if (item != null) arctic.selection.select(item, 1) }
+                onClick = { if (item != null) selection.select(item, EditorSelectionState.EditorSelectionSlot.Secondary) }
             )
             .drawBehind {
                 val brush =
-                    if (arctic.selection.selected(item))
+                    if (selection.selected(item))
                         Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                     else if (hovered)
                         Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))
@@ -90,56 +87,16 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false) where T: Item? {
         if (item == null) {
             EmptyEquippedSlot()
         } else {
-            val totalEnchantPoints = item.totalEnchantmentInvestedPoints
-
-            Image(
-                bitmap = item.data.inventoryIcon,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawWithContent { drawItemFrame(item.rarity, item.netheriteEnchant != null, item.totalEnchantmentInvestedPoints > 0) }
-                    .padding(if (simplified) 12.5.dp else 20.dp)
-            )
+            ItemImage(item, simplified)
 
             if (!simplified) {
-                Text(
-                    text = "${DungeonsPower.toInGamePower(item.power).toInt()}",
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 22.sp,
-                    fontFamily = JetbrainsMono,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 10.dp)
-                )
+                PowerText(item.power)
 
-                if (totalEnchantPoints != 0) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 10.dp)
-                    ) {
-                        Image(
-                            bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "$totalEnchantPoints",
-                            color = Color.White.copy(alpha = 0.85f),
-                            fontSize = 22.sp,
-                            fontFamily = JetbrainsMono
-                        )
-                    }
-                }
+                if (item.enchanted)
+                    InvestedEnchantmentPointsText(item.totalEnchantmentInvestedPoints)
 
                 if (item.markedNew == true) {
-                    Image(
-                        bitmap = IngameImages.get { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .fillMaxSize(0.2f)
-                            .offset(2.dp, (-1.5).dp)
-                            .scale(scaleX = -1f, scaleY = 1f)
-                    )
+                    NewMark()
                 }
             }
         }
@@ -154,4 +111,57 @@ private fun EmptyEquippedSlot() =
             .background(Brush.linearGradient(listOf(RarityColor("Common", RarityColorType.Translucent), Color.Transparent)))
             .border(7.dp, Brush.linearGradient(listOf(RarityColor("Common", RarityColorType.Opaque), Color.Transparent, RarityColor("Common", RarityColorType.Opaque))), shape = RectangleShape)
             .padding(20.dp)
+    )
+
+@Composable
+private fun BoxScope.PowerText(power: Double) =
+    Text(
+        text = "${remember(power) { DungeonsPower.toInGamePower(power).toInt()} }",
+        color = Color.White.copy(alpha = 0.85f),
+        fontSize = 22.sp,
+        fontFamily = JetbrainsMono,
+        modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 10.dp)
+    )
+
+@Composable
+private fun BoxScope.InvestedEnchantmentPointsText(points: Int) =
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 10.dp)
+    ) {
+        Image(
+            bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
+            contentDescription = null,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = "$points",
+            color = Color.White.copy(alpha = 0.85f),
+            fontSize = 22.sp,
+            fontFamily = JetbrainsMono
+        )
+    }
+
+@Composable
+private fun ItemImage(item: Item, simplified: Boolean) =
+    Image(
+        bitmap = item.data.inventoryIcon,
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxSize()
+            .drawWithContent { drawItemFrame(item.rarity, item.glided, item.enchanted) }
+            .padding(if (simplified) 12.5.dp else 20.dp)
+    )
+
+@Composable
+private fun BoxScope.NewMark() =
+    Image(
+        bitmap = IngameImages.get { "/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png" },
+        contentDescription = null,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .fillMaxSize(0.2f)
+            .offset(2.dp, (-1.5).dp)
+            .scale(scaleX = -1f, scaleY = 1f)
     )

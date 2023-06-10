@@ -39,7 +39,7 @@ fun ItemAlterButton(text: String, color: Color = Color(0x15ffffff), enabled: Boo
 
     Row(
         modifier = Modifier
-            .height(38.dp)
+            .height(35.dp)
             .clickable(interaction, null, enabled = enabled) { onClick() }
             .hoverable(interaction, enabled)
             .background(color, shape = RoundedCornerShape(6.dp))
@@ -48,7 +48,7 @@ fun ItemAlterButton(text: String, color: Color = Color(0x15ffffff), enabled: Boo
     ) {
         Text(
             text = text,
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             color = Color.White
         )
     }
@@ -68,7 +68,7 @@ fun ItemAlterButton(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(38.dp)
+            .height(35.dp)
             .clickable(interaction, null, enabled = enabled) { onClick() }
             .hoverable(interaction, enabled)
             .background(color, shape = RoundedCornerShape(6.dp))
