@@ -1,6 +1,8 @@
 package arctic.states
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.key.Key
 import dungeons.ItemData
 import dungeons.states.ArmorProperty
 import dungeons.states.Enchantment
@@ -39,6 +41,29 @@ class OverlayState {
 
     var enchantment: ItemEnchantmentOverlayState? by mutableStateOf(null)
     var armorProperty: ItemArmorPropertyOverlayState? by mutableStateOf(null)
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    fun pop(key: Key): Boolean {
+        if (key != Key.Escape) return false
+        val result = visible
+        if (fileLoadSrcSelector) fileLoadSrcSelector = false
+        if (fileSaveDstSelector) fileSaveDstSelector = false
+        if (fileClose) fileClose = false
+
+        if (inventoryFull) inventoryFull = false
+
+        val itemCreation = itemCreation
+        if (itemCreation?.preview != null) itemCreation.preview = null
+        else if (itemCreation != null) this.itemCreation = null
+
+        if (itemEdition != null) itemEdition = null
+        if (itemDuplication != null) itemDuplication = null
+        if (itemDeletion != null) itemDeletion = null
+        if (enchantment != null) enchantment = null
+        if (armorProperty != null) armorProperty = null
+
+        return result
+    }
 
 }
 

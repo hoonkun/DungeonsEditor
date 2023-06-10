@@ -261,7 +261,7 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
         true
     }
 
-    val onKeyEvent: (KeyEvent) -> Unit = {
+    val onKeyEvent: (KeyEvent) -> Boolean = {
         if (it.key == Key.Tab && it.type == KeyEventType.KeyDown) {
             if (hintTarget != null && candidates.items.size == 1) {
                 if (!keys.shift) complete()
@@ -281,12 +281,22 @@ fun Selector(validator: (File) -> Boolean = { true }, selectText: String = "ì €ì
                 isFieldShifting = true
             }
             requester.requestFocus()
+            true
         } else if (it.key == Key.Enter && it.type == KeyEventType.KeyUp) {
-            if (!complete() && selected != null && keys.ctrl) onSelect(selected)
+            if (!complete() && selected != null && keys.ctrl) {
+                onSelect(selected)
+                true
+            } else {
+                false
+            }
         } else if (it.key == Key.CtrlLeft || it.key == Key.CtrlRight) {
             keys.ctrl = it.type == KeyEventType.KeyDown
+            true
         } else if (it.key == Key.ShiftLeft || it.key == Key.ShiftRight) {
             keys.shift = it.type == KeyEventType.KeyDown
+            true
+        } else {
+            false
         }
     }
 
@@ -486,7 +496,7 @@ fun PathInputBox(content: @Composable RowScope.() -> Unit) =
 fun RowScope.PathInput(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
-    onKeyEvent: (KeyEvent) -> Unit,
+    onKeyEvent: (KeyEvent) -> Boolean,
     hideCursor: Boolean,
     focusRequester: FocusRequester
 ) = BasicTextField(
@@ -502,7 +512,7 @@ fun RowScope.PathInput(
         else SolidColor(SelectorColors.IdeGeneral),
     singleLine = true,
     modifier = Modifier.weight(1f)
-        .onKeyEvent { onKeyEvent(it); true }
+        .onKeyEvent { onKeyEvent(it) }
         .focusRequester(focusRequester)
         .padding(start = 20.dp, end = 20.dp)
 )

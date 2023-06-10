@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
@@ -38,7 +40,7 @@ fun App() {
         tween(durationMillis = 250)
     )
 
-    AppRoot {
+    AppRoot(modifier = Modifier.onKeyEvent { Arctic.overlayState.pop(it.key) }) {
         TitleView(modifier = Modifier/*.blur(blur)*/.graphicsLayer { renderEffect = if (blur != 0.dp) BlurEffect(blur.value, blur.value) else null })
         MainContainer(modifier = Modifier/*.blur(blur)*/.graphicsLayer { renderEffect = if (blur != 0.dp) BlurEffect(blur.value, blur.value) else null }) {
             EditorAnimator(Arctic.editorState) { editor -> InventoryView(editor) }
@@ -50,11 +52,12 @@ fun App() {
 }
 
 @Composable
-fun AppRoot(content: @Composable BoxScope.() -> Unit) =
+fun AppRoot(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) =
     Box (
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xff272727)),
+            .background(Color(0xff272727))
+            .then(modifier),
         content = content
     )
 
