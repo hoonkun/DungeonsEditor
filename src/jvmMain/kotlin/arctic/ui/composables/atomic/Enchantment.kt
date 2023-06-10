@@ -45,11 +45,7 @@ fun EnchantmentIconImage(
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val pattern = remember(data) { data.shinePattern }
-
-    val matrixR = remember { ShinePatternMatrix(0) }
-    val matrixG = remember { ShinePatternMatrix(1) }
-    val matrixB = remember { ShinePatternMatrix(2) }
+    val patterns = remember(data) { data.shinePatterns }
 
     BlurEffectedImage(
         bitmap = data.icon,
@@ -72,8 +68,8 @@ fun EnchantmentIconImage(
             .scale(if (data.id == "Unset") 0.7f else 1f)
             .scale(0.5f)
     ) {
-        if (pattern != null && data.id != "Unset") {
-            EnchantmentShine(pattern, listOf(matrixR, matrixG, matrixB))
+        if (patterns != null && data.id != "Unset") {
+            EnchantmentShine(patterns)
         }
     }
 }
@@ -137,7 +133,7 @@ private fun ShinePatternMatrix(channel: Int): FloatArray {
 @Composable
 fun animateShine(transition: InfiniteTransition, delay: Int) =
     transition.animateFloat(
-        initialValue = 0f, targetValue = 1f,
+        initialValue = 0f, targetValue = 0.85f,
         animationSpec = infiniteRepeatable(
             animation = keyframes {
                 durationMillis = 700
@@ -152,7 +148,7 @@ fun animateShine(transition: InfiniteTransition, delay: Int) =
     )
 
 @Composable
-private fun EnchantmentShine(pattern: ImageBitmap, matrix: List<FloatArray>) {
+private fun EnchantmentShine(patterns: List<ImageBitmap>) {
     val transition = rememberInfiniteTransition()
     val alphaR by animateShine(transition, 500 * 0)
     val alphaG by animateShine(transition, 500 * 1)
@@ -160,9 +156,9 @@ private fun EnchantmentShine(pattern: ImageBitmap, matrix: List<FloatArray>) {
 
     val drawShine: DrawScope.(Int, Float) -> Unit = { index, alpha ->
         drawImage(
-            image = pattern,
+            image = patterns[index],
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-            colorFilter = ColorFilter.colorMatrix(ColorMatrix(matrix[index].apply { set(index + 15, alpha) })),
+            alpha = alpha,
             blendMode = BlendMode.Overlay
         )
     }

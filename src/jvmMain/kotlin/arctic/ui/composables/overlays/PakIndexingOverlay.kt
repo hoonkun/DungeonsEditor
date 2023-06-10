@@ -80,7 +80,7 @@ fun PakIndexingOverlay() {
                     progressText = enchantment.name
                     progress++
                     enchantment.icon
-                    enchantment.shinePattern
+                    enchantment.shinePatterns
                 }
             }
 

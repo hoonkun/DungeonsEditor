@@ -2,6 +2,8 @@ package dungeons
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.serialization.Serializable
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -118,8 +120,34 @@ data class EnchantmentData(
             ?: throw RuntimeException("no image resource found: {$id}!")
     }
 
-    val shinePattern: ImageBitmap? by lazy {
+    private val shinePattern: ImageBitmap? by lazy {
         retrieveImage("${id}_shine") { it.startsWith("t_") && it.endsWith("shine_icon") }
+    }
+
+    private val shinePatternR: ImageBitmap? by lazy { filterShineColor(2) }
+    private val shinePatternG: ImageBitmap? by lazy { filterShineColor(1) }
+    private val shinePatternB: ImageBitmap? by lazy { filterShineColor(0) }
+
+    val shinePatterns: List<ImageBitmap>? by lazy {
+        val r = shinePatternR
+        val g = shinePatternG
+        val b = shinePatternB
+        if (r != null && g != null && b != null) listOf(r, g, b)
+        else null
+    }
+
+    private fun filterShineColor(channel: Int): ImageBitmap? {
+        val original = shinePattern?.toAwtImage() ?: return null
+        val new = BufferedImage(original.width, original.height, original.type)
+        val pixels = original.getRGB(0, 0, original.width, original.height, null, 0, original.width)
+        val mask = (0xff000000u or (0xffu shl (channel * 2 * 4)))
+        for (i in pixels.indices) {
+            val filtered = pixels[i].toUInt() and mask
+            val value = (filtered and 0x00ffffffu) shr (channel * 2 * 4)
+            pixels[i] = ((value shl 6 * 4) or (value shl 4 * 4) or (value shl 2 * 4) or value).toInt()
+        }
+        new.setRGB(0, 0, original.width, original.height, pixels, 0, original.width)
+        return new.toComposeImageBitmap()
     }
 
     private fun retrieveImage(cacheKey: String, criteria: (String) -> Boolean): ImageBitmap? {
