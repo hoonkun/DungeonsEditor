@@ -179,7 +179,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(text = enchantment.data.name, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                PowerfulEnchantmentIndicator()
+                if (enchantment.data.powerful) PowerfulEnchantmentIndicator()
             }
 
             val description = enchantment.data.description
