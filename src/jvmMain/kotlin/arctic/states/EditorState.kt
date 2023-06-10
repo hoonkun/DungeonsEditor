@@ -34,12 +34,17 @@ class EditorSelectionState {
 
     val hasSelection by derivedStateOf { primary != null || secondary != null }
 
+    fun slotOf(item: Item) = if (primary == item) EditorSelectionSlot.Primary else if (secondary == item) EditorSelectionSlot.Secondary else null
+
     fun selected(item: Item?) = item != null && (primary == item || secondary == item)
 
-    fun select(item: Item, into: EditorSelectionSlot) {
-        if (selected(item)) return unselect(item)
-        if (into == EditorSelectionSlot.Primary) primary = item
-        else secondary = item
+    fun select(item: Item, into: EditorSelectionSlot, unselectIfAlreadySelected: Boolean = true) {
+        if (selected(item))
+            if (unselectIfAlreadySelected) return unselect(item)
+            else return
+        else
+            if (into == EditorSelectionSlot.Primary) primary = item
+            else secondary = item
     }
 
     fun unselect(item: Item) {

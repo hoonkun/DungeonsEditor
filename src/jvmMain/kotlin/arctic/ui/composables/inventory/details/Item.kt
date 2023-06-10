@@ -89,11 +89,11 @@ private fun Content(item: Item, editor: EditorState) {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 PowerEditField(
-                    value = DungeonsPower.toInGamePower(item.power).toFixed(4).toString(),
+                    value = DungeonsPower.toInGamePower(item.power).toFixed(3).toString(),
                     onValueChange = {
                         if (it.toDoubleOrNull() != null) item.power = DungeonsPower.toSerializedPower(it.toDouble())
                     },
-                    inputModifier = Modifier.requiredWidth(120.dp)
+                    inputModifier = Modifier.requiredWidth(100.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 ItemAlterRight(item, editor)
@@ -121,6 +121,11 @@ private fun ItemAlterLeft(item: Item) {
 
 @Composable
 private fun ItemAlterRight(item: Item, editor: EditorState) {
+    if (!item.parent.equippedItems.contains(item) && item.where == editor.view)
+        ItemAlterButton(Localizations.UiText("transfer", item.where!!.other().localizedName)) { item.transfer(editor) }
+    else if (!item.parent.equippedItems.contains(item))
+        ItemAlterButton(Localizations.UiText("pull", item.where!!.other().localizedName)) { item.transfer(editor) }
+    Spacer(modifier = Modifier.width(7.dp))
     ItemAlterButton(Localizations.UiText("change_type")) { Arctic.overlayState.itemEdition = item }
     Spacer(modifier = Modifier.width(7.dp))
     ItemAlterButton(Localizations.UiText("duplicate")) {

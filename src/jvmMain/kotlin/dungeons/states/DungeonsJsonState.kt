@@ -513,6 +513,33 @@ class Item(
         enchantments?.forEach { it.leveling(it.level) }
     }
 
+    fun transfer(editor: EditorState) {
+        val previousIndex = inventoryIndex
+        val previousWhere = where
+        val selectionSlot = editor.selection.slotOf(this)
+
+        if (previousWhere == EditorState.EditorView.Inventory) {
+            parent.items.remove(this)
+            parent.storageChestItems.add(0, this)
+        } else {
+            parent.storageChestItems.remove(this)
+            parent.items.add(0, this)
+        }
+        parent.unequippedItems.forEachIndexed { index, item -> item.inventoryIndex = index }
+        parent.storageChestItems.forEachIndexed { index, item -> item.inventoryIndex = index }
+
+        if (editor.view == previousWhere) {
+            editor.selection.unselect(this)
+
+            val searchFrom =
+                if (editor.view == EditorState.EditorView.Inventory) parent.items
+                else parent.storageChestItems
+            val newSelection = searchFrom.find { it.inventoryIndex == previousIndex }
+            if (newSelection != null && selectionSlot != null)
+                editor.selection.select(newSelection, selectionSlot, unselectIfAlreadySelected = false)
+        }
+    }
+
     fun copy(): Item = Item(this).apply {
         equipmentSlot = null
         inventoryIndex = 0

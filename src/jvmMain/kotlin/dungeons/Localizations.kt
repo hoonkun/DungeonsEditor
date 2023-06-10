@@ -16,7 +16,7 @@ class Localizations {
 
     companion object {
 
-        var currentLocale by mutableStateOf("ko-KR")
+        var currentLocale by mutableStateOf("en")
 
         private var _texts: Map<String, Map<String, String>>? = null
         val texts get() = _texts!!
@@ -110,7 +110,9 @@ class Localizations {
 
         private val EnUiTexts = mapOf(
             "season_limited" to "SeasonLimited",
-            "change_type" to "Change Type",
+            "change_type" to "Replace",
+            "transfer" to "Transfer",
+            "pull" to "Pull",
             "duplicate" to "Duplicate",
             "delete" to "Delete",
             "unknown_item" to "Unknown Item",
@@ -167,6 +169,8 @@ class Localizations {
         private val KoUiTexts = mapOf(
             "season_limited" to "시즌한정",
             "change_type" to "타입 변경",
+            "transfer" to "{0}로 보내기",
+            "pull" to "여기로 가져오기",
             "duplicate" to "복제",
             "delete" to "삭제",
             "unknown_item" to "알 수 없는 아이템",
