@@ -77,6 +77,7 @@ private fun Content(item: Item, editor: EditorState) {
             ItemName(item.data.name ?: Localizations.UiText("unknown_item"))
 
             ItemDescription(item.data.flavour)
+            Spacer(modifier = Modifier.height(20.dp))
             ItemDescription(item.data.description)
 
             Spacer(modifier = Modifier.height(20.dp))

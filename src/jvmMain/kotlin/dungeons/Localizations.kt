@@ -25,7 +25,9 @@ class Localizations {
             return texts[currentLocale]?.get(key)
         }
 
-        private val ItemCorrections = mapOf<String, String>()
+        private val ItemCorrections = mapOf(
+            "CorruptedSeeds" to "CorruptedSeeds_Unique1"
+        )
 
         val ItemNameCorrections = ItemCorrections + mapOf(
             "Powerbow" to "PowerBow",
