@@ -72,30 +72,7 @@ private fun Content(item: Item, editor: EditorState) {
                 .offset((-10).dp, 60.dp)
         )
         Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-            Row {
-                ItemRarityButton(item.data, item.rarity) { item.rarity = it }
-                if (item.data.variant != "Artifact") {
-                    Spacer(modifier = Modifier.width(7.dp))
-                    ItemNetheriteEnchantButton(item)
-                    Spacer(modifier = Modifier.width(7.dp))
-                    ItemModifiedButton(item)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                ItemAlterButton(Localizations.UiText("change_type")) { Arctic.overlayState.itemEdition = item }
-                Spacer(modifier = Modifier.width(7.dp))
-                ItemAlterButton(Localizations.UiText("duplicate")) {
-                    if (item.where == editor.view) {
-                        if (editor.noSpaceInInventory)
-                            Arctic.overlayState.inventoryFull = true
-                        else
-                            item.parent.addItem(editor, item.copy(), item)
-                    } else {
-                        Arctic.overlayState.itemDuplication = item
-                    }
-                }
-                Spacer(modifier = Modifier.width(7.dp))
-                ItemAlterButton(Localizations.UiText("delete")) { Arctic.overlayState.itemDeletion = item }
-            }
+            Row { ItemAlterLeft(item) }
 
             ItemName(item.data.name ?: Localizations.UiText("unknown_item"))
 
@@ -109,12 +86,17 @@ private fun Content(item: Item, editor: EditorState) {
                 ItemArmorProperties(item, armorProperties)
             }
 
-            PowerEditField(
-                value = DungeonsPower.toInGamePower(item.power).toFixed(4).toString(),
-                onValueChange = {
-                    if (it.toDoubleOrNull() != null) item.power = DungeonsPower.toSerializedPower(it.toDouble())
-                }
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PowerEditField(
+                    value = DungeonsPower.toInGamePower(item.power).toFixed(4).toString(),
+                    onValueChange = {
+                        if (it.toDoubleOrNull() != null) item.power = DungeonsPower.toSerializedPower(it.toDouble())
+                    },
+                    inputModifier = Modifier.requiredWidth(120.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                ItemAlterRight(item, editor)
+            }
 
             val enchantments = item.enchantments
             if (enchantments != null) {
@@ -123,6 +105,35 @@ private fun Content(item: Item, editor: EditorState) {
             }
         }
     }
+}
+
+@Composable
+private fun ItemAlterLeft(item: Item) {
+    ItemRarityButton(item.data, item.rarity) { item.rarity = it }
+    if (item.data.variant != "Artifact") {
+        Spacer(modifier = Modifier.width(7.dp))
+        ItemNetheriteEnchantButton(item)
+        Spacer(modifier = Modifier.width(7.dp))
+        ItemModifiedButton(item)
+    }
+}
+
+@Composable
+private fun ItemAlterRight(item: Item, editor: EditorState) {
+    ItemAlterButton(Localizations.UiText("change_type")) { Arctic.overlayState.itemEdition = item }
+    Spacer(modifier = Modifier.width(7.dp))
+    ItemAlterButton(Localizations.UiText("duplicate")) {
+        if (item.where == editor.view) {
+            if (editor.noSpaceInInventory)
+                Arctic.overlayState.inventoryFull = true
+            else
+                item.parent.addItem(editor, item.copy(), item)
+        } else {
+            Arctic.overlayState.itemDuplication = item
+        }
+    }
+    Spacer(modifier = Modifier.width(7.dp))
+    ItemAlterButton(Localizations.UiText("delete"), color = Color(0x25ff6d0c)) { Arctic.overlayState.itemDeletion = item }
 }
 
 @Composable

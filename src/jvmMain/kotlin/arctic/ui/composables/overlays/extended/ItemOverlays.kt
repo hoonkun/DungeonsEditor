@@ -27,6 +27,7 @@ import arctic.states.ItemCreationOverlayState
 import arctic.ui.composables.atomic.ItemRarityButton
 import arctic.ui.composables.atomic.PowerEditField
 import arctic.ui.composables.atomic.drawUniqueIndicator
+import arctic.ui.composables.inventory.GlobalScrollbarStyle
 import arctic.ui.composables.overlays.OverlayBackdrop
 import arctic.ui.composables.overlays.SizeMeasureDummy
 import arctic.ui.utils.rememberMutableInteractionSource
@@ -67,7 +68,7 @@ fun ItemCreationOverlayContent(itemCreationOverlay: ItemCreationOverlayState, ed
         modifier = Modifier.fillMaxSize()/*.blur(blurRadius)*/.graphicsLayer { renderEffect = if (blurRadius != 0.dp) BlurEffect(blurRadius.value, blurRadius.value) else null }
     ) {
         Box {
-            ItemCreationVariantFilters(fixed = null, filter = variantFilter, modifier = Modifier.offset(x = (-180).dp))
+            ItemCreationVariantFilters(fixed = null, filter = variantFilter, modifier = Modifier.offset(x = (-220).dp))
             AnimatedContent(
                 targetState = variantFilter.value,
                 transitionSpec = {
@@ -107,7 +108,7 @@ fun ItemEditionOverlayContent(itemEditionTarget: Item) {
         modifier = Modifier.fillMaxSize()
     ) {
         Box {
-            ItemCreationVariantFilters(fixed = itemEditionTarget.data.variant, filter = null, modifier = Modifier.offset(x = (-180).dp))
+            // ItemCreationVariantFilters(fixed = itemEditionTarget.data.variant, filter = null)
             ItemDataCollection(
                 variant = itemEditionTarget.data.variant,
                 onItemSelect = { itemEditionTarget.type = it.type; Arctic.overlayState.itemEdition = null }
@@ -138,7 +139,7 @@ private fun ItemDataDetailOverlay(itemCreationOverlay: ItemCreationOverlayState,
 @Composable
 private fun ItemCreationVariantFilters(fixed: String?, filter: MutableState<String>?, modifier: Modifier = Modifier) {
     val items = listOf("Melee", "Ranged", "Armor", "Artifact")
-    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(160.dp).padding(top = 58.dp).then(modifier)) {
+    Column(horizontalAlignment = Alignment.End, modifier = Modifier.requiredWidth(200.dp).padding(top = 58.dp).then(modifier)) {
         for (item in items) {
             ItemCreationVariantFilter(Localizations.UiText(item.lowercase()), item, filter, fixed == null || fixed == item)
         }
@@ -265,6 +266,9 @@ fun ItemDataDetail(data: ItemData, editorState: EditorState) {
     var rarity by remember { mutableStateOf(if (data.unique) "Unique" else "Common") }
     var power by remember { mutableStateOf(DungeonsPower.toSerializedPower(editorState.stored.playerPower.toDouble())) }
 
+    val scroll = rememberScrollState()
+    val adapter = rememberScrollbarAdapter(scroll)
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -294,13 +298,18 @@ fun ItemDataDetail(data: ItemData, editorState: EditorState) {
                         fontWeight = FontWeight.Bold
                     )
 
-                    val description = data.description
-                    if (description != null)
-                        Text(text = description, color = Color.White, fontSize = 25.sp)
+                    Box(modifier = Modifier.requiredHeightIn(max = 150.dp)) {
+                        Column(modifier = Modifier.fillMaxSize().verticalScroll(scroll)) {
+                            val description = data.description
+                            if (description != null)
+                                Text(text = description, color = Color.White, fontSize = 25.sp)
 
-                    val flavour = data.flavour
-                    if (flavour != null)
-                        Text(text = flavour, color = Color.White, fontSize = 25.sp)
+                            val flavour = data.flavour
+                            if (flavour != null)
+                                Text(text = flavour, color = Color.White, fontSize = 25.sp)
+                        }
+                        VerticalScrollbar(adapter, style = GlobalScrollbarStyle, modifier = Modifier.align(Alignment.TopEnd))
+                    }
 
                     Spacer(modifier = Modifier.weight(1f))
 
@@ -309,7 +318,7 @@ fun ItemDataDetail(data: ItemData, editorState: EditorState) {
                         onValueChange = {
                             if (it.toDoubleOrNull() != null) power = DungeonsPower.toSerializedPower(it.toDouble())
                         },
-                        modifier = Modifier.align(Alignment.End)
+                        containerModifier = Modifier.align(Alignment.End)
                     )
                 }
             }

@@ -25,7 +25,7 @@ import dungeons.Localizations
 @Composable
 fun ItemRarityButton(data: ItemData, rarity: String, onClick: (String) -> Unit) {
     ItemAlterButton(
-        text = "${if (data.limited) "${Localizations.UiText("seasom_limited")} " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
+        text = "${if (data.limited) "${Localizations.UiText("season_limited")} " else ""}${Localizations["/rarity_${rarity.lowercase()}"]}",
         color = RarityColor(rarity, RarityColorType.Translucent),
         enabled = !data.unique,
         onClick = { onClick(if (rarity == "Common") "Rare" else "Common") }
@@ -33,7 +33,7 @@ fun ItemRarityButton(data: ItemData, rarity: String, onClick: (String) -> Unit) 
 }
 
 @Composable
-fun ItemAlterButton(text: String, color: Color = Color(0x15ffffff), enabled: Boolean = true, onClick: () -> Unit) {
+fun ItemAlterButton(text: String, color: Color = Color(0x25ffffff), enabled: Boolean = true, onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 

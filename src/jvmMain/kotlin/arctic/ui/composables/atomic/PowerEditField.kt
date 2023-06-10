@@ -25,7 +25,7 @@ import dungeons.IngameImages
 import dungeons.Localizations
 
 @Composable
-fun PowerEditField(value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
+fun PowerEditField(value: String, containerModifier: Modifier = Modifier, inputModifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val lineColor by animateColorAsState(
         targetValue =
@@ -34,7 +34,7 @@ fun PowerEditField(value: String, modifier: Modifier = Modifier, onValueChange: 
         animationSpec = tween(durationMillis = 250)
     )
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = containerModifier) {
         PowerIcon()
         Spacer(modifier = Modifier.width(10.dp))
         Row {
@@ -47,6 +47,7 @@ fun PowerEditField(value: String, modifier: Modifier = Modifier, onValueChange: 
                 singleLine = true,
                 cursorBrush = SolidColor(Color.White),
                 modifier = Modifier
+                    .then(inputModifier)
                     .onFocusChanged { focused = it.hasFocus }
                     .drawBehind {
                         drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, densityDp(3)))
