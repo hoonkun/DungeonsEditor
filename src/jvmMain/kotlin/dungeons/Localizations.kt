@@ -46,8 +46,6 @@ class Localizations {
             "VoidTouchedMelee" to "VoidStrikeMelee",
             "VoidTouchedRanged" to "VoidStrikeRanged",
             "CriticalHit" to "Critical",
-            "EnigmaResonatorMelee" to "EnigmaMelee",
-            "EnigmaResonatorRanged" to "EnigmaRanged",
             "FireAspect" to "Fire",
             "AnimaConduitMelee" to "Anima",
             "AnimaConduitRanged" to "AnimaRanged",
@@ -65,8 +63,8 @@ class Localizations {
             "Celerity" to "Cool Down",
             "AnimaConduitRanged" to "Anima",
             "Accelerating" to "Accelerate",
-            "EnigmaMelee" to "Enigma",
-            "EnigmaRanged" to "Enigma"
+            "EnigmaResonatorMelee" to "EnigmaMelee",
+            "EnigmaResonatorRanged" to "EnigmaRanged",
         )
 
         val EnchantmentDescriptionCorrections = EnchantmentCorrections + mapOf(
@@ -74,7 +72,9 @@ class Localizations {
             "EmeraldDivination" to "EmeraldDivination_effect",
             "Flee" to "Flee_effect",
             "DeathBarter" to "DeathBarter_effect",
-            "Reckless" to "ShardArmor"
+            "Reckless" to "ShardArmor",
+            "EnigmaResonatorMelee" to "Enigma",
+            "EnigmaResonatorRanged" to "EnigmaRanged"
         )
 
         val EnchantmentFixedEffectCorrections = mapOf(
@@ -101,7 +101,9 @@ class Localizations {
             "FireAspect" to "FireTrail",
             "ShadowFlash" to "shadowflash",
             "ShadowFeast" to "shadowfeast",
-            "BagOfSouls" to "BagOfSoul"
+            "BagOfSouls" to "BagOfSoul",
+            "EnigmaResonatorMelee" to "EnigmaMelee",
+            "EnigmaResonatorRanged" to "EnigmaRanged",
         )
 
         private val EnUiTexts = mapOf(
