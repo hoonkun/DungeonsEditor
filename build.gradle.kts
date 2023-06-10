@@ -48,7 +48,7 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.AppImage)
+            targetFormats(TargetFormat.Exe, TargetFormat.AppImage)
             packageName = "DungeonsEditor"
             packageVersion = "1.0.0"
             linux {
