@@ -46,14 +46,14 @@ fun ContentDrawScope.drawItemFrame(rarity: String, glided: Boolean, enchanted: B
         image = IngameImages.get { "/Game/UI/Materials/Inventory2/Slot/v2_${if (artifact) "item" else "gear"}_${backName}_slot.png" },
         srcSize = IntSize(322, 322),
         dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-        alpha = 0.85f
+        alpha = 0.75f
     )
     if (rarity == "Rare" || rarity == "Unique") {
         drawImage(
             image = IngameImages.get { "/Game/UI/Materials/Inventory2/Slot/v2_${backName}_overlay.png" },
             srcSize = IntSize(322, 322),
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-            alpha = 0.85f
+            alpha = 0.75f
         )
     }
 
