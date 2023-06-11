@@ -50,7 +50,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Exe, TargetFormat.AppImage)
             packageName = "DungeonsEditor"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
             linux {
                 iconFile.set(project.file("src/jvmMain/resources/_icon.png"))
             }
