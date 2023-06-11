@@ -82,8 +82,6 @@ private fun Content(item: Item, editor: EditorState) {
             Spacer(modifier = Modifier.height(20.dp))
             ItemDescription(item.data.description)
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             val armorProperties = item.armorProperties
             if (armorProperties != null) {
                 ItemArmorProperties(item, armorProperties)

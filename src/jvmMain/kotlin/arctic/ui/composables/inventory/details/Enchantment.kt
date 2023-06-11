@@ -4,12 +4,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.layout
 import arctic.states.Arctic
 import arctic.states.ItemEnchantmentOverlayState
 import arctic.ui.composables.atomic.EnchantmentIconImage
 import arctic.ui.composables.atomic.EnchantmentLevelImage
+import arctic.ui.unit.dp
 import dungeons.IngameImages
 import dungeons.states.Enchantment
 
@@ -18,9 +20,16 @@ import dungeons.states.Enchantment
 fun ItemEnchantments(enchantments: List<Enchantment>) {
     val slots = enchantments.chunked(3)
 
-    Row(modifier = Modifier.fillMaxSize()) {
-        for (slot in slots) {
-            ItemEnchantmentSlot(slot)
+    Box(modifier = Modifier.fillMaxSize().aspectRatio(3f / 1f)) {
+        Image(
+            bitmap = IngameImages.get { "/Game/UI/Inventory/Runes.png" },
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth().scale(2.25f).alpha(0.5f).offset(y = (-20).dp)
+        )
+        Row(modifier = Modifier.fillMaxSize()) {
+            for (slot in slots) {
+                ItemEnchantmentSlot(slot)
+            }
         }
     }
 }
