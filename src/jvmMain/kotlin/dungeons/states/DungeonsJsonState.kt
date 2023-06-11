@@ -465,7 +465,7 @@ class Item(
 
     val data by derivedStateOf { Database.item(this.type) ?: throw RuntimeException("unknown item type $type") }
 
-    val totalEnchantmentInvestedPoints by derivedStateOf { enchantments?.sumOf { it.investedPoints } ?: 0 }
+    val totalEnchantmentInvestedPoints by derivedStateOf { this.enchantments?.sumOf { it.investedPoints } ?: 0 }
 
     val enchanted by derivedStateOf { totalEnchantmentInvestedPoints > 0 }
 
@@ -510,7 +510,7 @@ class Item(
     )
 
     fun updateEnchantmentInvestedPoints() {
-        enchantments?.forEach { it.leveling(it.level) }
+        enchantments?.forEach { it.leveling() }
     }
 
     fun transfer(editor: EditorState) {

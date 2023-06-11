@@ -108,9 +108,9 @@ private fun EnchantmentDataCollection(holder: Item, applyTarget: Enchantment, en
             holder = holder,
             id = newId,
             level =
-                if (applyTarget.id == "Unset" && newId != "Unset" && applyTarget.isNetheriteEnchant) 1
-                else if (newId != "Unset") applyTarget.level
-                else 0,
+                if (newId == "Unset") 0
+                else if (applyTarget.id == "Unset" && applyTarget.isNetheriteEnchant) 1
+                else applyTarget.level,
             isNetheriteEnchant = applyTarget.isNetheriteEnchant
         )
         newEnchantment.leveling()
