@@ -6,10 +6,13 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
@@ -51,12 +54,22 @@ fun App() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.onGlobalPointerEvent(): Modifier {
+    var parent = this
+    for ((event, handlers) in Arctic.GlobalPointerListener.entries) {
+        parent = parent.onPointerEvent(event) { handlers.forEach { handler -> handler(it) } }
+    }
+    return parent
+}
+
 @Composable
 fun AppRoot(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) =
     Box (
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xff272727))
+            .onGlobalPointerEvent()
             .then(modifier),
         content = content
     )

@@ -2,8 +2,9 @@ package arctic.ui.composables.inventory.details
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import arctic.states.Arctic
 import arctic.states.EditorState
@@ -120,13 +122,44 @@ private fun ItemAlterLeft(item: Item) {
 }
 
 @Composable
+private fun TooltipText(text: String) =
+    Text(
+        text = Localizations.UiText(text),
+        color = Color.White,
+        fontSize = 20.sp,
+        modifier = Modifier
+            .background(Color(0xff191919), shape = RoundedCornerShape(6.dp))
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+    )
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun ItemAlterRight(item: Item, editor: EditorState) {
-    if (!item.parent.equippedItems.contains(item) && item.where == editor.view)
-        ItemAlterButton(Localizations.UiText("transfer", item.where!!.other().localizedName)) { item.transfer(editor) }
-    else if (!item.parent.equippedItems.contains(item))
-        ItemAlterButton(Localizations.UiText("pull", item.where!!.other().localizedName)) { item.transfer(editor) }
+    val transferText =
+        if (!item.parent.equippedItems.contains(item) && item.where == editor.view) "transfer"
+        else if (!item.parent.equippedItems.contains(item)) "pull"
+        else null
+
+    if (transferText != null) {
+        val tooltipArgs =
+            if (transferText == "transfer") arrayOf(item.where!!.other().localizedName)
+            else arrayOf(item.where!!.localizedName, editor.view.localizedName)
+
+        AnimatedTooltipArea(
+            tooltip = { TooltipText(Localizations.UiText("${transferText}_tooltip", *tooltipArgs)) },
+            delayMillis = 0
+        ) {
+            ItemAlterButton(Localizations.UiText(transferText, item.where!!.other().localizedName)) { item.transfer(editor) }
+        }
+    }
+
     Spacer(modifier = Modifier.width(7.dp))
-    ItemAlterButton(Localizations.UiText("change_type")) { Arctic.overlayState.itemEdition = item }
+    AnimatedTooltipArea(
+        tooltip = { TooltipText(Localizations.UiText("change_type_tooltip")) },
+        delayMillis = 0,
+    ) {
+        ItemAlterButton(Localizations.UiText("change_type")) { Arctic.overlayState.itemEdition = item }
+    }
     Spacer(modifier = Modifier.width(7.dp))
     ItemAlterButton(Localizations.UiText("duplicate")) {
         if (item.where == editor.view) {

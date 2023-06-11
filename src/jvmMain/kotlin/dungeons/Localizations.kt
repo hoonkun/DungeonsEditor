@@ -111,8 +111,11 @@ class Localizations {
         private val EnUiTexts = mapOf(
             "season_limited" to "SeasonLimited",
             "change_type" to "Replace",
+            "change_type_tooltip" to "Change this item to another",
             "transfer" to "Transfer",
             "pull" to "Pull",
+            "transfer_tooltip" to "Transfer this item to {0}",
+            "pull_tooltip" to "Pull this item from {0} to here({1})",
             "duplicate" to "Duplicate",
             "delete" to "Delete",
             "unknown_item" to "Unknown Item",
@@ -169,8 +172,11 @@ class Localizations {
         private val KoUiTexts = mapOf(
             "season_limited" to "시즌한정",
             "change_type" to "타입 변경",
+            "change_type_tooltip" to "이 아이템을 다른 아이템으로 변경합니다",
             "transfer" to "{0}로 보내기",
             "pull" to "여기로 가져오기",
+            "transfer_tooltip" to "이 아이템을 {0}로 보냅니다",
+            "pull_tooltip" to "이 아이템을 {0}로부터 여기({1})로 가져옵니다",
             "duplicate" to "복제",
             "delete" to "삭제",
             "unknown_item" to "알 수 없는 아이템",
