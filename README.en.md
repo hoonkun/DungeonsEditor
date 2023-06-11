@@ -26,7 +26,7 @@ Download the files for your operating system from the Release section.
 - Linux: Delete the AppImage file, and delete the `~/.dungeons-editor` directory.
 - Windows: Delete the directory you unzipped, and delete `%HOMEDRIVE%%HOMEPATH$/.dungeons-editor`. (This is usually `C:\Users\{{username}}\.dungeons-editor`.)
 
-## Enable
+## Usage
 ### Open the file
 1. run the tool and wait for it to finish looking for resource files.
     - If you see a screen that says 'Cannot find game resources', this means that you will need to specify your own game installation location.
