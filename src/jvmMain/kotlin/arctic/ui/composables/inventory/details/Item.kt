@@ -74,7 +74,7 @@ private fun Content(item: Item, editor: EditorState) {
                 .offset((-10).dp, 60.dp)
         )
         Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-            Row { ItemAlterLeft(item) }
+            Row(modifier = Modifier.padding(bottom = 10.dp)) { ItemAlterLeft(item) }
 
             ItemName(item.data.name ?: Localizations.UiText("unknown_item"))
 

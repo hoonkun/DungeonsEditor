@@ -129,10 +129,10 @@ fun TitleView(modifier: Modifier = Modifier) {
                     fontFamily = JetbrainsMono,
                     hoverInteraction = "outline",
                     buttonSize = (if (LocalData.locale == "en") 225.dp else 145.dp) to 52.dp,
-                    radius = 4.dp.value,
-                    stroke = 2.dp.value,
+                    radius = 4f,
+                    stroke = 2f,
                     maxFontSize = 18.sp,
-                    useAutoSizeText = false,
+                    useAutoSizeText = true,
                     modifier = Modifier.align(Alignment.CenterEnd).offset(x = (-295).dp, y = (-260).dp)
                 ) {
                     LocalData.locale = if (LocalData.locale == "en") "ko-KR" else "en"

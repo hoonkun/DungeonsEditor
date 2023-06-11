@@ -53,9 +53,9 @@ data class ItemData(
 
     val builtInProperties by lazy { Database.armorProperties.filter { it.defaultIn.contains(type) } }
 
-    val name by lazy { Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"] }
-    val flavour by lazy { Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"] }
-    val description by lazy { Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"] }
+    val name get() = Localizations["ItemType/${Localizations.ItemNameCorrections[type] ?: type}"]
+    val flavour get() = Localizations["ItemType/Flavour_${Localizations.ItemFlavourCorrections[type] ?: type}"]
+    val description get() = Localizations["ItemType/Desc_${Localizations.ItemDescriptionCorrections[type] ?: type}"]
 
     val inventoryIcon: ImageBitmap by lazy {
         retrieveImage("Inventory") { it.endsWith("_icon_inventory") }
@@ -101,19 +101,16 @@ data class EnchantmentData(
     val specialDescValues: List<String>? = null
 ) {
 
-    val name: String by lazy {
+    val name: String get() =
         Localizations["Enchantment/${Localizations.EnchantmentNameCorrections[id] ?: id}"] ?: "???"
-    }
 
-    val description: String? by lazy {
+    val description: String? get() =
         if (id == "Unset") Localizations.UiText("enchantment_unset")
         else Localizations["Enchantment/${Localizations.EnchantmentDescriptionCorrections[id] ?: id}_desc"]
-    }
 
-    val effect: String? by lazy {
+    val effect: String? get() =
         if (id == "Unset") Localizations.UiText("enchantment_unset_effect")
         else Localizations[Localizations.EnchantmentFixedEffectCorrections[id] ?: "Enchantment/${Localizations.EnchantmentEffectCorrections[id] ?: id}_effect"]
-    }
 
     val icon: ImageBitmap by lazy {
         retrieveImage(id) { it.startsWith("t_") && it.endsWith("_icon") && !it.endsWith("shine_icon") }
@@ -196,7 +193,7 @@ data class ArmorPropertyData(
     val defaultIn: List<String> = emptyList()
 ) {
 
-    val description by lazy {
+    val description get() =
         (Localizations["ArmorProperties/${Localizations.ArmorPropertyCorrections[id] ?: id}_description"])
             ?.replace("{0}", "")
             ?.replace("{1}", "")
@@ -205,6 +202,5 @@ data class ArmorPropertyData(
             ?.replace("만큼", "")
             ?.replace("  ", " ")
             ?.trim()
-    }
 
 }
