@@ -21,8 +21,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerButton
+import androidx.compose.ui.text.TextStyle
 import arctic.states.EditorSelectionState
 import arctic.ui.composables.atomic.RarityColor
 import arctic.ui.composables.atomic.RarityColorType
@@ -55,7 +57,6 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorSelec
     Box(
         modifier = Modifier
             .aspectRatio(1f / 1f)
-            .padding(5.dp)
             .hoverable(interaction)
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Primary),
@@ -78,8 +79,8 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorSelec
 
                 drawRect(
                     brush = brush,
-                    topLeft = Offset(densityDp(-10), densityDp(-10)),
-                    size = Size(size.width + densityDp(20), size.height + densityDp(20)),
+                    topLeft = Offset(densityDp(-5), densityDp(-5)),
+                    size = Size(size.width + densityDp(10), size.height + densityDp(10)),
                     style = Stroke(width = densityDp(4))
                 )
             }
@@ -120,26 +121,28 @@ private fun BoxScope.PowerText(power: Double) =
         color = Color.White.copy(alpha = 0.85f),
         fontSize = 22.sp,
         fontFamily = JetbrainsMono,
-        modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 8.dp, horizontal = 10.dp)
+        style = TextStyle(shadow = Shadow(Color.Black, blurRadius = 5f)),
+        modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 17.dp, vertical = 14.dp)
     )
 
 @Composable
 private fun BoxScope.InvestedEnchantmentPointsText(points: Int) =
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.align(Alignment.TopEnd).padding(vertical = 8.dp, horizontal = 10.dp)
+        modifier = Modifier.align(Alignment.TopEnd).padding(horizontal = 17.dp, vertical = 14.dp)
     ) {
-        Image(
-            bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
-            contentDescription = null,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.width(5.dp))
         Text(
             text = "$points",
             color = Color.White.copy(alpha = 0.85f),
             fontSize = 22.sp,
-            fontFamily = JetbrainsMono
+            fontFamily = JetbrainsMono,
+            style = TextStyle(shadow = Shadow(Color.Black, blurRadius = 5f))
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Image(
+            bitmap = IngameImages.get { "/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png" },
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
         )
     }
 
@@ -148,10 +151,11 @@ private fun ItemImage(item: Item, simplified: Boolean) =
     Image(
         bitmap = item.data.inventoryIcon,
         contentDescription = null,
+        alignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .drawWithContent { drawItemFrame(item.rarity, item.glided, item.enchanted) }
-            .padding(if (simplified) 12.5.dp else 20.dp)
+            .drawWithContent { drawItemFrame(item.rarity, item.glided, item.enchanted, item.data.variant == "Artifact") }
+            .padding(all = if (simplified) 12.5.dp else 20.dp)
     )
 
 @Composable

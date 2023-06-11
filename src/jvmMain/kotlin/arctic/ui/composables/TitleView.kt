@@ -308,7 +308,8 @@ private fun EquipmentSummaryEach(item: Item?) {
                     drawItemFrame(
                         rarity = item.rarity,
                         glided = item.netheriteEnchant != null,
-                        enchanted = item.totalEnchantmentInvestedPoints > 0
+                        enchanted = item.totalEnchantmentInvestedPoints > 0,
+                        artifact = item.data.variant == "Artifact"
                     )
                 }
                 .padding(10.dp)
@@ -320,7 +321,7 @@ private fun EquipmentSummaryEach(item: Item?) {
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(120.dp)
-                .drawWithContent { drawItemFrame(rarity = "Common", glided = false, enchanted = false) }
+                .drawWithContent { drawItemFrame(rarity = "Common", glided = false, enchanted = false, artifact = false) }
         ) {
             Text("/", fontSize = 30.sp, color = Color.White.copy(alpha = 0.45f), fontWeight = FontWeight.Bold)
         }

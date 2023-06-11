@@ -10,7 +10,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.IntSize
 import arctic.ui.unit.dp
+import dungeons.IngameImages
 
 
 fun DrawScope.densityDp(value: Int): Float = value.dp.value * density
@@ -28,17 +30,34 @@ fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean = false)
 }
 
 @Stable
-fun ContentDrawScope.drawItemFrame(rarity: String, glided: Boolean, enchanted: Boolean) {
-    drawRect(RarityBackgroundGradient(rarity))
+fun ContentDrawScope.drawItemFrame(rarity: String, glided: Boolean, enchanted: Boolean, artifact: Boolean) {
+    val backName =
+        when(rarity) {
+            "Common" -> "main"
+            "Rare" -> "rare"
+            "Unique" -> "unique"
+            else -> "main"
+        }
+
     if (glided) drawRect(GlidedItemBackgroundGradient())
-
-    drawContent()
-
-    drawRect(PowerBackgroundGradient())
     if (enchanted) drawRect(EnchantmentPointsBackgroundGradient())
 
-    drawRect(RarityBorderGradient1(rarity), style = Stroke(densityDp(5)))
-    drawRect(RarityBorderGradient2(rarity, size.width, size.height), style = Stroke(densityDp(5)))
+    drawImage(
+        image = IngameImages.get { "/Game/UI/Materials/Inventory2/Slot/v2_${if (artifact) "item" else "gear"}_${backName}_slot.png" },
+        srcSize = IntSize(322, 322),
+        dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+        alpha = 0.85f
+    )
+    if (rarity == "Rare" || rarity == "Unique") {
+        drawImage(
+            image = IngameImages.get { "/Game/UI/Materials/Inventory2/Slot/v2_${backName}_overlay.png" },
+            srcSize = IntSize(322, 322),
+            dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+            alpha = 0.85f
+        )
+    }
+
+    drawContent()
 }
 
 @Stable
