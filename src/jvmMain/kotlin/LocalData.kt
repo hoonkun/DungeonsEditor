@@ -1,4 +1,5 @@
 import androidx.compose.runtime.*
+import dungeons.Localizations
 import dungeons.readDungeonsSummary
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -6,14 +7,16 @@ import java.io.File
 
 @Serializable
 data class LocalDataRaw(
+    val locale: String = "en",
     val recentFiles: List<String> = emptyList(),
     val customPakLocation: String? = null
 )
 
 class LocalData {
     companion object {
-
         private var current = getOrCreateLocalData()
+
+        var locale by mutableStateOf(current.locale)
 
         val recentFiles = current.recentFiles.toMutableStateList()
 
@@ -37,9 +40,8 @@ class LocalData {
         }
 
         fun save() {
-            localDataFile().writeText(Json.encodeToString(LocalDataRaw.serializer(), LocalDataRaw(recentFiles, customPakLocation)))
+            localDataFile().writeText(Json.encodeToString(LocalDataRaw.serializer(), LocalDataRaw(locale, recentFiles, customPakLocation)))
         }
-
     }
 }
 
@@ -53,5 +55,9 @@ private fun getOrCreateLocalData(): LocalDataRaw {
         local.writeText("{}")
     }
     val raw = Json.decodeFromString(LocalDataRaw.serializer(), local.readText())
-    return LocalDataRaw(raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) }, raw.customPakLocation)
+    return LocalDataRaw(
+        locale = if (Localizations.supported.contains(raw.locale)) raw.locale else "en",
+        recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
+        customPakLocation = raw.customPakLocation
+    )
 }

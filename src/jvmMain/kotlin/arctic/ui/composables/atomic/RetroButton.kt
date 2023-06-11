@@ -15,15 +15,13 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
-
-
-private const val radius = 8
-private const val stroke = 5
 
 @Composable
 fun RetroButton(
@@ -33,10 +31,15 @@ fun RetroButton(
     disabledColor: Color = Color(0xff666666),
     enabled: Boolean = true,
     buttonSize: Pair<Dp, Dp> = 225.dp to 70.dp,
+    fontFamily: FontFamily = FontFamily.Default,
+    radius: Float = 8f,
+    stroke: Float = 5f,
+    bold: Boolean = true,
+    maxFontSize: TextUnit = 24.sp,
+    useAutoSizeText: Boolean = true,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
@@ -46,24 +49,44 @@ fun RetroButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
+            .then(modifier)
             .size(buttonSize.first, buttonSize.second)
             .hoverable(source, enabled)
-            .clickable(source, null, enabled, onClick = onClick).then(modifier)
+            .clickable(source, null, enabled, onClick = onClick)
     ) {
         if (hoverInteraction == "outline") {
-            if (hovered) Outline(Color.White)
-            Solid(solidColor)
-            if (pressed) Outline(Color.Black, alpha = 0.25f)
+            if (hovered) Outline(Color.White, radius = radius)
+            Solid(solidColor, radius = radius, stroke = stroke)
+            if (pressed) Outline(Color.Black, alpha = 0.25f, radius = radius)
         } else if (hoverInteraction == "overlay") {
-            if (hovered) Solid(solidColor, alpha = 0.2f)
-            if (pressed) Solid(Color.Black, alpha = 0.25f)
+            if (hovered) Solid(solidColor, alpha = 0.2f, radius = radius, stroke = stroke)
+            if (pressed) Solid(Color.Black, alpha = 0.25f, radius = radius, stroke = stroke)
         }
-        AutosizeText(text = text, maxFontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp))
+        if (useAutoSizeText) {
+            AutosizeText(
+                text = text,
+                maxFontSize = maxFontSize,
+                fontFamily = fontFamily,
+                color = Color.White,
+                fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+                widthKey = buttonSize.first,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        } else {
+            Text(
+                text = text,
+                fontSize = maxFontSize,
+                fontFamily = fontFamily,
+                color = Color.White,
+                fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
     }
 }
 
 @Composable
-private fun Outline(color: Color, alpha: Float = 1f) {
+private fun Outline(color: Color, alpha: Float = 1f, radius: Float) {
     Spacer(
         modifier = Modifier
             .fillMaxSize()
@@ -84,7 +107,7 @@ private fun Outline(color: Color, alpha: Float = 1f) {
 }
 
 @Composable
-private fun Solid(color: Color, alpha: Float = 1f) {
+private fun Solid(color: Color, alpha: Float = 1f, radius: Float, stroke: Float) {
     Spacer(
         modifier = Modifier
             .fillMaxSize()

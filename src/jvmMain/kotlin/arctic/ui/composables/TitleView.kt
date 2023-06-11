@@ -18,13 +18,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import arctic.states.Arctic
 import arctic.states.ArcticState
 import arctic.states.EditorState
 import arctic.ui.composables.atomic.BlurEffectedImage
+import arctic.ui.composables.atomic.RetroButton
 import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.atomic.drawItemFrame
 import arctic.ui.composables.fonts.JetbrainsMono
@@ -116,9 +119,25 @@ fun TitleView(modifier: Modifier = Modifier) {
                     color = Color(0xff090500),
                     modifier = Modifier
                         .offset(x = (-295).dp, y = (-260).dp)
+                        .height(52.dp)
                         .background(Color(0xffff8800))
                         .padding(start = 15.dp, top = 5.dp, bottom = 5.dp, end = 415.dp)
                 )
+                RetroButton(
+                    text = Localizations.Names[LocalData.locale] ?: "",
+                    color = Color(0xffa25400),
+                    fontFamily = JetbrainsMono,
+                    hoverInteraction = "outline",
+                    buttonSize = (if (LocalData.locale == "en") 225.dp else 145.dp) to 52.dp,
+                    radius = 4.dp.value,
+                    stroke = 2.dp.value,
+                    maxFontSize = 18.sp,
+                    useAutoSizeText = false,
+                    modifier = Modifier.align(Alignment.CenterEnd).offset(x = (-295).dp, y = (-260).dp)
+                ) {
+                    LocalData.locale = if (LocalData.locale == "en") "ko-KR" else "en"
+                    LocalData.save()
+                }
 
                 Divider(alignment = Alignment.Top)
                 Divider(alignment = Alignment.Bottom)
@@ -152,7 +171,7 @@ fun TitleView(modifier: Modifier = Modifier) {
                     modifier = Modifier.align(Alignment.TopStart).fillMaxHeight(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    SelectSectionHeader("main_icon_history.svg", "Recent Files")
+                    SelectSectionHeader("main_icon_history.svg", Localizations.UiText("recent_files"))
                     for (recent in LocalData.recentSummaries) {
                         val (path) = recent
                         val (text, subtext) = separatePathAndName(path)
@@ -169,7 +188,7 @@ fun TitleView(modifier: Modifier = Modifier) {
 
                     Spacer(modifier = Modifier.height(125.dp))
 
-                    SelectSectionHeader("main_icon_detected_files.svg", "Detected Files")
+                    SelectSectionHeader("main_icon_detected_files.svg", Localizations.UiText("detected_files"))
                     for (detected in DungeonsJsonFile.detected) {
                         val (path) = detected
                         val (text, subtext) = separatePathAndName(path)

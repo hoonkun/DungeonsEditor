@@ -1,6 +1,7 @@
 package dungeons
 
 import ByteArrayReader
+import LocalData
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,13 +17,18 @@ class Localizations {
 
     companion object {
 
-        var currentLocale by mutableStateOf("en")
+        val supported = listOf("en", "ko-KR")
+
+        val Names = mapOf(
+            "en" to "Language: English",
+            "ko-KR" to "언어: 한국어"
+        )
 
         private var _texts: Map<String, Map<String, String>>? = null
-        val texts get() = _texts!!
+        private val texts get() = _texts!!
 
         operator fun get(key: String): String? {
-            return texts[currentLocale]?.get(key)
+            return texts[LocalData.locale]?.get(key)
         }
 
         private val ItemCorrections = mapOf(
@@ -174,7 +180,9 @@ class Localizations {
             "tips_2" to "To remove enchantment or armor property, click selected item in left list again.",
             "tips_3" to "To exit popup without any 'close' or 'cancel' button, click any position in window.",
             "tips_4" to "File selector, using another explorer to pasting path is more convenient",
-            "tips_5" to "There is no guarantee with edit output file is playable in game, so MAKE BACKUPS PROPERLY."
+            "tips_5" to "There is no guarantee with edit output file is playable in game, so MAKE BACKUPS PROPERLY.",
+            "recent_files" to "Recent Files",
+            "detected_files" to "Detected Files"
         )
         private val KoUiTexts = mapOf(
             "season_limited" to "시즌한정",
@@ -242,7 +250,9 @@ class Localizations {
             "tips_2" to "이미 추가된 효과, 방어구 속성을 삭제하려면 목록에서 선택된 항목을 다시 한 번 누릅니다.",
             "tips_3" to "대체로, 닫기 버튼이 없는 팝업 화면에서 빠져나가려면 주변의 빈 공간을 누르면 됩니다.",
             "tips_4" to "파일을 찾거나 저장할 때 보이는 파일 선택기에는 직접 입력하기보다는 기존 탐색기에서 경로를 복사해 붙혀넣는 것이 편리합니다.",
-            "tips_5" to "수정 후 나온 결과물을 실제 게임 클라이언트가 받아줄 거라는 보장이 없으므로, 반드시 항상 백업을 만들어주세요."
+            "tips_5" to "수정 후 나온 결과물을 실제 게임 클라이언트가 받아줄 거라는 보장이 없으므로, 반드시 항상 백업을 만들어주세요.",
+            "recent_files" to "Recent Files",
+            "detected_files" to "Detected Files"
         )
 
         val UiTexts = mapOf(
@@ -251,7 +261,7 @@ class Localizations {
         )
 
         fun UiText(key: String, vararg args: String): String {
-            var text = UiTexts.getValue(currentLocale)[key.lowercase()] ?: key
+            var text = UiTexts.getValue(LocalData.locale)[key.lowercase()] ?: key
             args.forEachIndexed { index, s -> text = text.replace("{$index}", s) }
             return text
         }
