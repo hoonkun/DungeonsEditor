@@ -167,7 +167,14 @@ class Localizations {
             "item_creation_other_options_description" to "You can edit other properties after adding this item!",
             "item_creation_armor_property_description" to "Default set of armor properties are manually hard coded, so it may not accurate.",
             "enchantment_unset" to "Set this slot as inactivated.\nApplying this to netherite enchantment will delete this item's glided property.",
-            "enchantment_unset_effect" to "Do nothing in {0}% possibilities"
+            "enchantment_unset_effect" to "Do nothing in {0}% possibilities",
+            "tips_title" to "Amateur Tips",
+            "tips_0" to "You can display maximum 2 items in this area using LeftClick or RightClick",
+            "tips_1" to "To modify inactive enchantments in activated slot, set activated enchantment's level to zero first.",
+            "tips_2" to "To remove enchantment or armor property, click selected item in left list again.",
+            "tips_3" to "To exit popup without any 'close' or 'cancel' button, click any position in window.",
+            "tips_4" to "File selector, using another explorer to pasting path is more convenient",
+            "tips_5" to "There is no guarantee with edit output file is playable in game, so MAKE BACKUPS PROPERLY."
         )
         private val KoUiTexts = mapOf(
             "season_limited" to "시즌한정",
@@ -228,7 +235,14 @@ class Localizations {
             "item_creation_other_options_description" to "다른 옵션들은 추가한 뒤에 우측 영역에서 수정할 수 있어요!",
             "item_creation_armor_property_description" to "추가 후 표시되는 기본 ArmorProperty 값은 수기로 기록된 것으로, 정확하지 않을 수 있습니다.",
             "enchantment_unset" to "이 슬롯을 비활성화 상태로 변경합니다.\n'화려한'에 설정된 효과 부여의 경우 금박이 지워진 상태로 변경됩니다.",
-            "enchantment_unset_effect" to "{0}% 확률로 아무것도 하지 않습니다?"
+            "enchantment_unset_effect" to "{0}% 확률로 아무것도 하지 않습니다?",
+            "tips_title" to "아마추어 팁",
+            "tips_0" to "이 영역에는 좌클릭/우클릭으로 최대 두 개의 아이템을 표시할 수 있습니다.",
+            "tips_1" to "활성화된 효과부여 슬롯에서 나머지 비활성화된 슬롯을 수정하려면 먼저 활성화된 효과부여를 0레벨로 변경하여 비활성화합니다.",
+            "tips_2" to "이미 추가된 효과, 방어구 속성을 삭제하려면 목록에서 선택된 항목을 다시 한 번 누릅니다.",
+            "tips_3" to "대체로, 닫기 버튼이 없는 팝업 화면에서 빠져나가려면 주변의 빈 공간을 누르면 됩니다.",
+            "tips_4" to "파일을 찾거나 저장할 때 보이는 파일 선택기에는 직접 입력하기보다는 기존 탐색기에서 경로를 복사해 붙혀넣는 것이 편리합니다.",
+            "tips_5" to "수정 후 나온 결과물을 실제 게임 클라이언트가 받아줄 거라는 보장이 없으므로, 반드시 항상 백업을 만들어주세요."
         )
 
         val UiTexts = mapOf(

@@ -19,6 +19,7 @@ import arctic.ui.composables.inventory.details.ItemDetail
 import arctic.ui.composables.overlays.extended.tween250
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import dungeons.Localizations
 
 @Composable
 fun InventoryView(editor: EditorState) {
@@ -112,17 +113,12 @@ private fun SomeTips() =
         modifier = Modifier.fillMaxSize().offset(x = 35.dp).alpha(0.85f)
     ) {
         TipsTitle()
-        Tip("이 영역에는 좌클릭/우클릭으로 최대 두 개의 아이템을 표시할 수 있습니다.")
-        Tip("활성화된 효과부여 슬롯에서 나머지 비활성화된 슬롯을 수정하려면 먼저 활성화된 효과부여를 0레벨로 변경하여 비활성화합니다.")
-        Tip("이미 추가된 효과, 방어구 속성을 삭제하려면 목록에서 선택된 항목을 다시 한 번 누릅니다.")
-        Tip("대체로, 닫기 버튼이 없는 팝업 화면에서 빠져나가려면 주변의 빈 공간을 누르면 됩니다.")
-        Tip("파일을 찾거나 저장할 때 보이는 파일 선택기에는 직접 입력하기보다는 기존 탐색기에서 경로를 복사해 붙혀넣는 것이 편리합니다.")
-        Tip("수정 후 나온 결과물을 실제 게임 클라이언트가 받아줄 거라는 보장이 없으므로, 반드시 항상 백업을 만들어주세요.")
+        for (i in 0 until 6) { Tip(Localizations.UiText("tips_${i}")) }
     }
 
 @Composable
 private fun TipsTitle() {
-    Text(text = "아마추어 팁", fontSize = 48.sp, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 60.dp, vertical = 30.dp))
+    Text(text = Localizations.UiText("tips_title"), fontSize = 48.sp, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 60.dp, vertical = 30.dp))
 }
 
 @Composable
