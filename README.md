@@ -15,10 +15,11 @@
 이슈 환영!!
 
 ## 다운로드 및 설치
-Release 섹션에서 운영체제에 맞는 설치파일을 다운받습니다.
-- Linux: DungeonsEditor.AppImage
-- Windows: DungeonsEditor.zip
-  - 적절한 위치에 압축을 해제하면, DungeonsEditor.exe 라는 파일을 통해 실행할 수 있습니다.
+Release 섹션에서 운영체제에 맞는 파일을 다운받습니다.
+- Linux: DungeonsEditor.AppImage  
+  실행파일로, 해당 파일로 바로 실행 가능합니다.
+- Windows: DungeonsEditor.zip  
+  적절한 위치에 압축을 해제하면, DungeonsEditor.exe 라는 파일을 통해 실행할 수 있습니다.
 
 ## 완전히 삭제
 - Linux: AppImage 파일을 삭제하고, `~/.dungeons-editor` 디렉터리를 삭제합니다.
@@ -86,6 +87,20 @@ Release 섹션에서 운영체제에 맞는 설치파일을 다운받습니다.
 - 파일의 경로를 입력하면, 해당 파일을 만들거나 이미 존재했을 경우 덮어씁니다.
 
 파일이 저장되는 디렉터리에 자동으로 백업파일을 만드므로, 불필요하다고 판단하실 경우 수동으로 지우셔야합니다.
+
+## settings.arctic 파일
+툴을 재실행할 경우 반영되는 설정 집합입니다. 실행파일(AppImage, exe)와 같은 위치에 `settings.arctic` 이라는 이름의 파일을 수정하여 설정할 수 있습니다.  
+현재 두 필드가 설정가능합니다:
+- scale: Float  
+  실행될 툴의 글로벌 크기를 설정합니다. 기본 0.5로 설정되며, [0.4, 1.35] 범위 내에서 설정 가능합니다.
+- preload_textures: Boolean  
+  툴 실행 시 텍스쳐 파일을 미리 읽을지 여부를 설정합니다. 처음에 잠깐 기다리고 실행 중 부드럽게 사용할지(true), 혹은 빠르게 실행하고 툴 실행 중 약간의 버벅거림을 감수할지(false)를 설정합니다.
+
+설정파일 예시 포멧은 아래와 같습니다.
+```
+scale=0.5
+preload_textures=true
+```
 
 ## 직접 빌드해보기
 아마 PakReader 의 종속과 Keyset 이 없어서 빌드가 되지 않을 것입니다.  
