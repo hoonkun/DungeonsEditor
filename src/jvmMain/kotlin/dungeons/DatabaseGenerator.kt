@@ -78,7 +78,7 @@ class DatabaseGenerator {
             "BonusShot", "FireAspect", "MultiShot", "Gravity", "TempoTheft", "ChainReaction", "RadianceRanged",
             "SmitingRanged", "PoisonedRanged", "LevitationShot", "EnigmaResonatorRanged", "VoidTouchedRanged",
             "RollCharge", "MultiCharge", "PotionThirstRanged", "DippingPoison", "CooldownShot", "ShockWeb", "ArtifactCharge",
-            "Exploding"
+            "Exploding", "CriticalHit"
         )
 
         private val ExclusiveEnchantments = mapOf(
