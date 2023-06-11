@@ -199,15 +199,15 @@ private fun ItemNetheriteEnchantButton(holder: Item) {
                 bitmap = enchantment.data.icon,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(28.dp)
+                    .requiredSize(30.dp)
                     .offset(x = (-2).dp)
                     .drawBehind {
                         drawImage(
-                            image = IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/enchantSpecialUnique_Bullit.png" },
+                            image = IngameImages.get { "/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png" },
                             dstSize = IntSize(size.width.toInt(), size.height.toInt())
                         )
                     }
-                    .scale(1.2f)
+                    .scale(1.05f)
             )
             Spacer(modifier = Modifier.width(5.dp))
             Text(text = Localizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 18.sp, color = Color.White)
