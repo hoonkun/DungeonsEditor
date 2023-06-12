@@ -5,8 +5,7 @@ Currently, MinecraftDungeons is only officially supported on Windows, but there 
 
 All images and text displayed within the tool are read from the installed game data, so it will not work on devices that do not have Minecraft Dungeons installed.
 
-![Preview image](./preview.png)
-(Above screenshot shows tool's language with Korean, but tool also supports English as default!)
+![Preview image](./preview_en.png)
 
 ## Comment
 This is the version that just goes around.  
