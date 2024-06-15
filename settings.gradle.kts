@@ -15,4 +15,4 @@ pluginManagement {
 rootProject.name = "DungeonsEditor"
 
 include(":PakReader")
-project(":PakReader").projectDir = file("../PakReaderMultiplatform")
+project(":PakReader").projectDir = file("../PakReader")
