@@ -10,6 +10,7 @@ import pak.PathPakFilter
 import parsers.objects.fields.Guid
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.jvm.optionals.getOrNull
@@ -55,7 +56,7 @@ class PakRegistry {
             val candidate = candidates.find { File(it.split("/").joinToString(File.separator)).exists() }
             if (candidate != null) return candidate
 
-            val files = Files.walk(Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata"))
+            val files = try { Files.walk(Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata")) } catch (e: NoSuchFileException) { return null }
             val found = files.filter { it.absolutePathString().endsWith("/Dungeons/Content/Paks") }.findFirst()
 
             return found.getOrNull()?.absolutePathString()
