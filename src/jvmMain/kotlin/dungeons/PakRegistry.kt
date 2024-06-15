@@ -48,10 +48,26 @@ class PakRegistry {
             val customPakLocation = LocalData.customPakLocation
             if (customPakLocation != null && File(customPakLocation).exists()) return customPakLocation
 
+            val packageContentPath = "Dungeons/Content/Paks"
+            val possibleDrives = "CDEF"
+
+            val launcherContentPath = "XboxGames/Minecraft Dungeons/Content"
+            val possibleLauncherLocations = possibleDrives
+                .map { "$it:/$launcherContentPath/$packageContentPath" }
+                .toTypedArray()
+
+            val steamContentPath = "steamapps/common/MinecraftDungeons"
+            val possibleSteamLocations = listOf(
+                "${System.getenv("ProgramFiles(x86)")}/Steam",
+                *possibleDrives.map { "$it:/SteamLibrary" }.toTypedArray()
+            )
+                .map { "$it/$steamContentPath/$packageContentPath" }
+                .toTypedArray()
+
             val candidates = listOf(
                 "${System.getProperty("user.home")}/AppData/Local/Mojang/products/dungeons/dungeons/Dungeons/Content/Paks",
-                "${System.getenv("ProgramFiles(x86)")}/Steam/steamapps/common/MinecraftDungeons/Dungeons/Content/Paks",
-                "C:/XboxGames/Minecraft Dungeons/Content/Dungeons/Content/Paks"
+                *possibleLauncherLocations,
+                *possibleSteamLocations
             )
             val candidate = candidates.find { File(it.split("/").joinToString(File.separator)).exists() }
             if (candidate != null) return candidate
