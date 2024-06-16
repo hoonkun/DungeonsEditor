@@ -34,7 +34,9 @@ import arctic.ui.composables.atomic.RetroButton
 import arctic.ui.composables.atomic.densityDp
 import arctic.ui.composables.atomic.drawItemFrame
 import arctic.ui.composables.fonts.JetbrainsMono
-import arctic.ui.composables.overlays.extended.tween250
+import arctic.ui.composables.overlays.extended.defaultFadeIn
+import arctic.ui.composables.overlays.extended.defaultFadeOut
+import arctic.ui.composables.overlays.extended.defaultSlideIn
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import arctic.ui.utils.rememberMutableInteractionSource
@@ -70,7 +72,7 @@ fun TitleView(modifier: Modifier = Modifier) {
 
     AnimatedContent(
         targetState = Arctic.editorState == null,
-        transitionSpec = { fadeIn() with fadeOut() },
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
         modifier = Modifier.fillMaxSize().then(modifier)
     ) { isInTitle ->
         if (isInTitle) {
@@ -224,7 +226,6 @@ private fun BoxScope.Clickable(modifier: Modifier) =
             .then(modifier)
     )
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun BoxScope.Summary(
     targetState: DungeonsSummary?,
@@ -247,9 +248,9 @@ private fun BoxScope.Summary(
         AnimatedContent(
             targetState = targetState,
             transitionSpec = {
-                val enter = fadeIn(tween250()) + slideIn(tween250()) { IntOffset(-50.dp.value.toInt(), 0) }
-                val exit = fadeOut(tween250())
-                enter with exit using SizeTransform(false)
+                val enter = defaultFadeIn() + defaultSlideIn { IntOffset(-50.dp.value.toInt(), 0) }
+                val exit = defaultFadeOut()
+                enter togetherWith exit using SizeTransform(false)
             },
             modifier = Modifier.fillMaxSize()
         ) { summary ->

@@ -61,12 +61,12 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorSelec
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Primary),
                 enabled = item != null,
-                onClick = { if (item != null) selection.select(item, EditorSelectionState.EditorSelectionSlot.Primary) }
+                onClick = { if (item != null) selection.select(item, EditorSelectionState.Slot.Primary) }
             )
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Secondary),
                 enabled = item != null,
-                onClick = { if (item != null) selection.select(item, EditorSelectionState.EditorSelectionSlot.Secondary) }
+                onClick = { if (item != null) selection.select(item, EditorSelectionState.Slot.Secondary) }
             )
             .drawBehind {
                 val brush =

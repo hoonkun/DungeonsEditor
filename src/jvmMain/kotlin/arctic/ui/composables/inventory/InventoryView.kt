@@ -16,7 +16,10 @@ import arctic.states.EditorState
 import arctic.ui.composables.inventory.collections.EquippedItemCollection
 import arctic.ui.composables.inventory.collections.UnequippedItemCollection
 import arctic.ui.composables.inventory.details.ItemDetail
-import arctic.ui.composables.overlays.extended.tween250
+import arctic.ui.composables.overlays.extended.defaultFadeIn
+import arctic.ui.composables.overlays.extended.defaultFadeOut
+import arctic.ui.composables.overlays.extended.defaultSlideIn
+import arctic.ui.composables.overlays.extended.defaultSlideOut
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 import dungeons.Localizations
@@ -52,21 +55,19 @@ private fun Content(editor: EditorState) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun <S>LeftAreaAnimator(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {
-            val enter = fadeIn(tween250()) + slideIn(tween250(), initialOffset = { IntOffset(50.dp.value.toInt(), 0) })
-            val exit = fadeOut(tween250()) + slideOut(tween250(), targetOffset = { IntOffset(-50.dp.value.toInt(), 0) })
-            enter with exit using SizeTransform(false)
+            val enter = defaultFadeIn() + defaultSlideIn { IntOffset(50.dp.value.toInt(), 0) }
+            val exit = defaultFadeOut() + defaultSlideOut { IntOffset(-50.dp.value.toInt(), 0) }
+            enter togetherWith exit using SizeTransform(false)
         },
         modifier = Modifier.width(657.dp),
         content = content
     )
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun <S>RightAreaAnimator(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
     AnimatedContent(
@@ -74,7 +75,7 @@ private fun <S>RightAreaAnimator(targetState: S, content: @Composable AnimatedVi
         transitionSpec = {
             val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
             val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
-            enter with exit
+            enter togetherWith exit
         },
         modifier = Modifier.fillMaxHeight().width(718.dp),
         content = content

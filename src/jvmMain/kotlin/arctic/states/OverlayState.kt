@@ -42,7 +42,6 @@ class OverlayState {
     var enchantment: ItemEnchantmentOverlayState? by mutableStateOf(null)
     var armorProperty: ItemArmorPropertyOverlayState? by mutableStateOf(null)
 
-    @OptIn(ExperimentalComposeUiApi::class)
     fun pop(key: Key): Boolean {
         if (key != Key.Escape) return false
         val result = visible

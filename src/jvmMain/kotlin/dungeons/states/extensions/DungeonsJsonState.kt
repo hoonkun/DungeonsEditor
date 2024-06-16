@@ -19,7 +19,7 @@ fun DungeonsJsonState.addItem(editor: EditorState, newItem: Item, copiedFrom: It
         editor.selection.replace(copiedFrom, newItem)
     } else {
         editor.selection.clear()
-        editor.selection.select(newItem, EditorSelectionState.EditorSelectionSlot.Primary)
+        editor.selection.select(newItem, EditorSelectionState.Slot.Primary)
     }
 }
 

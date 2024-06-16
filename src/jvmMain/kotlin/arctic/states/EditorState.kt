@@ -7,7 +7,6 @@ import dungeons.states.Item
 
 @Stable
 class EditorState(json: DungeonsJsonState) {
-
     val stored: DungeonsJsonState = json
 
     val selection: EditorSelectionState = EditorSelectionState()
@@ -22,7 +21,6 @@ class EditorState(json: DungeonsJsonState) {
         val localizedName get() = if (this == Inventory) Localizations.UiText("inventory") else Localizations.UiText("storage")
         fun other() = if (this == Inventory) Storage else Inventory
     }
-
 }
 
 @Stable
@@ -34,16 +32,16 @@ class EditorSelectionState {
 
     val hasSelection by derivedStateOf { primary != null || secondary != null }
 
-    fun slotOf(item: Item) = if (primary == item) EditorSelectionSlot.Primary else if (secondary == item) EditorSelectionSlot.Secondary else null
+    fun slotOf(item: Item) = if (primary == item) Slot.Primary else if (secondary == item) Slot.Secondary else null
 
     fun selected(item: Item?) = item != null && (primary == item || secondary == item)
 
-    fun select(item: Item, into: EditorSelectionSlot, unselectIfAlreadySelected: Boolean = true) {
+    fun select(item: Item, into: Slot, unselectIfAlreadySelected: Boolean = true) {
         if (selected(item))
             if (unselectIfAlreadySelected) return unselect(item)
             else return
         else
-            if (into == EditorSelectionSlot.Primary) primary = item
+            if (into == Slot.Primary) primary = item
             else secondary = item
     }
 
@@ -62,7 +60,7 @@ class EditorSelectionState {
         secondary = null
     }
 
-    enum class EditorSelectionSlot {
+    enum class Slot {
         Primary, Secondary
     }
 
