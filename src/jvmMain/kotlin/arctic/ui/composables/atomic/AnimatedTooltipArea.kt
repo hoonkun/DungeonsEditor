@@ -83,9 +83,8 @@ fun AnimatedTooltipArea(
             }
     ) {
         content()
-        @OptIn(ExperimentalFoundationApi::class)
         Popup(
-            popupPositionProvider = tooltipPlacement.positionProvider(),
+            popupPositionProvider = tooltipPlacement.positionProvider(Offset.Zero),
             onDismissRequest = { isVisible = false }
         ) {
             AnimatedVisibility(isVisible, enter = fadeIn(), exit = fadeOut(), modifier = Modifier) {

@@ -10,11 +10,10 @@ fun <T>tween250() = tween<T>(durationMillis = 250)
 
 class OverlayTransitions {
     companion object {
-        @OptIn(ExperimentalAnimationApi::class)
         fun <S>detail(
             slideEnabled: (S, S) -> Boolean = { _, _ -> true },
             sizeTransformDuration: (S, S) -> Int = { _, _ -> 250 }
-        ): AnimatedContentScope<S>.() -> ContentTransform = {
+        ): AnimatedContentTransitionScope<S>.() -> ContentTransform = {
             val slide = slideEnabled(this.initialState, this.targetState)
 
             var enter = fadeIn(tween250())
@@ -24,7 +23,7 @@ class OverlayTransitions {
             if (slide) exit += slideOut(tween250(), targetOffset = { IntOffset(0, -50.dp.value.toInt()) })
 
             val duration = sizeTransformDuration(this.initialState, this.targetState)
-            enter with exit using SizeTransform(false) { _, _ -> tween(durationMillis = duration) }
+            enter togetherWith exit using SizeTransform(false) { _, _ -> tween(durationMillis = duration) }
         }
     }
 }
