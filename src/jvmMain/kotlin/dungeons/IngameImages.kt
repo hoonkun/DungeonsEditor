@@ -2,14 +2,12 @@ package dungeons
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import extensions.decode
 import parsers.Texture2d
+import utils.TextureDecoder
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
 import java.awt.image.Raster
-import java.io.File
-import javax.imageio.ImageIO
 
 class IngameImages {
     companion object {
@@ -30,7 +28,7 @@ class IngameImages {
                 val texture = pakPackage.getExport<Texture2d>()
                     ?: throw RuntimeException("could not find texture data in pak package: $pakPath")
 
-                val decoded = texture.decode()
+                val decoded = TextureDecoder.decode(texture)
 
                 val image = BufferedImage(decoded.width, decoded.height, BufferedImage.TYPE_4BYTE_ABGR)
                 image.data = Raster.createRaster(image.sampleModel, DataBufferByte(decoded.data, decoded.data.size), Point())

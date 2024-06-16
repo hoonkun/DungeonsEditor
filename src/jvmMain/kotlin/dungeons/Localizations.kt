@@ -3,14 +3,8 @@ package dungeons
 import ByteArrayReader
 import LocalData
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import extensions.LocalizationResource
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import utils.LocalizationResource
 import java.io.ByteArrayInputStream
-import java.io.DataInputStream
 
 @Stable
 class Localizations {
