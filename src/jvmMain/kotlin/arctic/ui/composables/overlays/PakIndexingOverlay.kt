@@ -1,6 +1,7 @@
 package arctic.ui.composables.overlays
 
 import LocalData
+import Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -14,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import arctic.states.Arctic
-import arctic.states.ArcticState
 import arctic.ui.composables.fonts.JetbrainsMono
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
@@ -24,7 +24,10 @@ import arctic.ui.utils.setValue
 import dungeons.Database
 import dungeons.Localizations
 import dungeons.PakRegistry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 
@@ -40,8 +43,8 @@ fun PakIndexingOverlay() {
 
     var initialized by remember { mutableRefOf(false) }
 
-    OverlayBackdrop(Arctic.pakState == ArcticState.PakState.Uninitialized, 0.6f)
-    OverlayAnimator(Arctic.pakState == ArcticState.PakState.Uninitialized) {
+    OverlayBackdrop(Arctic.pakState == Arctic.PakState.Uninitialized, 0.6f)
+    OverlayAnimator(Arctic.pakState == Arctic.PakState.Uninitialized) {
         Content(stateText = stateText, progressText = progressText, progress = progress, totalProgress = totalProgress, completed = completed)
     }
 
@@ -54,7 +57,7 @@ fun PakIndexingOverlay() {
             stateText = "Pak 파일을 읽고있습니다"
 
             if (!PakRegistry.initialize()) {
-                Arctic.pakState = ArcticState.PakState.NotFound
+                Arctic.pakState = Arctic.PakState.NotFound
                 initialized = false
 
                 return@launch
@@ -90,7 +93,7 @@ fun PakIndexingOverlay() {
 
             delay(500)
 
-            Arctic.pakState = ArcticState.PakState.Initialized
+            Arctic.pakState = Arctic.PakState.Initialized
         }
     }
 }

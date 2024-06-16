@@ -2,25 +2,30 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import arctic.states.Arctic
-import arctic.states.ArcticState
 import arctic.states.EditorState
-import arctic.ui.composables.TitleView
 import arctic.ui.composables.BottomBar
+import arctic.ui.composables.TitleView
 import arctic.ui.composables.inventory.InventoryView
 import arctic.ui.composables.overlays.EditorOverlays
 import arctic.ui.composables.overlays.GlobalOverlays
@@ -32,7 +37,7 @@ import arctic.ui.unit.dp
 @Preview
 fun App() {
     val overlayState = Arctic.overlayState
-    val pakIndexing = Arctic.pakState != ArcticState.PakState.Initialized
+    val pakIndexing = Arctic.pakState != Arctic.PakState.Initialized
 
     val blur by animateDpAsState(
         targetValue =

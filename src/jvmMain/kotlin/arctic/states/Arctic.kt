@@ -1,12 +1,15 @@
 package arctic.states
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventType
 
 @Stable
-class ArcticState {
+object Arctic {
 
     var pakState: PakState by mutableStateOf(PakState.Uninitialized)
 
@@ -27,5 +30,3 @@ class ArcticState {
     }
 
 }
-
-val Arctic = ArcticState()
