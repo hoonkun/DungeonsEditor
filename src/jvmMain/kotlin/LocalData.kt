@@ -6,15 +6,13 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 @Serializable
-data class LocalDataRaw(
-    val locale: String = "en",
-    val recentFiles: List<String> = emptyList(),
-    val customPakLocation: String? = null
-)
-
-class LocalData {
+data class LocalData(
+    private val locale: String = "en",
+    private val recentFiles: List<String> = emptyList(),
+    private val customPakLocation: String? = null
+) {
     companion object {
-        private var current = getOrCreateLocalData()
+        private val current = getOrCreate()
 
         var locale by mutableStateOf(current.locale)
 
@@ -40,24 +38,24 @@ class LocalData {
         }
 
         fun save() {
-            localDataFile().writeText(Json.encodeToString(LocalDataRaw.serializer(), LocalDataRaw(locale, recentFiles, customPakLocation)))
+            localDataFile().writeText(Json.encodeToString(serializer(), LocalData(locale, recentFiles, customPakLocation)))
+        }
+
+        private fun localDataFile() = File("${System.getProperty("user.home")}/.dungeons_editor/saved_local.json")
+
+        private fun getOrCreate(): LocalData {
+            val local = localDataFile()
+            if (!local.exists()) {
+                local.parentFile.mkdirs()
+                local.createNewFile()
+                local.writeText("{}")
+            }
+            val raw = Json.decodeFromString(LocalData.serializer(), local.readText())
+            return LocalData(
+                locale = if (Localizations.supported.contains(raw.locale)) raw.locale else "en",
+                recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
+                customPakLocation = raw.customPakLocation
+            )
         }
     }
-}
-
-private fun localDataFile() = File("${System.getProperty("user.home")}/.dungeons_editor/saved_local.json")
-
-private fun getOrCreateLocalData(): LocalDataRaw {
-    val local = localDataFile()
-    if (!local.exists()) {
-        local.parentFile.mkdirs()
-        local.createNewFile()
-        local.writeText("{}")
-    }
-    val raw = Json.decodeFromString(LocalDataRaw.serializer(), local.readText())
-    return LocalDataRaw(
-        locale = if (Localizations.supported.contains(raw.locale)) raw.locale else "en",
-        recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
-        customPakLocation = raw.customPakLocation
-    )
 }

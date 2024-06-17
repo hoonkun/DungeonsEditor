@@ -8,9 +8,13 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
 import java.awt.image.Raster
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class IngameImages {
     companion object {
+        private val lock = ReentrantLock()
+
         fun get(
             key: String? = null,
             preprocess: (BufferedImage) -> BufferedImage = { it },
@@ -22,7 +26,7 @@ class IngameImages {
                     if (!rawPath.startsWith("/Dungeons/Content")) "/Dungeons/Content".plus(rawPath.removePrefix("/Game"))
                     else rawPath
 
-                val pakPackage = PakRegistry.index.getPackage(pakPath)
+                val pakPackage = lock.withLock { PakRegistry.index.getPackage(pakPath) }
                     ?: throw RuntimeException("could not find ingame resource in pak file: $pakPath")
 
                 val texture = pakPackage.getExport<Texture2d>()

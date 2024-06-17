@@ -1,0 +1,15 @@
+{
+  "VoidTouchedMelee": "VoidStrikeMelee",
+  "VoidTouchedRanged": "VoidStrikeRanged",
+  "CriticalHit": "Critical",
+  "FireAspect": "Fire",
+  "AnimaConduitMelee": "Anima",
+  "AnimaConduitRanged": "AnimaRanged",
+  "PoisonedMelee": "Poisoned",
+  "PoisonedRanged": "Poisoned",
+  "SoulSiphon": "Soul",
+  "Shockwave": "Shock",
+  "Gravity": "GravityRanged",
+  "MultiShot": "Multi",
+  "TempoTheft": "Tempo"
+}

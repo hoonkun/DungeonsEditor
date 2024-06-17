@@ -1,10 +1,8 @@
 package dungeons
 
-import ByteArrayReader
 import LocalData
 import androidx.compose.runtime.Stable
 import utils.LocalizationResource
-import java.io.ByteArrayInputStream
 
 @Stable
 class Localizations {
@@ -150,6 +148,8 @@ class Localizations {
             "progress_text_enchantment_texture" to "Reading enchantment textures",
             "progress_text_reading_pak" to "Reading .pak files",
             "progress_text_reading_localization" to "Reading localization files",
+            "progress_text_reading_textures" to "Reading texture files",
+            "progress_text_waiting" to "Waiting for previous work finishes",
             "progress_text_completed" to "Completed!",
             "cleaning_up" to "cleaning up",
             "pak_indexing_title" to "Reading game resources",
@@ -220,6 +220,8 @@ class Localizations {
             "progress_text_enchantment_texture" to "효과 텍스쳐를 읽는 중입니다",
             "progress_text_reading_pak" to "Pak 파일을 읽는 중입니다",
             "progress_text_reading_localization" to "현지화 파일을 읽는 중입니다",
+            "progress_text_reading_textures" to "텍스쳐 파일을 읽는 중입니다",
+            "progress_text_waiting" to "이전 작업의 완료를 기다리고 있습니다",
             "progress_text_completed" to "완료되었습니다!",
             "cleaning_up" to "정리 중",
             "pak_indexing_title" to "게임 리소스를 읽는 중입니다",
@@ -264,9 +266,7 @@ class Localizations {
             val newTexts = mutableMapOf<String, Map<String, String>>()
             val languages = listOf("ko-KR", "en")
             languages.forEach {
-                val locresBytes = PakRegistry.index.getFileBytes("/Dungeons/Content/Localization/Game/$it/Game.locres")
-                val stream = ByteArrayReader(ByteArrayInputStream(locresBytes))
-                newTexts[it] = LocalizationResource.read(stream)
+                newTexts[it] = LocalizationResource.read(PakRegistry.index.getFileBytes("/Dungeons/Content/Localization/Game/$it/Game.locres")!!)
             }
             _texts = newTexts
         }

@@ -1,0 +1,5 @@
+{
+  "ItemCooldownDecrease": "ArtifactCooldownDecrease",
+  "ItemDamageBoost": "ArtifactDamageBoost",
+  "SlowResistance": "FreezingResistance"
+}

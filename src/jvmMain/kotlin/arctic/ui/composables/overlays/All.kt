@@ -13,7 +13,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import arctic.states.EditorState
-import arctic.ui.composables.overlays.extended.*
+import arctic.ui.composables.overlays.extended.ArmorPropertyModificationOverlay
+import arctic.ui.composables.overlays.extended.EnchantmentModificationOverlay
+import arctic.ui.composables.overlays.extended.ItemCreationOverlay
+import arctic.ui.composables.overlays.extended.ItemEditionOverlay
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
 
@@ -47,7 +50,7 @@ fun EditorOverlays(editor: EditorState) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun <S> OverlayAnimator(targetState: S, content: @Composable AnimatedVisibilityScope.(S) -> Unit) =
+fun <S> OverlayAnimator(targetState: S, content: @Composable AnimatedContentScope.(S) -> Unit) =
     AnimatedContent(
         targetState = targetState,
         transitionSpec = {

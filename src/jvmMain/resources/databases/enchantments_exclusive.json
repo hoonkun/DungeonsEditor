@@ -1,0 +1,9 @@
+{
+  "JunglePoisonMelee": ["Anchor_Unique1", "Whip_Unique1"],
+  "JunglePoisonRanged": [],
+  "ShadowShot": ["Shadow_Crossbow", "Veiled_Crossbow", "BatCrossbow"],
+  "ThriveUnderPressure": ["Shulker_Armor", "Shulker_Armor_Unique1"],
+  "SharedPain": ["ObsidianClaymore_Unique1"],
+  "Rushdown": ["TempestKnife", "TempestKnife_Unique2", "TempestKnife_Unique1"],
+  "ReliableRicochet": ["BubbleBow_Unique1", "BubbleBow_Spooky2"]
+}
