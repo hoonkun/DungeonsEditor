@@ -27,25 +27,23 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import arctic.ui.composables.atomic.RetroButton
-import arctic.ui.composables.atomic.densityDp
-import arctic.ui.composables.fonts.JetbrainsMono
-import arctic.ui.unit.dp
-import arctic.ui.unit.sp
-import arctic.ui.utils.getValue
-import arctic.ui.utils.mutableRefOf
-import arctic.ui.utils.rememberMutableInteractionSource
-import arctic.ui.utils.setValue
 import dungeons.Localizations
+import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.ui.reusables.getValue
+import kiwi.hoonkun.ui.reusables.mutableRefOf
+import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.setValue
+import kiwi.hoonkun.ui.units.dp
+import kiwi.hoonkun.ui.units.sp
 import java.io.File
 
 @Composable
 fun FileSelector(
     validator: (File) -> Boolean = { true },
-    selectText: String = Localizations.UiText("save"),
-    onSelect: (File) -> Unit
+    buttonText: String = Localizations.UiText("save"),
+    onSelect: (File) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-
     var useBasePath by remember { mutableStateOf(true) }
 
     var path by remember { mutableStateOf(TextFieldValue(File.separator, selection = TextRange(1))) }
@@ -195,7 +193,7 @@ fun FileSelector(
         if (haveToShiftField) haveToShiftField = false
     }
 
-    SelectorRoot {
+    SelectorRoot(modifier = modifier) {
         Padded {
             BasePathDocumentation(text = "/** you can use '..' to go parent directory */")
             Row {
@@ -216,7 +214,7 @@ fun FileSelector(
                 hideCursor = haveToShiftField,
                 focusRequester = requester
             )
-            Select(enabled = selected != null, text = selectText) { selected?.let { onSelect(it) } }
+            Select(enabled = selected != null, text = buttonText) { selected?.let { onSelect(it) } }
         }
         Padded {
             if (!candidateTarget.isDirectory) return@Padded
@@ -286,20 +284,22 @@ private fun Remaining(
     type: CandidateType
 ) = Text(
     "...$count ${type.displayName} more",
-    color = type.color,
+    color = type.color.copy(alpha = 0.45f),
     fontSize = 20.sp,
-    maxLines = 1
+    maxLines = 1,
+    modifier = Modifier.padding(top = 4.dp)
 )
 
 @Composable
 private fun SelectorRoot(
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
-            .fillMaxSize()
-            .requiredWidthIn(min = 1000.dp)
+            .fillMaxWidth()
+            .then(modifier)
             .padding(start = 25.dp, end = 25.dp, top = 32.dp)
     ) {
         Column(
@@ -338,8 +338,8 @@ private fun BasePathProperty(key: String, value: String, disabled: Boolean) =
             )
         ),
         color = SelectorColors.IdeGeneral,
-        fontSize = 24.sp,
-        fontFamily = JetbrainsMono,
+        fontSize = 20.sp,
+        fontFamily = Resources.Fonts.JetbrainsMono,
         modifier = Modifier.padding(bottom = 2.dp).alpha(if (disabled) 0.35f else 1f)
     )
 
@@ -357,8 +357,8 @@ private fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean
             )
         ),
         color = SelectorColors.IdeKeyword,
-        fontSize = 24.sp,
-        fontFamily = JetbrainsMono,
+        fontSize = 20.sp,
+        fontFamily = Resources.Fonts.JetbrainsMono,
         modifier = Modifier
             .padding(bottom = 2.dp)
             .clickable(rememberMutableInteractionSource(), null) { onClick(value == "false") }
@@ -366,18 +366,31 @@ private fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean
 
 @Composable
 private fun PathInputBox(content: @Composable RowScope.() -> Unit) =
-    Box(
-        modifier = Modifier.padding(vertical = 20.dp)
-    ) {
+    Box(modifier = Modifier.padding(vertical = 20.dp, horizontal = 24.dp)) {
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0.45f)
+                .drawBehind {
+                    val stroke = 5.dp.toPx()
+                    val radius = 8.dp.toPx()
+                    drawRect(
+                        color = Color.Black,
+                        topLeft = Offset(stroke, stroke + radius),
+                        size = Size(size.width - 2 * stroke, size.height - 2 * (stroke + radius))
+                    )
+                    drawRect(
+                        color = Color.Black,
+                        topLeft = Offset(stroke + radius, stroke),
+                        size = Size(size.width - 2 * (stroke + radius), size.height - 2 * stroke)
+                    )
+                }
+        )
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
-                .drawBehind {
-                    drawRect(SelectorColors.PathInput, topLeft = Offset(0f, densityDp(7)), size = Size(size.width, size.height - densityDp(14)))
-                    drawRect(SelectorColors.PathInput, topLeft = Offset(densityDp(7), 0f), size = Size(size.width - densityDp(14), size.height))
-                },
+                .height(80.dp),
             content = content
         )
     }
@@ -398,13 +411,13 @@ private fun RowScope.PathInput(
         fontFamily = SelectorFonts.JetbrainsMono
     ),
     cursorBrush =
-    if (hideCursor) SolidColor(Color.Transparent)
-    else SolidColor(SelectorColors.IdeGeneral),
+        if (hideCursor) SolidColor(Color.Transparent)
+        else SolidColor(SelectorColors.IdeGeneral),
     singleLine = true,
     modifier = Modifier.weight(1f)
         .onKeyEvent { onKeyEvent(it) }
         .focusRequester(focusRequester)
-        .padding(start = 20.dp, end = 20.dp)
+        .padding(horizontal = 20.dp, vertical = 8.dp)
 )
 
 @Composable
@@ -414,7 +427,14 @@ private fun Select(
     onClick: () -> Unit
 ) {
     Box(modifier = Modifier.padding(5.dp)) {
-        RetroButton(text, Color(0xff3f8e4f), "outline", enabled = enabled, buttonSize = 115.dp to 70.dp, onClick = onClick)
+        RetroButton(
+            text,
+            Color(0xff3f8e4f),
+            "outline",
+            enabled = enabled,
+            buttonSize = 115.dp to 70.dp,
+            onClick = onClick
+        )
     }
 }
 

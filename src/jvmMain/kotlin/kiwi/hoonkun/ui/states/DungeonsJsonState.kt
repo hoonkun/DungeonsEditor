@@ -268,7 +268,7 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
             replace(FIELD_XP, xp)
         }
 
-    fun save(file: DungeonsSaveFile) {
+    fun save(file: DungeonsSaveFile = DungeonsSaveFile(source)) {
         val date = LocalDateTime.now().run {
             val year = year - 2000
             val date = listOf(monthValue, dayOfMonth, hour, minute, second).joinToString("") { "$it".padStart(2, '0') }

@@ -99,8 +99,6 @@ object DungeonsDatabase {
             DungeonsDatabase.items = items
             DungeonsDatabase.enchantments = enchantments
             DungeonsDatabase.armorProperties = armorProperties
-
-            println("${items.count()} / ${enchantments.count()} / ${armorProperties.count()}")
         }
 
         private fun correctKey(key: String): String {
@@ -134,6 +132,8 @@ data class ItemData(
     val largeIcon: ImageBitmap by lazy {
         retrieveImage("Large", fallback = { it.endsWith("_icon_inventory") }) { it.endsWith("_icon") }
     }
+
+    val isArtifact = variant == "Artifact"
 
     fun load() {
         inventoryIcon

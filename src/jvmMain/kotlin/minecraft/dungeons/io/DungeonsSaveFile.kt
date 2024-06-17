@@ -1,6 +1,7 @@
 package minecraft.dungeons.io
 
 import Keyset
+import androidx.compose.runtime.Stable
 import kiwi.hoonkun.ui.states.DungeonsJsonState
 import kiwi.hoonkun.ui.states.Item
 import org.json.JSONObject
@@ -15,6 +16,8 @@ import kotlin.io.path.isDirectory
 
 
 class DungeonsSaveFile(path: String): File(path) {
+
+    constructor(file: File): this(file.absolutePath)
 
     companion object {
         private val Magic1 = listOf(0x44, 0x30, 0x30, 0x31).map { it.toByte() }.toByteArray()
@@ -59,6 +62,23 @@ class DungeonsSaveFile(path: String): File(path) {
         }
     }
 
+    sealed interface ValidateResult {
+        data object None: ValidateResult
+        data object Invalid: ValidateResult
+
+        class Valid(val json: DungeonsJsonState, val summary: DungeonsSummary): ValidateResult
+    }
+
+    fun validate(): ValidateResult {
+        if (!exists()) return ValidateResult.None
+        if (isDirectory) return ValidateResult.None
+        if (!isFile) return ValidateResult.None
+        return if (inputStream().run { readNBytes(4).contentEquals(Magic1) && readNBytes(4).contentEquals(Magic2) })
+            DungeonsJsonState(read(), this).let { ValidateResult.Valid(it, DungeonsSummary.fromState(it)) }
+        else
+            ValidateResult.Invalid
+    }
+
     fun read(): JSONObject {
         val content = readBytes().let { it.sliceArray(8 until it.size) }
 
@@ -90,6 +110,7 @@ class DungeonsSaveFile(path: String): File(path) {
 
 }
 
+@Stable
 class DungeonsSummary(
     val level: Int,
     val power: Int,

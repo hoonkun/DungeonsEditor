@@ -24,16 +24,18 @@ class OverlayState {
 
     fun make(target: Overlay) = target.also { stack.add(it) }.id
     fun make(
+        canBeDismissed: Boolean = true,
         backdropOptions: Overlay.BackdropOptions = Overlay.BackdropOptions(),
         composable: @Composable BoxScope.(id: String) -> Unit
     ) {
-        make(Overlay(backdropOptions = backdropOptions, composable = composable))
+        make(Overlay(backdropOptions = backdropOptions, canBeDismissed = canBeDismissed, composable = composable))
     }
     fun destroy(id: String) {
         stack.first { it.id == id }.state = Overlay.State.Exiting
     }
     fun pop(): Boolean {
         val last = stack.lastOrNull { it.state != Overlay.State.Exiting } ?: return false
+        if (!last.canBeDismissed) return false
         last.state = Overlay.State.Exiting
         return true
     }
@@ -96,6 +98,7 @@ class OverlayState {
 data class Overlay(
     val id: String = UUID.randomUUID().toString(),
     val backdropOptions: BackdropOptions = BackdropOptions(),
+    val canBeDismissed: Boolean = true,
     val composable: @Composable BoxScope.(id: String) -> Unit,
 ) {
     var state by mutableStateOf(State.Idle)

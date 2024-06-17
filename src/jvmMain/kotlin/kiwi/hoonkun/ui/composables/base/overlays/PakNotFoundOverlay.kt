@@ -22,7 +22,7 @@ fun PakNotFoundOverlay(
         Spacer(modifier = Modifier.height(40.dp))
         Box(modifier = Modifier.size(1050.dp, 640.dp)) {
             FileSelector(
-                selectText = Localizations.UiText("select"),
+                buttonText = Localizations.UiText("select"),
                 validator = { it.isDirectory && it.listFiles()?.any { file -> file.extension == "pak" } == true },
                 onSelect = { onSelect(it.absolutePath) }
             )

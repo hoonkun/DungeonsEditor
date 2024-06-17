@@ -68,5 +68,6 @@
   "tips_4": "File selector, using another explorer to pasting path is more convenient",
   "tips_5": "There is no guarantee with edit output file is playable in game, so MAKE BACKUPS PROPERLY.",
   "recent_files": "Recent Files",
-  "detected_files": "Detected Files"
+  "detected_files": "Detected Files",
+  "file_selector_preview": "Selector Preview"
 }

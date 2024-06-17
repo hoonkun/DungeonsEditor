@@ -67,6 +67,9 @@
   "tips_3": "대체로, 닫기 버튼이 없는 팝업 화면에서 빠져나가려면 주변의 빈 공간을 누르면 됩니다.",
   "tips_4": "파일을 찾거나 저장할 때 보이는 파일 선택기에는 직접 입력하기보다는 기존 탐색기에서 경로를 복사해 붙혀넣는 것이 편리합니다.",
   "tips_5": "수정 후 나온 결과물을 실제 게임 클라이언트가 받아줄 거라는 보장이 없으므로, 반드시 항상 백업을 만들어주세요.",
-  "recent_files": "Recent Files",
-  "detected_files": "Detected Files"
+  "recent_files": "최근 파일",
+  "detected_files": "탐지된 파일",
+  "file_selector_preview": "탐색기 파일 미리보기",
+  "file_selector_no_selection": "선택된 파일이 없어요",
+  "file_selector_invalid": "올바르지 않은 파일이에요"
 }

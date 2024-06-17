@@ -6,6 +6,8 @@ import kotlinx.serialization.json.Json
 
 object Localizations: ResourceReadable() {
 
+    val supported = listOf("en", "ko-KR")
+
     private val texts = mapOf(
         "en" to Json.decodeFromString<Map<String, String>>(resourceText("localizations/ui_en_US.json")),
         "ko-KR" to Json.decodeFromString<Map<String, String>>(resourceText("localizations/ui_ko_KR.json")),
