@@ -4,14 +4,12 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
+import kiwi.hoonkun.ui.composables.editor.EditorBottomBar
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.defaultSlideIn
@@ -53,9 +51,14 @@ fun JsonEditor(
 fun JsonEditorContent(json: DungeonsJsonState) {
     val editorState = rememberEditorState(json)
 
-    Row(
+    Column(
         modifier = Modifier.fillMaxSize()
     ) {
+        Row(
+            modifier = Modifier.weight(1f)
+        ) {
 
+        }
+        EditorBottomBar(editorState)
     }
 }

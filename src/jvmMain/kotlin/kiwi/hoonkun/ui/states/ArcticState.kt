@@ -8,5 +8,7 @@ class ArcticState {
     var json: DungeonsJsonState? by mutableStateOf(null)
 }
 
+val LocalArcticState = staticCompositionLocalOf<ArcticState> { throw RuntimeException("unreachable") }
+
 @Composable
 fun rememberArcticState() = remember { ArcticState() }

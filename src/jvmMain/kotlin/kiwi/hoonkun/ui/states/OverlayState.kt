@@ -114,5 +114,7 @@ data class Overlay(
     )
 }
 
+val LocalOverlayState = staticCompositionLocalOf<OverlayState> { throw RuntimeException("unreachable") }
+
 @Composable
 fun rememberOverlayState() = remember { OverlayState() }

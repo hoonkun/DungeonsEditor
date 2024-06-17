@@ -93,7 +93,11 @@ private fun App(windowWidth: Dp) {
 
     LaunchedPakLoadEffect(arctic, overlays)
 
-    AppProviders {
+    CompositionLocalProvider(
+        LocalTextStyle provides LocalTextStyle.current.copy(color = Color.White),
+        LocalArcticState provides arctic,
+        LocalOverlayState provides overlays
+    ) {
         AppRoot(
             overlays = overlays,
             modifier = Modifier
@@ -150,7 +154,10 @@ private fun App(windowWidth: Dp) {
                     )
                     JsonEditor(
                         json = arctic.json,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .hoverable(rememberMutableInteractionSource())
+                        ,
                         placeholder = {
                             Column(
                                 verticalArrangement = Arrangement.Center,
@@ -225,12 +232,4 @@ private fun LaunchedPakLoadEffect(arctic: ArcticState, overlays: OverlayState) {
             )
         }
     }
-}
-
-@Composable
-private fun AppProviders(content: @Composable () -> Unit) {
-    CompositionLocalProvider(
-        LocalTextStyle provides LocalTextStyle.current.copy(color = Color.White),
-        content = content
-    )
 }
