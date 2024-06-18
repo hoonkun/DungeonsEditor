@@ -29,8 +29,8 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
-import kiwi.hoonkun.ui.composables.base.overlays.PakIndexingOverlay
-import kiwi.hoonkun.ui.composables.base.overlays.PakNotFoundOverlay
+import kiwi.hoonkun.ui.composables.overlays.PakIndexingOverlay
+import kiwi.hoonkun.ui.composables.overlays.PakNotFoundOverlay
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp

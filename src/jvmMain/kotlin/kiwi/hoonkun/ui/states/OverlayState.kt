@@ -26,19 +26,22 @@ class OverlayState {
         canBeDismissed: Boolean = true,
         enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
         exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-        composable: @Composable BoxScope.(id: String) -> Unit
+        content: @Composable BoxScope.(id: String) -> Unit
     ) {
         val newOverlay = Overlay(
             backdropOptions = backdropOptions,
             canBeDismissed = canBeDismissed,
             enter = enter,
             exit = exit,
-            composable = composable
+            content = content
         )
         make(newOverlay)
     }
     fun destroy(id: String) {
-        stack.first { it.id == id }.state = Overlay.State.Exiting
+        val first = stack.first { it.id == id }
+        if (!first.canBeDismissed) return
+
+        first.state = Overlay.State.Exiting
     }
     fun pop(): Boolean {
         val last = stack.lastOrNull { it.state != Overlay.State.Exiting } ?: return false
@@ -76,7 +79,7 @@ class OverlayState {
             enter = item.enter,
             exit = item.exit
         ) {
-            item.composable(this@Content, item.id)
+            item.content(this@Content, item.id)
         }
     }
 
@@ -96,7 +99,7 @@ class OverlayState {
                     .clickable(
                         interactionSource = rememberMutableInteractionSource(),
                         indication = null,
-                        onClick = item.backdropOptions.onClick
+                        onClick = { item.backdropOptions.onClick(this@OverlayState, item) }
                     )
             )
         }
@@ -110,7 +113,7 @@ data class Overlay(
     val canBeDismissed: Boolean = true,
     val enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
     val exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-    val composable: @Composable BoxScope.(id: String) -> Unit,
+    val content: @Composable BoxScope.(id: String) -> Unit,
 ) {
     var state by mutableStateOf(State.Initial)
     val visible: Boolean get() = state == State.Idle
@@ -121,7 +124,7 @@ data class Overlay(
 
     data class BackdropOptions(
         val alpha: Float = 0.376f,
-        val onClick: () -> Unit = { }
+        val onClick: OverlayState.(Overlay) -> Unit = { destroy(it.id) }
     )
 }
 
