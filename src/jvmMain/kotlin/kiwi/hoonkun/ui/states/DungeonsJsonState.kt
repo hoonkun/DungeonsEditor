@@ -645,7 +645,13 @@ class Enchantment private constructor(
     constructor(holder: Item, id: String, investedPoints: Int = 0, level: Int = 0, isNetheriteEnchant: Boolean = false):
             this(id, investedPoints, level) { this.holder = holder; this.isNetheriteEnchant = isNetheriteEnchant }
 
-    fun copy() = Enchantment(holder, id, investedPoints, level, isNetheriteEnchant)
+    fun copy(
+        holder: Item = this.holder,
+        id: String = this.id,
+        investedPoints: Int = this.investedPoints,
+        level: Int = this.level,
+        isNetheriteEnchant: Boolean = this.isNetheriteEnchant,
+    ) = Enchantment(holder, id, investedPoints, level, isNetheriteEnchant)
 
     fun export(): JSONObject =
         JSONObject().apply {
