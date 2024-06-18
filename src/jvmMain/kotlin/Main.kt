@@ -66,6 +66,8 @@ private fun App(windowWidth: Dp) {
     val entriesInteractionSource = rememberMutableInteractionSource()
     val entriesHovered by entriesInteractionSource.collectIsHoveredAsState()
 
+    val blur by animateFloatAsState(if (overlays.any()) 50f else 0f)
+
     val entriesWidth = 550.dp
 
     val slideRatio = 0.1f
@@ -107,7 +109,9 @@ private fun App(windowWidth: Dp) {
         ) {
             AnimatedVisibility(
                 visible = pakLoaded,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { renderEffect = if (blur == 0f) null else BlurEffect(blur, blur) }
             ) {
                 Image(
                     bitmap = DungeonsTextures["/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png"],
