@@ -1,4 +1,4 @@
-package kiwi.hoonkun.ui.composables.base.overlays
+package kiwi.hoonkun.ui.composables.overlays
 
 import LocalData
 import Settings

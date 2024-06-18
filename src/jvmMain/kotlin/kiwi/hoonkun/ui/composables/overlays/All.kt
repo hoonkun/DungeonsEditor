@@ -1,4 +1,4 @@
-package kiwi.hoonkun.ui.composables.base.overlays
+package kiwi.hoonkun.ui.composables.overlays
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
