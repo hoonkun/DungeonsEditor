@@ -26,7 +26,7 @@ class OverlayState {
         canBeDismissed: Boolean = true,
         enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
         exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-        content: @Composable BoxScope.(id: String) -> Unit
+        content: @Composable AnimatedVisibilityScope.(id: String) -> Unit
     ) {
         val newOverlay = Overlay(
             backdropOptions = backdropOptions,
@@ -73,13 +73,13 @@ class OverlayState {
     }
 
     @Composable
-    private fun BoxScope.Content(item: Overlay) {
+    private fun Content(item: Overlay) {
         AnimatedVisibility(
             visible = item.visible,
             enter = item.enter,
             exit = item.exit
         ) {
-            item.content(this@Content, item.id)
+            item.content(this, item.id)
         }
     }
 
@@ -113,7 +113,7 @@ data class Overlay(
     val canBeDismissed: Boolean = true,
     val enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
     val exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-    val content: @Composable BoxScope.(id: String) -> Unit,
+    val content: @Composable AnimatedVisibilityScope.(id: String) -> Unit,
 ) {
     var state by mutableStateOf(State.Initial)
     val visible: Boolean get() = state == State.Idle
