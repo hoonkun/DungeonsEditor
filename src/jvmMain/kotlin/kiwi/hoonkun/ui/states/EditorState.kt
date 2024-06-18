@@ -27,7 +27,7 @@ class EditorState(
 
         var secondary: Item? by mutableStateOf(null)
 
-        val hasSelection get() =primary != null || secondary != null
+        val hasSelection get() = primary != null || secondary != null
 
         fun slotOf(item: Item) = if (primary == item) Slot.Primary else if (secondary == item) Slot.Secondary else null
 
