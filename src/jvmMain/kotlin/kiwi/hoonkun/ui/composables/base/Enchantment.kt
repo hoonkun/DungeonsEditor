@@ -20,19 +20,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ui.reusables.drawEnchantmentIconBorder
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
-import kiwi.hoonkun.ui.units.sp
-import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.resources.EnchantmentData
 import kotlin.math.sqrt
@@ -124,15 +119,6 @@ fun EnchantmentLevelImage(
         }
     }
 }
-
-@Composable
-fun PowerfulEnchantmentIndicator() =
-    AutosizeText(
-        text = DungeonsLocalizations["/enchantment_rarity_powerful"]!!,
-        maxFontSize = 25.sp,
-        style = TextStyle(color = Color(0xffe5247e), fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
-    )
 
 @Composable
 private fun EnchantmentShine(patterns: List<ImageBitmap>) {
