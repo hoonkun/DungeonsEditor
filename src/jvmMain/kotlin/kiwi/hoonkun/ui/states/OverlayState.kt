@@ -38,10 +38,7 @@ class OverlayState {
         make(newOverlay)
     }
     fun destroy(id: String) {
-        val first = stack.first { it.id == id }
-        if (!first.canBeDismissed) return
-
-        first.state = Overlay.State.Exiting
+        stack.first { it.id == id }.state = Overlay.State.Exiting
     }
     fun pop(): Boolean {
         val last = stack.lastOrNull { it.state != Overlay.State.Exiting } ?: return false
@@ -124,7 +121,7 @@ data class Overlay(
 
     data class BackdropOptions(
         val alpha: Float = 0.376f,
-        val onClick: OverlayState.(Overlay) -> Unit = { destroy(it.id) }
+        val onClick: OverlayState.(Overlay) -> Unit = { if (it.canBeDismissed) destroy(it.id) }
     )
 }
 
