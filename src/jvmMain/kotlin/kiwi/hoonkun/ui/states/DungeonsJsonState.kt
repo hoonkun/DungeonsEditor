@@ -678,9 +678,6 @@ class Enchantment private constructor(
             else 0
     }
 
-    fun isUniqueInHolder(other: EnchantmentData) =
-        holder.enchantments?.all { it.data.id != other.id } ?: true
-
     val isUnset get() = id == "Unset"
 
 }
