@@ -4,7 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import extensions.*
-import minecraft.dungeons.io.DungeonsSaveFile
+import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsDatabase
 import minecraft.dungeons.resources.EnchantmentData
 import minecraft.dungeons.values.DungeonsLevel
@@ -268,7 +268,7 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
             replace(FIELD_XP, xp)
         }
 
-    fun save(file: DungeonsSaveFile = DungeonsSaveFile(source)) {
+    fun save(file: DungeonsJsonFile = DungeonsJsonFile(source)) {
         val date = LocalDateTime.now().run {
             val year = year - 2000
             val date = listOf(monthValue, dayOfMonth, hour, minute, second).joinToString("") { "$it".padStart(2, '0') }
@@ -276,7 +276,7 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
         }
         if (file.isDirectory) {
             source.copyTo(File("${file.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
-            DungeonsSaveFile("${file.absolutePath}/${source.name}").write(export())
+            DungeonsJsonFile("${file.absolutePath}/${source.name}").write(export())
         } else {
             source.copyTo(File("${file.parentFile.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
             file.write(export())
@@ -605,6 +605,9 @@ class Item(
             put(FIELD_TYPE, type)
             put(FIELD_UPGRADED, upgraded)
         }
+
+    fun newNetheriteEnchant() =
+        Enchantment(this, "Unset", isNetheriteEnchant = true).also { this.netheriteEnchant = it }
 }
 
 @Stable
@@ -668,6 +671,8 @@ class Enchantment private constructor(
                 EnchantmentData.PowerfulGlidedInvestedPoints.slice(0 until newLevel).sum()
             else 0
     }
+
+    val isUnset get() = id == "Unset"
 
 }
 

@@ -239,7 +239,7 @@ data class EnchantmentData(
     }
 
     private fun retrieveImage(cacheKey: String, criteria: (String) -> Boolean): ImageBitmap? {
-        if (id == "Unset") return DungeonsTextures.get("EnchantmentUnset") { "/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png" }
+        if (id == "Unset") { return DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"] }
 
         val cached = DungeonsTextures.cached(cacheKey)
         if (cached != null) return cached

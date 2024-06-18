@@ -1,6 +1,9 @@
 package kiwi.hoonkun.ui.composables
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
@@ -13,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -28,14 +30,15 @@ import kiwi.hoonkun.ArcticSave
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
+import kiwi.hoonkun.ui.reusables.defaultFadeIn
+import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.drawItemFrame
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.DungeonsJsonState
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.Retriever
-import minecraft.dungeons.io.DungeonsSaveFile
+import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.io.DungeonsSummary
 import minecraft.dungeons.resources.DungeonsTextures
 
@@ -44,24 +47,19 @@ import minecraft.dungeons.resources.DungeonsTextures
 fun JsonEntries(
     onJsonSelect: (newJson: DungeonsJsonState) -> Unit,
     modifier: Modifier = Modifier,
-    hasPreview: Retriever<Boolean> = { false },
-    preview: @Composable (
-        none: @Composable () -> Unit,
-        invalid: @Composable () -> Unit,
-        valid: @Composable (DungeonsJsonState, DungeonsSummary) -> Unit
-    ) -> Unit = { _, _, _ ->  }
+    preview: DungeonsJsonFile.Preview
 ) {
-    val hideAlpha by animateFloatAsState(if (hasPreview()) 0f else 1f)
+    val hasPreview = preview is DungeonsJsonFile.Preview.Valid
+
+    val hideAlpha by animateFloatAsState(if (hasPreview) 0f else 1f)
     val hideIfPreviewNotPresents = remember { Modifier.graphicsLayer { alpha = 0.25f + (1 - hideAlpha) * 0.75f } }
     val hideIfPreviewPresents = remember { Modifier.graphicsLayer { alpha = 0.25f + hideAlpha * 0.75f } }
 
     Row(modifier = Modifier.fillMaxHeight().then(modifier)) {
         val recent = ArcticSave.recentSummaries
-        val detected = DungeonsSaveFile.Detector.results
+        val detected = DungeonsJsonFile.Detector.results
 
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 36.dp)
-        ) {
+        LazyColumn(contentPadding = PaddingValues(vertical = 36.dp)) {
             stickyHeader {
                 SummaryHeader(
                     text = Localizations.UiText("file_selector_preview"),
@@ -69,11 +67,32 @@ fun JsonEntries(
                 )
             }
             item {
-                preview(
-                    { SummaryNoEntries(Localizations.UiText("file_selector_no_selection"), hideIfPreviewNotPresents) },
-                    { SummaryNoEntries(Localizations.UiText("file_selector_invalid"), hideIfPreviewNotPresents) },
-                    { state, summary -> JsonPreview(summary, hideIfPreviewNotPresents) { onJsonSelect(state) } }
-                )
+                AnimatedContent(
+                    targetState = preview,
+                    transitionSpec = { defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false) }
+                ) {
+                    when (it) {
+                        is DungeonsJsonFile.Preview.None -> {
+                            SummaryNoEntries(
+                                text = Localizations.UiText("file_selector_no_selection"),
+                                modifier = hideIfPreviewNotPresents
+                            )
+                        }
+                        is DungeonsJsonFile.Preview.Invalid -> {
+                            SummaryNoEntries(
+                                text = Localizations.UiText("file_selector_invalid"),
+                                modifier = hideIfPreviewNotPresents
+                            )
+                        }
+                        is DungeonsJsonFile.Preview.Valid -> {
+                            JsonPreview(
+                                summary = it.summary,
+                                modifier = hideIfPreviewNotPresents,
+                                onClick = { onJsonSelect(it.json) }
+                            )
+                        }
+                    }
+                }
             }
             item { SectionSpacing() }
             stickyHeader {
@@ -89,27 +108,37 @@ fun JsonEntries(
                         modifier = hideIfPreviewPresents
                     )
                 }
-            }
-            items(recent, key = { it.first }) { (_, json, summary) ->
-                JsonPreview(
-                    summary = summary,
-                    onClick = { onJsonSelect(json) },
-                    modifier = hideIfPreviewPresents
-                )
+            } else {
+                items(recent, key = { it.first }) { (_, json, summary) ->
+                    JsonPreview(
+                        summary = summary,
+                        onClick = { onJsonSelect(json) },
+                        modifier = hideIfPreviewPresents
+                    )
+                }
             }
             item { SectionSpacing() }
             stickyHeader {
-                SummaryHeader(Localizations.UiText("detected_files"), modifier = hideIfPreviewPresents)
-            }
-            if (detected.isEmpty()) {
-                item { SummaryNoEntries(Localizations.UiText("no_detected_files"), modifier = hideIfPreviewPresents) }
-            }
-            items(detected, key = { it.first }) { (_, json, summary) ->
-                JsonPreview(
-                    summary = summary,
-                    onClick = { onJsonSelect(json) },
+                SummaryHeader(
+                    text = Localizations.UiText("detected_files"),
                     modifier = hideIfPreviewPresents
                 )
+            }
+            if (detected.isEmpty()) {
+                item {
+                    SummaryNoEntries(
+                        text = Localizations.UiText("no_detected_files"),
+                        modifier = hideIfPreviewPresents
+                    )
+                }
+            } else {
+                items(detected, key = { it.first }) { (_, json, summary) ->
+                    JsonPreview(
+                        summary = summary,
+                        onClick = { onJsonSelect(json) },
+                        modifier = hideIfPreviewPresents
+                    )
+                }
             }
         }
     }
@@ -123,7 +152,7 @@ private fun SectionSpacing() =
 private fun SummaryHeader(
     text: String,
     modifier: Modifier = Modifier
-) {
+) =
     Text(
         text = text,
         modifier = modifier
@@ -132,13 +161,12 @@ private fun SummaryHeader(
             .background(Color(0xffff8800))
             .padding(start = 36.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
     )
-}
 
 @Composable
 private fun SummaryNoEntries(
     text: String,
     modifier: Modifier = Modifier
-) {
+) =
     Text(
         text = text,
         modifier = modifier
@@ -147,7 +175,6 @@ private fun SummaryNoEntries(
             .background(Color(0xff272727))
             .padding(start = 36.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
     )
-}
 
 @Composable
 private fun JsonPreview(
@@ -188,19 +215,19 @@ private fun JsonPreview(
                 }
             }
             CurrencyText(
-                icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
-                value = "${summary.power}",
+                iconTextureKey = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+                text = "${summary.power}",
                 modifier = Modifier.weight(1f)
             )
             CurrencyText(
-                icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
-                value = "${summary.emerald}",
-                small = true,
+                iconTextureKey = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+                text = "${summary.emerald}",
+                iconScale = 22f / 28f,
                 modifier = Modifier.weight(1f)
             )
             CurrencyText(
-                icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
-                value = "${summary.gold}",
+                iconTextureKey = "/Game/UI/Materials/Currency/GoldIndicator.png",
+                text = "${summary.gold}",
                 modifier = Modifier.weight(1f)
             )
         }
@@ -234,10 +261,7 @@ private fun JsonPreviewEquipment(
             contentAlignment = Alignment.Center,
             modifier = modifier
                 .aspectRatio(1f / 1f)
-                .drawWithContent {
-                    drawItemFrame("Common")
-                    drawContent()
-                }
+                .drawBehind { drawItemFrame("Common") }
         ) {
             Text(
                 text = "-",
@@ -252,10 +276,7 @@ private fun JsonPreviewEquipment(
             bitmap = item.data.inventoryIcon,
             modifier = modifier
                 .aspectRatio(1f / 1f)
-                .drawWithContent {
-                    drawItemFrame(item.rarity, item.glided, item.enchanted, false)
-                    drawContent()
-                }
+                .drawBehind { drawItemFrame(item.rarity, item.glided, item.enchanted, false) }
                 .padding(10.dp)
         )
     }
@@ -263,26 +284,24 @@ private fun JsonPreviewEquipment(
 
 @Composable
 private fun CurrencyText(
-    icon: String,
-    value: String,
+    iconTextureKey: String,
+    text: String,
     modifier: Modifier = Modifier,
-    small: Boolean = false
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    iconScale: Float = 1f
+) =
+    CurrencyText(
+        value = text,
         modifier = modifier
     ) {
-        CurrencyImage(DungeonsTextures[icon], small)
-        CurrencyTextContent(value)
+        CurrencyImage(DungeonsTextures[iconTextureKey], iconScale)
     }
-}
 
 @Composable
 private fun CurrencyText(
     value: String,
     modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
-) {
+) =
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -290,27 +309,28 @@ private fun CurrencyText(
         icon()
         CurrencyTextContent(value)
     }
-}
 
 @Composable
-private fun CurrencyTextContent(value: String) {
-    Spacer(modifier = Modifier.width(10.dp))
+private fun CurrencyTextContent(
+    value: String
+) =
     Text(
         text = value,
         fontFamily = Resources.Fonts.JetbrainsMono,
         fontSize = 20.sp,
         color = Color.White.copy(alpha = 0.85f),
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.wrapContentWidth()
+        modifier = Modifier.wrapContentWidth().padding(start = 10.dp)
     )
-    Spacer(modifier = Modifier.width(30.dp))
-}
 
 @Composable
-private fun CurrencyImage(image: ImageBitmap, small: Boolean = false) =
+private fun CurrencyImage(
+    image: ImageBitmap,
+    iconScale: Float = 1f
+) =
     Image(
         bitmap = image,
         contentDescription = null,
-        modifier = Modifier.size(if (small) 22.dp else 28.dp)
+        modifier = Modifier.size(28.dp * iconScale)
     )
 

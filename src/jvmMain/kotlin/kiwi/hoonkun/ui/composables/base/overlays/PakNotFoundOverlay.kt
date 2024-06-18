@@ -14,8 +14,8 @@ import kiwi.hoonkun.ui.units.dp
 fun PakNotFoundOverlay(
     onSelect: (newPath: String) -> Unit
 ) {
-    arctic.ui.composables.overlays.ContentRoot {
-        arctic.ui.composables.overlays.OverlayTitleDescription(
+    ContentRoot {
+        OverlayTitleDescription(
             title = Localizations.UiText("pak_not_found_title"),
             description = Localizations.UiText("pak_not_found_description")
         )

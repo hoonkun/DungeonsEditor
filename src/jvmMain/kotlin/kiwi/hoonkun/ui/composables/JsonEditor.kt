@@ -1,8 +1,6 @@
 package kiwi.hoonkun.ui.composables
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -12,6 +10,8 @@ import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.ui.composables.editor.EditorBottomBar
 import kiwi.hoonkun.ui.composables.editor.collections.EquippedItems
 import kiwi.hoonkun.ui.composables.editor.collections.InventoryItems
+import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
+import kiwi.hoonkun.ui.composables.editor.details.Tips
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.defaultSlideIn
@@ -43,13 +43,13 @@ fun JsonEditor(
             modifier = Modifier.fillMaxHeight()
         ) {
             if (it == null) placeholder()
-            else JsonEditorContent(it)
+            else Content(it)
         }
     }
 }
 
 @Composable
-fun JsonEditorContent(json: DungeonsJsonState) {
+private fun Content(json: DungeonsJsonState) {
     val editorState = rememberEditorState(json)
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -67,7 +67,7 @@ fun JsonEditorContent(json: DungeonsJsonState) {
                 Column(
                     modifier = Modifier
                         .width(650.dp)
-                        .padding(horizontal = 50.dp)
+                        .padding(start = 50.dp)
                         .padding(top = 25.dp)
                 ) {
                     if (view == EditorState.EditorView.Inventory) {
@@ -93,6 +93,27 @@ fun JsonEditorContent(json: DungeonsJsonState) {
                             selection = editorState.selection,
                             noSpaceInInventory = editorState.noSpaceInInventory
                         )
+                    }
+                }
+            }
+            AnimatedContent(
+                targetState = editorState.selection.hasSelection,
+                transitionSpec = {
+                    val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
+                    val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
+                    enter togetherWith exit using SizeTransform(clip = false)
+                }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .padding(start = 50.dp, end = 100.dp)
+                ) {
+                    if (it) {
+                        ItemComparator(editor = editorState)
+                    } else {
+                        Tips()
                     }
                 }
             }

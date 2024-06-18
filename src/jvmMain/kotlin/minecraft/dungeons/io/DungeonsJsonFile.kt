@@ -15,7 +15,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 
 
-class DungeonsSaveFile(path: String): File(path) {
+class DungeonsJsonFile(path: String): File(path) {
 
     constructor(file: File): this(file.absolutePath)
 
@@ -28,7 +28,7 @@ class DungeonsSaveFile(path: String): File(path) {
         val results = detectDungeonsJson()
             .let { it.slice(0 until 3.coerceAtMost(it.size)) }
             .mapNotNull {
-                try { DungeonsSaveFile(it).summary() }
+                try { DungeonsJsonFile(it).summary() }
                 catch (e: Exception) { null }
             }
 
@@ -62,21 +62,21 @@ class DungeonsSaveFile(path: String): File(path) {
         }
     }
 
-    sealed interface ValidateResult {
-        data object None: ValidateResult
-        data object Invalid: ValidateResult
+    sealed interface Preview {
+        data object None: Preview
+        data object Invalid: Preview
 
-        class Valid(val json: DungeonsJsonState, val summary: DungeonsSummary): ValidateResult
+        class Valid(val json: DungeonsJsonState, val summary: DungeonsSummary): Preview
     }
 
-    fun validate(): ValidateResult {
-        if (!exists()) return ValidateResult.None
-        if (isDirectory) return ValidateResult.None
-        if (!isFile) return ValidateResult.None
+    fun preview(): Preview {
+        if (!exists()) return Preview.None
+        if (isDirectory) return Preview.None
+        if (!isFile) return Preview.None
         return if (inputStream().run { readNBytes(4).contentEquals(Magic1) && readNBytes(4).contentEquals(Magic2) })
-            DungeonsJsonState(read(), this).let { ValidateResult.Valid(it, DungeonsSummary.fromState(it)) }
+            DungeonsJsonState(read(), this).let { Preview.Valid(it, DungeonsSummary.fromState(it)) }
         else
-            ValidateResult.Invalid
+            Preview.Invalid
     }
 
     fun read(): JSONObject {

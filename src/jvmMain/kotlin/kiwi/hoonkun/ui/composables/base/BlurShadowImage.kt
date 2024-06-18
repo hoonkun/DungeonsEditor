@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -19,16 +20,17 @@ fun BlurShadowImage(
     modifier: Modifier = Modifier,
     overlay: @Composable BoxScope.() -> Unit = { }
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        AnimatedVisibility(enabled) {
+    Box(modifier = modifier) {
+        AnimatedVisibility(
+            visible = enabled,
+            modifier = Modifier.fillMaxSize()
+        ) {
             Image(
                 bitmap = bitmap,
                 contentDescription = null,
                 alpha = 0.85f,
                 modifier = Modifier
-                    .matchParentSize()
+                    .fillMaxSize()
                     .scale(1.05f)
                     .blur(10.dp)
             )
@@ -36,8 +38,7 @@ fun BlurShadowImage(
         Image(
             bitmap = bitmap,
             contentDescription = contentDescription,
-            modifier = Modifier
-                .matchParentSize()
+            modifier = Modifier.fillMaxSize()
         )
         overlay()
     }

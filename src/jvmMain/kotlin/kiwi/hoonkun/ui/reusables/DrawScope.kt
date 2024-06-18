@@ -10,21 +10,18 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.IntSize
-import arctic.ui.unit.dp
+import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
 
-
-fun DrawScope.densityDp(value: Int): Float = value.dp.toPx()
-fun DrawScope.densityDp(value: Float): Float = value.dp.toPx()
-fun DrawScope.densityDp(value: Double): Float = value.dp.toPx()
 
 @Stable
 fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean = false) {
     if (!hovered && !selected) return
+
     drawRoundRect(
-        brush = SolidColor(if (selected) Color.White else Color.White.copy(0.35f)),
-        cornerRadius = CornerRadius(densityDp(6), densityDp(6)),
-        style = Stroke(densityDp(3))
+        brush = SolidColor(Color.White.copy(alpha = if (selected) 1f else 0.35f)),
+        cornerRadius = CornerRadius(6.dp.toPx()),
+        style = Stroke(3.dp.toPx())
     )
 }
 
@@ -67,16 +64,16 @@ private fun PowerBackgroundGradient() =
     Brush.linearGradient(0f to Color.Transparent, 0.5f to Color.Transparent, 1f to Color(0x70000000))
 
 @Stable
-private fun DrawScope.EnchantmentPointsBackgroundGradient() =
+private fun EnchantmentPointsBackgroundGradient() =
     Brush.linearGradient(
         0f to Color.Transparent, 0.6f to Color.Transparent, 1f to Color(0x60b442f6),
-        start = Offset(0f, this.size.height),
-        end = Offset(this.size.width, 0f)
+        start = Offset(0f, Float.POSITIVE_INFINITY),
+        end = Offset(Float.POSITIVE_INFINITY, 0f)
     )
 
 @Stable
 private fun GlidedItemBackgroundGradient() =
-    Brush.linearGradient(0f to Color.Transparent, 0.5f to Color.Transparent, 1f to Color(0xaaffc847))
+    Brush.linearGradient(listOf(Color.Transparent, Color.Transparent, Color(0xaaffc847)))
 
 @Stable
 private fun RarityBackgroundGradient(rarity: String) =
@@ -102,8 +99,8 @@ fun DrawScope.drawUniqueIndicator() {
             start = Offset(0f, size.height / 2f),
             end = Offset(size.width, size.height / 2f)
         ),
-        topLeft = Offset(0f, size.height / 2 - densityDp(3)),
-        size = Size(size.width, densityDp(6))
+        topLeft = Offset(0f, size.height / 2 - 3.dp.toPx()),
+        size = Size(size.width, 6.dp.toPx())
     )
     drawCircle(
         Brush.radialGradient(
@@ -123,6 +120,6 @@ fun DrawScope.drawEnchantmentIconBorder(alpha: Float) {
         alpha = alpha,
         topLeft = Offset(size.width * (1f - scale) * 0.5f, size.height * (1f - scale) * 0.5f),
         size = Size(size.width * scale, size.height * scale),
-        style = Stroke(width = densityDp(6))
+        style = Stroke(width = 6.dp.toPx())
     )
 }

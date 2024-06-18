@@ -4,7 +4,7 @@ import androidx.compose.runtime.*
 import kiwi.hoonkun.resources.Localizations
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import minecraft.dungeons.io.DungeonsSaveFile
+import minecraft.dungeons.io.DungeonsJsonFile
 import java.io.File
 
 object ArcticSave {
@@ -17,7 +17,7 @@ object ArcticSave {
     val recentSummaries by derivedStateOf {
         recentFiles
             .mapNotNull { path ->
-                try { DungeonsSaveFile(path).summary() }
+                try { DungeonsJsonFile(path).summary() }
                 catch (e: Exception) { null }
             }
     }

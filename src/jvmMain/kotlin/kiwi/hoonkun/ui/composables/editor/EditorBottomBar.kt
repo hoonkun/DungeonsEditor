@@ -1,18 +1,12 @@
 package kiwi.hoonkun.ui.composables.editor
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,28 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
-import kiwi.hoonkun.ui.composables.base.RetroButton
-import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.defaultTween
+import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.Currency
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.LocalArcticState
+import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
@@ -167,14 +148,14 @@ private fun IconButton(icon: String, onClick: () -> Unit) {
 @Composable
 private fun CloseFileButton() {
     // TODO
-    val overlays = LocalArcticState.current
+    val overlays = LocalOverlayState.current
     IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") {  }
 }
 
 @Composable
 private fun SaveButton() {
     // TODO
-    val overlays = LocalArcticState.current
+    val overlays = LocalOverlayState.current
     IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {  }
 }
 
@@ -238,7 +219,12 @@ private fun CurrencyText(icon: String, value: String, valid: Boolean = true, sca
 
     CurrencyImage(bitmap, scale)
     Spacer(modifier = Modifier.width(10.dp))
-    Text(text = value, fontSize = 25.sp, color = if (valid) Color.White else Color(0xffff5e14), modifier = Modifier.width(100.dp))
+    Text(
+        text = value,
+        fontSize = 25.sp,
+        color = if (valid) Color.White else Color(0xffff5e14),
+        modifier = Modifier.width(100.dp)
+    )
     Spacer(modifier = Modifier.width(30.dp))
 }
 
@@ -265,107 +251,14 @@ private fun CurrencyField(
 ) {
     icon()
     Spacer(modifier = Modifier.width(10.dp))
-    CurrencyFieldInput(value = value, onValueChange = onValueChange, onSubmit = onSubmit, validator = validator)
+    TextFieldValidatable(
+        value = value,
+        onValueChange = onValueChange,
+        onSubmit = onSubmit,
+        validator = validator,
+        textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
+        modifier = Modifier.requiredWidth(100.dp)
+    )
     Spacer(modifier = Modifier.width(30.dp))
 }
 
-@Composable
-private fun CurrencyFieldInput(
-    value: String,
-    validator: (String) -> Boolean,
-    onValueChange: (String) -> Unit,
-    onSubmit: (String) -> Unit
-) {
-    val source = rememberMutableInteractionSource()
-    val focused by source.collectIsFocusedAsState()
-    val lineColor by animateColorAsState(
-        targetValue = if (!focused) Color(0x00ff884c) else Color(0xffff884c),
-        animationSpec = defaultTween()
-    )
-
-    val focusManager = LocalFocusManager.current
-
-    val valid = remember(value, validator) { validator(value) }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.requiredSize(100.dp, 36.dp)
-    ) {
-        BasicTextField(
-            value,
-            onValueChange,
-            textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
-            singleLine = true,
-            cursorBrush = SolidColor(Color.White),
-            interactionSource = source,
-            modifier = Modifier
-                .fillMaxWidth()
-                .drawBehind {
-                    drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 2.dp.toPx()))
-                }
-                .onKeyEvent {
-                    if (it.key != Key.Enter) false
-                    else if (!valid) false
-                    else {
-                        onSubmit(value)
-                        focusManager.clearFocus()
-                        true
-                    }
-                }
-        )
-        AnimatedContent(
-            targetState = focused to valid,
-            transitionSpec = {
-                val enter = defaultFadeIn()
-                val exit = defaultFadeOut()
-                enter togetherWith exit using SizeTransform(clip = false)
-            },
-            modifier = Modifier
-                .requiredSize(200.dp, 100.dp)
-                .offset { IntOffset(0, -77.5.dp.roundToPx()) }
-        ) { (capturedFocused, capturedValid) ->
-            Box(
-                contentAlignment = Alignment.BottomCenter,
-                modifier = Modifier.fillMaxSize()
-            ) AnimatedBox@ {
-                if (!capturedFocused) return@AnimatedBox
-
-                Row(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .drawBehind {
-                            val color = if (capturedValid) Color(0xff2a3d2b) else Color(0xff5c3232)
-                            val bottom = size.height - 10.dp.toPx()
-                            drawRoundRect(
-                                color = color,
-                                cornerRadius = CornerRadius(6.dp.toPx()),
-                                size = Size(size.width, bottom)
-                            )
-
-                            val triangleWidth = 10.dp.toPx()
-                            val path = Path().apply {
-                                moveTo((size.width - triangleWidth) / 2, bottom)
-                                lineTo(size.width / 2, size.height)
-                                lineTo((size.width + triangleWidth) / 2, bottom)
-                            }
-                            drawPath(path = path, color = color)
-                        }
-                        .padding(horizontal = if (capturedValid) 6.dp else 16.dp)
-                        .padding(top = if (capturedValid) 6.dp else 12.dp, bottom = if (capturedValid) 16.dp else 22.dp)
-                ) {
-                    if (capturedValid) {
-                        RetroButton(
-                            text = "확정",
-                            color = Color(0xff3f8e4f),
-                            hoverInteraction = RetroButtonHoverInteraction.Outline,
-                            modifier = Modifier.size(120.dp, 60.dp),
-                            onClick = { onSubmit(value) }
-                        )
-                    } else {
-                        Text(text = "잘못된 값이에요!")
-                    }
-                }
-            }
-        }
-    }
-}

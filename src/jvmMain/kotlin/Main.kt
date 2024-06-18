@@ -1,14 +1,10 @@
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,12 +31,10 @@ import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.overlays.PakIndexingOverlay
 import kiwi.hoonkun.ui.composables.base.overlays.PakNotFoundOverlay
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
-import minecraft.dungeons.io.DungeonsSaveFile
+import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
 
 
@@ -63,8 +57,11 @@ fun main() = application {
 
 @Composable
 private fun App(windowWidth: Dp) {
-    val arctic = rememberArcticState()
     val overlays = rememberOverlayState()
+    val appPointerListeners = LocalAppPointerListeners.current
+
+    var pakLoaded by remember { mutableStateOf(false) }
+    var json: DungeonsJsonState? by remember { mutableStateOf(null) }
 
     val entriesInteractionSource = rememberMutableInteractionSource()
     val entriesHovered by entriesInteractionSource.collectIsHoveredAsState()
@@ -74,29 +71,31 @@ private fun App(windowWidth: Dp) {
     val slideRatio = 0.1f
     val containerOffset by animateDpAsState(
         targetValue =
-            if (!entriesHovered && arctic.json != null) (windowWidth * (-slideRatio / 2))
+            if (!entriesHovered && json != null) (windowWidth * (-slideRatio / 2))
             else (windowWidth * (slideRatio / 2))
     )
     val entriesOffset by animateDpAsState(
         targetValue =
-            if (!entriesHovered && arctic.json != null) (windowWidth * slideRatio) - 12.dp
+            if (!entriesHovered && json != null) (windowWidth * slideRatio) - 12.dp
             else 0.dp
     )
     val entriesBrightness by animateFloatAsState(
         targetValue =
-            if (!entriesHovered && arctic.json != null) 0.75f
+            if (!entriesHovered && json != null) 0.75f
             else 0f
     )
 
-    var selectorValidatedResult by remember { mutableStateOf<DungeonsSaveFile.ValidateResult>(DungeonsSaveFile.ValidateResult.None) }
-    val hasPreview by remember { derivedStateOf { selectorValidatedResult is DungeonsSaveFile.ValidateResult.Valid } }
+    var preview by remember { mutableStateOf<DungeonsJsonFile.Preview>(DungeonsJsonFile.Preview.None) }
 
-    LaunchedPakLoadEffect(arctic, overlays)
+    LaunchedPakLoadEffect(
+        overlays = overlays,
+        onLoad = { pakLoaded = true }
+    )
 
     CompositionLocalProvider(
         LocalTextStyle provides LocalTextStyle.current.copy(color = Color.White),
-        LocalArcticState provides arctic,
-        LocalOverlayState provides overlays
+        LocalOverlayState provides overlays,
+        LocalScrollbarStyle provides GlobalScrollBarStyle
     ) {
         AppRoot(
             overlays = overlays,
@@ -104,9 +103,10 @@ private fun App(windowWidth: Dp) {
                 .fillMaxSize()
                 .background(Color(0xff272727))
                 .onKeyEvent { if (it.key == Key.Escape) overlays.pop() else false }
+                .then(appPointerListeners.onGlobalPointerEventModifier())
         ) {
             AnimatedVisibility(
-                visible = arctic.pakLoaded,
+                visible = pakLoaded,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Image(
@@ -129,20 +129,8 @@ private fun App(windowWidth: Dp) {
                         .offset { IntOffset(containerOffset.roundToPx(), 0) }
                 ) {
                     JsonEntries(
-                        onJsonSelect = { arctic.json = it },
-                        hasPreview = { hasPreview },
-                        preview = { none, invalid, valid ->
-                            AnimatedContent(
-                                targetState = selectorValidatedResult,
-                                transitionSpec = { defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false) }
-                            ) {
-                                when (it) {
-                                    is DungeonsSaveFile.ValidateResult.None -> none()
-                                    is DungeonsSaveFile.ValidateResult.Invalid -> invalid()
-                                    is DungeonsSaveFile.ValidateResult.Valid -> valid(it.json, it.summary)
-                                }
-                            }
-                        },
+                        onJsonSelect = { json = it },
+                        preview = preview,
                         modifier = Modifier
                             .width(entriesWidth)
                             .offset { IntOffset(entriesOffset.roundToPx(), 0) }
@@ -153,7 +141,7 @@ private fun App(windowWidth: Dp) {
                             },
                     )
                     JsonEditor(
-                        json = arctic.json,
+                        json = json,
                         modifier = Modifier
                             .weight(1f)
                             .hoverable(rememberMutableInteractionSource())
@@ -165,18 +153,18 @@ private fun App(windowWidth: Dp) {
                                 modifier = Modifier.requiredWidth(windowWidth - entriesWidth)
                             ) {
                                 FileSelector(
-                                    validator = validator@{
-                                        val validateResult = DungeonsSaveFile(it).validate()
-                                        selectorValidatedResult = validateResult
-
-                                        return@validator validateResult is DungeonsSaveFile.ValidateResult.Valid
+                                    validator = {
+                                        preview = DungeonsJsonFile(it).preview()
+                                        preview is DungeonsJsonFile.Preview.Valid
                                     },
                                     buttonText = Localizations.UiText("open"),
                                     modifier = Modifier.requiredHeight(525.dp),
-                                    onSelect = onSelect@{
-                                        val result = selectorValidatedResult
-                                        if (result !is DungeonsSaveFile.ValidateResult.Valid) return@onSelect
-                                        arctic.json = result.json
+                                    onSelect = {
+                                        preview.let {
+                                            if (it is DungeonsJsonFile.Preview.Valid) {
+                                                json = it.json
+                                            } // FileSelector onSelect preview.let if block
+                                        } // FileSelector onSelect preview.let lambda
    /* WOW! SO LOGICAL! */           } // FileSelector onSelect lambda
                                 ) // FileSelector parameters
                             } // Column content lambda
@@ -185,7 +173,7 @@ private fun App(windowWidth: Dp) {
                 } // Row content lambda
             } // AnimatedVisibility content lambda
         } // AppRoot content lambda
-    } // AppProvider content lambda
+    } // CompositionLocalProvider content lambda
 } // function App
 
 @Composable
@@ -201,10 +189,10 @@ fun AppRoot(
 }
 
 @Composable
-private fun LaunchedPakLoadEffect(arctic: ArcticState, overlays: OverlayState) {
+private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
     LaunchedEffect(true) {
         fun onPakLoaded(indexingOverlayId: String) {
-            arctic.pakLoaded = true
+            onLoad()
             overlays.destroy(indexingOverlayId)
         }
 
@@ -233,3 +221,14 @@ private fun LaunchedPakLoadEffect(arctic: ArcticState, overlays: OverlayState) {
         }
     }
 }
+
+
+private val GlobalScrollBarStyle =
+    ScrollbarStyle(
+        thickness = 20.dp,
+        minimalHeight = 100.dp,
+        hoverColor = Color.White.copy(alpha = 0.3f),
+        unhoverColor = Color.White.copy(alpha = 0.15f),
+        hoverDurationMillis = 0,
+        shape = RoundedCornerShape(3.dp),
+    )

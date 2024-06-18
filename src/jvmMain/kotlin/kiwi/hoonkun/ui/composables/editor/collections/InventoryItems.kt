@@ -1,5 +1,6 @@
 package kiwi.hoonkun.ui.composables.editor.collections
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -8,12 +9,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import kiwi.hoonkun.ui.reusables.RarityColor
 import kiwi.hoonkun.ui.reusables.RarityColorType
 import kiwi.hoonkun.ui.reusables.VariantFilterIcon
@@ -24,18 +26,23 @@ import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 
 @Composable
-fun InventoryItems(items: List<Item>, selection: EditorState.SelectionState, noSpaceInInventory: Boolean) {
-    val variantFilter = remember { mutableStateOf<String?>(null) }
-    val rarityFilter = remember { mutableStateOf<String?>(null) }
+fun InventoryItems(
+    items: List<Item>,
+    selection: EditorState.SelectionState,
+    noSpaceInInventory: Boolean
+) {
+    var filters by remember { mutableStateOf(InventoryItemFilter()) }
     
     val overlays = LocalOverlayState.current
 
     val datasets by remember(items) {
         derivedStateOf {
-            items.filter {
-                val variantMatched =
-                    (variantFilter.value == null || (if (variantFilter.value == "Enchanted") it.enchanted else it.data.variant == variantFilter.value))
-                val rarityMatched = (rarityFilter.value == null || it.rarity == rarityFilter.value)
+            val (variant, rarity) = filters
+            items.filter filter@ {
+                if (rarity == null && variant == null) return@filter true
+
+                val variantMatched = variant == null || if (variant == "Enchanted") it.enchanted else it.data.variant == variant
+                val rarityMatched = rarity == null || it.rarity == rarity
 
                 variantMatched && rarityMatched
             }
@@ -44,41 +51,48 @@ fun InventoryItems(items: List<Item>, selection: EditorState.SelectionState, noS
 
     Row {
         UnequippedItemFilterer(
-            variantFilter = variantFilter,
-            rarityFilter = rarityFilter,
+            filters = filters,
+            onFilterChange = { filters = it },
             onCreateItem = {
                 // TODO!
 //                if (noSpaceInInventory) Arctic.overlayState.inventoryFull = true
 //                else Arctic.overlayState.itemCreation = ItemCreationOverlayState()
             }
         )
-        ItemsLazyGrid(items = datasets) { _, item ->
-            ItemGridItem(item, selection = selection)
-        }
+        ItemsLazyGrid(
+            items = datasets,
+            itemContent = { item -> ItemGridItem(item, selection = selection) }
+        )
     }
 }
 
 @Composable
 private fun UnequippedItemFilterer(
-    variantFilter: MutableState<String?>,
-    rarityFilter: MutableState<String?>,
+    filters: InventoryItemFilter,
+    onFilterChange: (InventoryItemFilter) -> Unit,
     onCreateItem: () -> Unit
 ) {
-
-    var variant by variantFilter
-    var rarity by rarityFilter
+    val (selectedVariant, selectedRarity) = filters
 
     val variants = remember { listOf("Melee", "Armor", "Ranged", "Artifact", "Enchanted") }
     val rarities = remember { listOf("Unique", "Rare", "Common") }
 
     Column(horizontalAlignment = Alignment.End) {
         Spacer(modifier = Modifier.height(12.5.dp))
-        for (item in variants) {
-            VariantFilterButton(item, item == variant) { variant = if (variant == item) null else item }
+        for (variant in variants) {
+            VariantFilterButton(
+                variant = variant,
+                selected = variant == selectedVariant,
+                onClick = { onFilterChange(filters.copy(variant = if (selectedVariant == variant) null else variant)) }
+            )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        for (item in rarities) {
-            RarityFilterButton(item, item == rarity) { rarity = if (rarity == item) null else item }
+        for (rarity in rarities) {
+            RarityFilterButton(
+                rarity = rarity,
+                selected = rarity == selectedRarity,
+                onClick = { onFilterChange(filters.copy(rarity = if (selectedRarity == rarity) null else rarity)) }
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
         AddItemButton(onCreateItem)
@@ -91,7 +105,6 @@ private fun UnequippedItemFilterer(
 private fun VariantFilterButton(variant: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
-    val alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f
 
     Image(
         bitmap = VariantFilterIcon(variant, selected || hovered),
@@ -102,7 +115,7 @@ private fun VariantFilterButton(variant: String, selected: Boolean, onClick: () 
             .clickable(interaction, null, onClick = onClick)
             .padding(vertical = 12.5.dp)
             .padding(end = 12.5.dp, start = 22.5.dp)
-            .alpha(alpha)
+            .graphicsLayer { alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f }
     )
 }
 
@@ -110,23 +123,22 @@ private fun VariantFilterButton(variant: String, selected: Boolean, onClick: () 
 private fun RarityFilterButton(rarity: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
-    val alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f
 
-    Spacer(
+    Canvas(
         modifier = Modifier
             .size(70.dp, 40.dp)
             .hoverable(interaction)
             .clickable(interaction, null, onClick = onClick)
             .padding(vertical = 10.dp)
-            .drawBehind {
-                drawRoundRect(
-                    RarityColor(rarity, RarityColorType.Opaque).copy(alpha = alpha),
-                    topLeft = Offset(25.dp.toPx(), size.height / 2 - 6.dp.toPx()),
-                    size = Size(size.width - 40.dp.toPx(), 12.dp.toPx()),
-                    cornerRadius = CornerRadius(3.dp.toPx())
-                )
-            }
-    )
+            .graphicsLayer { alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f }
+    ) {
+        drawRoundRect(
+            RarityColor(rarity, RarityColorType.Opaque),
+            topLeft = Offset(25.dp.toPx(), size.height / 2 - 6.dp.toPx()),
+            size = Size(size.width - 40.dp.toPx(), 12.dp.toPx()),
+            cornerRadius = CornerRadius(3.dp.toPx())
+        )
+    }
 }
 
 @Composable
@@ -134,24 +146,28 @@ private fun AddItemButton(onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    Box(
+    Canvas(
         modifier = Modifier
             .size(70.dp)
             .hoverable(interaction)
             .clickable(interaction, null, onClick = onClick)
             .padding(vertical = 12.5.dp)
             .padding(end = 12.5.dp, start = 22.5.dp)
-            .drawBehind {
-                drawRect(
-                    color = Color(if(hovered) 0xffffffff else 0xff79706b),
-                    topLeft = Offset(size.width / 2 - 2.dp.toPx(), 9.dp.toPx()),
-                    size = Size(4.dp.toPx(), size.height - 18.dp.toPx())
-                )
-                drawRect(
-                    Color(if(hovered) 0xffffffff else 0xff79706b),
-                    topLeft = Offset(4.dp.toPx(), size.height / 2 - 2.dp.toPx()),
-                    size = Size(size.width - 8.dp.toPx(), 4.dp.toPx())
-                )
-            }
-    )
+    ) {
+        val color = Color(if(hovered) 0xffffffff else 0xff79706b)
+        val draw: DrawScope.() -> Unit = {
+            drawRect(
+                color = color,
+                topLeft = Offset(size.width / 2 - 2.dp.toPx(), 9.dp.toPx()),
+                size = Size(4.dp.toPx(), size.height - 18.dp.toPx())
+            )
+        }
+        draw()
+        rotate(degrees = 90f, block = draw)
+    }
 }
+
+private data class InventoryItemFilter(
+    val variant: String? = null,
+    val rarity: String? = null,
+)

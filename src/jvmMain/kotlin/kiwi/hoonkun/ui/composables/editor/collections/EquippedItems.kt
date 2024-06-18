@@ -24,52 +24,43 @@ fun EquippedItems(items: List<Item?>, selection: EditorState.SelectionState) {
     var collapsed by remember { mutableStateOf(false) }
 
     Row {
-        EquippedItemCollectionToggleButton(collapsed) { collapsed = !collapsed }
-        EquippedItemCollectionToggleAnimator(collapsed) { collapsed ->
+        EquippedItemsToggleButton(collapsed) { collapsed = !collapsed }
+        AnimatedContent(
+            targetState = collapsed,
+            transitionSpec = {
+                val enter = slideInVertically(initialOffsetY = { -it / 10 }) + fadeIn()
+                val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
+                enter togetherWith exit using SizeTransform(false)
+            }
+        ) { collapsed ->
             ItemsLazyGrid(
                 columns = if (collapsed) 6 else 3,
-                items = items
-            ) { _, item ->
-                ItemGridItem(item, collapsed, selection)
-            }
+                items = items,
+                itemContent = { item -> ItemGridItem(item, collapsed, selection) }
+            )
         }
     }
 }
 
 @Composable
-private fun EquippedItemCollectionToggleAnimator(
-    targetState: Boolean,
-    content: @Composable AnimatedVisibilityScope.(Boolean) -> Unit
-) =
-    AnimatedContent(
-        targetState = targetState,
-        transitionSpec = {
-            val enter = slideInVertically(initialOffsetY = { -it / 10 }) + fadeIn()
-            val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
-            enter togetherWith exit using SizeTransform(false)
-        },
-        content = content
-    )
-
-@Composable
-private fun EquippedItemCollectionToggleButton(collapsed: Boolean, onClick: () -> Unit) {
+private fun EquippedItemsToggleButton(collapsed: Boolean, onToggle: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
-
-    val bitmap = remember { DungeonsTextures["/Game/UI/Materials/Menu/arrow_gamemode.png"] }
 
     val rotation by animateFloatAsState(if (collapsed) 180f else 0f)
 
     Image(
-        bitmap = bitmap,
+        bitmap = DungeonsTextures["/Game/UI/Materials/Menu/arrow_gamemode.png"],
         contentDescription = null,
-        alpha = if (collapsed) 1.0f else if (hovered) 0.5f else 0.3f,
         modifier = Modifier
             .size(70.dp)
             .offset(y = 15.dp)
-            .clickable(interaction, null, onClick = onClick)
+            .clickable(interaction, null, onClick = onToggle)
             .hoverable(interaction)
             .padding(top = 15.dp, end = 15.dp, bottom = 15.dp, start = 25.dp)
-            .graphicsLayer { rotationZ = rotation }
+            .graphicsLayer {
+                rotationZ = rotation
+                alpha = if (collapsed) 1.0f else if (hovered) 0.5f else 0.3f
+            }
     )
 }

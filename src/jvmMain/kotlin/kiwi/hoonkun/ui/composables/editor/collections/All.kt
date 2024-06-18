@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,14 +37,18 @@ import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.values.DungeonsPower
 
 @Composable
-fun <T>ItemsLazyGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGridItemScope.(Int, T) -> Unit) where T: Item? =
+fun <T>ItemsLazyGrid(
+    columns: Int = 3,
+    items: List<T>,
+    itemContent: @Composable LazyGridItemScope.(T) -> Unit
+) where T: Item? =
     LazyVerticalGrid(
-        GridCells.Fixed(columns),
+        columns = GridCells.Fixed(columns),
         contentPadding = PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        itemsIndexed(items, itemContent = content)
+        items(items = items, itemContent = itemContent)
     }
 
 
