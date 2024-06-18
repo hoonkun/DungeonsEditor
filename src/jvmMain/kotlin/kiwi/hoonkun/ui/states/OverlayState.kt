@@ -1,8 +1,6 @@
 package kiwi.hoonkun.ui.states
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,11 +22,20 @@ class OverlayState {
 
     fun make(target: Overlay) = target.also { stack.add(it) }.id
     fun make(
-        canBeDismissed: Boolean = true,
         backdropOptions: Overlay.BackdropOptions = Overlay.BackdropOptions(),
+        canBeDismissed: Boolean = true,
+        enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
+        exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
         composable: @Composable BoxScope.(id: String) -> Unit
     ) {
-        make(Overlay(backdropOptions = backdropOptions, canBeDismissed = canBeDismissed, composable = composable))
+        val newOverlay = Overlay(
+            backdropOptions = backdropOptions,
+            canBeDismissed = canBeDismissed,
+            enter = enter,
+            exit = exit,
+            composable = composable
+        )
+        make(newOverlay)
     }
     fun destroy(id: String) {
         stack.first { it.id == id }.state = Overlay.State.Exiting
@@ -52,6 +59,8 @@ class OverlayState {
         Backdrop(item)
         Content(item)
 
+        LaunchedEffect(Unit) { item.state = Overlay.State.Idle }
+
         LaunchedEffect(item.visible) {
             if (item.visible) return@LaunchedEffect
 
@@ -64,8 +73,8 @@ class OverlayState {
     private fun BoxScope.Content(item: Overlay) {
         AnimatedVisibility(
             visible = item.visible,
-            enter = defaultFadeIn() + scaleIn(initialScale = 1.1f),
-            exit = defaultFadeOut() + scaleOut(targetScale = 1.1f)
+            enter = item.enter,
+            exit = item.exit
         ) {
             item.composable(this@Content, item.id)
         }
@@ -99,13 +108,15 @@ data class Overlay(
     val id: String = UUID.randomUUID().toString(),
     val backdropOptions: BackdropOptions = BackdropOptions(),
     val canBeDismissed: Boolean = true,
+    val enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
+    val exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
     val composable: @Composable BoxScope.(id: String) -> Unit,
 ) {
-    var state by mutableStateOf(State.Idle)
+    var state by mutableStateOf(State.Initial)
     val visible: Boolean get() = state == State.Idle
 
     enum class State {
-        Idle, Exiting
+        Initial, Idle, Exiting
     }
 
     data class BackdropOptions(
