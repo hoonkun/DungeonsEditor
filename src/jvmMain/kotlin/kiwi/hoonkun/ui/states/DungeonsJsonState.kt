@@ -544,7 +544,7 @@ class Item(
     )
 
     fun updateEnchantmentInvestedPoints() {
-        enchantments?.forEach { it.leveling() }
+        enchantments?.forEach { it.applyHolderInvestedPoints() }
     }
 
     fun transfer(editor: EditorState) {
@@ -620,6 +620,8 @@ class Enchantment private constructor(
         private const val FIELD_ID = "id"
         private const val FIELD_INVESTED_POINTS = "investedPoints"
         private const val FIELD_LEVEL = "level"
+
+        fun Unset(holder: Item) = Enchantment(holder, "Unset", 0, 0)
     }
 
     lateinit var holder: Item
@@ -660,7 +662,7 @@ class Enchantment private constructor(
             put(FIELD_LEVEL, level)
         }
 
-    fun leveling(newLevel: Int = this.level) {
+    fun applyHolderInvestedPoints(newLevel: Int = this.level) {
         level = newLevel
 
         val nonGlided = holder.netheriteEnchant == null || holder.netheriteEnchant?.id == "Unset"

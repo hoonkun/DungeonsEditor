@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.layout
 import kiwi.hoonkun.ui.composables.base.EnchantmentIconImage
 import kiwi.hoonkun.ui.composables.base.EnchantmentLevelImage
+import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.states.Enchantment
@@ -86,12 +87,9 @@ private fun EnchantmentIconImage(enchantment: Enchantment, modifier: Modifier = 
         onClick = {
             overlays.make(
                 enter = defaultFadeIn(),
-                exit = defaultFadeOut()
-            ) {
-
-            }
-            // TODO!!
-            /*Arctic.overlayState.enchantment = ItemEnchantmentOverlayState(enchantment.holder, enchantment)*/
+                exit = defaultFadeOut(),
+                content = { EnchantmentOverlay(enchantment) }
+            )
         }
     )
 }

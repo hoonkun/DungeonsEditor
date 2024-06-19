@@ -11,27 +11,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ui.reusables.drawEnchantmentIconBorder
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.resources.EnchantmentData
 import kotlin.math.sqrt
 
+
+private val IconScale = 1f / sqrt(2.0f)
+private val ShineScale = sqrt(2.0f)
 
 @Composable
 fun EnchantmentIconImage(
@@ -45,11 +44,11 @@ fun EnchantmentIconImage(
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val patterns = remember(data) { data.shinePatterns }
+    val patterns = remember(data) { data.shinePatterns?.let { EnchantmentPatterns(it[0], it[1], it[2]) } }
 
     Box(
         modifier = modifier
-            .scale(1f / sqrt(2.0f))
+            .scale(IconScale)
             .clickable(interaction, null, enabled = (!disableInteraction || selected)) { onClick(data) }
             .hoverable(interaction, enabled = !disableInteraction)
             .rotate(45f)
@@ -67,7 +66,7 @@ fun EnchantmentIconImage(
             enabled = data.id != "Unset",
             modifier = Modifier
                 .rotate(-45f)
-                .scale(sqrt(2.0f))
+                .scale(ShineScale)
                 .scale(if (data.id == "Unset") 0.7f else 1f)
                 .scale(0.5f)
         )
@@ -121,42 +120,82 @@ fun EnchantmentLevelImage(
 }
 
 @Composable
-private fun EnchantmentShine(patterns: List<ImageBitmap>) {
-    val transition = rememberInfiniteTransition()
+private fun EnchantmentShine(patterns: EnchantmentPatterns) {
+    val interpolation by animateShineInterpolation()
+    val interpolatedR by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 0) } }
+    val interpolatedG by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 1) } }
+    val interpolatedB by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 2) } }
 
-    val alphaR by animateShine(transition, 500 * 0)
-    val alphaG by animateShine(transition, 500 * 1)
-    val alphaB by animateShine(transition, 500 * 2)
-
-    val drawShine: DrawScope.(Int, Float) -> Unit = { index, alpha ->
-        drawImage(
-            image = patterns[index],
-            dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-            alpha = alpha,
-            blendMode = BlendMode.Overlay
-        )
+    val imageModifier = remember {
+        Modifier
+            .fillMaxSize()
+            .rotate(-45f)
+            .scale(ShineScale)
+            .scale(0.5f)
     }
 
-    Canvas(modifier = Modifier.fillMaxSize().rotate(-45f).scale(sqrt(2.0f)).scale(0.5f)) {
-        drawShine(0, alphaR)
-        drawShine(1, alphaG)
-        drawShine(2, alphaB)
+    Canvas(modifier = imageModifier) {
+        drawImage(image = patterns.r, dstSize = size.round(), alpha = interpolatedR * MaxAlpha)
+        drawImage(image = patterns.g, dstSize = size.round(), alpha = interpolatedG * MaxAlpha)
+        drawImage(image = patterns.b, dstSize = size.round(), alpha = interpolatedB * MaxAlpha)
     }
 }
 
+private const val MaxAlpha = 0.75f
+
+private const val ChannelDelay = 500
+private const val AlphaSnap = 500
+private const val AlphaDuration = 700
+private const val IdleAlpha = AlphaDuration - AlphaSnap
+private const val RestartDelay = 1000
+private const val AnimationDuration = (AlphaDuration + ChannelDelay * 2) * 2 + RestartDelay
+
+// [--------------------------------------------]
+// [^      ^      ^         ^                   ]
+// [--------------------------------------------]
+// [     ^      ^      ^         ^              ]
+// [--------------------------------------------]
+// [          ^      ^      ^         ^         ]
+
 @Composable
-private fun animateShine(transition: InfiniteTransition, delay: Int) =
-    transition.animateFloat(
-        initialValue = 0f, targetValue = 0.75f,
+private fun animateShineInterpolation(): State<Float> =
+    rememberInfiniteTransition().animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = 700
-                delayMillis = 1000
-                0.0f at 0
-                0.75f at 500
-                0.75f at 700
-            },
-            repeatMode = RepeatMode.Reverse,
-            initialStartOffset = StartOffset(1000 + delay)
+            animation = tween(AnimationDuration, easing = LinearEasing),
+            initialStartOffset = StartOffset(1000)
         )
     )
+
+@Stable
+private fun EaseOutCubic(x: Float) = 1 - (1 - x) * (1 - x)
+
+@Stable
+private fun interpolateShineAlpha(x: Float, delay: Int): Float {
+    val timestamp = x * AnimationDuration
+    if (timestamp < delay || timestamp > delay + AlphaDuration * 2) return 0f
+
+    var normalized = timestamp - delay
+    return if (normalized < AlphaDuration) {
+        if (normalized > AlphaSnap) 1f
+        else (EaseOutCubic(normalized / AlphaSnap) * 16f).toInt() / 16f
+    } else {
+        normalized -= AlphaDuration
+        if (normalized < IdleAlpha) 1f
+        else (EaseOutCubic(1 - (normalized - (IdleAlpha)) / AlphaSnap) * 16f).toInt() / 16f
+    }
+}
+
+@Immutable
+data class EnchantmentPatterns(
+    val r: ImageBitmap,
+    val g: ImageBitmap,
+    val b: ImageBitmap
+) {
+    inline fun forEach(block: (Int, ImageBitmap) -> Unit) {
+        block(0, r)
+        block(1, g)
+        block(2, b)
+    }
+}

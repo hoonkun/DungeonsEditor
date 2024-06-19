@@ -12,6 +12,8 @@ import minecraft.dungeons.io.DungeonsPakRegistry
 import pak.PakIndex
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 import kotlin.io.path.Path
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
@@ -225,16 +227,110 @@ data class EnchantmentData(
     }
 
     private fun filterShineColor(channel: Int): ImageBitmap? {
-        val original = shinePattern?.toAwtImage() ?: return null
-        val new = BufferedImage(original.width, original.height, original.type)
-        val pixels = original.getRGB(0, 0, original.width, original.height, null, 0, original.width)
-        val mask = (0xff000000u or (0xffu shl (channel * 2 * 4)))
-        for (i in pixels.indices) {
-            val filtered = pixels[i].toUInt() and mask
-            val value = (filtered and 0x00ffffffu) shr (channel * 2 * 4)
-            pixels[i] = ((value shl 6 * 4) or (value shl 4 * 4) or (value shl 2 * 4) or value).toInt()
+        val source = shinePattern?.toAwtImage() ?: return null
+        val backdrop = icon.toAwtImage()
+
+        val new = BufferedImage(source.width, source.height, backdrop.type)
+        val sourcePixels = source.getRGB(0, 0, source.width, source.height, null, 0, source.width)
+        val backdropPixels = backdrop.getRGB(0, 0, backdrop.width, backdrop.height, null, 0, source.width)
+        val mask = 0xff000000u or (0xffu shl (channel * 2 * 4)) // 0xff0000ff or 0xff00ff00 or 0xffff0000
+        for (i in sourcePixels.indices) {
+            val filtered = sourcePixels[i].toUInt() and mask // deletes except specified channel and alpha
+            if ((filtered and 0x00ffffffu) == 0u) {
+                sourcePixels[i] = 0
+                continue
+            }
+
+            // Apply BlendMode.Overlay here, to avoid real-time blend mode rendering in compose layer.
+            // W3C Thank you again!!
+
+            // Compositing Documentation
+            //
+            // co = Cs x αs + Cb x αb x (1 - αs) // ?
+            //
+            // co: the premultiplied pixel value after compositing
+            // Cs: the color value of the source graphic element being composited
+            // αs: the alpha value of the source graphic element being composited
+            // Cb: the color value of the backdrop
+            // αb: the alpha value of the backdrop
+            //
+            // αo = αs + αb x (1 - αs) ----------------------------------------------------------------------- (3)
+            //
+            // αo: the alpha value of the composite
+            // αs: the alpha value of the graphic element being composited
+            // αb: the alpha value of the backdrop
+            //
+            // Blending Documentation
+            //
+            // Cs = (1 - αb) x Cs + αb x B(Cb, Cs) -> update source color with blending function ------------- (1)
+            // Co = αs x Fa x Cs + αb x Fb x Cb -> result color with alpha is applied ------------------------ (2)
+            //
+            // Cs: is the source color
+            // Cb: is the backdrop color
+            // αs: is the source alpha
+            // αb: is the backdrop alpha
+            // B(Cb, Cs): is the mixing function
+            // Fa: is defined by the Porter Duff operator in use
+            // Fb: is defined by the Porter Duff operator in use
+
+            // What we use:
+            //
+            // Porter Duff
+            //     Fa = αb; Fb = 0 -> this is Source In Porter Duff, which deletes all pixels excepts source.
+            //
+            // Blending Functions
+            // Overlay
+            //     B(Cb, Cs) = HardLight(Cs, Cb)
+            // HardLight
+            //     if(Cs <= 0.5)
+            //         B(Cb, Cs) = Multiply(Cb, 2 x Cs)
+            //     else
+            //         B(Cb, Cs) = Screen(Cb, 2 x Cs -1)
+            // Multiply
+            //     B(Cb, Cs) = Cb x Cs
+            // Screen
+            //     B(Cb, Cs) = Cb + Cs - (Cb x Cs)
+
+            // Raw pixel values
+            val Ps = sourcePixels[i].toUInt()
+            val Pb = backdropPixels[i].toUInt()
+
+            // Source: ShinePattern
+            val Cs: (shift: Int) -> Float = {
+                // (((Ps and (0xffu shl (it * 8))) shr (it * 8)).toFloat() / 0xff).coerceIn(0f, 1f)
+                1f
+            }
+            val As = (((Ps and mask and 0x00ffffffu) shr (channel * 2 * 4)).toFloat() / 0xff).coerceIn(0f, 1f)
+
+            // Backdrop: RealImage
+            val Cb: (shift: Int) -> Float = { (((Pb and (0xffu shl (it * 8))) shr (it * 8)).toFloat() / 0xff).coerceIn(0f, 1f) }
+            val Ab = Cb(3) // 1f
+
+            // PorterDuff Values
+            val Fa = Ab
+            val Fb = 1 - As
+
+            // Blending Functions
+            val Multiply: BlendingFunction = { Cb, Cs -> Cb * Cs }
+            val Screen: BlendingFunction = { Cb, Cs -> Cb + Cs - (Cb * Cs) }
+            val HardLight: BlendingFunction = { Cb, Cs -> if (Cs <= 0.5f) Multiply(Cb, 2 * Cs) else Screen(Cb, 2 * Cs - 1) }
+            val Overlay: BlendingFunction = { Cb, Cs -> HardLight(Cs, Cb) }
+
+            // Implementation
+            val Co: (shift: Int) -> Float = { As * Fa * ((1 - Ab) * Cs(it) + Ab * Overlay(Cb(it), Cs(it))) + Ab * Fb * Cb(it) }
+            val Ao = As * Ab // As
+
+            val toUIntChannel: Float.() -> UInt = { times(0xff).toInt().coerceIn(0, 0xff).toUInt() }
+
+            val r = Co(2).toUIntChannel()
+            val g = Co(1).toUIntChannel()
+            val b = Co(0).toUIntChannel()
+            val a = Ao.toUIntChannel()
+
+            sourcePixels[i] = ((a shl 24) or (r shl 16) or (g shl 8) or b).toInt()
         }
-        new.setRGB(0, 0, original.width, original.height, pixels, 0, original.width)
+        new.setRGB(0, 0, source.width, source.height, sourcePixels, 0, source.width)
+        ImageIO.write(new, "png", File("/Users/hoonkun/Temp/Shine-${if (channel == 0) "B" else if (channel == 1) "G" else "R"}-W/${id}.png"))
         return new.toComposeImageBitmap()
     }
 
@@ -314,3 +410,5 @@ data class ArmorPropertyData(
             ?.replace("  ", " ")
             ?.trim()
 }
+
+typealias BlendingFunction = (Float, Float) -> Float
