@@ -1,4 +1,4 @@
-package extensions
+package kiwi.hoonkun.utils
 
 fun String.lengthEllipsisMiddle(maxLength: Int): String {
     return if (length < maxLength) this

@@ -15,20 +15,31 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import kiwi.hoonkun.ui.composables.base.AutosizeText
-import kiwi.hoonkun.ui.composables.base.EnchantmentIconImage
-import kiwi.hoonkun.ui.composables.base.EnchantmentLevelImage
+import androidx.compose.ui.unit.round
+import dungeons.DungeonsPower
+import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.ui.composables.base.*
+import kiwi.hoonkun.ui.composables.editor.collections.ItemCollectionView
+import kiwi.hoonkun.ui.composables.editor.details.EnchantmentSlots
+import kiwi.hoonkun.ui.composables.editor.details.ItemEnchantments
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
+import kiwi.hoonkun.utils.replace
+import kiwi.hoonkun.utils.toFixed
 import minecraft.dungeons.resources.DungeonsDatabase
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
@@ -50,8 +61,13 @@ fun rememberEnchantmentDataCollectionState(original: Enchantment) =
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AnimatedVisibilityScope.EnchantmentOverlay(original: Enchantment) {
+fun AnimatedVisibilityScope.EnchantmentOverlay(
+    original: Enchantment,
+    requestClose: () -> Unit
+) {
     val state = rememberEnchantmentDataCollectionState(original)
+
+    val density = LocalDensity.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -62,32 +78,148 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(original: Enchantment) {
             state = state,
             modifier = Modifier
                 .animateEnterExit(
-                    enter = slideIn { IntOffset(-60.dp.value.toInt(), 0) },
+                    enter = slideIn { with(density) { IntOffset(-60.dp.roundToPx(), 0) } },
                     exit = ExitTransition.None
                 )
         )
         Spacer(modifier = Modifier.width(40.dp))
-        AnimatedContent(
-            targetState = state.selected,
-            transitionSpec = {
-                val enter =
-                    if (initialState.id == "Unset") defaultFadeIn()
-                    else defaultFadeIn() + defaultSlideIn { IntOffset(50.dp.value.toInt(), 0) }
-                val exit =
-                    if (targetState.id == "Unset") defaultFadeOut()
-                    else defaultFadeOut() + defaultSlideOut { IntOffset(50.dp.value.toInt(), 0) }
-
-                enter togetherWith exit using SizeTransform(clip = false)
-            },
-            modifier = Modifier
-                .height(500.dp)
-                .animateEnterExit(
-                    enter = slideIn { IntOffset(0, 60.dp.value.toInt()) },
+        Box(modifier = Modifier.requiredWidth(675.dp)) {
+            HolderPreview(
+                state = state,
+                modifier = Modifier.animateEnterExit(
+                    enter = slideIn { with(density) { IntOffset(60.dp.roundToPx(), 0) } },
                     exit = ExitTransition.None
                 )
-        ) { preview ->
-            if (preview.id != "Unset") EnchantmentDetail(preview)
-            else Box(modifier = Modifier.width(0.dp).height(500.dp))
+            )
+
+            AnimatedContent(
+                targetState = state.selected,
+                transitionSpec = {
+                    val enter =
+                        if (initialState.id == "Unset") defaultFadeIn()
+                        else defaultFadeIn() + defaultSlideIn { with(density) { IntOffset(50.dp.roundToPx(), 0) } }
+                    val exit =
+                        if (targetState.id == "Unset") defaultFadeOut()
+                        else defaultFadeOut() + defaultSlideOut { with(density) { IntOffset(50.dp.roundToPx(), 0) } }
+
+                    enter togetherWith exit using SizeTransform(clip = false)
+                },
+                modifier = Modifier
+                    .height(400.dp)
+                    .animateEnterExit(
+                        enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
+                        exit = ExitTransition.None
+                    )
+            ) { preview ->
+                if (preview.id != "Unset") EnchantmentDetail(preview)
+                else Box(modifier = Modifier.width(0.dp).height(400.dp))
+            }
+
+            Row(
+                modifier = Modifier
+                    .offset(y = (-24).dp)
+                    .align(Alignment.BottomEnd)
+                    .offsetRelative(x = 0f, y = 1f)
+                    .animateEnterExit(
+                        enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
+                        exit = ExitTransition.None
+                    )
+            ) {
+                RetroButton(
+                    text = Localizations.UiText("cancel"),
+                    color = Color.White,
+                    hoverInteraction = RetroButtonHoverInteraction.Overlay,
+                    onClick = { requestClose() },
+                    modifier = Modifier.size(135.dp, 65.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                RetroButton(
+                    text = Localizations.UiText("ok"),
+                    color = Color(0xff3f8e4f),
+                    hoverInteraction = RetroButtonHoverInteraction.Outline,
+                    onClick = {
+                        if (state.initialSelected.isNetheriteEnchant) {
+                            state.initialSelected.holder.netheriteEnchant = state.selected
+                        } else {
+                            state.initialSelected.holder.enchantments?.replace(state.initialSelected, state.selected)
+                        }
+
+                        state.selected.applyHolderInvestedPoints()
+                    },
+                    modifier = Modifier.size(135.dp, 65.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HolderPreview(
+    state: EnchantmentDataCollectionState,
+    modifier: Modifier = Modifier,
+) {
+    val holder = state.initialSelected.holder
+    val enchantments by remember { derivedStateOf { holder.enchantments?.let { EnchantmentSlots(it) } } }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .offsetRelative(x = 0f, y = -1f)
+            .then(modifier)
+            .background(Color(0xff080808))
+            .clipToBounds()
+            .drawBehind {
+                drawImage(
+                    image = holder.data.largeIcon,
+                    dstOffset = Offset((-20f).dp.toPx(), -30f.dp.toPx()).round(),
+                    dstSize = Size(size.width * 0.5f, size.width * 0.5f).round(),
+                    alpha = 0.25f
+                )
+            }
+            .padding(20.dp)
+    ) {
+        Row {
+            Box(
+                modifier = Modifier
+                    .width(120.dp)
+                    .aspectRatio(1f / 1f)
+                    .padding(all = 12.dp)
+            ) {
+                ItemCollectionView(holder, fontSize = 12.sp)
+            }
+            Column {
+                Row(modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp, bottom = 8.dp)) {
+                    ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ItemNetheriteEnchantButton(holder = holder, readonly = true)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ItemModifiedButton(holder = holder, readonly = true)
+                }
+                Row(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                    Text(
+                        text = holder.data.name, fontSize = 40.sp, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(end = 8.dp).alignByBaseline()
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alignByBaseline()) {
+                        PowerIcon()
+                        Text(
+                            text = "${DungeonsLocalizations["/gearpower_POWER"]} ${DungeonsPower.toInGamePower(holder.power).toFixed(3)}",
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+        Row {
+            IfNotNull(enchantments) {
+                ItemEnchantments(
+                    enchantments = it,
+                    modifier = Modifier.weight(3f),
+                    breakdown = true,
+                    highlight = state.initialSelected,
+                    readonly = true
+                )
+            }
         }
     }
 }
@@ -142,16 +274,6 @@ private fun EnchantmentDataCollection(
                             else
                                 initialSelected.level
                     )
-
-                    // TODO: 저장 시로 아래 로직을 옮길 것
-//                    state.selected.applyHolderInvestedPoints()
-//                    if (preview.isNetheriteEnchant) {
-//                        holder.netheriteEnchant = newEnchantment
-//                    } else {
-//                        holder.enchantments?.replace(applyTarget, newEnchantment)
-//                    }
-//
-//                    holder.updateEnchantmentInvestedPoints()
                 }
             )
         }
@@ -170,7 +292,7 @@ private fun EnchantmentDataCollectionItem(
         EnchantmentIconImage(
             data = data,
             selected = selected,
-            disableInteraction = !enabled,
+            disabled = !enabled,
             modifier = Modifier.fillMaxWidth().aspectRatio(1f / 1f),
             onClick = { onItemSelect(data) }
         )

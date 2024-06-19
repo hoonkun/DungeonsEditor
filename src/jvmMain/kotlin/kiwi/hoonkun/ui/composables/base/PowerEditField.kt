@@ -43,7 +43,7 @@ fun PowerEditField(
 }
 
 @Composable
-private fun PowerIcon() =
+fun PowerIcon() =
     Image(
         bitmap = DungeonsTextures["/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png"],
         contentDescription = null,

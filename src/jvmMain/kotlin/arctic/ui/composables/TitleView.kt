@@ -46,7 +46,7 @@ import dungeons.IngameImages
 import dungeons.Localizations
 import dungeons.states.DungeonsJsonState
 import dungeons.states.Item
-import extensions.lengthEllipsisMiddle
+import kiwi.hoonkun.utils.lengthEllipsisMiddle
 import utils.separatePathAndName
 
 

@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -22,8 +23,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.reusables.RarityColor
 import kiwi.hoonkun.ui.reusables.RarityColorType
@@ -95,18 +98,26 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorState
         if (item == null) {
             EmptyEquippedSlot()
         } else {
-            ItemImage(item, simplified)
+            ItemCollectionView(item, simplified)
+        }
+    }
+}
 
-            if (!simplified) {
-                PowerText(item.power)
+@Composable
+fun BoxScope.ItemCollectionView(
+    item: Item,
+    simplified: Boolean = false,
+    fontSize: TextUnit = 22.sp,
+) {
+    ItemImage(item, simplified)
 
-                if (item.enchanted)
-                    InvestedEnchantmentPointsText(item.totalEnchantmentInvestedPoints)
-
-                if (item.markedNew == true) {
-                    NewMark()
-                }
-            }
+    if (!simplified) {
+        PowerText(item.power, fontSize = fontSize)
+        if (item.enchanted) {
+            InvestedEnchantmentPointsText(item.totalEnchantmentInvestedPoints, fontSize = fontSize)
+        }
+        if (item.markedNew == true) {
+            NewMark()
         }
     }
 }
@@ -122,26 +133,27 @@ private fun EmptyEquippedSlot() =
     )
 
 @Composable
-private fun BoxScope.PowerText(power: Double) =
+private fun BoxScope.PowerText(power: Double, fontSize: TextUnit) =
     Text(
         text = "${remember(power) { DungeonsPower.toInGamePower(power).toInt()} }",
         color = Color.White.copy(alpha = 0.85f),
-        fontSize = 22.sp,
+        fontSize = fontSize,
         fontFamily = Resources.Fonts.JetbrainsMono,
         style = TextStyle(shadow = Shadow(Color.Black, blurRadius = 5f)),
         modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 12.dp, vertical = 9.dp)
     )
 
 @Composable
-private fun BoxScope.InvestedEnchantmentPointsText(points: Int) =
+private fun BoxScope.InvestedEnchantmentPointsText(points: Int, fontSize: TextUnit) =
     Row(
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.align(Alignment.TopEnd).padding(horizontal = 12.dp, vertical = 9.dp)
+        modifier = Modifier.fillMaxWidth().align(Alignment.TopEnd).padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
         Text(
             text = "$points",
             color = Color.White.copy(alpha = 0.85f),
-            fontSize = 22.sp,
+            fontSize = fontSize,
             fontFamily = Resources.Fonts.JetbrainsMono,
             style = TextStyle(shadow = Shadow(Color.Black, blurRadius = 5f))
         )
@@ -149,7 +161,7 @@ private fun BoxScope.InvestedEnchantmentPointsText(points: Int) =
         Image(
             bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png"],
             contentDescription = null,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.fillMaxWidth(0.15f).aspectRatio(1f / 1f)
         )
     }
 
@@ -161,8 +173,12 @@ private fun ItemImage(item: Item, simplified: Boolean) =
         alignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .drawBehind { drawItemFrame(item.rarity, item.glided, item.enchanted, item.data.variant == "Artifact") }
-            .padding(all = if (simplified) 12.5.dp else 20.dp)
+            .drawWithContent {
+                drawItemFrame(item.rarity, item.glided, item.enchanted, item.data.variant == "Artifact")
+                scale(if (simplified) 0.875f else 0.775f) {
+                    this@drawWithContent.drawContent()
+                }
+            }
     )
 
 @Composable

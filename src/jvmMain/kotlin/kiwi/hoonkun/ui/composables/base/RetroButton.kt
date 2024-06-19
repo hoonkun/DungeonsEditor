@@ -6,7 +6,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
@@ -45,18 +44,17 @@ fun RetroButton(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .then(modifier)
+        modifier = modifier
             .hoverable(source, enabled)
             .clickable(source, null, enabled, onClick = onClick)
     ) {
         if (hoverInteraction == RetroButtonHoverInteraction.Outline) {
-            if (hovered) Outline(Color.White, radius = radius)
-            Solid(solidColor, radius = radius, stroke = stroke)
-            if (pressed) Outline(Color.Black, alpha = 0.25f, radius = radius)
+            if (hovered) Outline(Color.White, radius = radius, modifier = Modifier.matchParentSize())
+            Solid(solidColor, radius = radius, stroke = stroke, modifier = Modifier.matchParentSize())
+            if (pressed) Outline(Color.Black, alpha = 0.25f, radius = radius, modifier = Modifier.matchParentSize())
         } else if (hoverInteraction == RetroButtonHoverInteraction.Overlay) {
-            if (hovered) Solid(solidColor, alpha = 0.2f, radius = radius, stroke = stroke)
-            if (pressed) Solid(Color.Black, alpha = 0.25f, radius = radius, stroke = stroke)
+            if (hovered) Solid(solidColor, alpha = 0.2f, radius = radius, stroke = stroke, modifier = Modifier.matchParentSize())
+            if (pressed) Solid(Color.Black, alpha = 0.25f, radius = radius, stroke = stroke, modifier = Modifier.matchParentSize())
         }
         Text(
             text = text,
@@ -67,10 +65,10 @@ fun RetroButton(
 }
 
 @Composable
-private fun Outline(color: Color, alpha: Float = 1f, radius: Dp) {
+private fun Outline(color: Color, alpha: Float = 1f, radius: Dp, modifier: Modifier = Modifier) {
     Spacer(
         modifier = Modifier
-            .fillMaxSize()
+            .then(modifier)
             .alpha(alpha)
             .drawBehind {
                 drawRect(
@@ -88,10 +86,10 @@ private fun Outline(color: Color, alpha: Float = 1f, radius: Dp) {
 }
 
 @Composable
-private fun Solid(color: Color, alpha: Float = 1f, radius: Dp, stroke: Dp) {
+private fun Solid(color: Color, alpha: Float = 1f, radius: Dp, stroke: Dp, modifier: Modifier = Modifier) {
     Spacer(
         modifier = Modifier
-            .fillMaxSize()
+            .then(modifier)
             .alpha(alpha)
             .drawBehind {
                 drawRect(

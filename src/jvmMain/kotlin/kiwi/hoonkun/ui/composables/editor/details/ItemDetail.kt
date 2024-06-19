@@ -1,13 +1,15 @@
 package kiwi.hoonkun.ui.composables.editor.details
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -18,22 +20,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.reusables.IfNotNull
 import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.Retriever
-import minecraft.dungeons.resources.DungeonsLocalizations
-import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.values.DungeonsPower
 
 @Composable
@@ -100,7 +96,7 @@ private fun Content(item: Item, editor: EditorState) {
 
         IfNotNull(item.enchantments) {
             Spacer(modifier = Modifier.height(30.dp))
-            ItemEnchantments(it)
+            ItemEnchantments(EnchantmentSlots(it), modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -179,99 +175,6 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
 //        Arctic.overlayState.itemDeletion = item
         }
     )
-}
-
-@Composable
-private fun ItemNetheriteEnchantButton(holder: Item) {
-
-    @Composable
-    fun InactiveItemNetheriteEnchantButton(builder: Retriever<Enchantment>) {
-        ItemAlterButton(
-            color = Color(0x15ffffff),
-            horizontalPadding = 4.dp,
-            onClick = {
-                val target = builder()
-                // TODO!
-//        Arctic.overlayState.enchantment = ItemEnchantmentOverlayState(holder, target)
-            }
-        ) {
-            Image(
-                bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"],
-                contentDescription = null,
-                modifier = Modifier.size(28.dp)
-            )
-        }
-    }
-
-    @Composable
-    fun ActiveItemNetheriteEnchantButton(enchantment: Enchantment) {
-        ItemAlterButton(
-            color = Color(0x40ffc847),
-            horizontalPadding = 10.dp,
-            onClick = {
-                val target = enchantment
-                // TODO!
-//        Arctic.overlayState.enchantment = ItemEnchantmentOverlayState(holder, target)
-            }
-        ) {
-            Image(
-                bitmap = enchantment.data.icon,
-                contentDescription = null,
-                modifier = Modifier
-                    .requiredSize(30.dp)
-                    .drawBehind {
-                        drawImage(
-                            image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
-                            dstSize = IntSize(size.width.toInt(), size.height.toInt())
-                        )
-                    }
-                    .scale(1.05f)
-            )
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(text = DungeonsLocalizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 18.sp, color = Color.White)
-        }
-    }
-
-    val enchantment = holder.netheriteEnchant
-
-    if (enchantment != null && !enchantment.isUnset)
-        ActiveItemNetheriteEnchantButton(enchantment)
-    else
-        InactiveItemNetheriteEnchantButton(builder = { holder.newNetheriteEnchant() })
-}
-
-@Composable
-private fun ItemModifiedButton(holder: Item) {
-    val modified = holder.modified == true
-    var timesModified by remember { mutableStateOf("${holder.timesModified ?: 0}") }
-
-    ItemAlterButton(
-        color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
-        onClick = { holder.modified = !modified }
-    ) {
-        Text(
-            text = if (modified) Localizations.UiText("modified") else "_",
-            fontSize = 18.sp,
-            color = Color.White
-        )
-
-        if (!modified) return@ItemAlterButton
-
-        TextFieldValidatable(
-            value = timesModified,
-            onValueChange = { timesModified = it },
-            validator = { it.toIntOrNull() != null },
-            onSubmit = { holder.timesModified = timesModified.toInt().takeIf { it != 0 } },
-            textStyle = TextStyle(fontSize = 18.sp, color = Color.White, textAlign = TextAlign.End),
-            hideDecorationIfNotFocused = true,
-            modifier = Modifier.requiredWidth(28.dp).padding(end = 2.dp).offset(y = (-1).dp)
-        )
-        Text(
-            text = Localizations.UiText("times"),
-            fontSize = 18.sp,
-            color = Color.White
-        )
-    }
 }
 
 @Composable

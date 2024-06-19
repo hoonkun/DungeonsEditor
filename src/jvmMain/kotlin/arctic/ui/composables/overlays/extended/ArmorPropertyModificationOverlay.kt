@@ -25,15 +25,15 @@ import arctic.states.ItemArmorPropertyOverlayState
 import arctic.ui.composables.atomic.rememberArmorPropertyIconAsState
 import arctic.ui.composables.overlays.OverlayBackdrop
 import arctic.ui.composables.overlays.SizeMeasureDummy
-import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.ArmorPropertyData
 import dungeons.Database
 import dungeons.Localizations
 import dungeons.states.ArmorProperty
 import dungeons.states.Item
-import extensions.replace
+import kiwi.hoonkun.utils.replace
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

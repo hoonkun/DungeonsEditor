@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.ui.reusables.drawEnchantmentIconBorder
@@ -37,7 +37,9 @@ fun EnchantmentIconImage(
     data: EnchantmentData,
     onClick: (EnchantmentData) -> Unit = { },
     hideIndicator: Boolean = false,
-    disableInteraction: Boolean = false,
+    forceOpaque: Boolean = false,
+    outline: Boolean = false,
+    disabled: Boolean = false,
     selected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -47,18 +49,20 @@ fun EnchantmentIconImage(
     val patterns = remember(data) { data.shinePatterns?.let { EnchantmentPatterns(it[0], it[1], it[2]) } }
 
     Box(
-        modifier = modifier
+        modifier = Modifier
+            .then(modifier)
+            .graphicsLayer { alpha = if (!forceOpaque && disabled && !selected) 0.25f else 1f }
             .scale(IconScale)
-            .clickable(interaction, null, enabled = (!disableInteraction || selected)) { onClick(data) }
-            .hoverable(interaction, enabled = !disableInteraction)
+            .clickable(interaction, null, enabled = (!disabled || selected)) { onClick(data) }
+            .hoverable(interaction, enabled = !disabled)
             .rotate(45f)
             .drawBehind {
+                if (outline) return@drawBehind drawEnchantmentIconBorder(1f)
                 if (hideIndicator) return@drawBehind
                 if (!hovered && !selected) return@drawBehind
                 drawEnchantmentIconBorder(if (selected) 0.8f else 0.4f)
             }
-            .scale(2f)
-            .alpha(if (disableInteraction && !selected) 0.25f else 1f),
+            .scale(2f),
     ) {
         BlurShadowImage(
             bitmap = data.icon,

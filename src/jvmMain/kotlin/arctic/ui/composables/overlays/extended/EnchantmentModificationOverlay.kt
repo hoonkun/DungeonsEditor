@@ -22,19 +22,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import arctic.states.Arctic
 import arctic.states.ItemEnchantmentOverlayState
-import arctic.ui.composables.atomic.*
+import arctic.ui.composables.atomic.AutosizeText
+import arctic.ui.composables.atomic.EnchantmentIconImage
+import arctic.ui.composables.atomic.EnchantmentLevelImage
+import arctic.ui.composables.atomic.PowerfulEnchantmentIndicator
 import arctic.ui.composables.overlays.OverlayBackdrop
 import arctic.ui.composables.overlays.SizeMeasureDummy
-import arctic.ui.utils.rememberMutableInteractionSource
 import arctic.ui.unit.dp
 import arctic.ui.unit.sp
+import arctic.ui.utils.rememberMutableInteractionSource
 import dungeons.Database
 import dungeons.EnchantmentData
 import dungeons.IngameImages
 import dungeons.states.Enchantment
 import dungeons.states.Item
 import dungeons.states.extensions.leveling
-import extensions.replace
+import kiwi.hoonkun.utils.replace
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

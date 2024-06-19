@@ -3,7 +3,8 @@ package kiwi.hoonkun.ui.states
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import extensions.*
+import extensions.toFixed
+import kiwi.hoonkun.utils.*
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsDatabase
 import minecraft.dungeons.resources.EnchantmentData
