@@ -15,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
@@ -30,9 +31,8 @@ import androidx.compose.ui.unit.round
 import dungeons.DungeonsPower
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
-import kiwi.hoonkun.ui.composables.editor.collections.ItemCollectionView
-import kiwi.hoonkun.ui.composables.editor.details.EnchantmentSlots
-import kiwi.hoonkun.ui.composables.editor.details.ItemEnchantments
+import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
+import kiwi.hoonkun.ui.composables.editor.details.EnchantmentsHolder
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.states.Item
@@ -159,7 +159,7 @@ private fun HolderPreview(
     modifier: Modifier = Modifier,
 ) {
     val holder = state.initialSelected.holder
-    val enchantments by remember { derivedStateOf { holder.enchantments?.let { EnchantmentSlots(it) } } }
+    val enchantments by remember { derivedStateOf { holder.enchantments?.let { EnchantmentsHolder(it) } } }
 
     Column(
         modifier = Modifier
@@ -179,14 +179,13 @@ private fun HolderPreview(
             .padding(20.dp)
     ) {
         Row {
-            Box(
+            ItemSlot(
+                item = holder,
                 modifier = Modifier
                     .width(120.dp)
                     .aspectRatio(1f / 1f)
                     .padding(all = 12.dp)
-            ) {
-                ItemCollectionView(holder, fontSize = 12.sp)
-            }
+            )
             Column {
                 Row(modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp, bottom = 8.dp)) {
                     ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
@@ -210,16 +209,10 @@ private fun HolderPreview(
                 }
             }
         }
-        Row {
-            IfNotNull(enchantments) {
-                ItemEnchantments(
-                    enchantments = it,
-                    modifier = Modifier.weight(3f),
-                    breakdown = true,
-                    highlight = state.initialSelected,
-                    readonly = true
-                )
-            }
+
+        val capturedEnchantments = enchantments ?: return@Column // Generally, this is always not null.
+        Row(modifier = Modifier.drawBehind { drawEnchantmentRune() }) {
+            // TODO!!
         }
     }
 }
@@ -289,11 +282,11 @@ private fun EnchantmentDataCollectionItem(
     onItemSelect: (EnchantmentData) -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        EnchantmentIconImage(
+        EnchantmentImage(
             data = data,
             selected = selected,
-            disabled = !enabled,
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f / 1f),
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth().aspectRatio(1f / 1f).alpha(if (enabled) 1f else 0.25f),
             onClick = { onItemSelect(data) }
         )
         AutosizeText(
@@ -313,12 +306,11 @@ private fun EnchantmentDataCollectionItem(
 private fun EnchantmentDetail(enchantment: Enchantment) {
     Row(modifier = Modifier.requiredSize(675.dp, 300.dp).background(Color(0xff080808))) {
         Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
-            EnchantmentIconImage(
+            EnchantmentImage(
                 data = enchantment.data,
-                hideIndicator = true,
                 modifier = Modifier.fillMaxSize()
             )
-            EnchantmentLevelImage(level = enchantment.level)
+            EnchantmentLevel(level = enchantment.level)
         }
         Column(modifier = Modifier.padding(top = 20.dp, end = 30.dp, bottom = 30.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {

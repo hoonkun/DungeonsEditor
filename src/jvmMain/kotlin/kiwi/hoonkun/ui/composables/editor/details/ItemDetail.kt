@@ -96,7 +96,7 @@ private fun Content(item: Item, editor: EditorState) {
 
         IfNotNull(item.enchantments) {
             Spacer(modifier = Modifier.height(30.dp))
-            ItemEnchantments(EnchantmentSlots(it), modifier = Modifier.fillMaxWidth())
+            ItemEnchantments(EnchantmentsHolder(it), modifier = Modifier.fillMaxWidth())
         }
     }
 }

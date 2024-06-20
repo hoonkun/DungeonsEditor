@@ -275,9 +275,11 @@ private fun JsonPreviewEquipment(
         BlurShadowImage(
             bitmap = item.data.inventoryIcon,
             modifier = modifier
-                .aspectRatio(1f / 1f)
-                .drawBehind { drawItemFrame(item.rarity, item.glided, item.enchanted, false) }
-                .padding(10.dp)
+                .aspectRatio(1f / 1f),
+            contentPadding = PaddingValues(all = 10.dp),
+            onDrawBehind = { _, _ ->
+                drawItemFrame(item.rarity, item.glided, item.enchanted, false)
+            }
         )
     }
 }

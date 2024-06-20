@@ -207,7 +207,8 @@ data class EnchantmentData(
     }
 
     private val shinePattern: ImageBitmap? by lazy {
-        retrieveImage("${id}_shine") { it.startsWith("t_") && it.endsWith("shine_icon") }
+        if (id == "Unset") null
+        else retrieveImage("${id}_shine") { it.startsWith("t_") && it.endsWith("shine_icon") }
     }
 
     private val shinePatternR: ImageBitmap? by lazy { filterShineColor(2) }

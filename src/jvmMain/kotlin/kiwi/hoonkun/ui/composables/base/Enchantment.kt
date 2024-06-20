@@ -2,86 +2,149 @@ package kiwi.hoonkun.ui.composables.base
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
-import kiwi.hoonkun.ui.reusables.drawEnchantmentIconBorder
+import androidx.compose.ui.unit.IntSize
+import kiwi.hoonkun.ui.reusables.offsetRelative
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
-import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.resources.EnchantmentData
 import kotlin.math.sqrt
 
 
-private val IconScale = 1f / sqrt(2.0f)
-private val ShineScale = sqrt(2.0f)
-
 @Composable
-fun EnchantmentIconImage(
+fun EnchantmentImage(
     data: EnchantmentData,
-    onClick: (EnchantmentData) -> Unit = { },
-    hideIndicator: Boolean = false,
-    forceOpaque: Boolean = false,
-    outline: Boolean = false,
-    disabled: Boolean = false,
+    modifier: Modifier = Modifier.fillMaxSize(),
     selected: Boolean = false,
-    modifier: Modifier = Modifier
+    enabled: Boolean = true,
+    onClick: ((EnchantmentData) -> Unit)? = null
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
 
     val patterns = remember(data) { data.shinePatterns?.let { EnchantmentPatterns(it[0], it[1], it[2]) } }
 
-    Box(
-        modifier = Modifier
-            .then(modifier)
-            .graphicsLayer { alpha = if (!forceOpaque && disabled && !selected) 0.25f else 1f }
-            .scale(IconScale)
-            .clickable(interaction, null, enabled = (!disabled || selected)) { onClick(data) }
-            .hoverable(interaction, enabled = !disabled)
-            .rotate(45f)
-            .drawBehind {
-                if (outline) return@drawBehind drawEnchantmentIconBorder(1f)
-                if (hideIndicator) return@drawBehind
-                if (!hovered && !selected) return@drawBehind
-                drawEnchantmentIconBorder(if (selected) 0.8f else 0.4f)
-            }
-            .scale(2f),
-    ) {
-        BlurShadowImage(
-            bitmap = data.icon,
-            contentDescription = data.description,
-            enabled = data.id != "Unset",
-            modifier = Modifier
-                .rotate(-45f)
-                .scale(ShineScale)
-                .scale(if (data.id == "Unset") 0.7f else 1f)
-                .scale(0.5f)
-        )
-        if (patterns != null && data.id != "Unset") {
-            EnchantmentShine(patterns)
+    val enchantmentPath: CacheDrawScope.(IntOffset, IntSize) -> Path = { offset, size ->
+        Path().apply {
+            val x = offset.x.toFloat()
+            val y = offset.y.toFloat()
+            val width = size.width.toFloat()
+            val height = size.height.toFloat()
+            moveTo(x + width / 2f, y)
+            lineTo(x + width, y + height / 2f)
+            lineTo(x + width / 2f, y + height)
+            lineTo(x, y + height / 2f)
+            close()
         }
+    }
+
+    val drawPressIndication: DrawScope.(EnchantmentDrawCache) -> Unit = indication@ { cache ->
+        if (!pressed) return@indication
+        scale(0.8f) { drawPath(path = cache.path, color = Color.Black.copy(alpha = 0.25f)) }
+    }
+
+    val onDrawBehind: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
+        scale(0.825f) {
+            drawPath(
+                path = cache.path,
+                color = Color.White.copy(alpha = if (selected) 1f else if (hovered) 0.4f else 0f),
+                style = Stroke(width = (6 * (1f / 0.825f)).dp.toPx())
+            )
+        }
+    }
+
+    val onDrawFront = if (patterns != null) {
+        val interpolation by animateShineInterpolation()
+        val interpolatedR by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 0) } }
+        val interpolatedG by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 1) } }
+        val interpolatedB by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 2) } }
+
+        val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, offset, size ->
+            drawImage(image = patterns.r, dstOffset = offset, dstSize = size, alpha = interpolatedR * MaxAlpha)
+            drawImage(image = patterns.g, dstOffset = offset, dstSize = size, alpha = interpolatedG * MaxAlpha)
+            drawImage(image = patterns.b, dstOffset = offset, dstSize = size, alpha = interpolatedB * MaxAlpha)
+
+            drawPressIndication(cache)
+        }
+        func
+    } else {
+        val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
+            drawPressIndication(cache)
+        }
+        func
+    }
+
+    BlurShadowImage(
+        bitmap = data.icon,
+        enabled = data.id != "Unset",
+        drawCacheFactory = { offset, size -> EnchantmentDrawCache(enchantmentPath(offset, size)) },
+        onDrawBehind = onDrawBehind,
+        onDrawFront = onDrawFront,
+        contentScale = if (data.id == "Unset") 0.75f else 1f,
+        modifier = Modifier
+            .rotate(degrees = 45f)
+            .scale(1f / sqrt(2f))
+            .hoverable(interaction, enabled = enabled)
+            .clickable(interactionSource = interaction, enabled = enabled, indication = null) { onClick?.invoke(data) }
+            .scale(sqrt(2f))
+            .rotate(degrees = -45f)
+            .then(modifier)
+    )
+}
+
+@Stable
+data class EnchantmentDrawCache(val path: Path): BlurShadowImageDrawCache
+
+@Composable
+fun EnchantmentSlot(
+    first: @Composable () -> Unit,
+    second: @Composable () -> Unit,
+    third: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val offsets = remember { listOf(Offset(0f, 0.5f), Offset(0.5f, 1f), Offset(1f, 0.5f)) }
+
+    Box(modifier = modifier) {
+        val sizeModifier = Modifier.fillMaxSize(0.5f)
+
+        Image(
+            bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/enchant_icon.png"],
+            contentDescription = null,
+            modifier = sizeModifier.offsetRelative(0.5f, 0f).scale(0.375f)
+        )
+
+        Box(modifier = sizeModifier.offsetRelative(offsets[0])) { first() }
+        Box(modifier = sizeModifier.offsetRelative(offsets[1])) { second() }
+        Box(modifier = sizeModifier.offsetRelative(offsets[2])) { third() }
     }
 }
 
 @Composable
-fun EnchantmentLevelImage(
+fun EnchantmentLevel(
     level: Int,
     positionerSize: Float = 0.45f,
     scale: Float = 1.0f,
@@ -120,28 +183,6 @@ fun EnchantmentLevelImage(
                     .padding(10.dp)
             )
         }
-    }
-}
-
-@Composable
-private fun EnchantmentShine(patterns: EnchantmentPatterns) {
-    val interpolation by animateShineInterpolation()
-    val interpolatedR by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 0) } }
-    val interpolatedG by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 1) } }
-    val interpolatedB by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 2) } }
-
-    val imageModifier = remember {
-        Modifier
-            .fillMaxSize()
-            .rotate(-45f)
-            .scale(ShineScale)
-            .scale(0.5f)
-    }
-
-    Canvas(modifier = imageModifier) {
-        drawImage(image = patterns.r, dstSize = size.round(), alpha = interpolatedR * MaxAlpha)
-        drawImage(image = patterns.g, dstSize = size.round(), alpha = interpolatedG * MaxAlpha)
-        drawImage(image = patterns.b, dstSize = size.round(), alpha = interpolatedB * MaxAlpha)
     }
 }
 
@@ -192,14 +233,8 @@ private fun interpolateShineAlpha(x: Float, delay: Int): Float {
 }
 
 @Immutable
-data class EnchantmentPatterns(
+private data class EnchantmentPatterns(
     val r: ImageBitmap,
     val g: ImageBitmap,
     val b: ImageBitmap
-) {
-    inline fun forEach(block: (Int, ImageBitmap) -> Unit) {
-        block(0, r)
-        block(1, g)
-        block(2, b)
-    }
-}
+)

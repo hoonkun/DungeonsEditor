@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
@@ -122,4 +124,18 @@ fun DrawScope.drawEnchantmentIconBorder(alpha: Float) {
         size = Size(size.width * scale, size.height * scale),
         style = Stroke(width = 6.dp.toPx())
     )
+}
+
+@Stable
+fun DrawScope.drawEnchantmentRune() {
+    val image = DungeonsTextures["/Game/UI/Inventory/Runes.png"]
+    translate(top = -175.dp.toPx()) {
+        scale(1.35f) {
+            drawImage(
+                image = image,
+                alpha = 0.5f,
+                dstSize = Size(size.width, size.width * (image.height / image.width.toFloat())).round()
+            )
+        }
+    }
 }
