@@ -208,7 +208,7 @@ private fun HolderPreview(
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemModifiedButton(holder = holder, readonly = true)
                 }
-                Row(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                     Text(
                         text = holder.data.name, fontSize = 40.sp, fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(end = 8.dp).alignByBaseline()
@@ -224,7 +224,7 @@ private fun HolderPreview(
             }
         }
 
-        Row(modifier = Modifier.drawBehind { drawEnchantmentRune() }) {
+        Row(modifier = Modifier.drawBehind { drawEnchantmentRune(topOffset = (-150).dp) }) {
             val slots = remember { state.enchantments.chunked(3).map { EnchantmentsHolder(it) } }
             slots.forEach { slot ->
                 EnchantmentSlot(
