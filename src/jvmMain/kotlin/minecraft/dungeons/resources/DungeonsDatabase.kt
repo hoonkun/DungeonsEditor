@@ -48,7 +48,7 @@ object DungeonsDatabase {
 
         fun run(index: PakIndex) {
             val items = mutableSetOf<ItemData>()
-            val enchantments = mutableSetOf<EnchantmentData>()
+            val enchantments = mutableSetOf(EnchantmentData(id = "Unset", ""))
 
             index.forEach { pathString ->
                 val path = Path(pathString)
@@ -95,8 +95,6 @@ object DungeonsDatabase {
                 }
 
             }
-
-            enchantments.add(EnchantmentData(id = "Unset", ""))
 
             DungeonsDatabase.items = items
             DungeonsDatabase.enchantments = enchantments
@@ -195,11 +193,11 @@ data class EnchantmentData(
 
     val description: String? get() =
         if (id == "Unset") Localizations["enchantment_unset"]
-        else DungeonsLocalizations["Enchantment/${DungeonsLocalizations.Corrections.EnchantmentDescription[id] ?: id}_desc"]
+        else DungeonsLocalizations["Enchantment/${DungeonsLocalizations.Corrections.EnchantmentDescription[id] ?: id}_desc"].replaceFormatStrings()
 
     val effect: String? get() =
         if (id == "Unset") Localizations["enchantment_unset_effect"]
-        else DungeonsLocalizations[DungeonsLocalizations.Corrections.EnchantmentFixedEffect[id] ?: "Enchantment/${DungeonsLocalizations.Corrections.EnchantmentEffect[id] ?: id}_effect"]
+        else (DungeonsLocalizations[DungeonsLocalizations.Corrections.EnchantmentFixedEffect[id] ?: "Enchantment/${DungeonsLocalizations.Corrections.EnchantmentEffect[id] ?: id}_effect"]).replaceFormatStrings()
 
     val icon: ImageBitmap by lazy {
         retrieveImage(id) { it.startsWith("t_") && it.endsWith("_icon") && !it.endsWith("shine_icon") }
@@ -392,6 +390,8 @@ data class EnchantmentData(
 
         private val EnchantmentSpecialDescValue: Map<String, List<String>> =
             Json.decodeFromString(resourceText("databases/enchantments_special_descriptions.json"))
+
+        private fun String?.replaceFormatStrings() = this?.replace("{0}", "N")
     }
 
 }

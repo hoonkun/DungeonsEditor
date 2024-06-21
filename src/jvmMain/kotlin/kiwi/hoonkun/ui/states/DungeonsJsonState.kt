@@ -426,7 +426,7 @@ class FinishedObjectiveTags(decorActor: Int, rescuedVillager: Int, cannotAttachP
 }
 
 @Stable
-class Item(
+class Item private constructor(
     val parent: DungeonsJsonState,
     inventoryIndex: Int?,
     power: Double,
@@ -544,10 +544,6 @@ class Item(
         other.markedNew
     )
 
-    fun updateEnchantmentInvestedPoints() {
-        enchantments?.forEach { it.applyHolderInvestedPoints() }
-    }
-
     fun transfer(editor: EditorState) {
         val previousIndex = inventoryIndex
         val previousWhere = where
@@ -637,7 +633,7 @@ class Enchantment private constructor(
     @JsonField(FIELD_LEVEL)
     var level: Int by mutableStateOf(level)
 
-    val data by derivedStateOf { DungeonsDatabase.enchantment(id) ?: throw RuntimeException("unknown enchantment id $id") }
+    val data by derivedStateOf { DungeonsDatabase.enchantment(this.id) ?: throw RuntimeException("unknown enchantment id ${this.id}") }
 
     constructor(from: JSONObject): this(
         from.getString(FIELD_ID),
@@ -663,7 +659,7 @@ class Enchantment private constructor(
             put(FIELD_LEVEL, level)
         }
 
-    fun applyHolderInvestedPoints(newLevel: Int = this.level) {
+    fun applyInvestedPoints(newLevel: Int = this.level) {
         level = newLevel
 
         val nonGlided = holder.netheriteEnchant == null || holder.netheriteEnchant?.id == "Unset"

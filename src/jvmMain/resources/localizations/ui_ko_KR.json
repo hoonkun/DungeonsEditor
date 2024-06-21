@@ -71,5 +71,8 @@
   "detected_files": "탐지된 파일",
   "file_selector_preview": "탐색기 파일 미리보기",
   "file_selector_no_selection": "선택된 파일이 없어요",
-  "file_selector_invalid": "올바르지 않은 파일이에요"
+  "file_selector_invalid": "올바르지 않은 파일이에요",
+  "enchantment_empty_slot": "빈 슬롯이에요. 왼쪽에서 장착할 효과를 선택해보세요!",
+  "enchantment_deactivate": "비활성",
+  "enchantment_delete": "다시 눌러서 효과 삭제"
 }

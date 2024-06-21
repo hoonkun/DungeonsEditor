@@ -117,7 +117,7 @@ fun ItemNetheriteEnchantButton(
                 val target = builder()
                 overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
                     EnchantmentOverlay(
-                        original = target,
+                        initialSelected = target,
                         requestClose = { overlays.destroy(it) }
                     )
                 }
@@ -140,7 +140,7 @@ fun ItemNetheriteEnchantButton(
             onClick = {
                 overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
                     EnchantmentOverlay(
-                        original = enchantment,
+                        initialSelected = enchantment,
                         requestClose = { overlays.destroy(it) }
                     )
                 }

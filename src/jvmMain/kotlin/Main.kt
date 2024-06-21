@@ -21,10 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEntries
@@ -39,10 +36,7 @@ import minecraft.dungeons.resources.DungeonsTextures
 
 
 fun main() = application {
-    val windowState = rememberWindowState(
-        size = DpSize(1800.dp, 1400.dp),
-        position = WindowPosition(Alignment.Center)
-    )
+    val windowState = LocalWindowState.current
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -53,6 +47,13 @@ fun main() = application {
     ) {
         App(windowState.size.width)
     }
+}
+
+val LocalWindowState = staticCompositionLocalOf {
+    WindowState(
+        size = DpSize(1800.dp, 1400.dp),
+        position = WindowPosition(Alignment.Center)
+    )
 }
 
 @Composable

@@ -13,26 +13,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.CacheDrawScope
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ui.reusables.offsetRelative
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.round
+import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.resources.EnchantmentData
 import kotlin.math.sqrt
 
+
+private val DefaultPaint = Paint()
+private val DarknessPaint = Paint().apply {
+    colorFilter = ColorFilter.lighting(Color(red = 0.65f, green = 0.65f, blue = 0.65f), Color.Black)
+}
 
 @Composable
 fun EnchantmentImage(
@@ -40,34 +47,19 @@ fun EnchantmentImage(
     modifier: Modifier = Modifier.fillMaxSize(),
     selected: Boolean = false,
     enabled: Boolean = true,
-    onClick: ((EnchantmentData) -> Unit)? = null
+    contentPaint: (Paint) -> Paint = { it },
+    onDrawFront: DrawScope.(EnchantmentDrawCache) -> Unit = { _ -> },
+    onClick: ((EnchantmentData) -> Unit)? = null,
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
 
+    val paint = remember(pressed, contentPaint) { contentPaint(if (pressed) DarknessPaint else DefaultPaint) }
+
     val patterns = remember(data) { data.shinePatterns?.let { EnchantmentPatterns(it[0], it[1], it[2]) } }
 
-    val enchantmentPath: CacheDrawScope.(IntOffset, IntSize) -> Path = { offset, size ->
-        Path().apply {
-            val x = offset.x.toFloat()
-            val y = offset.y.toFloat()
-            val width = size.width.toFloat()
-            val height = size.height.toFloat()
-            moveTo(x + width / 2f, y)
-            lineTo(x + width, y + height / 2f)
-            lineTo(x + width / 2f, y + height)
-            lineTo(x, y + height / 2f)
-            close()
-        }
-    }
-
-    val drawPressIndication: DrawScope.(EnchantmentDrawCache) -> Unit = indication@ { cache ->
-        if (!pressed) return@indication
-        scale(0.8f) { drawPath(path = cache.path, color = Color.Black.copy(alpha = 0.25f)) }
-    }
-
-    val onDrawBehind: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
+    val drawBehind: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
         scale(0.825f) {
             drawPath(
                 path = cache.path,
@@ -77,23 +69,26 @@ fun EnchantmentImage(
         }
     }
 
-    val onDrawFront = if (patterns != null) {
+    val drawFront = if (patterns != null) {
         val interpolation by animateShineInterpolation()
         val interpolatedR by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 0) } }
         val interpolatedG by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 1) } }
         val interpolatedB by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 2) } }
 
         val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, offset, size ->
-            drawImage(image = patterns.r, dstOffset = offset, dstSize = size, alpha = interpolatedR * MaxAlpha)
-            drawImage(image = patterns.g, dstOffset = offset, dstSize = size, alpha = interpolatedG * MaxAlpha)
-            drawImage(image = patterns.b, dstOffset = offset, dstSize = size, alpha = interpolatedB * MaxAlpha)
+            drawIntoCanvas {
+                it.saveLayer(Rect(0f, 0f, this.size.width, this.size.height), paint)
+                drawImage(image = patterns.r, dstOffset = offset, dstSize = size, alpha = interpolatedR * MaxAlpha)
+                drawImage(image = patterns.g, dstOffset = offset, dstSize = size, alpha = interpolatedG * MaxAlpha)
+                drawImage(image = patterns.b, dstOffset = offset, dstSize = size, alpha = interpolatedB * MaxAlpha)
+                it.restore()
+            }
 
-            drawPressIndication(cache)
+            onDrawFront(cache)
         }
         func
     } else {
         val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
-            drawPressIndication(cache)
         }
         func
     }
@@ -101,10 +96,11 @@ fun EnchantmentImage(
     BlurShadowImage(
         bitmap = data.icon,
         enabled = data.id != "Unset",
-        drawCacheFactory = { offset, size -> EnchantmentDrawCache(enchantmentPath(offset, size)) },
-        onDrawBehind = onDrawBehind,
-        onDrawFront = onDrawFront,
+        drawCacheFactory = { offset, size -> EnchantmentDrawCache(EnchantmentOutlinePath(offset, size)) },
+        onDrawBehind = drawBehind,
+        onDrawFront = drawFront,
         contentScale = if (data.id == "Unset") 0.75f else 1f,
+        contentPaint = { paint },
         modifier = Modifier
             .rotate(degrees = 45f)
             .scale(1f / sqrt(2f))
@@ -117,14 +113,32 @@ fun EnchantmentImage(
 }
 
 @Stable
+fun EnchantmentOutlinePath(offset: IntOffset, size: IntSize): Path =
+    Path().apply {
+        val x = offset.x.toFloat()
+        val y = offset.y.toFloat()
+        val width = size.width.toFloat()
+        val height = size.height.toFloat()
+        moveTo(x + width / 2f, y)
+        lineTo(x + width, y + height / 2f)
+        lineTo(x + width / 2f, y + height)
+        lineTo(x, y + height / 2f)
+        close()
+    }
+
+@Stable
 data class EnchantmentDrawCache(val path: Path): BlurShadowImageDrawCache
+
+@Immutable
+data class EnchantmentsHolder(
+    val all: List<Enchantment>
+)
 
 @Composable
 fun EnchantmentSlot(
-    first: @Composable () -> Unit,
-    second: @Composable () -> Unit,
-    third: @Composable () -> Unit,
-    modifier: Modifier = Modifier
+    enchantments: EnchantmentsHolder,
+    modifier: Modifier = Modifier,
+    contentEach: @Composable (Enchantment) -> Unit
 ) {
     val offsets = remember { listOf(Offset(0f, 0.5f), Offset(0.5f, 1f), Offset(1f, 0.5f)) }
 
@@ -137,9 +151,9 @@ fun EnchantmentSlot(
             modifier = sizeModifier.offsetRelative(0.5f, 0f).scale(0.375f)
         )
 
-        Box(modifier = sizeModifier.offsetRelative(offsets[0])) { first() }
-        Box(modifier = sizeModifier.offsetRelative(offsets[1])) { second() }
-        Box(modifier = sizeModifier.offsetRelative(offsets[2])) { third() }
+        enchantments.all.zip(offsets).forEach { (enchantment, offset) ->
+            Box(sizeModifier.offsetRelative(offset)) { contentEach(enchantment) }
+        }
     }
 }
 
@@ -154,11 +168,10 @@ fun EnchantmentLevel(
     AnimatedContent(
         targetState = level,
         transitionSpec = {
-            val a = with(density) { if (initialState < targetState) -20.dp.roundToPx() else 20.dp.roundToPx() }
-            val b = with(density) { if (initialState < targetState) 20.dp.roundToPx() else -20.dp.roundToPx() }
+            val offset = with(density) { (if (initialState < targetState) (-20).dp else 20.dp).roundToPx() }
+            val enter = fadeIn() + slideIn { IntOffset(0, offset) }
+            val exit = fadeOut() + slideOut { IntOffset(0, -offset) }
 
-            val enter = fadeIn() + slideIn { IntOffset(0, a) }
-            val exit = fadeOut() + slideOut { IntOffset(0, b) }
             enter togetherWith exit using SizeTransform(false)
         },
         modifier = Modifier
@@ -166,23 +179,18 @@ fun EnchantmentLevel(
             .padding(10.dp)
             .then(modifier)
     ) { capturedLevel ->
-        if (capturedLevel != 0) {
-            Image(
-                bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${capturedLevel}_normal_text.png"],
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .scale(scale)
-                    .padding(10.dp)
-            )
-        } else {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .scale(scale)
-                    .padding(10.dp)
-            )
-        }
+        Spacer(
+            modifier = Modifier
+                .fillMaxSize()
+                .scale(scale)
+                .drawBehind {
+                    if (capturedLevel == 0) return@drawBehind
+                    drawImage(
+                        image = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${capturedLevel}_normal_text.png"],
+                        dstSize = size.round()
+                    )
+                }
+        )
     }
 }
 

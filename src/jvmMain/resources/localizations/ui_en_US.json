@@ -69,5 +69,8 @@
   "tips_5": "There is no guarantee with edit output file is playable in game, so MAKE BACKUPS PROPERLY.",
   "recent_files": "Recent Files",
   "detected_files": "Detected Files",
-  "file_selector_preview": "Selector Preview"
+  "file_selector_preview": "Selector Preview",
+  "enchantment_empty_slot": "Enchantment does not set.\nSelect preferred enchantment in left area!",
+  "enchantment_deactivate": "Deactivate",
+  "enchantment_delete": "click again to delete"
 }

@@ -14,8 +14,6 @@ import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
 import kiwi.hoonkun.ui.composables.editor.details.Tips
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.defaultSlideIn
-import kiwi.hoonkun.ui.reusables.defaultSlideOut
 import kiwi.hoonkun.ui.states.DungeonsJsonState
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.rememberEditorState
@@ -36,8 +34,8 @@ fun JsonEditor(
         AnimatedContent(
             targetState = json,
             transitionSpec = {
-                val enter = defaultFadeIn() + defaultSlideIn { IntOffset(0, 20.dp.value.toInt()) }
-                val exit = defaultFadeOut() + defaultSlideOut { IntOffset(0, -20.dp.value.toInt()) }
+                val enter = defaultFadeIn() + slideIn { IntOffset(0, 20.dp.value.toInt()) }
+                val exit = defaultFadeOut() + slideOut { IntOffset(0, -20.dp.value.toInt()) }
                 enter togetherWith exit using SizeTransform(clip = false)
             },
             modifier = Modifier.fillMaxHeight()
@@ -59,8 +57,8 @@ private fun Content(json: DungeonsJsonState) {
                 transitionSpec = {
                     val a = if (targetState == EditorState.EditorView.Inventory) -50 else 50
                     val b = if (targetState == EditorState.EditorView.Inventory) 50 else -50
-                    val enter = defaultFadeIn() + defaultSlideIn { IntOffset(a.dp.value.toInt(), 0) }
-                    val exit = defaultFadeOut() + defaultSlideOut { IntOffset(b.dp.value.toInt(), 0) }
+                    val enter = defaultFadeIn() + slideIn { IntOffset(a.dp.value.toInt(), 0) }
+                    val exit = defaultFadeOut() + slideOut { IntOffset(b.dp.value.toInt(), 0) }
                     enter togetherWith exit using SizeTransform(false)
                 }
             ) { view ->
