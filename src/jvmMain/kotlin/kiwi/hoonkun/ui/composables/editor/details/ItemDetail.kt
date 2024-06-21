@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -44,7 +43,7 @@ fun ItemDetail(item: Item?, editor: EditorState) {
         contentAlignment = Alignment.Center
     ) {
         if (it != null) Content(item = it, editor = editor)
-        else Spacer(modifier = Modifier.fillMaxWidth().scale(1f / 1.3f))
+        else Spacer(modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -53,6 +52,7 @@ private fun Content(item: Item, editor: EditorState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .requiredHeightIn(min = 450.dp)
             .drawBehind {
                 drawImage(
                     image = item.data.largeIcon,
