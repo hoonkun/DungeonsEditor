@@ -13,6 +13,7 @@ import minecraft.dungeons.values.DungeonsPower
 import org.json.JSONObject
 import java.io.File
 import java.time.LocalDateTime
+import java.util.*
 
 @Target(AnnotationTarget.PROPERTY)
 annotation class CanBeUndefined
@@ -455,6 +456,8 @@ class Item private constructor(
         private const val FIELD_EQUIPMENT_SLOT = "equipmentSlot"
         private const val FIELD_MARKED_NEW = "markedNew"
     }
+
+    val internalId = UUID.randomUUID().toString()
 
     @JsonField(FIELD_INVENTORY_INDEX) @CanBeUndefined
     var inventoryIndex: Int? by mutableStateOf(inventoryIndex)

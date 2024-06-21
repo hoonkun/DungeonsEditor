@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonSkippableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,21 +33,28 @@ import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
+import java.util.*
 
 @Composable
+@NonSkippableComposable
 fun <T>ItemsLazyGrid(
     columns: Int = 3,
     items: List<T>,
     itemContent: @Composable LazyGridItemScope.(T) -> Unit
-) where T: Item? =
+) where T: Item? {
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         contentPadding = PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(items = items, itemContent = itemContent)
+        items(
+            items = items,
+            key = { it?.internalId ?: UUID.randomUUID().toString() },
+            itemContent = itemContent
+        )
     }
+}
 
 
 @OptIn(ExperimentalFoundationApi::class)
