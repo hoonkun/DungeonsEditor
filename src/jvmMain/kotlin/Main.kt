@@ -2,7 +2,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
@@ -21,7 +20,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.application
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEntries
@@ -56,6 +58,11 @@ val LocalWindowState = staticCompositionLocalOf {
     )
 }
 
+interface AppFocusable {
+    data object Entries: AppFocusable
+    data object Editor: AppFocusable
+}
+
 @Composable
 private fun App(windowWidth: Dp) {
     val overlays = rememberOverlayState()
@@ -64,27 +71,26 @@ private fun App(windowWidth: Dp) {
     var pakLoaded by remember { mutableStateOf(false) }
     var json: DungeonsJsonState? by remember { mutableStateOf(null) }
 
-    val entriesInteractionSource = rememberMutableInteractionSource()
-    val entriesHovered by entriesInteractionSource.collectIsHoveredAsState()
+    var focusedArea by remember { mutableStateOf<AppFocusable>(AppFocusable.Entries) }
 
     val blur by animateFloatAsState(if (overlays.any()) 50f else 0f)
 
     val entriesWidth = 550.dp
 
-    val slideRatio = 0.1f
+    val slideRatio = 0.2f
     val containerOffset by animateDpAsState(
         targetValue =
-            if (!entriesHovered && json != null) (windowWidth * (-slideRatio / 2))
+            if (focusedArea == AppFocusable.Editor && json != null) (windowWidth * (-slideRatio / 2))
             else (windowWidth * (slideRatio / 2))
     )
     val entriesOffset by animateDpAsState(
         targetValue =
-            if (!entriesHovered && json != null) (windowWidth * slideRatio) - 12.dp
+            if (focusedArea == AppFocusable.Editor && json != null) (windowWidth * slideRatio) - 12.dp
             else 0.dp
     )
     val entriesBrightness by animateFloatAsState(
         targetValue =
-            if (!entriesHovered && json != null) 0.75f
+            if (focusedArea == AppFocusable.Editor && json != null) 0.75f
             else 0f
     )
 
@@ -134,12 +140,16 @@ private fun App(windowWidth: Dp) {
                         .offset { IntOffset(containerOffset.roundToPx(), 0) }
                 ) {
                     JsonEntries(
-                        onJsonSelect = { json = it },
+                        onJsonSelect = {
+                            json = it
+                            focusedArea = AppFocusable.Editor
+                        },
                         preview = preview,
+                        focused = focusedArea == AppFocusable.Entries,
+                        requestFocus = { focusedArea = AppFocusable.Entries },
                         modifier = Modifier
                             .width(entriesWidth)
                             .offset { IntOffset(entriesOffset.roundToPx(), 0) }
-                            .hoverable(entriesInteractionSource)
                             .drawWithContent {
                                 drawContent()
                                 drawRect(Color.Black, alpha = entriesBrightness)
@@ -149,8 +159,9 @@ private fun App(windowWidth: Dp) {
                         json = json,
                         modifier = Modifier
                             .weight(1f)
-                            .hoverable(rememberMutableInteractionSource())
-                        ,
+                            .clickable(rememberMutableInteractionSource(), null) {
+                                focusedArea = AppFocusable.Editor
+                            },
                         placeholder = {
                             Column(
                                 verticalArrangement = Arrangement.Center,

@@ -43,86 +43,82 @@ fun EditorBottomBar(editor: EditorState) {
     var gold by remember { mutableStateOf("${goldHolder?.count ?: 0}") }
 
 
-    Box(
-        contentAlignment = Alignment.Center,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .requiredHeight(85.dp)
             .background(Color(0xff191919))
+            .padding(horizontal = 170.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 64.dp)
+        CurrencyField(
+            value = level,
+            onValueChange = { level = it },
+            onSubmit = { stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) },
+            validator = { it.toDoubleOrNull() != null }
         ) {
-            CurrencyField(
-                value = level,
-                onValueChange = { level = it },
-                onSubmit = { stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) },
-                validator = { it.toDoubleOrNull() != null }
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    CurrencyImage(levelIcon, 0.8f)
-                    Text(text = "LV.", fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                }
+            Box(contentAlignment = Alignment.Center) {
+                CurrencyImage(levelIcon, 0.8f)
+                Text(text = "LV.", fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
             }
-
-            CurrencyText(
-                icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
-                scale = 0.8f,
-                value = "${stored.playerPower}"
-            )
-
-            CurrencyField(
-                icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
-                iconScale = 0.7f,
-                value = emerald,
-                onValueChange = { emerald = it },
-                onSubmit = { newValue ->
-                    emeraldHolder.let {
-                        if (it == null)
-                            stored.currencies.add(Currency("Emerald", newValue.toInt()))
-                        else
-                            it.count = newValue.toInt()
-                    }
-                },
-                validator = { it.toIntOrNull() != null }
-            )
-
-            CurrencyField(
-                icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
-                iconScale = 0.9f,
-                value = gold,
-                onValueChange = { gold = it },
-                onSubmit = { newValue ->
-                    goldHolder.let {
-                        if (it == null)
-                            stored.currencies.add(Currency("Gold", newValue.toInt()))
-                        else
-                            it.count = newValue.toInt()
-                    }
-                },
-                validator = { it.toIntOrNull() != null }
-            )
-
-            CurrencyText(
-                icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
-                scale = 0.7f,
-                value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
-                valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            InventorySwitcher(
-                current = editor.view,
-                onSwitch = { editor.view = it }
-            )
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            SaveButton()
-            CloseFileButton()
         }
+
+        CurrencyText(
+            icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+            scale = 0.8f,
+            value = "${stored.playerPower}"
+        )
+
+        CurrencyField(
+            icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+            iconScale = 0.7f,
+            value = emerald,
+            onValueChange = { emerald = it },
+            onSubmit = { newValue ->
+                emeraldHolder.let {
+                    if (it == null)
+                        stored.currencies.add(Currency("Emerald", newValue.toInt()))
+                    else
+                        it.count = newValue.toInt()
+                }
+            },
+            validator = { it.toIntOrNull() != null }
+        )
+
+        CurrencyField(
+            icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
+            iconScale = 0.9f,
+            value = gold,
+            onValueChange = { gold = it },
+            onSubmit = { newValue ->
+                goldHolder.let {
+                    if (it == null)
+                        stored.currencies.add(Currency("Gold", newValue.toInt()))
+                    else
+                        it.count = newValue.toInt()
+                }
+            },
+            validator = { it.toIntOrNull() != null }
+        )
+
+        CurrencyText(
+            icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
+            scale = 0.7f,
+            value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
+            valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        InventorySwitcher(
+            current = editor.view,
+            onSwitch = { editor.view = it }
+        )
+
+        Spacer(modifier = Modifier.width(20.dp))
+
+        SaveButton()
+        CloseFileButton()
     }
 }
 

@@ -51,7 +51,11 @@ private fun Content(json: DungeonsJsonState) {
     val editorState = rememberEditorState(json)
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(modifier = Modifier.weight(1f)) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 100.dp, end = 170.dp)
+        ) {
             AnimatedContent(
                 targetState = editorState.view,
                 transitionSpec = {
@@ -65,7 +69,6 @@ private fun Content(json: DungeonsJsonState) {
                 Column(
                     modifier = Modifier
                         .width(650.dp)
-                        .padding(start = 50.dp)
                         .padding(top = 25.dp)
                 ) {
                     if (view == EditorState.EditorView.Inventory) {
@@ -106,7 +109,7 @@ private fun Content(json: DungeonsJsonState) {
                     modifier = Modifier
                         .fillMaxSize()
                         .weight(1f)
-                        .padding(start = 50.dp, end = 100.dp)
+                        .padding(start = 50.dp)
                 ) {
                     if (it) {
                         ItemComparator(editor = editorState)

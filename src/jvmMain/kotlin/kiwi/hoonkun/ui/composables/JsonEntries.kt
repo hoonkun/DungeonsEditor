@@ -46,6 +46,8 @@ import minecraft.dungeons.resources.DungeonsTextures
 @Composable
 fun JsonEntries(
     onJsonSelect: (newJson: DungeonsJsonState) -> Unit,
+    focused: Boolean,
+    requestFocus: () -> Unit,
     modifier: Modifier = Modifier,
     preview: DungeonsJsonFile.Preview
 ) {
@@ -55,7 +57,11 @@ fun JsonEntries(
     val hideIfPreviewNotPresents = remember { Modifier.graphicsLayer { alpha = 0.25f + (1 - hideAlpha) * 0.75f } }
     val hideIfPreviewPresents = remember { Modifier.graphicsLayer { alpha = 0.25f + hideAlpha * 0.75f } }
 
-    Row(modifier = Modifier.fillMaxHeight().then(modifier)) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .then(modifier)
+    ) {
         val recent = ArcticSave.recentSummaries
         val detected = DungeonsJsonFile.Detector.results
 
@@ -140,6 +146,14 @@ fun JsonEntries(
                     )
                 }
             }
+        }
+
+        if (!focused) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(rememberMutableInteractionSource(), indication = null) { requestFocus() }
+            )
         }
     }
 }
