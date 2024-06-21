@@ -63,3 +63,7 @@ compose.desktop {
         }
     }
 }
+
+composeCompiler {
+    enableStrongSkippingMode.set(true)
+}
