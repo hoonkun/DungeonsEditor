@@ -23,7 +23,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -37,6 +40,7 @@ import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import java.io.File
 
+// TODO: 한국어 지원
 @Composable
 fun FileSelector(
     validator: (File) -> Boolean = { true },
@@ -91,16 +95,7 @@ fun FileSelector(
         entire.substring(entered.length until entire.length)
     }
 
-    val value = remember(path.text, path.selection, haveToShiftField, hint) {
-        val newText = "${path.text}${hint}"
-        val annotatedText = AnnotatedString(
-            text = newText,
-            listOf(AnnotatedString.Range(
-                item = SpanStyle(color = SelectorColors.OnBackground.copy(alpha = 0.313f)),
-                start = path.text.length,
-                end = newText.length
-            ))
-        )
+    val value = remember(path.text, path.selection, path.composition, haveToShiftField, hint) {
         val selection =
             if (haveToShiftField) TextRange(path.selection.start + hint.length)
             else path.selection
@@ -108,7 +103,7 @@ fun FileSelector(
         if (isFieldShifting && !haveToShiftField)
             isFieldShifting = false
 
-        TextFieldValue(annotatedText, selection)
+        TextFieldValue(path.text, selection, path.composition)
     }
 
     val selected = remember(path.text, useBasePath) {
@@ -117,11 +112,11 @@ fun FileSelector(
 
     val requester = remember { FocusRequester() }
 
-    val value2path: (TextFieldValue) -> TextFieldValue = transform@ {
+    val value2path: (TextFieldValue) -> TextFieldValue = {
         var newPath =
             if (isFieldShifting) it.text.slice(0 until it.text.length - 1)
             else it.text
-        newPath = newPath.removeSuffix(hint).replace("//", "/")
+        newPath = newPath.replace("//", "/")
         if (isFieldShifting) newPath += it.text.last()
 
         val pasted = newPath.length - path.text.length > 2
@@ -137,7 +132,8 @@ fun FileSelector(
             selection = TextRange(
                 it.selection.start.coerceAtMost(newPath.length),
                 it.selection.end.coerceAtMost(newPath.length)
-            )
+            ),
+            composition = it.composition
         )
     }
 
@@ -212,7 +208,18 @@ fun FileSelector(
                 onValueChange = { if (it.text.isNotEmpty() || (isWindows && !useBasePath)) path = value2path(it) },
                 onKeyEvent = onKeyEvent,
                 hideCursor = haveToShiftField,
-                focusRequester = requester
+                focusRequester = requester,
+                visualTransformation = {
+                    val text = "${it.text}${hint}"
+                    val spanStyle = AnnotatedString.Range(
+                        item = SpanStyle(color = SelectorColors.OnBackground.copy(alpha = 0.313f)),
+                        start = path.text.length,
+                        end = text.length
+                    )
+                    val string = AnnotatedString(text, listOf(spanStyle))
+
+                    TransformedText(string, OffsetMapping.Identity)
+                }
             )
             Select(enabled = selected != null, text = buttonText) { selected?.let { onSelect(it) } }
         }
@@ -401,7 +408,8 @@ private fun RowScope.PathInput(
     onValueChange: (TextFieldValue) -> Unit,
     onKeyEvent: (KeyEvent) -> Boolean,
     hideCursor: Boolean,
-    focusRequester: FocusRequester
+    focusRequester: FocusRequester,
+    visualTransformation: VisualTransformation
 ) = BasicTextField(
     value = value,
     onValueChange = onValueChange,
@@ -411,8 +419,9 @@ private fun RowScope.PathInput(
         fontFamily = SelectorFonts.JetbrainsMono
     ),
     cursorBrush =
-        if (hideCursor) SolidColor(Color.Transparent)
-        else SolidColor(SelectorColors.IdeGeneral),
+    if (hideCursor) SolidColor(Color.Transparent)
+    else SolidColor(SelectorColors.IdeGeneral),
+    visualTransformation = visualTransformation,
     singleLine = true,
     modifier = Modifier.weight(1f)
         .onKeyEvent { onKeyEvent(it) }
