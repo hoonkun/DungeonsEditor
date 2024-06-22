@@ -176,7 +176,10 @@ private fun App(windowWidth: Dp) {
                                         preview is DungeonsJsonFile.Preview.Valid
                                     },
                                     buttonText = Localizations.UiText("open"),
-                                    modifier = Modifier.requiredHeight(525.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .requiredHeight(525.dp)
+                                        .padding(start = 25.dp, end = 25.dp, top = 32.dp),
                                     onSelect = {
                                         preview.let {
                                             if (it is DungeonsJsonFile.Preview.Valid) {

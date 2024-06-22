@@ -68,6 +68,8 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
         private const val FIELD_XP = "xp"
     }
 
+    val sourcePath get() = source.absolutePath
+
     @JsonField(FIELD_BONUS_PREREQUISITES)
     val bonusPrerequisites: SnapshotStateList<String> = from.getJSONArray(FIELD_BONUS_PREREQUISITES).toStringList().toMutableStateList()
 
@@ -270,17 +272,19 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
             replace(FIELD_XP, xp)
         }
 
-    fun save(file: DungeonsJsonFile = DungeonsJsonFile(source)) {
+    fun save(file: DungeonsJsonFile = DungeonsJsonFile(source), createBackup: Boolean = true) {
         val date = LocalDateTime.now().run {
             val year = year - 2000
             val date = listOf(monthValue, dayOfMonth, hour, minute, second).joinToString("") { "$it".padStart(2, '0') }
             "$year$date"
         }
         if (file.isDirectory) {
-            source.copyTo(File("${file.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
+            if (createBackup)
+                source.copyTo(File("${file.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
             DungeonsJsonFile("${file.absolutePath}/${source.name}").write(export())
         } else {
-            source.copyTo(File("${file.parentFile.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
+            if (createBackup)
+                source.copyTo(File("${file.parentFile.absolutePath}/${source.nameWithoutExtension}.b$date.dat"))
             file.write(export())
         }
     }

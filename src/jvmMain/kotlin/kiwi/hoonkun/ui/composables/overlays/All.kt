@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 
@@ -20,11 +21,11 @@ fun OverlayTitleText(text: String) =
     )
 
 @Composable
-fun OverlayDescriptionText(text: String) =
+fun OverlayDescriptionText(text: String, fontSize: TextUnit = 24.sp) =
     Text(
         text = text,
         color = Color.White.copy(alpha = 0.4f),
-        fontSize = 24.sp,
+        fontSize = fontSize,
         textAlign = TextAlign.Center
     )
 

@@ -1,16 +1,17 @@
 package kiwi.hoonkun.ui.composables.overlays
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.ui.composables.base.BasePathToggleProperty
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
+import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
+import java.io.File
 
 @Composable
 fun FileSaveOverlay(
@@ -18,23 +19,42 @@ fun FileSaveOverlay(
     postSave: () -> Unit = { },
     requestClose: () -> Unit
 ) {
+    var createBackup by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(30.dp)
+    ) {
+        OverlayDescriptionText(Localizations.UiText("file_save_cancel_help"), fontSize = 18.sp)
+    }
+
     ContentRoot {
         OverlayTitleDescription(
             title = Localizations.UiText("file_save_title"),
             description = Localizations.UiText("file_save_description")
         )
-        // TODO: 원래 파일의 경로를 표시할 것
-        //  취소하고 닫기? 같은 버튼도 있으면 좋지 않을까.
-        //  백업 파일 생성 여부 관련 체크박스도 만들 것.
         Spacer(modifier = Modifier.height(20.dp))
-        Box(modifier = Modifier.size(1050.dp, 640.dp)) {
-            FileSelector(
-                onSelect = {
-                    editor.stored.save(DungeonsJsonFile(it))
-                    requestClose()
-                    postSave()
+        FileSelector(
+            defaultCandidate = { File(editor.stored.sourcePath) },
+            modifier = Modifier
+                .size(1050.dp, 640.dp)
+                .padding(start = 25.dp, end = 25.dp, top = 32.dp),
+            options = {
+                BasePathToggleProperty(
+                    key = "createBackup",
+                    value = if (createBackup) "true" else "false"
+                ) {
+                    createBackup = it
                 }
-            )
-        }
+                Spacer(modifier = Modifier.width(30.dp))
+            },
+            onSelect = {
+                editor.stored.save(DungeonsJsonFile(it), createBackup)
+                requestClose()
+                postSave()
+            }
+        )
     }
 }
