@@ -40,7 +40,6 @@ import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import java.io.File
 
-// TODO: 한국어 지원
 @Composable
 fun FileSelector(
     validator: (File) -> Boolean = { true },
