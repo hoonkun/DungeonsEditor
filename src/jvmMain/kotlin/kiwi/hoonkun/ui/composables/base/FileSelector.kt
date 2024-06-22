@@ -1,8 +1,13 @@
 package kiwi.hoonkun.ui.composables.base
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.TextFieldScrollState
+import androidx.compose.foundation.text.rememberTextFieldScrollState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +21,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -32,30 +39,32 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import dungeons.Localizations
 import kiwi.hoonkun.ui.Resources
-import kiwi.hoonkun.ui.reusables.getValue
-import kiwi.hoonkun.ui.reusables.mutableRefOf
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
-import kiwi.hoonkun.ui.reusables.setValue
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
+import kiwi.hoonkun.utils.Retriever
+import java.awt.Cursor
 import java.io.File
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FileSelector(
     validator: (File) -> Boolean = { true },
     buttonText: String = Localizations.UiText("save"),
     onSelect: (File) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    defaultCandidate: Retriever<File?> = { null },
+    options: @Composable () -> Unit = { }
 ) {
+    val rememberedDefaultCandidate = remember(defaultCandidate) { defaultCandidate()?.toStateFile() }
+    val textFieldScrollState = rememberTextFieldScrollState(orientation = Orientation.Horizontal)
+
     var useBasePath by remember { mutableStateOf(true) }
 
     var path by remember { mutableStateOf(TextFieldValue(File.separator, selection = TextRange(1))) }
     val entirePath by remember(path.text) { derivedStateOf { "${if (useBasePath) BasePath else ""}${path.text}" } }
 
     val keys = remember { KeySet(ctrl = false, shift = false) }
-
-    var haveToShiftField by remember { mutableStateOf(false) }
-    var isFieldShifting by remember { mutableRefOf(false) }
 
     val candidateTarget = remember(entirePath) {
         File(
@@ -78,14 +87,12 @@ fun FileSelector(
             if (candidates.items.size == 1) candidates.items.first().let { if (path.text.endsWith(it.name)) null else it }
             else null
 
-        if (newState != null) {
-            haveToShiftField = true
-            isFieldShifting = true
-        }
-
         mutableStateOf(newState)
     }
-    val hint = remember(path.text, hintTarget) {
+    val hint = remember(path.text, hintTarget, rememberedDefaultCandidate) {
+        if (path.text == "/" && hintTarget == null && rememberedDefaultCandidate != null)
+            return@remember rememberedDefaultCandidate.absolutePath.drop(1)
+
         val target = hintTarget ?: return@remember ""
 
         val entered = path.text.let { it.substring(it.lastIndexOf(File.separator) + 1, it.length) }
@@ -94,29 +101,15 @@ fun FileSelector(
         entire.substring(entered.length until entire.length)
     }
 
-    val value = remember(path.text, path.selection, path.composition, haveToShiftField, hint) {
-        val selection =
-            if (haveToShiftField) TextRange(path.selection.start + hint.length)
-            else path.selection
-
-        if (isFieldShifting && !haveToShiftField)
-            isFieldShifting = false
-
-        TextFieldValue(path.text, selection, path.composition)
-    }
-
     val selected = remember(path.text, useBasePath) {
         File("${if (useBasePath) BasePath else ""}${path.text}").takeIf(validator)
     }
 
     val requester = remember { FocusRequester() }
 
-    val value2path: (TextFieldValue) -> TextFieldValue = {
-        var newPath =
-            if (isFieldShifting) it.text.slice(0 until it.text.length - 1)
-            else it.text
+    val transform: (TextFieldValue) -> TextFieldValue = {
+        var newPath = it.text
         newPath = newPath.replace("//", "/")
-        if (isFieldShifting) newPath += it.text.last()
 
         val pasted = newPath.length - path.text.length > 2
         if (pasted && newPath.startsWith(BasePath) && useBasePath) {
@@ -137,7 +130,10 @@ fun FileSelector(
     }
 
     val complete = complete@ {
-        val target = hintTarget ?: return@complete false
+        val target = (if (path.text == "/" && hintTarget == null) rememberedDefaultCandidate else hintTarget) ?: return@complete false
+        if (target === rememberedDefaultCandidate) {
+            useBasePath = false
+        }
         val newPath = "${path.text}$hint${if (target.isDirectory) File.separator  else ""}"
         path = TextFieldValue(text = newPath, selection = TextRange(newPath.length))
         hintTarget = null
@@ -160,8 +156,6 @@ fun FileSelector(
                         if (noneSelected || firstFile) candidates.items.last()
                         else candidates.items[candidates.items.indexOf(hintTarget) - 1]
                     }
-                haveToShiftField = true
-                isFieldShifting = true
             }
             requester.requestFocus()
             true
@@ -183,15 +177,20 @@ fun FileSelector(
         }
     }
 
-    SideEffect {
+    LaunchedEffect(Unit) {
         requester.requestFocus()
-        if (haveToShiftField) haveToShiftField = false
+    }
+
+    LaunchedEffect(hintTarget) {
+        if (hintTarget == null) return@LaunchedEffect
+        textFieldScrollState.scrollBy(textFieldScrollState.maxOffset)
     }
 
     SelectorRoot(modifier = modifier) {
         Padded {
             BasePathDocumentation(text = "/** you can use '..' to go parent directory */")
             Row {
+                options()
                 BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") {
                     if (it && isWindows && path.text.isEmpty()) path = path.copy(text = "\\")
                     else if (isWindows && path.text == File.separator) path = path.copy(text = "")
@@ -203,11 +202,11 @@ fun FileSelector(
         }
         PathInputBox {
             PathInput(
-                value = value,
-                onValueChange = { if (it.text.isNotEmpty() || (isWindows && !useBasePath)) path = value2path(it) },
+                value = path,
+                onValueChange = { if (it.text.isNotEmpty() || (isWindows && !useBasePath)) path = transform(it) },
                 onKeyEvent = onKeyEvent,
-                hideCursor = haveToShiftField,
                 focusRequester = requester,
+                scrollState = textFieldScrollState,
                 visualTransformation = {
                     val text = "${it.text}${hint}"
                     val spanStyle = AnnotatedString.Range(
@@ -217,7 +216,13 @@ fun FileSelector(
                     )
                     val string = AnnotatedString(text, listOf(spanStyle))
 
-                    TransformedText(string, OffsetMapping.Identity)
+                    TransformedText(
+                        text = string,
+                        offsetMapping = object : OffsetMapping {
+                            override fun originalToTransformed(offset: Int): Int = offset.coerceIn(0, it.text.length)
+                            override fun transformedToOriginal(offset: Int): Int = offset.coerceIn(0, it.text.length)
+                        }
+                    )
                 }
             )
             Select(enabled = selected != null, text = buttonText) { selected?.let { onSelect(it) } }
@@ -303,10 +308,7 @@ private fun SelectorRoot(
 ) {
     Box(
         contentAlignment = Alignment.TopCenter,
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier)
-            .padding(start = 25.dp, end = 25.dp, top = 32.dp)
+        modifier = modifier
     ) {
         Column(
             content = content
@@ -321,7 +323,7 @@ private fun Padded(
 ) = Column(modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = top), content = content)
 
 @Composable
-private fun BasePathDocumentation(text: String) =
+fun BasePathDocumentation(text: String) =
     Text(
         text = text,
         color = SelectorColors.IdeDocumentation,
@@ -331,7 +333,7 @@ private fun BasePathDocumentation(text: String) =
     )
 
 @Composable
-private fun BasePathProperty(key: String, value: String, disabled: Boolean) =
+fun BasePathProperty(key: String, value: String, disabled: Boolean) =
     Text(
         AnnotatedString(
             text = "$key = $value",
@@ -350,7 +352,7 @@ private fun BasePathProperty(key: String, value: String, disabled: Boolean) =
     )
 
 @Composable
-private fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean) -> Unit) =
+fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean) -> Unit) =
     Text(
         AnnotatedString(
             text = "$key = ${value.padEnd(5, ' ')}",
@@ -368,6 +370,7 @@ private fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean
         modifier = Modifier
             .padding(bottom = 2.dp)
             .clickable(rememberMutableInteractionSource(), null) { onClick(value == "false") }
+            .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
     )
 
 @Composable
@@ -401,13 +404,14 @@ private fun PathInputBox(content: @Composable RowScope.() -> Unit) =
         )
     }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RowScope.PathInput(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     onKeyEvent: (KeyEvent) -> Boolean,
-    hideCursor: Boolean,
     focusRequester: FocusRequester,
+    scrollState: TextFieldScrollState,
     visualTransformation: VisualTransformation
 ) = BasicTextField(
     value = value,
@@ -417,9 +421,8 @@ private fun RowScope.PathInput(
         fontSize = 24.sp,
         fontFamily = SelectorFonts.JetbrainsMono
     ),
-    cursorBrush =
-    if (hideCursor) SolidColor(Color.Transparent)
-    else SolidColor(SelectorColors.IdeGeneral),
+    scrollState = scrollState,
+    cursorBrush = SolidColor(SelectorColors.IdeGeneral),
     visualTransformation = visualTransformation,
     singleLine = true,
     modifier = Modifier.weight(1f)
