@@ -132,7 +132,7 @@ fun ItemSlot(
                     }
 
                     if (item.markedNew == true) {
-                        NewMark(modifier = Modifier.align(Alignment.BottomEnd))
+                        NewMark(modifier = Modifier.align(Alignment.TopStart))
                     }
                 }
             }.toComposeImageBitmap()
