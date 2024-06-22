@@ -8,10 +8,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonSkippableComposable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -110,36 +107,36 @@ fun ItemSlot(
     simplified: Boolean = false,
 ) {
     val density = LocalDensity.current
-    val image = remember {
-        renderComposeScene(256, 256, density) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f / 1f)
-            ) {
-                ItemImage(item, simplified)
+    val image by remember {
+        derivedStateOf {
+            renderComposeScene(256, 256, density) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f / 1f)
+                ) {
+                    ItemImage(item, simplified)
 
-                if (simplified) return@Box
+                    if (simplified) return@Box
 
-                PowerText(
-                    power = item.power,
-                    modifier = Modifier.align(Alignment.BottomEnd)
-                )
-
-                if (item.enchanted) {
-                    InvestedEnchantmentPointsText(
-                        points = item.totalEnchantmentInvestedPoints,
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
-                }
-
-                if (item.markedNew == true) {
-                    NewMark(
+                    PowerText(
+                        power = item.power,
                         modifier = Modifier.align(Alignment.BottomEnd)
                     )
+
+                    if (item.enchanted) {
+                        InvestedEnchantmentPointsText(
+                            points = item.totalEnchantmentInvestedPoints,
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        )
+                    }
+
+                    if (item.markedNew == true) {
+                        NewMark(modifier = Modifier.align(Alignment.BottomEnd))
+                    }
                 }
-            }
-        }.toComposeImageBitmap()
+            }.toComposeImageBitmap()
+        }
     }
 
     Image(
