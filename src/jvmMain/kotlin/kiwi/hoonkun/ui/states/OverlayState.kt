@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -52,14 +51,14 @@ class OverlayState {
     fun any(): Boolean = stack.any { it.state == Overlay.State.Idle }
 
     @Composable
-    fun Stack(scope: BoxScope) {
+    fun Stack() {
         for (item in stack) {
-            key(item.id) { scope.Item(item) }
+            key(item.id) { Item(item) }
         }
     }
 
     @Composable
-    fun BoxScope.Item(item: Overlay) {
+    fun Item(item: Overlay) {
         Backdrop(item)
         Content(item)
 
@@ -75,7 +74,7 @@ class OverlayState {
 
     @Composable
     private fun Content(item: Overlay) {
-        val isLastItem by remember { derivedStateOf { stack.lastOrNull() != item } }
+        val isLastItem by remember { derivedStateOf { stack.lastOrNull { it.state == Overlay.State.Idle } != item } }
         val blur by animateFloatAsState(if (isLastItem) 50f else 0f)
 
         AnimatedVisibility(

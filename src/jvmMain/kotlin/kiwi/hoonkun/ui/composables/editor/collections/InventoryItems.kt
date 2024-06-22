@@ -16,10 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
-import kiwi.hoonkun.ui.reusables.RarityColor
-import kiwi.hoonkun.ui.reusables.RarityColorType
-import kiwi.hoonkun.ui.reusables.VariantFilterIcon
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.composables.overlays.InventoryFullOverlay
+import kiwi.hoonkun.ui.composables.overlays.ItemCreationOverlay
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.states.LocalOverlayState
@@ -28,11 +27,11 @@ import kiwi.hoonkun.ui.units.dp
 @Composable
 fun InventoryItems(
     items: List<Item>,
-    selection: EditorState.SelectionState,
-    noSpaceInInventory: Boolean
+    editorState: EditorState
 ) {
     var filters by remember { mutableStateOf(InventoryItemFilter()) }
-    
+
+    val selection = editorState.selection
     val overlays = LocalOverlayState.current
 
     val datasets by remember(items) {
@@ -54,9 +53,18 @@ fun InventoryItems(
             filters = filters,
             onFilterChange = { filters = it },
             onCreateItem = {
-                // TODO!
-//                if (noSpaceInInventory) Arctic.overlayState.inventoryFull = true
-//                else Arctic.overlayState.itemCreation = ItemCreationOverlayState()
+                if (editorState.noSpaceInInventory)
+                    overlays.make { InventoryFullOverlay() }
+                else
+                    overlays.make(
+                        enter = defaultFadeIn(),
+                        exit = defaultFadeOut()
+                    ) {
+                        ItemCreationOverlay(
+                            editorState = editorState,
+                            requestClose = { overlays.destroy(it) }
+                        )
+                    }
             }
         )
         ItemsLazyGrid(

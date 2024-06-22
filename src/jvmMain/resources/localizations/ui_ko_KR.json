@@ -78,5 +78,5 @@
   "enchantment_deactivate": "비활성",
   "enchantment_delete": "다시 눌러서 효과 삭제",
   "save_complete": "저장이 완료되었어요!",
-  "save_complete_backup": "기존 파일은 아래 경로에 백업되었어요:\n{0}",
+  "save_complete_backup": "기존 파일은 아래 경로에 백업되었어요:\n{0}"
 }

@@ -431,7 +431,7 @@ class FinishedObjectiveTags(decorActor: Int, rescuedVillager: Int, cannotAttachP
 }
 
 @Stable
-class Item private constructor(
+class Item(
     val parent: DungeonsJsonState,
     inventoryIndex: Int?,
     power: Double,

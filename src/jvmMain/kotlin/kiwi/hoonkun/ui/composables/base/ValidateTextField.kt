@@ -150,7 +150,7 @@ fun TextFieldValidatable(
                             text = "확정",
                             color = Color(0xff3f8e4f),
                             hoverInteraction = RetroButtonHoverInteraction.Outline,
-                            modifier = Modifier.size(120.dp, 60.dp),
+                            modifier = Modifier.size(110.dp, 50.dp),
                             onClick = { onSubmit(value) }
                         )
                     } else {

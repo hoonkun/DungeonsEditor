@@ -1,10 +1,12 @@
 package kiwi.hoonkun.ui.composables.base
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.CacheDrawScope
@@ -55,6 +57,8 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
     val density = LocalDensity.current
     var blurred by remember(bitmap) { mutableRefOf<ImageBitmap?>(null) }
 
+    val blurAlpha by animateFloatAsState(if (enabled) 1f else 0f)
+
     val paddingLeft = remember { with(density) { contentPadding.calculateLeftPadding(layoutDirection).toPx() } }
     val paddingTop = remember { with(density) { contentPadding.calculateTopPadding().toPx() } }
     val paddingHorizontal = remember { with(density) { paddingLeft + contentPadding.calculateRightPadding(layoutDirection).toPx() } }
@@ -91,9 +95,14 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
                     onDrawBehind(cache, dstOffset, dstSize)
                     drawIntoCanvas {
                         it.saveLayer(Rect(0f, 0f, size.width, size.height), contentPaint())
-                        if (enabled) {
-                            scale(contentScale * 1.05f) {
-                                blurred?.let { drawImage(it, dstOffset = dstOffset, dstSize = dstSize) }
+                        scale(contentScale * 1.05f) {
+                            blurred?.let { rendered ->
+                                drawImage(
+                                    image = rendered,
+                                    dstOffset = dstOffset,
+                                    dstSize = dstSize,
+                                    alpha = blurAlpha,
+                                )
                             }
                         }
                         scale(contentScale) {
@@ -124,6 +133,7 @@ fun BlurShadowImage(
         modifier = modifier,
         contentPadding = contentPadding,
         contentPaint = contentPaint,
+        contentScale = contentScale,
         drawCacheFactory = { _, _ -> BlurShadowImageDrawCache.None },
         onDrawBehind = { _, offset, size -> onDrawBehind(offset, size) },
         onDrawFront = { _, offset, size -> onDrawFront(offset, size) }

@@ -89,14 +89,12 @@ private fun Content(
                         )
                         InventoryItems(
                             items = editorState.stored.unequippedItems,
-                            selection = editorState.selection,
-                            noSpaceInInventory = editorState.noSpaceInInventory
+                            editorState = editorState,
                         )
                     } else {
                         InventoryItems(
                             items = editorState.stored.storageChestItems,
-                            selection = editorState.selection,
-                            noSpaceInInventory = editorState.noSpaceInInventory
+                            editorState = editorState
                         )
                     }
                 }

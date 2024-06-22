@@ -94,17 +94,6 @@ private fun RarityBorderGradient2(rarity: String, width: Float, height: Float) =
 @Stable
 fun DrawScope.drawUniqueIndicator() {
     val color = RarityColor("Unique", RarityColorType.Opaque)
-    drawRect(
-        Brush.linearGradient(
-            0f to color.copy(alpha = 0f),
-            0.5f to color.copy(alpha = 0.75f),
-            1f to color.copy(alpha = 0f),
-            start = Offset(0f, size.height / 2f),
-            end = Offset(size.width, size.height / 2f)
-        ),
-        topLeft = Offset(0f, size.height / 2 - 3.dp.toPx()),
-        size = Size(size.width, 6.dp.toPx())
-    )
     drawCircle(
         Brush.radialGradient(
             0f to color.copy(alpha = 0.45f),

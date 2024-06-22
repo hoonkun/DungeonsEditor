@@ -22,10 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
-import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
-import kiwi.hoonkun.ui.composables.overlays.InventoryFullOverlay
-import kiwi.hoonkun.ui.composables.overlays.ItemDeleteConfirmOverlay
-import kiwi.hoonkun.ui.composables.overlays.ItemDuplicateLocationConfirmOverlay
+import kiwi.hoonkun.ui.composables.overlays.*
 import kiwi.hoonkun.ui.reusables.IfNotNull
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
@@ -167,8 +164,15 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
         ItemAlterButton(
             text = Localizations.UiText("change_type"),
             onClick = {
-                // TODO!
-                // Arctic.overlayState.itemEdition = item
+                overlays.make(
+                    enter = defaultFadeIn(),
+                    exit = defaultFadeOut()
+                ) {
+                    ItemEditionOverlay(
+                        target = item,
+                        requestClose = { overlays.destroy(it) }
+                    )
+                }
             }
         )
     }

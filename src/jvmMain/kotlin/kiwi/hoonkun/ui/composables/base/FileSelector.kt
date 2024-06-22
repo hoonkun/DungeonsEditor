@@ -437,13 +437,13 @@ private fun Select(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Box(modifier = Modifier.padding(5.dp)) {
+    Box(modifier = Modifier.padding(10.dp)) {
         RetroButton(
             text = text,
             color = Color(0xff3f8e4f),
             hoverInteraction = RetroButtonHoverInteraction.Outline,
             enabled = enabled,
-            modifier = Modifier.size(115.dp, 70.dp),
+            modifier = Modifier.size(105.dp, 60.dp),
             onClick = onClick
         )
     }

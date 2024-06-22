@@ -12,9 +12,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -111,7 +109,7 @@ private fun App(windowWidth: Dp) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xff272727))
-                .onKeyEvent { if (it.key == Key.Escape) overlays.pop() else false }
+                .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
                 .then(appPointerListeners.onGlobalPointerEventModifier())
         ) {
             AnimatedVisibility(
@@ -205,7 +203,7 @@ fun AppRoot(
 ) {
     Box(modifier = modifier) {
         content()
-        overlays.Stack(this)
+        overlays.Stack()
     }
 }
 

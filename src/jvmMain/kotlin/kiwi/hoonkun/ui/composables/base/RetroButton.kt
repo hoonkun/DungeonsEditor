@@ -4,27 +4,67 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.draw.CacheDrawScope
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
 
-val RetroButtonDefaultSizeModifier = Modifier.size(200.dp, 65.dp)
+@Composable
+fun RetroButton(
+    color: Color,
+    modifier: Modifier = RetroButtonDefaultSizeModifier,
+    enabled: Boolean = true,
+    hoverInteraction: RetroButtonHoverInteraction,
+    disabledColor: Color = Color(0xff666666),
+    radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
+    stroke: Dp = 5.dp,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
+    onClick: () -> Unit,
+    content: @Composable RowScope.() -> Unit
+) {
+    val source = rememberMutableInteractionSource()
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+
+    val solidColor = if (enabled) color else disabledColor
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .drawWithCache {
+                val path = RetroIndicator(radius)
+                onDrawBehind {
+                    if (hoverInteraction == RetroButtonHoverInteraction.Outline) {
+                        drawPath(path = path, color = solidColor)
+                        if (pressed) drawPath(path = path, color = Color.Black.copy(alpha = 0.25f))
+                        if (hovered) drawPath(path = path, color = Color.White, style = Stroke(width = stroke.toPx()))
+                    } else if (hoverInteraction == RetroButtonHoverInteraction.Overlay) {
+                        if (pressed) drawPath(path = path, color = Color.Black.copy(alpha = 0.25f))
+                        if (hovered) drawPath(path = path, color = solidColor.copy(alpha = 0.2f))
+                    }
+                }
+            }
+            .padding(contentPadding)
+            .hoverable(source, enabled)
+            .clickable(source, null, enabled, onClick = onClick)
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun RetroButton(
@@ -35,30 +75,22 @@ fun RetroButton(
     hoverInteraction: RetroButtonHoverInteraction,
     disabledColor: Color = Color(0xff666666),
     textStyle: TextStyle = LocalTextStyle.current,
-    radius: Dp = 8.dp,
+    radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
     stroke: Dp = 5.dp,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     onClick: () -> Unit
 ) {
-    val source = rememberMutableInteractionSource()
-    val hovered by source.collectIsHoveredAsState()
-    val pressed by source.collectIsPressedAsState()
-
-    val solidColor = if (enabled) color else disabledColor
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .hoverable(source, enabled)
-            .clickable(source, null, enabled, onClick = onClick)
+    RetroButton(
+        color = color,
+        modifier = modifier,
+        enabled = enabled,
+        hoverInteraction = hoverInteraction,
+        disabledColor = disabledColor,
+        radius = radius,
+        stroke = stroke,
+        contentPadding = contentPadding,
+        onClick = onClick
     ) {
-        if (hoverInteraction == RetroButtonHoverInteraction.Outline) {
-            if (hovered) Outline(Color.White, radius = radius, modifier = Modifier.matchParentSize())
-            Solid(solidColor, radius = radius, stroke = stroke, modifier = Modifier.matchParentSize())
-            if (pressed) Outline(Color.Black, alpha = 0.25f, radius = radius, modifier = Modifier.matchParentSize())
-        } else if (hoverInteraction == RetroButtonHoverInteraction.Overlay) {
-            if (hovered) Solid(solidColor, alpha = 0.2f, radius = radius, stroke = stroke, modifier = Modifier.matchParentSize())
-            if (pressed) Solid(Color.Black, alpha = 0.25f, radius = radius, stroke = stroke, modifier = Modifier.matchParentSize())
-        }
         Text(
             text = text,
             style = textStyle,
@@ -67,46 +99,48 @@ fun RetroButton(
     }
 }
 
-@Composable
-private fun Outline(color: Color, alpha: Float = 1f, radius: Dp, modifier: Modifier = Modifier) {
-    Spacer(
-        modifier = Modifier
-            .then(modifier)
-            .alpha(alpha)
-            .drawBehind {
-                drawRect(
-                    color = color,
-                    topLeft = Offset(radius.toPx(), 0f),
-                    size = Size(size.width - 2 * radius.toPx(), size.height)
-                )
-                drawRect(
-                    color = color,
-                    topLeft = Offset(0f, radius.toPx()),
-                    size = Size(size.width, size.height - 2 * radius.toPx())
-                )
-            }
-    )
-}
-
-@Composable
-private fun Solid(color: Color, alpha: Float = 1f, radius: Dp, stroke: Dp, modifier: Modifier = Modifier) {
-    Spacer(
-        modifier = Modifier
-            .then(modifier)
-            .alpha(alpha)
-            .drawBehind {
-                drawRect(
-                    color = color,
-                    topLeft = Offset(stroke.toPx(), stroke.toPx() + radius.toPx()),
-                    size = Size(size.width - 2 * stroke.toPx(), size.height - 2 * (stroke.toPx() + radius.toPx()))
-                )
-                drawRect(
-                    color = color,
-                    topLeft = Offset(stroke.toPx() + radius.toPx(), stroke.toPx()),
-                    size = Size(size.width - 2 * (stroke.toPx() + radius.toPx()), size.height - 2 * stroke.toPx())
-                )
-            }
-    )
-}
-
 enum class RetroButtonHoverInteraction { Outline, Overlay }
+
+val RetroButtonDefaultSizeModifier = Modifier.size(190.dp, 55.dp)
+
+data class RetroButtonDpCornerRadius(
+    val topStart: Dp = 8.dp,
+    val topEnd: Dp = 8.dp,
+    val bottomStart: Dp = 8.dp,
+    val bottomEnd: Dp = 8.dp
+) {
+    fun toPxRadius(density: Density) = with (density) {
+        RetroButtonCornerRadius(
+            topStart.toPx(),
+            topEnd.toPx(),
+            bottomStart.toPx(),
+            bottomEnd.toPx()
+        )
+    }
+}
+
+data class RetroButtonCornerRadius(
+    val topStart: Float = 0f,
+    val topEnd: Float = 0f,
+    val bottomStart: Float = 0f,
+    val bottomEnd: Float = 0f
+)
+
+fun CacheDrawScope.RetroIndicator(dpRadius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius()): Path =
+    Path().apply {
+        val radius = dpRadius.toPxRadius(this@RetroIndicator)
+        moveTo(radius.topStart, 0f)
+        lineTo(size.width - radius.topEnd, 0f)
+        lineTo(size.width - radius.topEnd, radius.topEnd)
+        lineTo(size.width, radius.topEnd)
+        lineTo(size.width, size.height - radius.bottomEnd)
+        lineTo(size.width - radius.bottomEnd, size.height - radius.bottomEnd)
+        lineTo(size.width - radius.bottomEnd, size.height)
+        lineTo(radius.bottomStart, size.height)
+        lineTo(radius.bottomStart, size.height - radius.bottomStart)
+        lineTo(0f, size.height - radius.bottomStart)
+        lineTo(0f, radius.topStart)
+        lineTo(radius.topStart, radius.topStart)
+        close()
+    }
+

@@ -22,8 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
@@ -140,7 +143,7 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                     color = Color.White,
                     hoverInteraction = RetroButtonHoverInteraction.Overlay,
                     onClick = { requestClose() },
-                    modifier = Modifier.size(135.dp, 65.dp)
+                    modifier = Modifier.size(125.dp, 55.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 RetroButton(
@@ -153,7 +156,7 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
 
                         requestClose()
                     },
-                    modifier = Modifier.size(135.dp, 65.dp)
+                    modifier = Modifier.size(125.dp, 55.dp)
                 )
             }
         }
@@ -564,21 +567,3 @@ private fun LevelModifier(
         .scale(if (level == 0) 1f else 2f)
         .then(modifier)
 }
-
-private fun CacheDrawScope.RetroIndicator(): Path =
-    Path().apply {
-        val radius = 5.dp.toPx()
-        moveTo(radius, 0f)
-        lineTo(size.width - radius, 0f)
-        lineTo(size.width - radius, radius)
-        lineTo(size.width, radius)
-        lineTo(size.width, size.height - radius)
-        lineTo(size.width - radius, size.height - radius)
-        lineTo(size.width - radius, size.height)
-        lineTo(radius, size.height)
-        lineTo(radius, size.height - radius)
-        lineTo(0f, size.height - radius)
-        lineTo(0f, radius)
-        lineTo(radius, radius)
-        close()
-    }

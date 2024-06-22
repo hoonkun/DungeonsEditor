@@ -76,5 +76,5 @@
   "enchantment_deactivate": "Deactivate",
   "enchantment_delete": "click again to delete",
   "save_complete": "Save Complete!",
-  "save_complete_backup": "Existing file was backed up in:\n{0}",
+  "save_complete_backup": "Existing file was backed up in:\n{0}"
 }

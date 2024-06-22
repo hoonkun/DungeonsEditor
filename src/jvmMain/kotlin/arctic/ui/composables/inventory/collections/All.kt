@@ -41,7 +41,7 @@ import dungeons.states.Item
 @Composable
 fun <T>ItemsLazyGrid(columns: Int = 3, items: List<T>, content: @Composable LazyGridItemScope.(Int, T) -> Unit) where T: Item? =
     LazyVerticalGrid(
-        GridCells.Fixed(columns),
+        columns = GridCells.Fixed(columns),
         contentPadding = PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
