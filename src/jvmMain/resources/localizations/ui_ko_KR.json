@@ -52,6 +52,7 @@
   "pak_not_found_description": "예측 가능한 위치에서 게임파일을 찾지 못했습니다.\n게임 내 리소스 파일(.pak) 디렉터리의 경로를 입력해주세요.",
   "inventory": "인벤토리",
   "storage": "창고",
+  "unknown_place": "알 수 없는 위치",
   "tap_to_close": "닫으려면 아무 곳이나 누르세요",
   "select": "선택",
   "open": "열기",

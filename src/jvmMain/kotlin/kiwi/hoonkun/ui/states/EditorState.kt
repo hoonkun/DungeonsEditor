@@ -16,7 +16,9 @@ class EditorState(
     enum class EditorView {
         Inventory, Storage;
 
-        val localizedName get() = if (this == Inventory) Localizations.UiText("inventory") else Localizations.UiText("storage")
+        val localizedName get() =
+            if (this == Inventory) Localizations.UiText("inventory")
+            else Localizations.UiText("storage")
         fun other() = if (this == Inventory) Storage else Inventory
     }
 

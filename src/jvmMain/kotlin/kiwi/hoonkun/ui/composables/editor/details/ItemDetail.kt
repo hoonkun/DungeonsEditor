@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
+import kiwi.hoonkun.ui.composables.overlays.ItemDeleteConfirmOverlay
 import kiwi.hoonkun.ui.reusables.IfNotNull
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
@@ -189,8 +190,13 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
         text = Localizations.UiText("delete"),
         color = Color(0x25ff6d0c),
         onClick =  {
-            // TODO!!
-//        Arctic.overlayState.itemDeletion = item
+            overlays.make {
+                ItemDeleteConfirmOverlay(
+                    editor = editor,
+                    target = item,
+                    requestClose = { overlays.destroy(it) }
+                )
+            }
         }
     )
 }

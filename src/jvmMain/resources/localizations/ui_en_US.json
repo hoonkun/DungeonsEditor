@@ -52,6 +52,7 @@
   "pak_not_found_description": "Editor could not find game resources in predictable locations.\nPlease set game resources(.pak) directory manually.",
   "inventory": "Inventory",
   "storage": "Storage",
+  "unknown_place": "Unknown Place",
   "tap_to_close": "Click anywhere to close",
   "select": "select",
   "open": "Open",
