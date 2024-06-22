@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
+import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.Currency
 import kiwi.hoonkun.ui.states.EditorState
@@ -30,7 +31,10 @@ import minecraft.dungeons.values.DungeonsLevel
 
 
 @Composable
-fun EditorBottomBar(editor: EditorState) {
+fun EditorBottomBar(
+    editor: EditorState,
+    requestClose: () -> Unit
+) {
     val stored = remember(editor) { editor.stored }
 
     val emeraldHolder by remember(stored) { derivedStateOf { stored.currencies.find { it.type == "Emerald" } } }
@@ -118,7 +122,7 @@ fun EditorBottomBar(editor: EditorState) {
         Spacer(modifier = Modifier.width(20.dp))
 
         SaveButton()
-        CloseFileButton()
+        CloseFileButton(requestClose)
     }
 }
 
@@ -142,10 +146,18 @@ private fun IconButton(icon: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CloseFileButton() {
-    // TODO
+private fun CloseFileButton(
+    onClick: () -> Unit
+) {
     val overlays = LocalOverlayState.current
-    IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") {  }
+    IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") {
+        overlays.make {
+            CloseFileConfirmOverlay(
+                onConfirm = onClick,
+                requestClose = { overlays.destroy(it) }
+            )
+        }
+    }
 }
 
 @Composable

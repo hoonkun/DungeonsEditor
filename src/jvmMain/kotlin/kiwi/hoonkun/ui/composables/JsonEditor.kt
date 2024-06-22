@@ -22,6 +22,7 @@ import kiwi.hoonkun.ui.units.dp
 @Composable
 fun JsonEditor(
     json: DungeonsJsonState?,
+    requestClose: () -> Unit,
     modifier: Modifier = Modifier,
     placeholder: @Composable () -> Unit = { }
 ) {
@@ -41,13 +42,16 @@ fun JsonEditor(
             modifier = Modifier.fillMaxHeight()
         ) {
             if (it == null) placeholder()
-            else Content(it)
+            else Content(it, requestClose)
         }
     }
 }
 
 @Composable
-private fun Content(json: DungeonsJsonState) {
+private fun Content(
+    json: DungeonsJsonState,
+    requestClose: () -> Unit
+) {
     val editorState = rememberEditorState(json)
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -119,6 +123,6 @@ private fun Content(json: DungeonsJsonState) {
                 }
             }
         }
-        EditorBottomBar(editorState)
+        EditorBottomBar(editorState, requestClose)
     }
 }

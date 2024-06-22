@@ -141,11 +141,12 @@ private fun App(windowWidth: Dp) {
                 ) {
                     JsonEntries(
                         onJsonSelect = {
+                            // TODO: it을 그대로 사용하지 말고 상태를 다시 초기화할 것. 파일을 닫을 때 내용을 Discard 할 수가 없다.
                             json = it
                             focusedArea = AppFocusable.Editor
                         },
                         preview = preview,
-                        focused = focusedArea == AppFocusable.Entries,
+                        focused = focusedArea == AppFocusable.Entries || json == null,
                         requestFocus = { focusedArea = AppFocusable.Entries },
                         modifier = Modifier
                             .width(entriesWidth)
@@ -162,6 +163,7 @@ private fun App(windowWidth: Dp) {
                             .clickable(rememberMutableInteractionSource(), null) {
                                 focusedArea = AppFocusable.Editor
                             },
+                        requestClose = { json = null },
                         placeholder = {
                             Column(
                                 verticalArrangement = Arrangement.Center,
