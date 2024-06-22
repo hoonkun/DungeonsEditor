@@ -73,5 +73,7 @@
   "file_selector_preview": "Selector Preview",
   "enchantment_empty_slot": "Enchantment does not set.\nSelect preferred enchantment in left area!",
   "enchantment_deactivate": "Deactivate",
-  "enchantment_delete": "click again to delete"
+  "enchantment_delete": "click again to delete",
+  "save_complete": "Save Complete!",
+  "save_complete_backup": "Existing file was backed up in:\n{0}"
 }

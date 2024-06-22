@@ -20,10 +20,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
+import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
+import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.Currency
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
+import kiwi.hoonkun.ui.states.Overlay
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
@@ -121,7 +124,7 @@ fun EditorBottomBar(
 
         Spacer(modifier = Modifier.width(20.dp))
 
-        SaveButton()
+        SaveButton(editor)
         CloseFileButton(requestClose)
     }
 }
@@ -151,7 +154,7 @@ private fun CloseFileButton(
 ) {
     val overlays = LocalOverlayState.current
     IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") {
-        overlays.make {
+        overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             CloseFileConfirmOverlay(
                 onConfirm = onClick,
                 requestClose = { overlays.destroy(it) }
@@ -161,10 +164,17 @@ private fun CloseFileButton(
 }
 
 @Composable
-private fun SaveButton() {
-    // TODO
+private fun SaveButton(editor: EditorState) {
     val overlays = LocalOverlayState.current
-    IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {  }
+    IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {
+        overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
+            FileSaveOverlay(
+                editor = editor,
+                postSave = { overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) { FileSaveCompleteOverlay() } },
+                requestClose = { overlays.destroy(it) }
+            )
+        }
+    }
 }
 
 @Composable
