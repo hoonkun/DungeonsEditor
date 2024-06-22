@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
+import kiwi.hoonkun.ui.composables.overlays.InventoryFullOverlay
 import kiwi.hoonkun.ui.composables.overlays.ItemDeleteConfirmOverlay
+import kiwi.hoonkun.ui.composables.overlays.ItemDuplicateLocationConfirmOverlay
 import kiwi.hoonkun.ui.reusables.IfNotNull
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
@@ -174,15 +176,20 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
     ItemAlterButton(
         text = Localizations.UiText("duplicate"),
         onClick = {
-            // TODO!!
-//        if (item.where == editor.view) {
-//            if (editor.noSpaceInInventory)
-//                Arctic.overlayState.inventoryFull = true
-//            else
-//                item.parent.addItem(editor, item.copy(), item)
-//        } else {
-//            Arctic.overlayState.itemDuplication = item
-//        }
+            if (item.where == editor.view) {
+                if (editor.view == EditorState.EditorView.Inventory && editor.noSpaceInInventory)
+                    overlays.make { InventoryFullOverlay() }
+                else
+                    item.parent.addItem(editor, item.copy(), item)
+            } else {
+                overlays.make {
+                    ItemDuplicateLocationConfirmOverlay(
+                        editor = editor,
+                        target = item,
+                        requestClose = { overlays.destroy(it) }
+                    )
+                }
+            }
         }
     )
     Spacer(modifier = Modifier.width(7.dp))
