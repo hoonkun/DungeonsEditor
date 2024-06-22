@@ -1,5 +1,7 @@
 package kiwi.hoonkun.ui.composables.base
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,13 +20,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.states.Item
-import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import kiwi.hoonkun.utils.Retriever
@@ -80,6 +79,7 @@ fun ItemAlterButton(
     color: Color = Color(0x15ffffff),
     enabled: Boolean = true,
     horizontalPadding: Dp = 10.dp,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     content: @Composable RowScope.() -> Unit
 ) {
@@ -89,6 +89,8 @@ fun ItemAlterButton(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .padding(3.dp)
+            .then(modifier)
             .height(35.dp)
             .clickable(interaction, null, role = Role.Button, enabled = enabled) { onClick() }
             .hoverable(interaction, enabled)
@@ -103,25 +105,17 @@ fun ItemAlterButton(
 @Composable
 fun ItemNetheriteEnchantButton(
     holder: Item,
-    readonly: Boolean = false,
+    enchantment: Enchantment?,
+    modifier: Modifier = Modifier,
+    onClick: (Enchantment) -> Unit
 ) {
-    val overlays = LocalOverlayState.current
-
     @Composable
-    fun InactiveItemNetheriteEnchantButton(builder: Retriever<Enchantment>) {
+    fun InactiveItemNetheriteEnchantButton(enchantment: Retriever<Enchantment>) {
         ItemAlterButton(
             color = Color(0x15ffffff),
             horizontalPadding = 4.dp,
-            enabled = !readonly,
-            onClick = {
-                val target = builder()
-                overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
-                    EnchantmentOverlay(
-                        initialSelected = target,
-                        requestClose = { overlays.destroy(it) }
-                    )
-                }
-            }
+            modifier = modifier,
+            onClick = { onClick(enchantment()) }
         ) {
             Image(
                 bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"],
@@ -136,40 +130,59 @@ fun ItemNetheriteEnchantButton(
         ItemAlterButton(
             color = Color(0x40ffc847),
             horizontalPadding = 10.dp,
-            enabled = !readonly,
-            onClick = {
-                overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
-                    EnchantmentOverlay(
-                        initialSelected = enchantment,
-                        requestClose = { overlays.destroy(it) }
-                    )
-                }
-            }
+            modifier = modifier,
+            onClick = { onClick(enchantment) }
         ) {
-            Image(
-                bitmap = enchantment.data.icon,
-                contentDescription = null,
+            AnimatedContent(
+                targetState = enchantment.data,
+                transitionSpec = {
+                    val enter =
+                        if (targetState.id == "Unset") defaultFadeIn()
+                        else defaultFadeIn() + scaleIn(initialScale = 1.5f)
+                    val exit = defaultFadeOut()
+                    enter togetherWith exit using SizeTransform(clip = false)
+                },
                 modifier = Modifier
                     .requiredSize(30.dp)
                     .drawBehind {
                         drawImage(
                             image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
-                            dstSize = IntSize(size.width.toInt(), size.height.toInt())
+                            dstSize = size.round()
                         )
                     }
                     .scale(1.05f)
-            )
+            ) { capturedEnchantmentData ->
+                Image(
+                    bitmap = capturedEnchantmentData.icon,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
             Spacer(modifier = Modifier.width(5.dp))
-            Text(text = DungeonsLocalizations["AncientLabels/iteminspector_gilded"]!!, fontSize = 18.sp, color = Color.White)
+            Text(
+                text = DungeonsLocalizations["AncientLabels/iteminspector_gilded"]!!,
+                fontSize = 18.sp,
+                color = Color.White
+            )
         }
     }
 
-    val enchantment = holder.netheriteEnchant
-
-    if (enchantment != null && !enchantment.isUnset)
-        ActiveItemNetheriteEnchantButton(enchantment)
-    else
-        InactiveItemNetheriteEnchantButton(builder = { holder.newNetheriteEnchant() })
+    AnimatedContent(
+        targetState = enchantment?.isUnset != false,
+        transitionSpec = {
+            val enterSpec = tween<Float>(220, delayMillis = 90)
+            val enter = fadeIn(animationSpec = enterSpec) + scaleIn(initialScale = 0.92f, animationSpec = enterSpec)
+            val exit = fadeOut(animationSpec = tween(90))
+            enter togetherWith exit using SizeTransform(clip = false)
+        }
+    ) { isUnset ->
+        if (isUnset) {
+            InactiveItemNetheriteEnchantButton(enchantment = { enchantment ?: holder.newNetheriteEnchant() })
+        } else {
+            if (enchantment == null) return@AnimatedContent
+            ActiveItemNetheriteEnchantButton(enchantment)
+        }
+    }
 }
 
 @Composable

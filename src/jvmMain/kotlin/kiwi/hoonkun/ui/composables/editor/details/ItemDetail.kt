@@ -22,7 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
+import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
 import kiwi.hoonkun.ui.reusables.IfNotNull
+import kiwi.hoonkun.ui.reusables.defaultFadeIn
+import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
@@ -49,6 +52,8 @@ fun ItemDetail(item: Item?, editor: EditorState) {
 
 @Composable
 private fun Content(item: Item, editor: EditorState) {
+    val overlays = LocalOverlayState.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,17 +68,30 @@ private fun Content(item: Item, editor: EditorState) {
             }
             .padding(top = 20.dp)
     ) {
-        Row(modifier = Modifier.padding(bottom = 10.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 10.dp)
+        ) {
             ItemRarityButton(item.data, item.rarity) { item.rarity = it }
             if (item.data.variant != "Artifact") {
                 Spacer(modifier = Modifier.width(7.dp))
-                ItemNetheriteEnchantButton(item)
+                ItemNetheriteEnchantButton(
+                    holder = item,
+                    enchantment = item.netheriteEnchant
+                ) { enchantment ->
+                    overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
+                        EnchantmentOverlay(
+                            initialSelected = enchantment,
+                            requestClose = { overlays.destroy(it) }
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.width(7.dp))
                 ItemModifiedButton(item)
             }
         }
 
-        ItemName(item.data.name ?: Localizations.UiText("unknown_item"))
+        ItemName(item.data.name)
         ItemDescription(item.data.flavour)
         ItemDescription(item.data.description)
 

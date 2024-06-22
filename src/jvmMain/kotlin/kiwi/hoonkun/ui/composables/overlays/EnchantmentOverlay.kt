@@ -54,7 +54,7 @@ class EnchantmentDataCollectionState(initialSelected: Enchantment) {
 
     private val index = holder.enchantments?.indexOf(initialSelected) ?: -1
 
-    val netherite = holder.netheriteEnchant?.copy() ?: Enchantment.Unset(holder)
+    val netherite = holder.netheriteEnchant?.copy() ?: Enchantment.Unset(holder).apply { isNetheriteEnchant = true }
     val enchantments = holder.enchantments?.map { it.copy() }?.toMutableStateList()
         ?: List(9) { Enchantment.Unset(holder) }.toMutableStateList()
 
@@ -122,14 +122,7 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                         exit = ExitTransition.None
                     )
             ) { preview ->
-                Box(
-                    modifier = Modifier
-                        .requiredSize(675.dp, 300.dp)
-                        .background(Color(0xff080808))
-                        .consumeClick()
-                ) {
-                    EnchantmentDetail(preview)
-                }
+                EnchantmentDetail(preview)
             }
 
             Row(
@@ -201,10 +194,23 @@ private fun HolderPreview(
                     .padding(all = 12.dp)
             )
             Column {
-                Row(modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp, bottom = 8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp, bottom = 8.dp)
+                ) {
                     ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
                     Spacer(modifier = Modifier.width(8.dp))
-                    ItemNetheriteEnchantButton(holder = holder, readonly = true)
+                    ItemNetheriteEnchantButton(
+                        holder = holder,
+                        modifier = Modifier.drawBehind {
+                            if (state.selected != state.netherite) return@drawBehind
+
+                            drawInteractionBorder(hovered = false, selected = true)
+                        },
+                        enchantment = state.netherite
+                    ) {
+                        state.selected = state.netherite
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemModifiedButton(holder = holder, readonly = true)
                 }
@@ -329,7 +335,7 @@ private fun EnchantmentDataCollection(
                     state.selected.level =
                         if (newId == "Unset")
                             0
-                        else if (state.selected.id == "Unset" && state.selected.isNetheriteEnchant)
+                        else if (state.selected.isNetheriteEnchant)
                             state.selected.level.coerceAtLeast(1)
                         else
                             state.selected.level
@@ -398,28 +404,35 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
     val data = remember(enchantment.id) { DungeonsDatabase.enchantments.first { it.id == enchantment.id } }
     val density = LocalDensity.current
 
-    AnimatedContent(
-        targetState = data,
-        transitionSpec = {
-            val initialIndex = DungeonsDatabase.enchantments.indexOf(initialState)
-            val targetIndex = DungeonsDatabase.enchantments.indexOf(targetState)
+    Box(
+        modifier = Modifier
+            .requiredSize(675.dp, 300.dp)
+            .background(Color(0xff080808))
+            .consumeClick()
+    ) {
+        AnimatedContent(
+            targetState = data,
+            transitionSpec = {
+                val initialIndex = DungeonsDatabase.enchantments.indexOf(initialState)
+                val targetIndex = DungeonsDatabase.enchantments.indexOf(targetState)
 
-            val offset = with(density) {
-                if (initialIndex < targetIndex) 50.dp.roundToPx()
-                else (-50).dp.roundToPx()
+                val offset = with(density) {
+                    if (initialIndex < targetIndex) 50.dp.roundToPx()
+                    else (-50).dp.roundToPx()
+                }
+
+                val enter = defaultFadeIn() + slideIn { IntOffset(0, offset) }
+                val exit = defaultFadeOut() + slideOut { IntOffset(0, -offset) }
+
+                enter togetherWith exit
+            },
+            contentAlignment = Alignment.Center
+        ) { capturedData ->
+            if (capturedData.id == "Unset") {
+                UnsetEnchantmentPreview()
+            } else {
+                ValidEnchantmentPreview(capturedData, enchantment)
             }
-
-            val enter = defaultFadeIn() + slideIn { IntOffset(0, offset) }
-            val exit = defaultFadeOut() + slideOut { IntOffset(0, -offset) }
-
-            enter togetherWith exit
-        },
-        contentAlignment = Alignment.Center
-    ) { capturedData ->
-        if (capturedData.id == "Unset") {
-            UnsetEnchantmentPreview()
-        } else {
-            ValidEnchantmentPreview(capturedData, enchantment)
         }
     }
 }
