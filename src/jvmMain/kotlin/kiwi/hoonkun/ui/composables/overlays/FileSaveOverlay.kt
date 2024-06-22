@@ -27,7 +27,7 @@ fun FileSaveOverlay(
             .fillMaxSize()
             .padding(30.dp)
     ) {
-        OverlayDescriptionText(Localizations.UiText("file_save_cancel_help"), fontSize = 18.sp)
+        OverlayDescriptionText(Localizations.UiText("tap_to_cancel"), fontSize = 18.sp)
     }
 
     ContentRoot {

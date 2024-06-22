@@ -53,7 +53,8 @@
   "inventory": "Inventory",
   "storage": "Storage",
   "unknown_place": "Unknown Place",
-  "tap_to_close": "Click anywhere to close",
+  "tap_to_close": "Press Esc or any empty space to close",
+  "tap_to_cancel": "Press Esc or any empty space to cancel",
   "select": "select",
   "open": "Open",
   "add": "Add",
@@ -76,5 +77,4 @@
   "enchantment_delete": "click again to delete",
   "save_complete": "Save Complete!",
   "save_complete_backup": "Existing file was backed up in:\n{0}",
-  "file_save_cancel_help": "Press Esc or any empty space to cancel"
 }
