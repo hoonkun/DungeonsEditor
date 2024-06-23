@@ -1,7 +1,5 @@
 package kiwi.hoonkun.ui.composables.overlays
 
-import LocalData
-import Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -12,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import kiwi.hoonkun.ArcticSave
+import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.units.dp
@@ -42,7 +42,7 @@ fun PakIndexingOverlay(
     var enchantmentState by remember { mutableStateOf(LoadState()) }
     val enchantmentProgresses = remember { List(4) { LoadProgress() }.toMutableStateList() }
 
-    val customPakLocation = LocalData.customPakLocation
+    val customPakLocation = ArcticSave.customPakLocation
 
     LaunchedEffect(customPakLocation) {
         val mutex = Mutex()
@@ -84,7 +84,7 @@ fun PakIndexingOverlay(
 
             DungeonsLocalizations.initialize()
 
-            if (Settings.preloadTextures) {
+            if (ArcticSettings.preloadTextures) {
                 initState = initState.copy(leadingText = Localizations.UiText("progress_text_reading_textures"))
 
                 val targetItems = DungeonsDatabase.items.filter { it.name != null }.toSet()
@@ -126,7 +126,7 @@ fun PakIndexingOverlay(
             description = Localizations.UiText("pak_indexing_description")
         )
 
-        if (!Settings.preloadTextures) return@ContentRoot
+        if (!ArcticSettings.preloadTextures) return@ContentRoot
 
         Spacer(modifier = Modifier.height(50.dp))
         Column(modifier = Modifier.width(700.dp)) {
