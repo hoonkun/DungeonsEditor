@@ -199,35 +199,43 @@ fun ItemModifiedButton(
     holder: Item,
     readonly: Boolean = false
 ) {
-    val modified = holder.modified == true
-
-    ItemAlterButton(
-        color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
-        enabled = !readonly,
-        onClick = { holder.modified = !modified }
-    ) {
-        Text(
-            text = if (modified) Localizations.UiText("modified") else "_",
-            fontSize = 18.sp,
-            color = Color.White
-        )
-
-        if (!modified) return@ItemAlterButton
-
-        if (readonly) {
-            Text(text = "${holder.timesModified}", fontSize = 18.sp, modifier = Modifier.padding(start = 8.dp))
-        } else {
-            var timesModified by remember { mutableStateOf("${holder.timesModified ?: 0}") }
-            TextFieldValidatable(
-                value = timesModified,
-                onValueChange = { timesModified = it },
-                validator = { it.toIntOrNull() != null },
-                onSubmit = { holder.timesModified = timesModified.toInt().takeIf { it != 0 } },
-                textStyle = TextStyle(fontSize = 18.sp, color = Color.White, textAlign = TextAlign.End),
-                hideDecorationIfNotFocused = true,
-                modifier = Modifier.requiredWidth(28.dp).padding(end = 2.dp).offset(y = (-1).dp)
-            )
+    AnimatedContent(
+        targetState = holder.modified == true,
+        transitionSpec = {
+            val enterSpec = tween<Float>(220, delayMillis = 90)
+            val enter = fadeIn(animationSpec = enterSpec) + scaleIn(initialScale = 0.92f, animationSpec = enterSpec)
+            val exit = fadeOut(animationSpec = tween(90))
+            enter togetherWith exit using SizeTransform(clip = false)
         }
-        Text(text = Localizations.UiText("times"), fontSize = 18.sp)
+    ) { modified ->
+        ItemAlterButton(
+            color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
+            enabled = !readonly,
+            onClick = { holder.modified = !modified }
+        ) {
+            Text(
+                text = if (modified) Localizations.UiText("modified") else "_",
+                fontSize = 18.sp,
+                color = Color.White
+            )
+
+            if (!modified) return@ItemAlterButton
+
+            if (readonly) {
+                Text(text = "${holder.timesModified}", fontSize = 18.sp, modifier = Modifier.padding(start = 8.dp))
+            } else {
+                var timesModified by remember { mutableStateOf("${holder.timesModified ?: 0}") }
+                TextFieldValidatable(
+                    value = timesModified,
+                    onValueChange = { timesModified = it },
+                    validator = { it.toIntOrNull() != null },
+                    onSubmit = { holder.timesModified = timesModified.toInt().takeIf { it != 0 } },
+                    textStyle = TextStyle(fontSize = 18.sp, color = Color.White, textAlign = TextAlign.End),
+                    hideDecorationIfNotFocused = true,
+                    modifier = Modifier.requiredWidth(28.dp).padding(end = 2.dp).offset(y = (-1).dp)
+                )
+            }
+            Text(text = Localizations.UiText("times"), fontSize = 18.sp)
+        }
     }
 }

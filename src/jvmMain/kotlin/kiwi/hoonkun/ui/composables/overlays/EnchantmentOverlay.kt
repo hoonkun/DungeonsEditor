@@ -34,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
 import dungeons.DungeonsPower
@@ -77,9 +78,13 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
     initialSelected: Enchantment,
     requestClose: () -> Unit
 ) {
-    val state = rememberEnchantmentDataCollectionState(initialSelected)
-
     val density = LocalDensity.current
+    val windowState = LocalWindowState.current
+
+    val parentHeight = (windowState.size.height - DetailHeight) / 2f
+    val childOffset = parentHeight / 2f - DetailHeight / 2f - 25.dp
+
+    val state = rememberEnchantmentDataCollectionState(initialSelected)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -95,13 +100,15 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                 )
         )
         Spacer(modifier = Modifier.width(40.dp))
-        Box(modifier = Modifier.requiredWidth(675.dp)) {
+        Box(modifier = Modifier.requiredSize(675.dp, parentHeight)) {
             HolderPreview(
                 state = state,
-                modifier = Modifier.animateEnterExit(
-                    enter = slideIn { with(density) { IntOffset(60.dp.roundToPx(), 0) } },
-                    exit = ExitTransition.None
-                )
+                offset = childOffset,
+                modifier = Modifier
+                    .animateEnterExit(
+                        enter = slideIn { with(density) { IntOffset(60.dp.roundToPx(), 0) } },
+                        exit = ExitTransition.None
+                    )
             )
 
             AnimatedContent(
@@ -122,14 +129,15 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                 },
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .height(400.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.Center)
                     .animateEnterExit(
                         enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
                         exit = ExitTransition.None
                     )
             ) { preview ->
                 EnchantmentDetail(preview)
-                Row(modifier = Modifier.offsetRelative(x = 0f, y = 1f)) {
+                Row(modifier = Modifier.offsetRelative(x = 0f, y = 1f).offset(y = -childOffset)) {
                     Spacer(modifier = Modifier.weight(1f))
                     RetroButton(
                         text = Localizations.UiText("cancel"),
@@ -160,6 +168,7 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
 @Composable
 private fun HolderPreview(
     state: EnchantmentDataCollectionState,
+    offset: Dp,
     modifier: Modifier = Modifier,
 ) {
     val holder = state.holder
@@ -168,6 +177,7 @@ private fun HolderPreview(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .offset(y = offset)
             .offsetRelative(x = 0f, y = -1f)
             .then(modifier)
             .background(Color(0xff080808))
@@ -390,6 +400,8 @@ private val SelectedPaint = Paint().apply {
     colorFilter = ColorFilter.lighting(Color(red = 0.35f, green = 0.35f, blue = 0.35f), Color.Black)
 }
 
+private val DetailHeight = 300.dp
+
 @Composable
 private fun EnchantmentDetail(enchantment: Enchantment) {
     val data = remember(enchantment.id) { DungeonsDatabase.enchantments.first { it.id == enchantment.id } }
@@ -397,7 +409,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
 
     Box(
         modifier = Modifier
-            .requiredSize(675.dp, 300.dp)
+            .requiredSize(675.dp, DetailHeight)
             .background(Color(0xff080808))
             .consumeClick()
     ) {

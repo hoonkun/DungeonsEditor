@@ -68,7 +68,7 @@ fun AnimatedVisibilityScope.ArmorPropertyOverlay(
     val windowState = LocalWindowState.current
 
     val parentHeight = (windowState.size.height - DetailHeight) / 2f
-    val childOffset = parentHeight / 2f - 100.dp
+    val childOffset = parentHeight / 2f - DetailHeight / 2f - 25.dp
 
     val state = rememberArmorPropertyOverlayState(holder, initialSelected)
 
@@ -79,16 +79,19 @@ fun AnimatedVisibilityScope.ArmorPropertyOverlay(
     ) {
         ArmorPropertyDataCollection(
             state = state,
-            modifier = Modifier.animateEnterExit(enter = slideIn { IntOffset(-60.dp.value.toInt(), 0) }, exit = ExitTransition.None)
+            modifier = Modifier.animateEnterExit(
+                enter = slideIn { IntOffset(-60.dp.value.toInt(), 0) },
+                exit = ExitTransition.None
+            )
         )
         Spacer(modifier = Modifier.width(40.dp))
-        Box(modifier = Modifier.requiredWidth(675.dp)) {
+        Box(modifier = Modifier.requiredSize(675.dp, parentHeight)) {
             HolderPreview(
                 state = state,
                 offset = childOffset,
                 modifier = Modifier
                     .animateEnterExit(
-                        enter = slideIn { with(density) { IntOffset(60.dp.roundToPx(), 0) } },
+                        enter = slideIn { with(density) { IntOffset(-60.dp.roundToPx(), 0) } },
                         exit = ExitTransition.None
                     )
                     .animateContentSize()
@@ -111,7 +114,7 @@ fun AnimatedVisibilityScope.ArmorPropertyOverlay(
                 },
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .requiredHeight(parentHeight)
+                    .fillMaxHeight()
                     .align(Alignment.Center)
                     .animateEnterExit(
                         enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
@@ -364,7 +367,7 @@ private fun ArmorPropertyCollectionItem(
     }
 }
 
-val DetailHeight = 140.dp
+private val DetailHeight = 140.dp
 
 @Composable
 private fun ArmorPropertyDetail(
@@ -377,11 +380,11 @@ private fun ArmorPropertyDetail(
         modifier = Modifier
             .requiredSize(675.dp, DetailHeight)
             .background(Color(0xff080808))
+            .consumeClick()
             .padding(30.dp)
     ) {
         AnimatedContent(
             targetState = property?.data,
-            contentAlignment = Alignment.CenterStart,
             transitionSpec = {
                 val initialIndex = state.datasets.indexOf(initialState)
                 val targetIndex = state.datasets.indexOf(targetState)
@@ -395,7 +398,8 @@ private fun ArmorPropertyDetail(
                 val exit = defaultFadeOut() + slideOut { IntOffset(0, -offset) }
 
                 enter togetherWith exit
-            }
+            },
+            contentAlignment = Alignment.CenterStart,
         ) { capturedPropertyData ->
             if (capturedPropertyData != null) {
                 Column {
