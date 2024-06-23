@@ -24,6 +24,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import kiwi.hoonkun.ArcticSave
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEntries
@@ -69,7 +70,9 @@ private fun App(windowWidth: Dp) {
     val appPointerListeners = LocalAppPointerListeners.current
 
     var pakLoaded by remember { mutableStateOf(false) }
-    var json: DungeonsJsonState? by remember { mutableStateOf(null) }
+    var selectedJsonSourcePath: String? by remember { mutableStateOf(null) }
+
+    val states = remember { mutableStateMapOf<String, EditorState>() }
 
     var focusedArea by remember { mutableStateOf<AppFocusable>(AppFocusable.Entries) }
 
@@ -80,23 +83,35 @@ private fun App(windowWidth: Dp) {
     val slideRatio = 0.2f
     val containerOffset by animateDpAsState(
         targetValue =
-            if (focusedArea == AppFocusable.Editor && json != null) (windowWidth * (-slideRatio / 2))
+            if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * (-slideRatio / 2))
             else (windowWidth * (slideRatio / 2)),
         animationSpec = spring(stiffness = Spring.StiffnessLow)
     )
     val entriesOffset by animateDpAsState(
         targetValue =
-            if (focusedArea == AppFocusable.Editor && json != null) (windowWidth * slideRatio) - 12.dp
+            if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * slideRatio) - 12.dp
             else 0.dp,
         animationSpec = spring(stiffness = Spring.StiffnessLow)
     )
     val entriesBrightness by animateFloatAsState(
         targetValue =
-            if (focusedArea == AppFocusable.Editor && json != null) 0.75f
+            if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) 0.75f
             else 0f
     )
 
     var preview by remember { mutableStateOf<DungeonsJsonFile.Preview>(DungeonsJsonFile.Preview.None) }
+
+    val onSelect: (DungeonsJsonState) -> Unit = {
+        if (!states.containsKey(it.sourcePath)) {
+            val file = DungeonsJsonFile(it.sourcePath)
+            states[it.sourcePath] = EditorState(DungeonsJsonState(file.read(), file))
+        }
+        selectedJsonSourcePath = it.sourcePath
+        focusedArea = AppFocusable.Editor
+        preview = DungeonsJsonFile.Preview.None
+
+        ArcticSave.updateRecentFiles(it.sourcePath)
+    }
 
     LaunchedPakLoadEffect(
         overlays = overlays,
@@ -142,13 +157,9 @@ private fun App(windowWidth: Dp) {
                         .offset { IntOffset(containerOffset.roundToPx(), 0) }
                 ) {
                     JsonEntries(
-                        onJsonSelect = {
-                            // TODO: it을 그대로 사용하지 말고 상태를 다시 초기화할 것. 파일을 닫을 때 내용을 Discard 할 수가 없다.
-                            json = it
-                            focusedArea = AppFocusable.Editor
-                        },
+                        onJsonSelect = { onSelect(it) },
                         preview = preview,
-                        focused = focusedArea == AppFocusable.Entries || json == null,
+                        focused = focusedArea == AppFocusable.Entries || selectedJsonSourcePath == null,
                         requestFocus = { focusedArea = AppFocusable.Entries },
                         modifier = Modifier
                             .width(entriesWidth)
@@ -159,13 +170,13 @@ private fun App(windowWidth: Dp) {
                             },
                     )
                     JsonEditor(
-                        json = json,
+                        state = selectedJsonSourcePath?.let { states[it] },
                         modifier = Modifier
                             .weight(1f)
                             .clickable(rememberMutableInteractionSource(), null) {
                                 focusedArea = AppFocusable.Editor
                             },
-                        requestClose = { json = null },
+                        requestClose = { selectedJsonSourcePath = null },
                         placeholder = {
                             Column(
                                 verticalArrangement = Arrangement.Center,
@@ -185,7 +196,7 @@ private fun App(windowWidth: Dp) {
                                     onSelect = {
                                         preview.let {
                                             if (it is DungeonsJsonFile.Preview.Valid) {
-                                                json = it.json
+                                                onSelect(it.json)
                                             } // FileSelector onSelect preview.let if block
                                         } // FileSelector onSelect preview.let lambda
    /* WOW! SO LOGICAL! */           } // FileSelector onSelect lambda

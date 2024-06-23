@@ -119,7 +119,7 @@ fun JsonEntries(
                     JsonPreview(
                         summary = summary,
                         onClick = { onJsonSelect(json) },
-                        modifier = hideIfPreviewPresents
+                        modifier = hideIfPreviewPresents.animateItemPlacement()
                     )
                 }
             }
@@ -142,7 +142,7 @@ fun JsonEntries(
                     JsonPreview(
                         summary = summary,
                         onClick = { onJsonSelect(json) },
-                        modifier = hideIfPreviewPresents
+                        modifier = hideIfPreviewPresents.animateItemPlacement()
                     )
                 }
             }

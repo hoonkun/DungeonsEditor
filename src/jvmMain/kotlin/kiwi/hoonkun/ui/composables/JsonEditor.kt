@@ -14,14 +14,12 @@ import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
 import kiwi.hoonkun.ui.composables.editor.details.Tips
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.states.DungeonsJsonState
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.rememberEditorState
 import kiwi.hoonkun.ui.units.dp
 
 @Composable
 fun JsonEditor(
-    json: DungeonsJsonState?,
+    state: EditorState?,
     requestClose: () -> Unit,
     modifier: Modifier = Modifier,
     placeholder: @Composable () -> Unit = { }
@@ -33,12 +31,8 @@ fun JsonEditor(
             .background(Color(0xff202020))
     ) {
         AnimatedContent(
-            targetState = json,
-            transitionSpec = {
-                val enter = defaultFadeIn() + slideIn { IntOffset(0, 20.dp.value.toInt()) }
-                val exit = defaultFadeOut() + slideOut { IntOffset(0, -20.dp.value.toInt()) }
-                enter togetherWith exit using SizeTransform(clip = false)
-            },
+            targetState = state,
+            transitionSpec = { defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false) },
             modifier = Modifier.fillMaxHeight()
         ) {
             if (it == null) placeholder()
@@ -49,11 +43,9 @@ fun JsonEditor(
 
 @Composable
 private fun Content(
-    json: DungeonsJsonState,
+    editorState: EditorState,
     requestClose: () -> Unit
 ) {
-    val editorState = rememberEditorState(json)
-
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
