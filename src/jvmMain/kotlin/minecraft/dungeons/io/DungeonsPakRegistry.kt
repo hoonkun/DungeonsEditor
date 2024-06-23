@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import minecraft.dungeons.resources.DungeonsDatabase
+import minecraft.dungeons.resources.DungeonsTextures
 import pak.PakIndex
 import pak.PathPakFilter
 import parsers.objects.fields.Guid
@@ -35,6 +36,7 @@ object DungeonsPakRegistry {
         _index = newIndex
 
         DungeonsDatabase.Initializer.run(newIndex)
+        DungeonsTextures.Initializer.run(newIndex)
 
         return true
     }

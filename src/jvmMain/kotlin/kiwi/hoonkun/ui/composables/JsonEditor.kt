@@ -1,12 +1,20 @@
 package kiwi.hoonkun.ui.composables
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.IntOffset
+import kiwi.hoonkun.ui.composables.base.RetroButton
+import kiwi.hoonkun.ui.composables.base.RetroButtonDpCornerRadius
+import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.editor.EditorBottomBar
 import kiwi.hoonkun.ui.composables.editor.collections.EquippedItems
 import kiwi.hoonkun.ui.composables.editor.collections.InventoryItems
@@ -22,6 +30,7 @@ fun JsonEditor(
     state: EditorState?,
     requestClose: () -> Unit,
     modifier: Modifier = Modifier,
+    tabs: @Composable () -> Unit = { },
     placeholder: @Composable () -> Unit = { }
 ) {
     Box(
@@ -30,15 +39,47 @@ fun JsonEditor(
             .then(modifier)
             .background(Color(0xff202020))
     ) {
+        tabs()
         AnimatedContent(
             targetState = state,
-            transitionSpec = { defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false) },
-            modifier = Modifier.fillMaxHeight()
+            transitionSpec = {
+                val floatSpec = spring<Float>(stiffness = Spring.StiffnessLow)
+                val intOffsetSpec = spring<IntOffset>(stiffness = Spring.StiffnessLow)
+                val enter = fadeIn(floatSpec) + slideIn(intOffsetSpec) { IntOffset(0, 80.dp.value.toInt()) }
+                val exit = fadeOut() + slideOut(intOffsetSpec) { IntOffset(0, 160.dp.value.toInt()) }
+                enter togetherWith exit using SizeTransform(clip = false)
+            },
+            modifier = Modifier.fillMaxHeight().background(Color(0xff202020))
         ) {
             if (it == null) placeholder()
             else Content(it, requestClose)
         }
     }
+}
+
+@Composable
+fun JsonEditorTabButton(
+    bitmap: ImageBitmap,
+    selected: Boolean,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+    onClick: () -> Unit
+) {
+    val color by animateColorAsState(if (selected) Color(0xff3f8e4f) else Color(0xff363636))
+
+    RetroButton(
+        color = { color },
+        hoverInteraction = RetroButtonHoverInteraction.Outline,
+        contentPadding = contentPadding,
+        radius = RetroButtonDpCornerRadius(8.dp, 0.dp, 8.dp, 0.dp),
+        modifier = Modifier.fillMaxWidth().offset(x = 4.dp),
+        onClick = onClick
+    ) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = null
+        )
+    }
+    Spacer(modifier = Modifier.height(10.dp))
 }
 
 @Composable

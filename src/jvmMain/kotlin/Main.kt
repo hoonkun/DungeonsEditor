@@ -27,6 +27,7 @@ import androidx.compose.ui.window.application
 import kiwi.hoonkun.ArcticSave
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.JsonEditor
+import kiwi.hoonkun.ui.composables.JsonEditorTabButton
 import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.overlays.PakIndexingOverlay
@@ -36,6 +37,7 @@ import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
+import kotlin.random.Random
 
 
 fun main() = application {
@@ -75,6 +77,10 @@ private fun App(windowWidth: Dp) {
             else (windowWidth * (slideRatio / 2)),
         animationSpec = spring(stiffness = Spring.StiffnessLow)
     )
+    val tabsOffset by animateDpAsState(
+        targetValue = if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null || states.size > 0) (-114).dp else 0.dp,
+        animationSpec = spring(stiffness = Spring.StiffnessLow)
+    )
     val entriesOffset by animateDpAsState(
         targetValue =
             if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * slideRatio) - 12.dp
@@ -99,6 +105,11 @@ private fun App(windowWidth: Dp) {
         preview = DungeonsJsonFile.Preview.None
 
         ArcticSave.updateRecentFiles(it.sourcePath)
+    }
+
+    val onTabSelect: (String?) -> Unit = {
+        selectedJsonSourcePath = it
+        focusedArea = if (it != null) AppFocusable.Editor else AppFocusable.Entries
     }
 
     LaunchedPakLoadEffect(
@@ -147,7 +158,7 @@ private fun App(windowWidth: Dp) {
                     JsonEntries(
                         onJsonSelect = { onSelect(it) },
                         preview = preview,
-                        focused = focusedArea == AppFocusable.Entries || selectedJsonSourcePath == null,
+                        focused = focusedArea == AppFocusable.Entries,
                         requestFocus = { focusedArea = AppFocusable.Entries },
                         modifier = Modifier
                             .width(entriesWidth)
@@ -165,6 +176,28 @@ private fun App(windowWidth: Dp) {
                                 focusedArea = AppFocusable.Editor
                             },
                         requestClose = { selectedJsonSourcePath = null },
+                        tabs = {
+                            Column(
+                                modifier = Modifier
+                                    .requiredWidth(114.dp)
+                                    .padding(top = 24.dp, start = 10.dp)
+                                    .offset { IntOffset(x = tabsOffset.roundToPx(), y = 0) }
+                            ) {
+                                JsonEditorTabButton(
+                                    bitmap = DungeonsTextures["/Game/UI/Materials/Map/Pins/mapicon_chest.png"],
+                                    selected = selectedJsonSourcePath == null,
+                                    onClick = { onTabSelect(null) },
+                                    contentPadding = PaddingValues(16.dp)
+                                )
+                                states.keys.forEach { key ->
+                                    JsonEditorTabButton(
+                                        bitmap = DungeonsTextures.pets[Random(key.hashCode()).nextInt(DungeonsTextures.pets.size)],
+                                        selected = selectedJsonSourcePath == key,
+                                        onClick = { onTabSelect(key) }
+                                    )
+                                }
+                            }
+                        },
                         placeholder = {
                             Column(
                                 verticalArrangement = Arrangement.Center,

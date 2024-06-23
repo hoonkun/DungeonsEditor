@@ -21,10 +21,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
+import kiwi.hoonkun.utils.Retriever
 
 @Composable
 fun RetroButton(
-    color: Color,
+    color: Retriever<Color>,
     modifier: Modifier = RetroButtonDefaultSizeModifier,
     enabled: Boolean = true,
     hoverInteraction: RetroButtonHoverInteraction,
@@ -39,13 +40,12 @@ fun RetroButton(
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
 
-    val solidColor = if (enabled) color else disabledColor
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .drawWithCache {
+                val solidColor = if (enabled) color() else disabledColor
                 val path = RetroIndicator(radius)
                 onDrawBehind {
                     if (hoverInteraction == RetroButtonHoverInteraction.Outline) {
@@ -58,12 +58,39 @@ fun RetroButton(
                     }
                 }
             }
-            .padding(contentPadding)
             .hoverable(source, enabled)
             .clickable(source, null, enabled, onClick = onClick)
+            .padding(contentPadding)
     ) {
         content()
     }
+}
+
+@Composable
+fun RetroButton(
+    color: Color,
+    modifier: Modifier = RetroButtonDefaultSizeModifier,
+    enabled: Boolean = true,
+    hoverInteraction: RetroButtonHoverInteraction,
+    disabledColor: Color = Color(0xff666666),
+    radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
+    stroke: Dp = 5.dp,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
+    onClick: () -> Unit,
+    content: @Composable RowScope.() -> Unit
+) {
+    RetroButton(
+        color = { color },
+        modifier = modifier,
+        enabled = enabled,
+        hoverInteraction = hoverInteraction,
+        disabledColor = disabledColor,
+        radius = radius,
+        stroke = stroke,
+        contentPadding = contentPadding,
+        onClick = onClick,
+        content = content
+    )
 }
 
 @Composable
