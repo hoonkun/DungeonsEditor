@@ -12,8 +12,6 @@ import minecraft.dungeons.io.DungeonsPakRegistry
 import pak.PakIndex
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.io.path.Path
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
@@ -330,7 +328,6 @@ data class EnchantmentData(
             sourcePixels[i] = ((a shl 24) or (r shl 16) or (g shl 8) or b).toInt()
         }
         new.setRGB(0, 0, source.width, source.height, sourcePixels, 0, source.width)
-        ImageIO.write(new, "png", File("/Users/hoonkun/Temp/Shine-${if (channel == 0) "B" else if (channel == 1) "G" else "R"}-W/${id}.png"))
         return new.toComposeImageBitmap()
     }
 
