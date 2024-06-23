@@ -21,7 +21,7 @@ tasks.withType<Test> {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
     jvm { withJava() }
     sourceSets {
         val jvmMain by getting {

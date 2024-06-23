@@ -14,7 +14,6 @@ import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
-import kotlin.jvm.optionals.getOrNull
 
 object DungeonsPakRegistry {
     private var _index: PakIndex? by mutableStateOf(null)
@@ -69,8 +68,8 @@ object DungeonsPakRegistry {
         if (candidate != null) return candidate
 
         val files = try { Files.walk(Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata")) } catch (e: NoSuchFileException) { return null }
-        val found = files.filter { it.absolutePathString().endsWith("/Dungeons/Content/Paks") }.findFirst()
+        val found = files.toList().find { it.absolutePathString().endsWith("/Dungeons/Content/Paks") }
 
-        return found.getOrNull()?.absolutePathString()
+        return found?.absolutePathString()
     }
 }
