@@ -232,8 +232,8 @@ private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
 
         fun onPakNotFound(indexingOverlayId: String) {
             fun onNewPakPathSelected(notFoundOverlayId: String, path: String) {
-                LocalData.customPakLocation = path
-                LocalData.save()
+                ArcticSave.customPakLocation = path
+                ArcticSave.save()
 
                 overlays.destroy(notFoundOverlayId)
             }
