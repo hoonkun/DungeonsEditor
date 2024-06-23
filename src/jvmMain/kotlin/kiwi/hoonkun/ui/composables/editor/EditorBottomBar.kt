@@ -1,5 +1,8 @@
 package kiwi.hoonkun.ui.composables.editor
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,12 +19,16 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
+import kiwi.hoonkun.ui.reusables.defaultFadeIn
+import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.Currency
 import kiwi.hoonkun.ui.states.EditorState
@@ -113,6 +120,7 @@ fun EditorBottomBar(
             scale = 0.7f,
             value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
             valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
+            width = 50.dp
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -182,6 +190,8 @@ private fun InventorySwitcher(
     current: EditorState.EditorView,
     onSwitch: (EditorState.EditorView) -> Unit
 ) {
+    val density = LocalDensity.current
+
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
@@ -217,13 +227,22 @@ private fun InventorySwitcher(
             )
         }
 
-        Text(
-            text = current.name,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            modifier = Modifier.fillMaxHeight().padding(vertical = 10.dp, horizontal = 15.dp).offset(y = 3.dp)
-        )
+        AnimatedContent(
+            targetState = current,
+            transitionSpec = {
+                val enter = defaultFadeIn()
+                val exit = defaultFadeOut()
+                enter togetherWith exit using SizeTransform(false)
+            }
+        ) { selected ->
+            Text(
+                text = selected.name,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(horizontal = 15.dp)
+            )
+        }
     }
 }
 
@@ -232,7 +251,13 @@ private fun CurrencyImage(image: ImageBitmap, scale: Float = 1f) =
     Image(image, null, modifier = Modifier.size(50.dp).scale(scale))
 
 @Composable
-private fun CurrencyText(icon: String, value: String, valid: Boolean = true, scale: Float = 1f) {
+private fun CurrencyText(
+    icon: String,
+    value: String,
+    valid: Boolean = true,
+    scale: Float = 1f,
+    width: Dp = 100.dp
+) {
     val bitmap = remember(icon) { DungeonsTextures[icon] }
 
     CurrencyImage(bitmap, scale)
@@ -241,7 +266,7 @@ private fun CurrencyText(icon: String, value: String, valid: Boolean = true, sca
         text = value,
         fontSize = 25.sp,
         color = if (valid) Color.White else Color(0xffff5e14),
-        modifier = Modifier.width(100.dp)
+        modifier = Modifier.width(width)
     )
     Spacer(modifier = Modifier.width(30.dp))
 }
