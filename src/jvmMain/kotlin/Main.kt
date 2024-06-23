@@ -1,6 +1,8 @@
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,12 +81,14 @@ private fun App(windowWidth: Dp) {
     val containerOffset by animateDpAsState(
         targetValue =
             if (focusedArea == AppFocusable.Editor && json != null) (windowWidth * (-slideRatio / 2))
-            else (windowWidth * (slideRatio / 2))
+            else (windowWidth * (slideRatio / 2)),
+        animationSpec = spring(stiffness = Spring.StiffnessLow)
     )
     val entriesOffset by animateDpAsState(
         targetValue =
             if (focusedArea == AppFocusable.Editor && json != null) (windowWidth * slideRatio) - 12.dp
-            else 0.dp
+            else 0.dp,
+        animationSpec = spring(stiffness = Spring.StiffnessLow)
     )
     val entriesBrightness by animateFloatAsState(
         targetValue =
