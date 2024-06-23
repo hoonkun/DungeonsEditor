@@ -87,7 +87,7 @@ fun PakIndexingOverlay(
             if (ArcticSettings.preloadTextures) {
                 initState = initState.copy(leadingText = Localizations.UiText("progress_text_reading_textures"))
 
-                val targetItems = DungeonsDatabase.items.filter { it.name != null }.toSet()
+                val targetItems = DungeonsDatabase.items.toSet()
                 val targetEnchantments = DungeonsDatabase.enchantments
 
                 itemState = itemState.copy(leadingText = Localizations.UiText("progress_text_item_texture"))
@@ -96,7 +96,7 @@ fun PakIndexingOverlay(
                 targetItems.loadEach(
                     itemProgresses,
                     loader = { it.load() },
-                    then = { itemState = itemState.copy(trailingText = it.name ?: "") }
+                    then = { itemState = itemState.copy(trailingText = it.name) }
                 )
                 targetEnchantments.loadEach(
                     enchantmentProgresses,
