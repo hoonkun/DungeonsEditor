@@ -119,7 +119,7 @@ data class ItemData(
 
     val builtInProperties by lazy { DungeonsDatabase.armorProperties.filter { it.defaultIn.contains(type) } }
 
-    val name get() = DungeonsLocalizations["ItemType/${DungeonsLocalizations.Corrections.ItemName[type] ?: type}"]
+    val name get() = DungeonsLocalizations[DungeonsLocalizations.Corrections.ItemName[type] ?: "ItemType/${type}"]
         ?: Localizations.UiText("Unknown_item")
     val flavour get() = DungeonsLocalizations["ItemType/Flavour_${DungeonsLocalizations.Corrections.ItemFlavour[type] ?: type}"]
     val description get() = DungeonsLocalizations["ItemType/Desc_${DungeonsLocalizations.Corrections.ItemDescription[type] ?: type}"]

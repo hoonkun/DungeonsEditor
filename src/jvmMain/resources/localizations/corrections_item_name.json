@@ -1,5 +1,11 @@
 {
-  "Powerbow": "PowerBow",
-  "Powerbow_Unique1": "PowerBow_Unique1",
-  "Powerbow_Unique2": "PowerBow_Unique2"
+  "Powerbow": "ItemType/PowerBow",
+  "Powerbow_Unique1": "ItemType/PowerBow_Unique1",
+  "Powerbow_Unique2": "ItemType/PowerBow_Unique2",
+  "ChampionsArmor": "ItemType/ChampionsArmor ",
+  "ChampionsArmor_Unique1": "ItemType/ChampionsArmor_Unique1 ",
+  "Spear_Spooky2": "Content_Spooky2022/Decor/Text/Spooky2022EventLabels.csv/Spear_Spooky2",
+  "EmeraldArmor_Unique1": "ItemType/Emerald_Armor_Unique1",
+  "EmeraldArmor_Unique2": "ItemType/Emerald_Armor_Unique2",
+  "CorruptedSeeds": "ItemType/CorruptedSeeds_Unique1"
 }
