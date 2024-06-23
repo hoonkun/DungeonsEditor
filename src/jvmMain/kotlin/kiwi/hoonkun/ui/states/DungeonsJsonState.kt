@@ -706,7 +706,7 @@ class ArmorProperty private constructor(
     @JsonField(FIELD_RARITY)
     var rarity: String by mutableStateOf(rarity)
 
-    val data by derivedStateOf { DungeonsDatabase.armorProperty(id) ?: throw RuntimeException("unknown armor property id $id") }
+    val data by derivedStateOf { DungeonsDatabase.armorProperty(this.id) ?: throw RuntimeException("unknown armor property id ${this.id}") }
 
     constructor(from: JSONObject): this(
         from.getString(FIELD_ID),

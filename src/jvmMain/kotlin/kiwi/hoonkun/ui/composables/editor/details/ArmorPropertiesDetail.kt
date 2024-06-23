@@ -25,6 +25,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.ui.composables.base.rememberArmorPropertyIconAsState
+import kiwi.hoonkun.ui.composables.overlays.ArmorPropertyOverlay
+import kiwi.hoonkun.ui.reusables.defaultFadeIn
+import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.ArmorProperty
 import kiwi.hoonkun.ui.states.Item
@@ -34,6 +37,8 @@ import kiwi.hoonkun.ui.units.sp
 
 @Composable
 fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
+    val overlays = LocalOverlayState.current
+
     val groupedProperties by remember(properties) {
         derivedStateOf {
             val sorted = properties.sortedBy { it.data.description?.length }
@@ -62,7 +67,18 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
                 items = groupedProperties,
                 span = { GridItemSpan(it.second) }
             ) { (property) ->
-                ArmorPropertyItem(item, property)
+                ArmorPropertyItem(property) {
+                    overlays.make(
+                        enter = defaultFadeIn(),
+                        exit = defaultFadeOut()
+                    ) {
+                        ArmorPropertyOverlay(
+                            holder = property.holder,
+                            initialSelected = property,
+                            requestClose = { overlays.destroy(it) }
+                        )
+                    }
+                }
             }
         }
         Spacer(modifier = Modifier.width(10.dp))
@@ -71,31 +87,34 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
 }
 
 @Composable
-private fun ArmorPropertyItem(item: Item, property: ArmorProperty) {
+fun ArmorPropertyItem(
+    property: ArmorProperty,
+    selected: () -> Boolean = { false },
+    onClick: () -> Unit
+) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
     val propertyRarityIcon = rememberArmorPropertyIconAsState(property)
-
-    val overlays = LocalOverlayState.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .requiredHeight(ItemHeight)
             .drawBehind {
-                drawRoundRect(
-                    color = Color.White.copy(alpha = if (hovered) 0.1f else 0.0f),
-                    topLeft = Offset(-10.dp.toPx(), 0f),
-                    size = Size(size.width + 20.dp.toPx(), size.height),
-                    cornerRadius = CornerRadius(6.dp.toPx())
-                )
+                val drawIndicator: (Float) -> Unit = { alpha ->
+                    drawRoundRect(
+                        color = Color.White.copy(alpha = alpha),
+                        topLeft = Offset(-10.dp.toPx(), 0f),
+                        size = Size(size.width + 20.dp.toPx(), size.height),
+                        cornerRadius = CornerRadius(6.dp.toPx())
+                    )
+                }
+                drawIndicator(if (hovered) 0.1f else 0.0f)
+                if (selected()) drawIndicator(0.2f)
             }
             .hoverable(interaction)
-            .clickable(interaction, null) {
-                // TODO!
-                // overlayState.armorProperty = ItemArmorPropertyOverlayState(item, property)
-            }
+            .clickable(interaction, null) { onClick() }
     ) {
         Image(
             bitmap = propertyRarityIcon,
@@ -141,15 +160,23 @@ private fun ArmorPropertyAddButton(item: Item) {
             }
             .hoverable(interaction)
             .clickable(interaction, null) {
-                // TODO!
-                // Arctic.overlayState.armorProperty = ItemArmorPropertyOverlayState(item)
+                overlays.make(
+                    enter = defaultFadeIn(),
+                    exit = defaultFadeOut()
+                ) {
+                    ArmorPropertyOverlay(
+                        holder = item,
+                        initialSelected = null,
+                        requestClose = { overlays.destroy(it) }
+                    )
+                }
             }
     )
 }
 
 private val ItemHeight = 40.dp
 
-private fun List<ArmorProperty>.groupByLength(): List<Pair<ArmorProperty, Int>> {
+fun List<ArmorProperty>.groupByLength(): List<Pair<ArmorProperty, Int>> {
     val result = mutableListOf<Pair<ArmorProperty, Int>>()
     forEach {
         val description = it.data.description ?: it.data.id
@@ -159,7 +186,7 @@ private fun List<ArmorProperty>.groupByLength(): List<Pair<ArmorProperty, Int>> 
     return result
 }
 
-private fun List<Pair<ArmorProperty, Int>>.height(): Dp {
+fun List<Pair<ArmorProperty, Int>>.height(): Dp {
     var row = 1; var column = 0
     forEach { (_, span) ->
         if (column + span > 2) {

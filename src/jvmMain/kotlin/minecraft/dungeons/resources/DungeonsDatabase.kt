@@ -404,11 +404,9 @@ data class ArmorPropertyData(
 ) {
     val description get() =
         (DungeonsLocalizations["ArmorProperties/${DungeonsLocalizations.Corrections.ArmorProperty[id] ?: id}_description"])
-            ?.replace("{0}", "")
-            ?.replace("{1}", "")
-            ?.replace("{2}", "")
-            ?.replace("개의", "추가")
-            ?.replace("만큼", "")
+            ?.replace("{0}", "N")
+            ?.replace("{1}", "M")
+            ?.replace("{2}", "K")
             ?.replace("  ", " ")
             ?.trim()
 }

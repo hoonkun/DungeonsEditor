@@ -52,21 +52,24 @@ import minecraft.dungeons.resources.EnchantmentData
 
 
 @Stable
-class EnchantmentDataCollectionState(initialSelected: Enchantment) {
+private class EnchantmentDataCollectionState(
+    initialSelected: Enchantment
+) {
     val holder = initialSelected.holder
 
-    private val index = holder.enchantments?.indexOf(initialSelected) ?: -1
+    val datasets = DungeonsDatabase.enchantments.filter { it.applyFor.contains(initialSelected.holder.data.variant) }
+    val initialIndex = datasets.indexOf(initialSelected.data)
 
     val netherite = holder.netheriteEnchant?.copy() ?: Enchantment.Unset(holder).apply { isNetheriteEnchant = true }
     val enchantments = holder.enchantments?.map { it.copy() }?.toMutableStateList()
         ?: List(9) { Enchantment.Unset(holder) }.toMutableStateList()
 
-    var selected by mutableStateOf(enchantments.getOrNull(index) ?: netherite)
+    var selected by mutableStateOf(enchantments.getOrNull(holder.enchantments?.indexOf(initialSelected) ?: -1) ?: netherite)
 }
 
 @Composable
-fun rememberEnchantmentDataCollectionState(original: Enchantment) =
-    remember { EnchantmentDataCollectionState(original) }
+private fun rememberEnchantmentDataCollectionState(original: Enchantment) =
+    remember(original) { EnchantmentDataCollectionState(original) }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -126,38 +129,29 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                     )
             ) { preview ->
                 EnchantmentDetail(preview)
-            }
-
-            Row(
-                modifier = Modifier
-                    .offset(y = (-24).dp)
-                    .align(Alignment.BottomEnd)
-                    .offsetRelative(x = 0f, y = 1f)
-                    .animateEnterExit(
-                        enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
-                        exit = ExitTransition.None
+                Row(modifier = Modifier.offsetRelative(x = 0f, y = 1f)) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    RetroButton(
+                        text = Localizations.UiText("cancel"),
+                        color = Color.White,
+                        hoverInteraction = RetroButtonHoverInteraction.Overlay,
+                        onClick = { requestClose() },
+                        modifier = Modifier.size(125.dp, 55.dp)
                     )
-            ) {
-                RetroButton(
-                    text = Localizations.UiText("cancel"),
-                    color = Color.White,
-                    hoverInteraction = RetroButtonHoverInteraction.Overlay,
-                    onClick = { requestClose() },
-                    modifier = Modifier.size(125.dp, 55.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                RetroButton(
-                    text = Localizations.UiText("ok"),
-                    color = Color(0xff3f8e4f),
-                    hoverInteraction = RetroButtonHoverInteraction.Outline,
-                    onClick = {
-                        state.holder.enchantments = state.enchantments
-                        state.holder.netheriteEnchant = state.netherite
+                    Spacer(modifier = Modifier.width(12.dp))
+                    RetroButton(
+                        text = Localizations.UiText("ok"),
+                        color = Color(0xff3f8e4f),
+                        hoverInteraction = RetroButtonHoverInteraction.Outline,
+                        onClick = {
+                            state.holder.enchantments = state.enchantments
+                            state.holder.netheriteEnchant = state.netherite
 
-                        requestClose()
-                    },
-                    modifier = Modifier.size(125.dp, 55.dp)
-                )
+                            requestClose()
+                        },
+                        modifier = Modifier.size(125.dp, 55.dp)
+                    )
+                }
             }
         }
     }
@@ -173,6 +167,7 @@ private fun HolderPreview(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .wrapContentHeight()
             .offsetRelative(x = 0f, y = -1f)
             .then(modifier)
             .background(Color(0xff080808))
@@ -297,19 +292,12 @@ private fun EnchantmentDataCollection(
     val windowState = LocalWindowState.current
     val density = LocalDensity.current
 
-    val variant = state.holder.data.variant
-
-    val datasets = remember(variant) {
-        DungeonsDatabase.enchantments.filter { it.applyFor.contains(variant) }
-    }
     val autoScrollOffset = remember(density, windowState.size) {
         with(density) { -(windowState.size.height / 2f).roundToPx() + 160.dp.roundToPx() }
     }
 
     val gridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = remember {
-            datasets.indexOfFirst { it.id == state.selected.id }.coerceAtLeast(0)
-        },
+        initialFirstVisibleItemIndex = state.initialIndex,
         initialFirstVisibleItemScrollOffset = autoScrollOffset
     )
 
@@ -323,7 +311,7 @@ private fun EnchantmentDataCollection(
             .then(modifier)
             .background(Color(0xff080808))
     ) {
-        items(datasets, key = { it.id }) { data ->
+        items(state.datasets, key = { it.id }) { data ->
             val isUniqueInHolder = remember(data, state.selected, state.selected.id) {
                 state.enchantments.all { it.data.id != data.id }
             }
@@ -390,7 +378,7 @@ private fun EnchantmentDataCollectionItem(
             maxFontSize = 20.sp
         )
         Text(
-            text = Localizations.UiText("enchantment_delete"),
+            text = Localizations.UiText("effect_delete"),
             style = LocalTextStyle.current.copy(fontSize = 14.sp, textAlign = TextAlign.Center),
             modifier = Modifier.graphicsLayer { alpha = if (selected) 1f else 0f }
         )

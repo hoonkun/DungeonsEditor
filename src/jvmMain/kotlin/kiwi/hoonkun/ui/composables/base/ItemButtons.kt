@@ -107,14 +107,19 @@ fun ItemNetheriteEnchantButton(
     holder: Item,
     enchantment: Enchantment?,
     modifier: Modifier = Modifier,
-    onClick: (Enchantment) -> Unit
+    enabled: Boolean = true,
+    onClick: (Enchantment) -> Unit = { }
 ) {
     @Composable
-    fun InactiveItemNetheriteEnchantButton(enchantment: Retriever<Enchantment>) {
+    fun InactiveItemNetheriteEnchantButton(
+        enchantment: Retriever<Enchantment>,
+        enabled: Boolean = true
+    ) {
         ItemAlterButton(
             color = Color(0x15ffffff),
             horizontalPadding = 4.dp,
             modifier = modifier,
+            enabled = enabled,
             onClick = { onClick(enchantment()) }
         ) {
             Image(
@@ -126,11 +131,15 @@ fun ItemNetheriteEnchantButton(
     }
 
     @Composable
-    fun ActiveItemNetheriteEnchantButton(enchantment: Enchantment) {
+    fun ActiveItemNetheriteEnchantButton(
+        enchantment: Enchantment,
+        enabled: Boolean = true
+    ) {
         ItemAlterButton(
             color = Color(0x40ffc847),
             horizontalPadding = 10.dp,
             modifier = modifier,
+            enabled = enabled,
             onClick = { onClick(enchantment) }
         ) {
             AnimatedContent(
@@ -180,7 +189,7 @@ fun ItemNetheriteEnchantButton(
             InactiveItemNetheriteEnchantButton(enchantment = { enchantment ?: holder.newNetheriteEnchant() })
         } else {
             if (enchantment == null) return@AnimatedContent
-            ActiveItemNetheriteEnchantButton(enchantment)
+            ActiveItemNetheriteEnchantButton(enchantment, enabled = enabled)
         }
     }
 }
