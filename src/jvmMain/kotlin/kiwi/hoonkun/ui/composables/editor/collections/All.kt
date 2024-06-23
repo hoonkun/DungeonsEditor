@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.text.TextStyle
 import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.ui.reusables.RarityColor
+import kiwi.hoonkun.ui.reusables.RarityColorType
 import kiwi.hoonkun.ui.reusables.drawItemFrame
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.EditorState
@@ -30,6 +32,7 @@ import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.values.DungeonsPower
 import java.util.*
 
 @Composable
@@ -152,16 +155,16 @@ private fun EmptyItemSlot(modifier: Modifier) =
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(
-                arctic.ui.composables.atomic.RarityColor(
+                RarityColor(
                     "Common",
-                    arctic.ui.composables.atomic.RarityColorType.Translucent
+                    RarityColorType.Translucent
                 ), Color.Transparent)))
             .border(7.dp, Brush.linearGradient(listOf(
-                arctic.ui.composables.atomic.RarityColor(
+                RarityColor(
                     "Common",
-                    arctic.ui.composables.atomic.RarityColorType.Opaque
+                    RarityColorType.Opaque
                 ), Color.Transparent,
-                arctic.ui.composables.atomic.RarityColor("Common", arctic.ui.composables.atomic.RarityColorType.Opaque)
+                RarityColor("Common", RarityColorType.Opaque)
             )), shape = RectangleShape)
             .padding(20.dp)
             .then(modifier)
@@ -170,7 +173,7 @@ private fun EmptyItemSlot(modifier: Modifier) =
 @Composable
 private fun PowerText(power: Double, modifier: Modifier) =
     Text(
-        text = "${remember(power) { dungeons.DungeonsPower.toInGamePower(power).toInt()} }",
+        text = "${remember(power) { DungeonsPower.toInGamePower(power).toInt()} }",
         color = Color.White.copy(alpha = 0.85f),
         fontSize = 22.sp,
         fontFamily = Resources.Fonts.JetbrainsMono,

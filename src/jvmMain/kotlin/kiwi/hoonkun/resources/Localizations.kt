@@ -1,6 +1,6 @@
 package kiwi.hoonkun.resources
 
-import LocalData
+import kiwi.hoonkun.ArcticSave
 import kiwi.hoonkun.utils.ResourceReadable
 import kotlinx.serialization.json.Json
 
@@ -16,7 +16,7 @@ object Localizations: ResourceReadable() {
     operator fun get(key: String) = UiText(key)
 
     fun UiText(key: String, vararg args: String): String =
-        args.foldIndexed(texts.getValue(LocalData.locale)[key.lowercase()] ?: key) { index, acc, s ->
+        args.foldIndexed(texts.getValue(ArcticSave.locale)[key.lowercase()] ?: key) { index, acc, s ->
             acc.replace("{$index}", s)
         }
 

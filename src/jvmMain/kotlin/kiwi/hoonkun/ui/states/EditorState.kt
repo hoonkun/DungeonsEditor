@@ -1,7 +1,7 @@
 package kiwi.hoonkun.ui.states
 
 import androidx.compose.runtime.*
-import dungeons.Localizations
+import kiwi.hoonkun.resources.Localizations
 
 @Stable
 class EditorState(

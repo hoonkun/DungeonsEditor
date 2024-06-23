@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
-import dungeons.DungeonsPower
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
@@ -50,6 +49,7 @@ import minecraft.dungeons.resources.DungeonsDatabase
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.resources.EnchantmentData
+import minecraft.dungeons.values.DungeonsPower
 
 
 @Stable

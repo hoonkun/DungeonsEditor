@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dungeons.Localizations
+import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.units.dp
 

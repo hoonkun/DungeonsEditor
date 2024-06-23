@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.round
-import dungeons.DungeonsPower
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
@@ -55,6 +54,7 @@ import kiwi.hoonkun.utils.toFixed
 import minecraft.dungeons.resources.ArmorPropertyData
 import minecraft.dungeons.resources.DungeonsDatabase
 import minecraft.dungeons.resources.DungeonsLocalizations
+import minecraft.dungeons.values.DungeonsPower
 
 
 @OptIn(ExperimentalAnimationApi::class)

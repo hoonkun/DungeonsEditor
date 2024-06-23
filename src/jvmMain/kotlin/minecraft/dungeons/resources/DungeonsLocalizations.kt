@@ -1,6 +1,6 @@
 package minecraft.dungeons.resources
 
-import LocalData
+import kiwi.hoonkun.ArcticSave
 import kiwi.hoonkun.utils.ResourceReadable
 import kotlinx.serialization.json.Json
 import minecraft.dungeons.io.DungeonsPakRegistry
@@ -11,7 +11,7 @@ object DungeonsLocalizations: ResourceReadable() {
     private val texts get() = _texts!!
 
     operator fun get(key: String): String? {
-        return texts[LocalData.locale]?.get(key)
+        return texts[ArcticSave.locale]?.get(key)
     }
 
     object Corrections {

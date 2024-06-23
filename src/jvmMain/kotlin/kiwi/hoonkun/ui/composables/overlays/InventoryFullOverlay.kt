@@ -1,7 +1,7 @@
 package kiwi.hoonkun.ui.composables.overlays
 
 import androidx.compose.runtime.Composable
-import dungeons.Localizations
+import kiwi.hoonkun.resources.Localizations
 
 @Composable
 fun InventoryFullOverlay() {
