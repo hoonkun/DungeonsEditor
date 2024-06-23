@@ -52,18 +52,6 @@ fun main() = application {
     }
 }
 
-val LocalWindowState = staticCompositionLocalOf {
-    WindowState(
-        size = DpSize(1800.dp, 1400.dp),
-        position = WindowPosition(Alignment.Center)
-    )
-}
-
-interface AppFocusable {
-    data object Entries: AppFocusable
-    data object Editor: AppFocusable
-}
-
 @Composable
 private fun App(windowWidth: Dp) {
     val overlays = rememberOverlayState()
@@ -256,6 +244,17 @@ private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
     }
 }
 
+val LocalWindowState = staticCompositionLocalOf {
+    WindowState(
+        size = DpSize(1800.dp, 1400.dp),
+        position = WindowPosition(Alignment.Center)
+    )
+}
+
+interface AppFocusable {
+    data object Entries: AppFocusable
+    data object Editor: AppFocusable
+}
 
 private val GlobalScrollBarStyle =
     ScrollbarStyle(
