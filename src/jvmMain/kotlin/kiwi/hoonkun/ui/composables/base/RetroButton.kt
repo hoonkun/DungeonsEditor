@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -59,7 +60,7 @@ fun RetroButton(
                 }
             }
             .hoverable(source, enabled)
-            .clickable(source, null, enabled, onClick = onClick)
+            .clickable(source, null, role = Role.Button, enabled = enabled, onClick = onClick)
             .padding(contentPadding)
     ) {
         content()

@@ -7,8 +7,11 @@ import kotlinx.serialization.json.Json
 import minecraft.dungeons.io.DungeonsJsonFile
 import java.io.File
 
-object ArcticSave {
+object ArcticSettings {
     private val current = getOrCreate()
+
+    val globalScale: Float by mutableStateOf(current.scale)
+    val preloadTextures: Boolean by mutableStateOf(current.preloadTextures)
 
     var locale by mutableStateOf(current.locale)
     val recentFiles = current.recentFiles.toMutableStateList()
@@ -34,23 +37,29 @@ object ArcticSave {
     fun save() {
         localDataFile().writeText(
             Json.encodeToString(
-                serializer = SerializableArcticSaveFile.serializer(),
-                value = SerializableArcticSaveFile(locale, recentFiles, customPakLocation)
+                serializer = SerializableArcticSettings.serializer(),
+                value = SerializableArcticSettings(
+                    locale,
+                    recentFiles,
+                    customPakLocation,
+                    preloadTextures,
+                    globalScale,
+                )
             )
         )
     }
 
     private fun localDataFile() = File("${System.getProperty("user.home")}/.dungeons_editor/saved_local.json")
 
-    private fun getOrCreate(): SerializableArcticSaveFile {
+    private fun getOrCreate(): SerializableArcticSettings {
         val local = localDataFile()
         if (!local.exists()) {
             local.parentFile.mkdirs()
             local.createNewFile()
             local.writeText("{}")
         }
-        val raw = Json.decodeFromString(SerializableArcticSaveFile.serializer(), local.readText())
-        return SerializableArcticSaveFile(
+        val raw = Json.decodeFromString(SerializableArcticSettings.serializer(), local.readText())
+        return SerializableArcticSettings(
             locale = if (Localizations.supported.contains(raw.locale)) raw.locale else "en",
             recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
             customPakLocation = raw.customPakLocation
@@ -60,32 +69,10 @@ object ArcticSave {
 
 
 @Serializable
-private data class SerializableArcticSaveFile(
+private data class SerializableArcticSettings(
     val locale: String = "en",
     val recentFiles: List<String> = emptyList(),
-    val customPakLocation: String? = null
+    val customPakLocation: String? = null,
+    val preloadTextures: Boolean = true,
+    val scale: Float = 0.7f
 )
-
-@Immutable
-object ArcticSettings {
-    val globalScale: Float
-
-    val preloadTextures: Boolean
-
-    init {
-        val pwd = System.getenv("APPIMAGE")?.let { it.dropLast(it.length - it.lastIndexOf('/')) } ?: "."
-        val file = File("$pwd/settings.arctic")
-        val settings =
-            if (file.exists())
-                file
-                    .readText()
-                    .trim()
-                    .split("\n")
-                    .associate { it.split("=").let { segments -> segments[0] to segments[1] } }
-            else
-                emptyMap()
-
-        globalScale = settings["scale"]?.toFloat()?.coerceIn(0.4f..1.35f) ?: 0.7f
-        preloadTextures = settings["preload_textures"].let { it == "true" || it == null }
-    }
-}

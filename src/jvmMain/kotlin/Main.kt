@@ -7,13 +7,15 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -24,15 +26,20 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import kiwi.hoonkun.ArcticSave
+import androidx.compose.ui.zIndex
+import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEditorTabButton
 import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
+import kiwi.hoonkun.ui.composables.base.RetroButton
+import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.overlays.PakIndexingOverlay
 import kiwi.hoonkun.ui.composables.overlays.PakNotFoundOverlay
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.io.DungeonsJsonFile
@@ -104,7 +111,7 @@ private fun App(windowWidth: Dp) {
         focusedArea = AppFocusable.Editor
         preview = DungeonsJsonFile.Preview.None
 
-        ArcticSave.updateRecentFiles(it.sourcePath)
+        ArcticSettings.updateRecentFiles(it.sourcePath)
     }
 
     val onTabSelect: (String?) -> Unit = {
@@ -199,30 +206,91 @@ private fun App(windowWidth: Dp) {
                             }
                         },
                         placeholder = {
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.requiredWidth(windowWidth - entriesWidth)
+                            Box(
+                                modifier = Modifier
+                                    .requiredWidth(windowWidth - entriesWidth)
+                                    .fillMaxHeight()
                             ) {
-                                FileSelector(
-                                    validator = {
-                                        preview = DungeonsJsonFile(it).preview()
-                                        preview is DungeonsJsonFile.Preview.Valid
-                                    },
-                                    buttonText = Localizations.UiText("open"),
+                                RetroButton(
+                                    color = Color(0xff434343),
+                                    hoverInteraction = RetroButtonHoverInteraction.Outline,
+                                    contentPadding = PaddingValues(8.dp),
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .requiredHeight(525.dp)
-                                        .padding(start = 25.dp, end = 25.dp, top = 32.dp),
-                                    onSelect = {
-                                        preview.let {
-                                            if (it is DungeonsJsonFile.Preview.Valid) {
-                                                onSelect(it.json)
-                                            } // FileSelector onSelect preview.let if block
-                                        } // FileSelector onSelect preview.let lambda
-   /* WOW! SO LOGICAL! */           } // FileSelector onSelect lambda
-                                ) // FileSelector parameters
-                            } // Column content lambda
+                                        .padding(vertical = 36.dp, horizontal = 54.dp)
+                                        .size(54.dp)
+                                        .zIndex(2f)
+                                        .align(Alignment.BottomStart),
+                                    onClick = {  }
+                                ) {
+                                    Image(
+                                        bitmap = DungeonsTextures["/Game/UI/Materials/ChatWheel/New/quickAction_settings.png"],
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize(),
+                                        filterQuality = FilterQuality.None
+                                    )
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.End,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(vertical = 36.dp, horizontal = 54.dp)
+                                        .zIndex(1f)
+                                        .alpha(0.5f)
+                                ) {
+                                    Text(text = "Dungeons Editor, 1.1.0 by HoonKun", fontFamily = Resources.Fonts.JetbrainsMono)
+                                    Text(text = "Compatible with Minecraft Dungeons 1.17.0.0", fontFamily = Resources.Fonts.JetbrainsMono)
+                                }
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .graphicsLayer {
+                                            compositingStrategy = CompositingStrategy.Offscreen
+                                        }
+                                        .drawBehind {
+                                            val image =
+                                                DungeonsTextures["/Game/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
+                                            val dstSize = Size(
+                                                size.width,
+                                                size.width * (image.height.toFloat() / image.width)
+                                            ).round()
+                                            drawRect(
+                                                Brush.verticalGradient(
+                                                    0f to Color(0xff202020).copy(alpha = 0f),
+                                                    1f to Color(0xff202020),
+                                                    endY = dstSize.height.toFloat(),
+                                                    tileMode = TileMode.Clamp
+                                                )
+                                            )
+                                            drawImage(
+                                                image = image,
+                                                dstSize = dstSize,
+                                                blendMode = BlendMode.SrcOut
+                                            )
+                                        }
+                                ) {
+                                    FileSelector(
+                                        validator = {
+                                            preview = DungeonsJsonFile(it).preview()
+                                            preview is DungeonsJsonFile.Preview.Valid
+                                        },
+                                        buttonText = Localizations.UiText("open"),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .requiredHeight(525.dp)
+                                            .padding(start = 25.dp, end = 25.dp, top = 32.dp)
+                                            .offset(y = 110.dp),
+                                        onSelect = {
+                                            preview.let {
+                                                if (it is DungeonsJsonFile.Preview.Valid) {
+                                                    onSelect(it.json)
+                                                } // FileSelector onSelect preview.let if block
+                                            } // FileSelector onSelect preview.let lambda
+  /* WOW! SO LOGICAL! */                } // FileSelector onSelect lambda
+                                    ) // FileSelector parameters
+                                } // Column content lambda
+                            } // Box content lambda
                         } // JsonEditor placeholder lambda
                     ) // JsonEditor parameters
                 } // Row content lambda
@@ -253,8 +321,8 @@ private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
 
         fun onPakNotFound(indexingOverlayId: String) {
             fun onNewPakPathSelected(notFoundOverlayId: String, path: String) {
-                ArcticSave.customPakLocation = path
-                ArcticSave.save()
+                ArcticSettings.customPakLocation = path
+                ArcticSettings.save()
 
                 overlays.destroy(notFoundOverlayId)
             }

@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
-import kiwi.hoonkun.ArcticSave
+import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
@@ -62,7 +62,7 @@ fun JsonEntries(
             .fillMaxHeight()
             .then(modifier)
     ) {
-        val recent = ArcticSave.recentSummaries
+        val recent = ArcticSettings.recentSummaries
         val detected = DungeonsJsonFile.Detector.results
 
         LazyColumn(contentPadding = PaddingValues(vertical = 36.dp)) {

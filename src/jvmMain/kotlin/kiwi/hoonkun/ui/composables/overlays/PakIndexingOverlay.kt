@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import kiwi.hoonkun.ArcticSave
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
@@ -42,7 +41,7 @@ fun PakIndexingOverlay(
     var enchantmentState by remember { mutableStateOf(LoadState()) }
     val enchantmentProgresses = remember { List(4) { LoadProgress() }.toMutableStateList() }
 
-    val customPakLocation = ArcticSave.customPakLocation
+    val customPakLocation = ArcticSettings.customPakLocation
 
     LaunchedEffect(customPakLocation) {
         val mutex = Mutex()
