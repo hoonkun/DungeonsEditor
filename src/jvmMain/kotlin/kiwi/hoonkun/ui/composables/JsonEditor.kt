@@ -42,11 +42,15 @@ fun JsonEditor(
         tabs()
         AnimatedContent(
             targetState = state,
-            transitionSpec = {
+            transitionSpec = spec@ {
+                if (targetState == null || initialState == null)
+                    return@spec fadeIn() togetherWith fadeOut() using SizeTransform(clip = false)
+
                 val floatSpec = spring<Float>(stiffness = Spring.StiffnessLow)
                 val intOffsetSpec = spring<IntOffset>(stiffness = Spring.StiffnessLow)
                 val enter = fadeIn(floatSpec) + slideIn(intOffsetSpec) { IntOffset(0, 80.dp.value.toInt()) }
                 val exit = fadeOut() + slideOut(intOffsetSpec) { IntOffset(0, 160.dp.value.toInt()) }
+
                 enter togetherWith exit using SizeTransform(clip = false)
             },
             modifier = Modifier.fillMaxHeight().background(Color(0xff202020))
