@@ -11,7 +11,10 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.layout
+import java.awt.Cursor
 
 fun Modifier.offsetRelative(
     offset: Offset
@@ -43,6 +46,7 @@ fun Modifier.offsetRelative(
         }
     }
 
+fun Modifier.handCursor() = pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
 
 private class GrayScaleModifier(private val amount: () -> Float): DrawModifier {
     override fun ContentDrawScope.draw() {

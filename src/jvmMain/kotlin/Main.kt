@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Window
@@ -36,35 +35,50 @@ import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
+import kiwi.hoonkun.ui.composables.overlays.ExitApplicationConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.PakIndexingOverlay
 import kiwi.hoonkun.ui.composables.overlays.PakNotFoundOverlay
+import kiwi.hoonkun.ui.composables.overlays.SettingsOverlay
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
+import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
 import kotlin.random.Random
 
 
 fun main() = application {
-    val windowState = LocalWindowState.current
+    val windowSize = remember(0xC0FFEE.dp) { DpSize(1800.dp, 1400.dp) }
+
+    val arcticWindowState = remember {
+        ArcticWindowState(WindowState(size = windowSize, position = WindowPosition(Alignment.Center)))
+    }
+
+    SideEffect {
+        arcticWindowState.parent.size = windowSize
+        arcticWindowState.parent.position = WindowPosition(Alignment.Center)
+    }
 
     Window(
         onCloseRequest = ::exitApplication,
-        state = windowState,
+        state = arcticWindowState.parent,
         resizable = false,
+        visible = arcticWindowState.visible,
         title = "Dungeons Editor",
         icon = painterResource("_icon.png"),
     ) {
-        App(windowState.size.width)
+        App(arcticWindowState, ::exitApplication)
     }
 }
 
 @Composable
-private fun App(windowWidth: Dp) {
+private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
     val overlays = rememberOverlayState()
     val appPointerListeners = LocalAppPointerListeners.current
+
+    val windowWidth = windowState.size.width
 
     var pakLoaded by remember { mutableStateOf(false) }
     var selectedJsonSourcePath: String? by remember { mutableStateOf(null) }
@@ -125,9 +139,10 @@ private fun App(windowWidth: Dp) {
     )
 
     CompositionLocalProvider(
-        LocalTextStyle provides LocalTextStyle.current.copy(color = Color.White),
+        LocalTextStyle provides LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.White),
         LocalOverlayState provides overlays,
-        LocalScrollbarStyle provides GlobalScrollBarStyle
+        LocalScrollbarStyle provides GlobalScrollBarStyle,
+        LocalWindowState provides windowState,
     ) {
         AppRoot(
             overlays = overlays,
@@ -209,31 +224,56 @@ private fun App(windowWidth: Dp) {
                             Box(
                                 modifier = Modifier
                                     .requiredWidth(windowWidth - entriesWidth)
+                                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                    .drawBehind {
+                                        val image =
+                                            DungeonsTextures["/Game/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
+                                        val dstSize = Size(
+                                            size.width,
+                                            size.width * (image.height.toFloat() / image.width)
+                                        ).round()
+                                        drawRect(
+                                            Brush.verticalGradient(
+                                                0f to Color(0xff202020).copy(alpha = 0f),
+                                                1f to Color(0xff202020),
+                                                endY = dstSize.height.toFloat(),
+                                                tileMode = TileMode.Clamp
+                                            )
+                                        )
+                                        drawImage(
+                                            image = image,
+                                            dstSize = dstSize,
+                                            blendMode = BlendMode.SrcOut
+                                        )
+                                    }
+                                    .padding(horizontal = 40.dp)
+                                    .padding(bottom = 36.dp)
                                     .fillMaxHeight()
                             ) {
-                                RetroButton(
-                                    color = Color(0xff434343),
-                                    hoverInteraction = RetroButtonHoverInteraction.Outline,
-                                    contentPadding = PaddingValues(8.dp),
-                                    modifier = Modifier
-                                        .padding(vertical = 36.dp, horizontal = 54.dp)
-                                        .size(54.dp)
-                                        .zIndex(2f)
-                                        .align(Alignment.BottomStart),
-                                    onClick = {  }
+                                Row(
+                                    modifier = Modifier.align(Alignment.BottomStart)
                                 ) {
-                                    Image(
-                                        bitmap = DungeonsTextures["/Game/UI/Materials/ChatWheel/New/quickAction_settings.png"],
-                                        contentDescription = null,
-                                        modifier = Modifier.fillMaxSize(),
-                                        filterQuality = FilterQuality.None
+                                    MainIconButton(
+                                        icon = DungeonsTextures["/Game/UI/Materials/Map/Pins/dungeon_door.png"],
+                                        onClick = {
+                                            overlays.make {
+                                                ExitApplicationConfirmOverlay(
+                                                    onConfirm = requestExit,
+                                                    requestClose = { overlays.destroy(it) }
+                                                )
+                                            }
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    MainIconButton(
+                                        icon = DungeonsTextures["/Game/UI/Materials/ChatWheel/New/quickAction_settings.png"],
+                                        onClick = { overlays.make { SettingsOverlay() } }
                                     )
                                 }
                                 Column(
                                     horizontalAlignment = Alignment.End,
                                     modifier = Modifier
                                         .align(Alignment.BottomEnd)
-                                        .padding(vertical = 36.dp, horizontal = 54.dp)
                                         .zIndex(1f)
                                         .alpha(0.5f)
                                 ) {
@@ -243,32 +283,7 @@ private fun App(windowWidth: Dp) {
                                 Column(
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .graphicsLayer {
-                                            compositingStrategy = CompositingStrategy.Offscreen
-                                        }
-                                        .drawBehind {
-                                            val image =
-                                                DungeonsTextures["/Game/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
-                                            val dstSize = Size(
-                                                size.width,
-                                                size.width * (image.height.toFloat() / image.width)
-                                            ).round()
-                                            drawRect(
-                                                Brush.verticalGradient(
-                                                    0f to Color(0xff202020).copy(alpha = 0f),
-                                                    1f to Color(0xff202020),
-                                                    endY = dstSize.height.toFloat(),
-                                                    tileMode = TileMode.Clamp
-                                                )
-                                            )
-                                            drawImage(
-                                                image = image,
-                                                dstSize = dstSize,
-                                                blendMode = BlendMode.SrcOut
-                                            )
-                                        }
+                                    modifier = Modifier.fillMaxSize()
                                 ) {
                                     FileSelector(
                                         validator = {
@@ -279,7 +294,7 @@ private fun App(windowWidth: Dp) {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .requiredHeight(525.dp)
-                                            .padding(start = 25.dp, end = 25.dp, top = 32.dp)
+                                            .padding(top = 32.dp)
                                             .offset(y = 110.dp),
                                         onSelect = {
                                             preview.let {
@@ -300,7 +315,7 @@ private fun App(windowWidth: Dp) {
 } // function App
 
 @Composable
-fun AppRoot(
+private fun AppRoot(
     overlays: OverlayState,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
@@ -308,6 +323,31 @@ fun AppRoot(
     Box(modifier = modifier) {
         content()
         overlays.Stack()
+    }
+}
+
+@Composable
+private fun MainIconButton(
+    icon: ImageBitmap,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    RetroButton(
+        color = Color(0xff434343),
+        hoverInteraction = RetroButtonHoverInteraction.Outline,
+        contentPadding = PaddingValues(8.dp),
+        modifier = Modifier
+            .size(54.dp)
+            .zIndex(2f)
+            .then(modifier),
+        onClick = { onClick() }
+    ) {
+        Image(
+            bitmap = icon,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            filterQuality = FilterQuality.None
+        )
     }
 }
 
@@ -345,10 +385,24 @@ private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
     }
 }
 
+@Stable
+class ArcticWindowState(initialState: WindowState) {
+    var parent: WindowState by mutableStateOf(initialState)
+
+    val isMinimized get() = parent.isMinimized
+    val placement get() = parent.placement
+    val position get() = parent.position
+    val size get() = parent.size
+
+    var visible by mutableStateOf(true)
+}
+
 val LocalWindowState = staticCompositionLocalOf {
-    WindowState(
-        size = DpSize(1800.dp, 1400.dp),
-        position = WindowPosition(Alignment.Center)
+    ArcticWindowState(
+        WindowState(
+            size = DpSize(1800.dp, 1400.dp),
+            position = WindowPosition(Alignment.Center)
+        )
     )
 }
 

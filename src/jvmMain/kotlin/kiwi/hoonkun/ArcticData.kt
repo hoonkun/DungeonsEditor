@@ -10,8 +10,8 @@ import java.io.File
 object ArcticSettings {
     private val current = getOrCreate()
 
-    val globalScale: Float by mutableStateOf(current.scale)
-    val preloadTextures: Boolean by mutableStateOf(current.preloadTextures)
+    var globalScale: Float by mutableStateOf(current.scale)
+    var preloadTextures: Boolean by mutableStateOf(current.preloadTextures)
 
     var locale by mutableStateOf(current.locale)
     val recentFiles = current.recentFiles.toMutableStateList()
@@ -31,6 +31,11 @@ object ArcticSettings {
 
         if (recentFiles.size > 4) recentFiles.removeRange(4, recentFiles.size)
 
+        save()
+    }
+
+    fun withSave(block: ArcticSettings.() -> Unit) {
+        this.block()
         save()
     }
 
@@ -62,7 +67,9 @@ object ArcticSettings {
         return SerializableArcticSettings(
             locale = if (Localizations.supported.contains(raw.locale)) raw.locale else "en",
             recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
-            customPakLocation = raw.customPakLocation
+            customPakLocation = raw.customPakLocation,
+            scale = raw.scale.coerceIn(0.4f..1.35f),
+            preloadTextures = raw.preloadTextures
         )
     }
 }

@@ -400,7 +400,7 @@ private val SelectedPaint = Paint().apply {
     colorFilter = ColorFilter.lighting(Color(red = 0.35f, green = 0.35f, blue = 0.35f), Color.Black)
 }
 
-private val DetailHeight = 300.dp
+private val DetailHeight get() = 300.dp
 
 @Composable
 private fun EnchantmentDetail(enchantment: Enchantment) {

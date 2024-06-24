@@ -109,6 +109,35 @@ fun RetroButton(
     onClick: () -> Unit
 ) {
     RetroButton(
+        text = text,
+        color = { color },
+        modifier = modifier,
+        enabled = enabled,
+        textStyle = textStyle,
+        hoverInteraction = hoverInteraction,
+        disabledColor = disabledColor,
+        radius = radius,
+        stroke = stroke,
+        contentPadding = contentPadding,
+        onClick = onClick
+    )
+}
+
+@Composable
+fun RetroButton(
+    text: String,
+    color: Retriever<Color>,
+    modifier: Modifier = RetroButtonDefaultSizeModifier,
+    enabled: Boolean = true,
+    hoverInteraction: RetroButtonHoverInteraction,
+    disabledColor: Color = Color(0xff666666),
+    textStyle: TextStyle = LocalTextStyle.current,
+    radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
+    stroke: Dp = 5.dp,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
+    onClick: () -> Unit
+) {
+    RetroButton(
         color = color,
         modifier = modifier,
         enabled = enabled,

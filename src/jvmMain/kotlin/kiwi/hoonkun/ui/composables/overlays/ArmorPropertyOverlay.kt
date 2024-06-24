@@ -367,7 +367,7 @@ private fun ArmorPropertyCollectionItem(
     }
 }
 
-private val DetailHeight = 140.dp
+private val DetailHeight get() = 140.dp
 
 @Composable
 private fun ArmorPropertyDetail(
@@ -450,7 +450,7 @@ private fun ArmorPropertyRarityToggle(property: ArmorProperty) {
     )
 }
 
-val AddButtonHeight = 40.dp
+val AddButtonHeight get() = 40.dp
 
 @Composable
 private fun AddButton(state: ArmorPropertyOverlayState) {

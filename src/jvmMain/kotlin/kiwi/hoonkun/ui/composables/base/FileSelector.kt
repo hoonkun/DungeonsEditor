@@ -54,14 +54,17 @@ fun FileSelector(
     onSelect: (File) -> Unit,
     modifier: Modifier = Modifier,
     defaultCandidate: Retriever<File?> = { null },
-    options: @Composable () -> Unit = { }
+    maxRows: Int = 3,
+    initialPath: String = File.separator,
+    initialUseBasePath: Boolean = true,
+    options: @Composable () -> Unit = { },
 ) {
     val rememberedDefaultCandidate = remember(defaultCandidate) { defaultCandidate()?.toStateFile() }
     val textFieldScrollState = rememberTextFieldScrollState(orientation = Orientation.Horizontal)
 
-    var useBasePath by remember { mutableStateOf(true) }
+    var useBasePath by remember { mutableStateOf(initialUseBasePath) }
 
-    var path by remember { mutableStateOf(TextFieldValue(File.separator, selection = TextRange(1))) }
+    var path by remember { mutableStateOf(TextFieldValue(initialPath, selection = TextRange(1))) }
     val entirePath by remember(path.text) { derivedStateOf { "${if (useBasePath) BasePath else ""}${path.text}" } }
 
     val keys = remember { KeySet(ctrl = false, shift = false) }
@@ -179,6 +182,7 @@ fun FileSelector(
 
     LaunchedEffect(Unit) {
         requester.requestFocus()
+        textFieldScrollState.scrollBy(textFieldScrollState.maxOffset)
     }
 
     LaunchedEffect(hintTarget) {
@@ -187,18 +191,16 @@ fun FileSelector(
     }
 
     SelectorRoot(modifier = modifier) {
-        Padded {
-            BasePathDocumentation(text = "/** you can use '..' to go parent directory */")
-            Row {
-                options()
-                BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") {
-                    if (it && isWindows && path.text.isEmpty()) path = path.copy(text = "\\")
-                    else if (isWindows && path.text == File.separator) path = path.copy(text = "")
-                    useBasePath = it
-                }
-                Spacer(modifier = Modifier.width(30.dp))
-                BasePathProperty(key = "basePath", value = BasePath, disabled = !useBasePath)
+        BasePathDocumentation(text = "/** you can use '..' to go parent directory */")
+        Row {
+            options()
+            BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") {
+                if (it && isWindows && path.text.isEmpty()) path = path.copy(text = "\\")
+                else if (isWindows && path.text == File.separator) path = path.copy(text = "")
+                useBasePath = it
             }
+            Spacer(modifier = Modifier.width(30.dp))
+            BasePathProperty(key = "basePath", value = BasePath, disabled = !useBasePath)
         }
         PathInputBox {
             PathInput(
@@ -227,21 +229,21 @@ fun FileSelector(
             )
             Select(enabled = selected != null, text = buttonText) { selected?.let { onSelect(it) } }
         }
-        Padded {
-            if (!candidateTarget.isDirectory) return@Padded
+        if (!candidateTarget.isDirectory) return@SelectorRoot
 
-            Candidates(
-                type = CandidateType.Directory,
-                candidates = candidates,
-                hintTarget = hintTarget
-            )
+        Candidates(
+            type = CandidateType.Directory,
+            candidates = candidates,
+            hintTarget = hintTarget,
+            maxRows = maxRows,
+        )
 
-            Candidates(
-                type = CandidateType.File,
-                candidates = candidates,
-                hintTarget = hintTarget
-            )
-        }
+        Candidates(
+            type = CandidateType.File,
+            candidates = candidates,
+            hintTarget = hintTarget,
+            maxRows = maxRows,
+        )
     }
 
 }
@@ -250,10 +252,11 @@ fun FileSelector(
 private fun Candidates(
     type: CandidateType,
     candidates: StateFileList,
-    hintTarget: StateFile?
+    hintTarget: StateFile?,
+    maxRows: Int,
 ) {
     val typed = remember(candidates, type.criteria) { candidates.items.filter(type.criteria).toStateFileList() }
-    val printTargets = remember(typed, hintTarget) { typed.printTargets(hintTarget) }
+    val printTargets = remember(typed, hintTarget) { typed.printTargets(hintTarget, maxRows) }
     val remaining = remember(typed, printTargets) { remaining(typed, printTargets) }
 
     if (printTargets.items.isEmpty()) return
@@ -308,12 +311,9 @@ private fun SelectorRoot(
 ) {
     Box(
         contentAlignment = Alignment.TopCenter,
-        modifier = modifier
-    ) {
-        Column(
-            content = content
-        )
-    }
+        modifier = modifier,
+        content = { Column(content = content) }
+    )
 }
 
 @Composable
@@ -375,7 +375,7 @@ fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean) -> Uni
 
 @Composable
 private fun PathInputBox(content: @Composable RowScope.() -> Unit) =
-    Box(modifier = Modifier.padding(vertical = 20.dp, horizontal = 24.dp)) {
+    Box(modifier = Modifier.padding(vertical = 20.dp)) {
         Spacer(
             modifier = Modifier
                 .matchParentSize()
@@ -523,13 +523,13 @@ private fun String.removeSuffixes(suffix: CharSequence): String {
     return result
 }
 
-private fun StateFileList.printTargets(hintTarget: StateFile?): StateFileList {
+private fun StateFileList.printTargets(hintTarget: StateFile?, maxRows: Int): StateFileList {
     val range = items.indexOf(items.find { it == hintTarget }).coerceAtLeast(0)
         .div(Columns).minus(1).coerceAtLeast(0).times(Columns)
         .let {
-            val minFirstRow = ((items.size + items.size.mod(Columns)).div(Columns) - 3).coerceAtLeast(0)
+            val minFirstRow = ((items.size + items.size.mod(Columns)).div(Columns) - maxRows).coerceAtLeast(0)
             val minInclusive = it.coerceAtMost(minFirstRow * Columns)
-            val maxExclusive = (minInclusive + 3 * Columns).coerceAtMost(items.size)
+            val maxExclusive = (minInclusive + maxRows * Columns).coerceAtMost(items.size)
             minInclusive until maxExclusive
         }
     return items.slice(range).toStateFileList()
@@ -543,6 +543,7 @@ private data class KeySet(
     var shift: Boolean
 )
 
+@Stable
 private enum class CandidateType(
     val displayName: String,
     val color: Color,

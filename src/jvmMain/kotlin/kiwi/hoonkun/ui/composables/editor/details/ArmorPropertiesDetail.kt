@@ -174,7 +174,7 @@ private fun ArmorPropertyAddButton(item: Item) {
     )
 }
 
-private val ItemHeight = 40.dp
+private val ItemHeight get() = 40.dp
 
 fun List<ArmorProperty>.groupByLength(): List<Pair<ArmorProperty, Int>> {
     val result = mutableListOf<Pair<ArmorProperty, Int>>()

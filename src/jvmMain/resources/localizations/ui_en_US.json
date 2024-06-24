@@ -77,5 +77,14 @@
   "effect_delete": "click again to delete",
   "effect_delete_multiline": "click again\nto delete",
   "save_complete": "Save Complete!",
-  "armor_property_empty": "Select preferred armor property in left area!"
+  "armor_property_empty": "Select preferred armor property in left area!",
+  "settings_title": "Settings",
+  "settings_lang": "Language",
+  "settings_pak_location": "Custom Resource Path",
+  "settings_global_scale": "UI Scale",
+  "settings_preload_textures": "Preload Textures when Startup",
+  "settings_on": "On",
+  "settings_off": "Off",
+  "exit_application_title": "Do you really want to exit application?",
+  "exit_application_description": "All changes made after last save will not be saved."
 }
