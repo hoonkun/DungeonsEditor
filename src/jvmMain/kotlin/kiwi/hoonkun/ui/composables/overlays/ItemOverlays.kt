@@ -185,7 +185,7 @@ private fun ItemDataDetailOverlay(
             }
         }
         Column(
-            horizontalAlignment = Alignment.End,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.offset(y = 365.dp)
         ) {
             if (data.variant != "Artifact")
