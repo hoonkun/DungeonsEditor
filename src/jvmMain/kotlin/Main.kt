@@ -196,7 +196,11 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                             .clickable(rememberMutableInteractionSource(), null) {
                                 focusedArea = AppFocusable.Editor
                             },
-                        requestClose = { selectedJsonSourcePath = null },
+                        requestClose = {
+                            val path = selectedJsonSourcePath
+                            selectedJsonSourcePath = null
+                            states.remove(path)
+                        },
                         tabs = {
                             Column(
                                 modifier = Modifier
