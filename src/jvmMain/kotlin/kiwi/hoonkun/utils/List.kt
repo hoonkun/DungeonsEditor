@@ -7,8 +7,6 @@ fun <T> MutableList<T>.padEnd(minSize: Int, factory: (Int) -> T): MutableList<T>
     return this
 }
 
-fun <T> List<T>.padEndRemaining(multiplier: Int, factory: (Int) -> T) = this.toMutableList().padEnd(size + (multiplier - size % multiplier), factory)
-
 fun <T> MutableList<T>.replace(from: T, into: T) {
     val index = indexOf(from)
     if (index < 0) return

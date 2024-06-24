@@ -14,8 +14,9 @@ object ArcticSettings {
     var preloadTextures: Boolean by mutableStateOf(current.preloadTextures)
 
     var locale by mutableStateOf(current.locale)
-    val recentFiles = current.recentFiles.toMutableStateList()
     var customPakLocation by mutableStateOf(current.customPakLocation)
+
+    private val recentFiles = current.recentFiles.toMutableStateList()
 
     val recentSummaries by derivedStateOf {
         recentFiles
@@ -35,7 +36,7 @@ object ArcticSettings {
     }
 
     fun withSave(block: ArcticSettings.() -> Unit) {
-        this.block()
+        block(this)
         save()
     }
 

@@ -66,8 +66,6 @@ private class GrayScaleModifier(private val amount: () -> Float): DrawModifier {
 
 fun Modifier.grayscale(amount: () -> Float = { 0f }) = this.then(GrayScaleModifier(amount))
 
-fun Modifier.grayscale(amount: Float = 0f) = grayscale { amount }
-
 // 접근성을 망칠 것 같은데 다른 방법이 없을까?
 @Composable
 fun Modifier.consumeClick() = clickable(rememberMutableInteractionSource(), indication = null, onClick = { })

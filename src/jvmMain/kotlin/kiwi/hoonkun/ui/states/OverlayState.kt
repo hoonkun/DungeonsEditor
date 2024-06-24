@@ -22,7 +22,7 @@ import java.util.*
 class OverlayState {
     private val stack = mutableStateListOf<Overlay>()
 
-    fun make(target: Overlay) = target.also { stack.add(it) }.id
+    private fun make(target: Overlay) = target.also { stack.add(it) }.id
     fun make(
         backdropOptions: Overlay.BackdropOptions = Overlay.BackdropOptions(),
         canBeDismissed: Boolean = true,

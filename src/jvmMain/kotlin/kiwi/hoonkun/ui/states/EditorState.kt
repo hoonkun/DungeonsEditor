@@ -1,6 +1,9 @@
 package kiwi.hoonkun.ui.states
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kiwi.hoonkun.resources.Localizations
 
 @Stable
@@ -64,7 +67,3 @@ class EditorState(
         }
     }
 }
-
-@Composable
-fun rememberEditorState(json: DungeonsJsonState): EditorState =
-    remember { EditorState(json) }

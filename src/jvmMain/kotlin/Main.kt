@@ -18,7 +18,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Window
@@ -67,7 +66,7 @@ fun main() = application {
         resizable = false,
         visible = arcticWindowState.visible,
         title = "Dungeons Editor",
-        icon = painterResource("_icon.png"),
+        icon = Resources.Drawables.icon(),
     ) {
         App(arcticWindowState, ::exitApplication)
     }

@@ -86,5 +86,6 @@
   "settings_on": "On",
   "settings_off": "Off",
   "exit_application_title": "Do you really want to exit application?",
-  "exit_application_description": "All changes made after last save will not be saved."
+  "exit_application_description": "All changes made after last save will not be saved.",
+  "exit": "Exit"
 }

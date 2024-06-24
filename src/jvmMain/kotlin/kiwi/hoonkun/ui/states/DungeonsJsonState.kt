@@ -67,7 +67,7 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
         private const val FIELD_XP = "xp"
     }
 
-    val sourcePath get() = source.absolutePath
+    val sourcePath: String get() = source.absolutePath
 
     @JsonField(FIELD_BONUS_PREREQUISITES)
     val bonusPrerequisites: SnapshotStateList<String> = from.getJSONArray(FIELD_BONUS_PREREQUISITES).toStringList().toMutableStateList()
@@ -224,6 +224,7 @@ class DungeonsJsonState(private val from: JSONObject, private val source: File) 
     val equippedMelee by derivedStateOf { items.find { it.equipmentSlot == "MeleeGear" } }
     val equippedRanged by derivedStateOf { items.find { it.equipmentSlot == "RangedGear" } }
     val equippedArmor by derivedStateOf { items.find { it.equipmentSlot == "ArmorGear" } }
+
     val equippedArtifact1 by derivedStateOf { items.find { it.equipmentSlot == "HotbarSlot1" } }
     val equippedArtifact2 by derivedStateOf { items.find { it.equipmentSlot == "HotbarSlot2" } }
     val equippedArtifact3 by derivedStateOf { items.find { it.equipmentSlot == "HotbarSlot3" } }

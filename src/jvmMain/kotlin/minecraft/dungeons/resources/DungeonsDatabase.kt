@@ -290,40 +290,40 @@ data class EnchantmentData(
             //     B(Cb, Cs) = Cb + Cs - (Cb x Cs)
 
             // Raw pixel values
-            val Ps = sourcePixels[i].toUInt()
-            val Pb = backdropPixels[i].toUInt()
+            val ps = sourcePixels[i].toUInt()
+            val pb = backdropPixels[i].toUInt()
 
             // Source: ShinePattern
-            val Cs: (shift: Int) -> Float = {
+            val cs: (shift: Int) -> Float = {
                 // (((Ps and (0xffu shl (it * 8))) shr (it * 8)).toFloat() / 0xff).coerceIn(0f, 1f)
                 1f
             }
-            val As = (((Ps and mask and 0x00ffffffu) shr (channel * 2 * 4)).toFloat() / 0xff).coerceIn(0f, 1f)
+            val alphaS = (((ps and mask and 0x00ffffffu) shr (channel * 2 * 4)).toFloat() / 0xff).coerceIn(0f, 1f)
 
             // Backdrop: RealImage
-            val Cb: (shift: Int) -> Float = { (((Pb and (0xffu shl (it * 8))) shr (it * 8)).toFloat() / 0xff).coerceIn(0f, 1f) }
-            val Ab = Cb(3) // 1f
+            val cb: (shift: Int) -> Float = { (((pb and (0xffu shl (it * 8))) shr (it * 8)).toFloat() / 0xff).coerceIn(0f, 1f) }
+            val alphaB = cb(3) // 1f
 
             // PorterDuff Values
-            val Fa = Ab
-            val Fb = 1 - As
+            val fa = alphaB
+            val fb = 1 - alphaS
 
             // Blending Functions
-            val Multiply: BlendingFunction = { Cb, Cs -> Cb * Cs }
-            val Screen: BlendingFunction = { Cb, Cs -> Cb + Cs - (Cb * Cs) }
-            val HardLight: BlendingFunction = { Cb, Cs -> if (Cs <= 0.5f) Multiply(Cb, 2 * Cs) else Screen(Cb, 2 * Cs - 1) }
-            val Overlay: BlendingFunction = { Cb, Cs -> HardLight(Cs, Cb) }
+            val multiply: BlendingFunction = { b, s -> b * s }
+            val screen: BlendingFunction = { b, s -> b + s - (b * s) }
+            val hardlight: BlendingFunction = { b, s -> if (s <= 0.5f) multiply(b, 2 * s) else screen(b, 2 * s - 1) }
+            val overlay: BlendingFunction = { b, s -> hardlight(s, b) }
 
             // Implementation
-            val Co: (shift: Int) -> Float = { As * Fa * ((1 - Ab) * Cs(it) + Ab * Overlay(Cb(it), Cs(it))) + Ab * Fb * Cb(it) }
-            val Ao = As * Ab // As
+            val co: (shift: Int) -> Float = { alphaS * fa * ((1 - alphaB) * cs(it) + alphaB * overlay(cb(it), cs(it))) + alphaB * fb * cb(it) }
+            val ao = alphaS * alphaB // As
 
             val toUIntChannel: Float.() -> UInt = { times(0xff).toInt().coerceIn(0, 0xff).toUInt() }
 
-            val r = Co(2).toUIntChannel()
-            val g = Co(1).toUIntChannel()
-            val b = Co(0).toUIntChannel()
-            val a = Ao.toUIntChannel()
+            val r = co(2).toUIntChannel()
+            val g = co(1).toUIntChannel()
+            val b = co(0).toUIntChannel()
+            val a = ao.toUIntChannel()
 
             sourcePixels[i] = ((a shl 24) or (r shl 16) or (g shl 8) or b).toInt()
         }

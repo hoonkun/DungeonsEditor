@@ -38,7 +38,7 @@ fun ExitApplicationConfirmOverlay(
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = Localizations.UiText("close"),
+                text = Localizations.UiText("exit"),
                 color = Color(0xffff6e25),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = onPositive

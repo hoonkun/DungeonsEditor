@@ -36,9 +36,9 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.ui.reusables.rememberFocusRequester
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
@@ -108,7 +108,7 @@ fun FileSelector(
         File("${if (useBasePath) BasePath else ""}${path.text}").takeIf(validator)
     }
 
-    val requester = remember { FocusRequester() }
+    val requester = rememberFocusRequester()
 
     val transform: (TextFieldValue) -> TextFieldValue = {
         var newPath = it.text
@@ -315,12 +315,6 @@ private fun SelectorRoot(
         content = { Column(content = content) }
     )
 }
-
-@Composable
-private fun Padded(
-    top: Dp = 0.dp,
-    content: @Composable ColumnScope.() -> Unit
-) = Column(modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = top), content = content)
 
 @Composable
 fun BasePathDocumentation(text: String) =

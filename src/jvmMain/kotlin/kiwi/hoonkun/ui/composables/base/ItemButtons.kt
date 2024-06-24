@@ -176,19 +176,11 @@ fun ItemNetheriteEnchantButton(
         }
     }
 
-    AnimatedContent(
-        targetState = enchantment?.isUnset != false,
-        transitionSpec = {
-            val enterSpec = tween<Float>(220, delayMillis = 90)
-            val enter = fadeIn(animationSpec = enterSpec) + scaleIn(initialScale = 0.92f, animationSpec = enterSpec)
-            val exit = fadeOut(animationSpec = tween(90))
-            enter togetherWith exit using SizeTransform(clip = false)
-        }
-    ) { isUnset ->
+    ItemAlterButtonAnimatable(targetState = enchantment?.isUnset != false) { isUnset ->
         if (isUnset) {
             InactiveItemNetheriteEnchantButton(enchantment = { enchantment ?: holder.newNetheriteEnchant() })
         } else {
-            if (enchantment == null) return@AnimatedContent
+            if (enchantment == null) return@ItemAlterButtonAnimatable
             ActiveItemNetheriteEnchantButton(enchantment, enabled = enabled)
         }
     }
@@ -199,15 +191,7 @@ fun ItemModifiedButton(
     holder: Item,
     readonly: Boolean = false
 ) {
-    AnimatedContent(
-        targetState = holder.modified == true,
-        transitionSpec = {
-            val enterSpec = tween<Float>(220, delayMillis = 90)
-            val enter = fadeIn(animationSpec = enterSpec) + scaleIn(initialScale = 0.92f, animationSpec = enterSpec)
-            val exit = fadeOut(animationSpec = tween(90))
-            enter togetherWith exit using SizeTransform(clip = false)
-        }
-    ) { modified ->
+    ItemAlterButtonAnimatable(targetState = holder.modified == true) { modified ->
         ItemAlterButton(
             color = if (modified) Color(0x556f52ff) else Color(0x15ffffff),
             enabled = !readonly,
@@ -238,4 +222,21 @@ fun ItemModifiedButton(
             Text(text = Localizations.UiText("times"), fontSize = 18.sp)
         }
     }
+}
+
+@Composable
+private fun ItemAlterButtonAnimatable(
+    targetState: Boolean,
+    content: @Composable AnimatedContentScope.(Boolean) -> Unit
+) {
+    AnimatedContent(
+        targetState = targetState,
+        transitionSpec = {
+            val enterSpec = tween<Float>(220, delayMillis = 90)
+            val enter = fadeIn(animationSpec = enterSpec) + scaleIn(initialScale = 0.92f, animationSpec = enterSpec)
+            val exit = fadeOut(animationSpec = tween(90))
+            enter togetherWith exit using SizeTransform(clip = false)
+        },
+        content = content
+    )
 }

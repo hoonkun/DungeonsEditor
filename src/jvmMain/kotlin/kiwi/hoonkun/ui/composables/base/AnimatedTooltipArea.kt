@@ -43,29 +43,17 @@ fun AnimatedTooltipArea(
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var job: Job? by remember { mutableRefOf(null) }
 
+    var job by remember { mutableRefOf<Job?>(null) }
     var parentBounds by remember { mutableRefOf(Rect.Zero) }
+
     var isVisible by remember { mutableStateOf(false) }
 
     val appPointerListeners = LocalAppPointerListeners.current
 
-    fun show() {
-        job?.cancel()
-        job = scope.launch {
-            delay(delayMillis)
-            isVisible = true
-        }
-    }
-
-    fun hide() {
-        isVisible = false
-    }
-
     fun hideIfNotHovered(globalPosition: Offset) {
-        if (!parentBounds.contains(globalPosition)) {
-            hide()
-        }
+        if (parentBounds.contains(globalPosition)) return
+        isVisible = false
     }
 
     DisposableEffect(Unit) {
@@ -79,7 +67,11 @@ fun AnimatedTooltipArea(
         modifier = modifier
             .onGloballyPositioned { parentBounds = it.boundsInWindow() }
             .onPointerEvent(PointerEventType.Enter) {
-                show()
+                job?.cancel()
+                job = scope.launch {
+                    delay(delayMillis)
+                    isVisible = true
+                }
             }
             .onPointerEvent(PointerEventType.Move) {
                 hideIfNotHovered(parentBounds.topLeft + it.position)
@@ -88,7 +80,7 @@ fun AnimatedTooltipArea(
                 hideIfNotHovered(parentBounds.topLeft + it.position)
             }
             .onPointerEvent(PointerEventType.Press) {
-                hide()
+                isVisible = false
             }
     ) {
         content()
