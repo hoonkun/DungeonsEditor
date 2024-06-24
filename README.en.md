@@ -23,7 +23,7 @@ Download the files for your operating system from the Release section.
 
 ## Delete completely
 - Linux: Delete the AppImage file, and delete the `~/.dungeons-editor` directory.
-- Windows: Delete the directory you unzipped, and delete `%HOMEDRIVE%%HOMEPATH$/.dungeons-editor`. (This is usually `C:\Users\{{username}}\.dungeons-editor`.)
+- Windows: Delete the directory you unzipped, and delete `%HOMEDRIVE%%HOMEPATH%/.dungeons-editor`. (This is usually `C:\Users\{{username}}\.dungeons-editor`.)
 
 ## Usage
 ### Open the file
@@ -31,10 +31,10 @@ Download the files for your operating system from the Release section.
     - If you see a screen that says 'Cannot find game resources', this means that you will need to specify your own game installation location.
 2. Press the gray arrow on the right to manually select the files you want to edit, or select one of the files automatically found in the 'Detected Files' area on the bottom left.
     - Manually selecting a file  
-      You'll see a file navigation screen. The UX is not friendly, so we recommend copying and pasting the path through another system explorer.  
+      You'll see a file navigation screen. The UX is not friendly, so we recommend copy and pasting the path through another system explorer.  
       Press OK to select and enter the editor.
     - Selecting from Detected Files  
-      The gray arrow on the right shows preview information. Confirm that this is the file you want to modify, and if so, press the gray arrow to enter the editor.
+      Select file you want to modify in left area with preview.
 
 ### Modify equipment
 Select the equipment you want to modify from the list on the left. The selected equipment will be displayed on the right.
@@ -46,7 +46,6 @@ Select the equipment you want to modify from the list on the left. The selected 
       Resetting an enchantment's level to 0 returns the slot to 'not yet active slot' (with three effects visible in one large slot). Use this method if you want to modify another effect that was in the slot without deleting an effect that is already active.
 - Power  
   Modify by typing a value directly into the input box with labeled 'POWER'.
-  However, each keystroke is validated and will be replaced with a typable real number, so it can be difficult to type the desired value directly(just copy-paste it).
 - Type  
   To change a specific item to a different one, press "Replace" in the right of power edit field.  
   You can only change within the same item category (Melee, Armor, Ranged, Relic).
@@ -86,21 +85,8 @@ Again, the UX is not friendly, so I recommend copying and pasting the path from 
 - If you enter the path of a directory, it will save it in that directory with the same name as the original file.
 - If you enter the path of a file, it will create the file with given name of path or overwrite it if it already exists.
 
-It will automatically create a backup file in the directory where the file is saved, so you'll need to manually delete it if you think it's not needed.
-
-## settings.arctic file
-This is the set of settings that will be applied when you rerun the tool. You can set them by modifying the file named `settings.arctic` in the same location as the executable (AppImage, exe).  
-There are currently two fields that can be set
-- scale: Float  
-  Sets the global scale of the tool. It is set to 0.5 by default and can be set within the range [0.4, 1.35].
-- preload_textures: Boolean  
-  Sets whether to preload texture files when startup of the tool. Sets whether to wait a bit at the startup and use them smoothly during execution (true), or to execute them quickly and accept some stuttering during tool execution (false).
-
-An example configuration file looks like:
-```
-scale=0.5
-preload_textures=true
-```
+It will automatically create a backup file in the directory where the file is saved.
+But you can disable this behavior by clicking 'createBackup = true' text in save dialog.
 
 ## Building
 It probably won't build because of the dependency on PakReader and the lack of a Keyset.
