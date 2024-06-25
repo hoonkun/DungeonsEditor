@@ -13,7 +13,8 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.*
+import androidx.compose.ui.unit.Constraints
 import java.awt.Cursor
 
 fun Modifier.offsetRelative(
@@ -65,6 +66,24 @@ private class GrayScaleModifier(private val amount: () -> Float): DrawModifier {
 }
 
 fun Modifier.grayscale(amount: () -> Float = { 0f }) = this.then(GrayScaleModifier(amount))
+
+
+private class ZeroIntrinsicSizeModifier: LayoutModifier {
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult =
+        measurable.measure(constraints).let {
+            layout(it.width, it.height) { it.place(0, 0) }
+        }
+
+    override fun IntrinsicMeasureScope.minIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int
+    ): Int = 0
+    override fun IntrinsicMeasureScope.minIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int
+    ): Int = 0
+}
+fun Modifier.applyZeroIntrinsics() = this.then(ZeroIntrinsicSizeModifier())
 
 // 접근성을 망칠 것 같은데 다른 방법이 없을까?
 @Composable

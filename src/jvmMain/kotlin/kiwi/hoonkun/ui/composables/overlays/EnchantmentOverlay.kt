@@ -196,6 +196,8 @@ private fun HolderPreview(
         Row {
             ItemSlot(
                 item = holder,
+                fontSize = 12.sp,
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                 modifier = Modifier
                     .width(120.dp)
                     .aspectRatio(1f / 1f)

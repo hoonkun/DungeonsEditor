@@ -7,8 +7,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonSkippableComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -16,17 +20,16 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.renderComposeScene
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
 import kiwi.hoonkun.ui.Resources
-import kiwi.hoonkun.ui.reusables.RarityColor
-import kiwi.hoonkun.ui.reusables.RarityColorType
-import kiwi.hoonkun.ui.reusables.drawItemFrame
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
@@ -99,7 +102,10 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorState
     if (item == null) {
         EmptyItemSlot(modifier)
     } else {
-        ItemSlot(item = item, simplified = simplified, modifier = modifier)
+        if (simplified)
+            ItemSlotSimplified(item = item, modifier = modifier)
+        else
+            ItemSlot(item = item, modifier = modifier)
     }
 }
 
@@ -107,50 +113,53 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorState
 fun ItemSlot(
     item: Item,
     modifier: Modifier = Modifier,
-    simplified: Boolean = false,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 17.dp, vertical = 12.dp),
+    fillFraction: Float = 0.8f,
+    fontSize: TextUnit = 22.sp
 ) {
-    val density = LocalDensity.current
-    val image by remember {
-        derivedStateOf {
-            renderComposeScene(256, 256, density) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f / 1f)
-                ) {
-                    ItemImage(item, simplified)
+    Box(modifier = modifier) {
+        ItemImage(item = item, fillFraction = fillFraction)
 
-                    if (simplified) return@Box
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(contentPadding)
+        ) {
+            PowerText(
+                power = item.power,
+                fontSize = fontSize,
+                modifier = Modifier.align(Alignment.BottomEnd)
+            )
 
-                    PowerText(
-                        power = item.power,
-                        modifier = Modifier.align(Alignment.BottomEnd)
-                    )
+            if (item.enchanted) {
+                InvestedEnchantmentPointsText(
+                    points = item.totalEnchantmentInvestedPoints,
+                    fontSize = fontSize,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                )
+            }
+        }
 
-                    if (item.enchanted) {
-                        InvestedEnchantmentPointsText(
-                            points = item.totalEnchantmentInvestedPoints,
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        )
-                    }
-
-                    if (item.markedNew == true) {
-                        NewMark(modifier = Modifier.align(Alignment.TopStart))
-                    }
-                }
-            }.toComposeImageBitmap()
+        if (item.markedNew == true) {
+            NewMark(modifier = Modifier.align(Alignment.TopStart))
         }
     }
-
-    Image(
-        bitmap = image,
-        contentDescription = item.data.name,
-        modifier = modifier
-    )
 }
 
 @Composable
-private fun EmptyItemSlot(modifier: Modifier) =
+fun ItemSlotSimplified(
+    item: Item,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        ItemImage(item = item)
+    }
+}
+
+@Composable
+private fun EmptyItemSlot(
+    modifier: Modifier
+) =
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -171,39 +180,57 @@ private fun EmptyItemSlot(modifier: Modifier) =
     )
 
 @Composable
-private fun PowerText(power: Double, modifier: Modifier) =
+private fun PowerText(
+    power: Double,
+    modifier: Modifier,
+    fontSize: TextUnit = 22.sp
+) =
     Text(
         text = "${remember(power) { DungeonsPower.toInGamePower(power).toInt()} }",
-        color = Color.White.copy(alpha = 0.85f),
-        fontSize = 22.sp,
-        fontFamily = Resources.Fonts.JetbrainsMono,
-        style = TextStyle(shadow = Shadow(Color.Black, blurRadius = 5f)),
-        modifier = Modifier.padding(horizontal = 17.dp, vertical = 14.dp).then(modifier)
+        style = LocalTextStyle.current.copy(
+            color = Color.White.copy(alpha = 0.85f),
+            fontSize = fontSize,
+            fontFamily = Resources.Fonts.JetbrainsMono,
+            shadow = Shadow(Color.Black, blurRadius = 5f)
+        ),
+        modifier = modifier
     )
 
 @Composable
-private fun InvestedEnchantmentPointsText(points: Int, modifier: Modifier = Modifier) =
+private fun InvestedEnchantmentPointsText(
+    points: Int,
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 22.sp
+) =
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 17.dp, vertical = 14.dp).then(modifier)
+        modifier = Modifier.height(IntrinsicSize.Min).then(modifier)
     ) {
         Text(
             text = "$points",
-            color = Color.White.copy(alpha = 0.85f),
-            fontSize = 22.sp,
-            fontFamily = Resources.Fonts.JetbrainsMono,
-            style = TextStyle(shadow = Shadow(Color.Black, blurRadius = 5f))
+            style = LocalTextStyle.current.copy(
+                color = Color.White.copy(alpha = 0.85f),
+                fontSize = fontSize,
+                fontFamily = Resources.Fonts.JetbrainsMono,
+                shadow = Shadow(Color.Black, blurRadius = 5f)
+            )
         )
         Spacer(modifier = Modifier.width(5.dp))
         Image(
             bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png"],
             contentDescription = null,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier
+                .applyZeroIntrinsics()
+                .fillMaxHeight(0.6f)
+                .aspectRatio(1f / 1f)
         )
     }
 
 @Composable
-private fun ItemImage(item: Item, simplified: Boolean) =
+private fun ItemImage(
+    item: Item,
+    fillFraction: Float = 0.8f,
+) =
     Image(
         bitmap = item.data.inventoryIcon,
         contentDescription = null,
@@ -212,13 +239,16 @@ private fun ItemImage(item: Item, simplified: Boolean) =
             .fillMaxSize()
             .drawWithContent {
                 drawItemFrame(item.rarity, item.glided, item.enchanted, item.data.variant == "Artifact")
-                drawContent()
+                scale(fillFraction) {
+                    this@drawWithContent.drawContent()
+                }
             }
-            .padding(all = if (simplified) 12.5.dp else 20.dp)
     )
 
 @Composable
-private fun NewMark(modifier: Modifier = Modifier) =
+private fun NewMark(
+    modifier: Modifier = Modifier
+) =
     Image(
         bitmap = DungeonsTextures["/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png"],
         contentDescription = null,
