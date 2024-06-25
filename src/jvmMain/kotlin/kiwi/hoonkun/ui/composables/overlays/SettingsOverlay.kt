@@ -93,8 +93,8 @@ fun SettingsOverlay() {
     }
 }
 
-private val ScaleCandidateNames = listOf("0.6", "0.9", "1", "1.1", "1.2")
-private val ScaleCandidateValues = listOf(0.4f, 0.6f, 0.7f, 0.8f, 1f)
+private val ScaleCandidateNames = listOf("0.6", "0.8", "1", "1.2", "1.4")
+private val ScaleCandidateValues = listOf(0.4f, 0.475f, 0.55f, 0.625f, 0.7f)
 private val ScaleCandidates = ScaleCandidateNames.zip(ScaleCandidateValues)
 
 @Composable

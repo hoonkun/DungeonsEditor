@@ -10,6 +10,8 @@ import java.io.File
 object ArcticSettings {
     private val current = getOrCreate()
 
+    private val json = Json { isLenient = true }
+
     var globalScale: Float by mutableStateOf(current.scale)
     var preloadTextures: Boolean by mutableStateOf(current.preloadTextures)
 
@@ -64,7 +66,7 @@ object ArcticSettings {
             local.createNewFile()
             local.writeText("{}")
         }
-        val raw = Json.decodeFromString(SerializableArcticSettings.serializer(), local.readText())
+        val raw = json.decodeFromString(SerializableArcticSettings.serializer(), local.readText())
         return SerializableArcticSettings(
             locale = if (Localizations.supported.contains(raw.locale)) raw.locale else "en",
             recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
@@ -82,5 +84,5 @@ private data class SerializableArcticSettings(
     val recentFiles: List<String> = emptyList(),
     val customPakLocation: String? = null,
     val preloadTextures: Boolean = true,
-    val scale: Float = 0.7f
+    val scale: Float = 0.55f
 )
