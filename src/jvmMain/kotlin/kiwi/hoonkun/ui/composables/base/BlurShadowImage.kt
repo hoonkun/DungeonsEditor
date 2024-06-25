@@ -1,10 +1,9 @@
 package kiwi.hoonkun.ui.composables.base
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,18 +19,12 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
-import kiwi.hoonkun.ui.reusables.getValue
-import kiwi.hoonkun.ui.reusables.mutableRefOf
 import kiwi.hoonkun.ui.reusables.round
-import kiwi.hoonkun.ui.reusables.setValue
 import kiwi.hoonkun.ui.units.dp
 
 
@@ -55,7 +48,6 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
-    var blurred by remember(bitmap) { mutableRefOf<ImageBitmap?>(null) }
 
     val blurAlpha by animateFloatAsState(if (enabled) 1f else 0f)
 
@@ -64,56 +56,49 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
     val paddingHorizontal = remember { with(density) { paddingLeft + contentPadding.calculateRightPadding(layoutDirection).toPx() } }
     val paddingVertical = remember { with(density) { paddingTop + contentPadding.calculateBottomPadding().toPx() } }
 
-    Spacer(
-        modifier = modifier
-            .layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
+    val calculateDstPlacement: CacheDrawScope.() -> Pair<IntOffset, IntSize> = {
+        Offset(paddingLeft, paddingTop).round() to Size(size.width - paddingHorizontal, size.height - paddingVertical).round()
+    }
 
-                blurred = renderComposeScene(
-                    width = placeable.width,
-                    height = placeable.height,
-                    density = density,
-                    content = {
-                        Canvas(
-                            modifier = Modifier
-                                .size(placeable.width.toDp(), placeable.height.toDp())
-                                .blur(10.dp),
-                        ) {
-                            drawImage(bitmap, dstSize = size.round())
-                        }
-                    }
-                ).toComposeImageBitmap()
-
-                layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-            }
-            .drawWithCache {
-                val dstOffset = Offset(paddingLeft, paddingTop).round()
-                val dstSize = Size(size.width - paddingHorizontal, size.height - paddingVertical).round()
-
-                val cache = drawCacheFactory(dstOffset, dstSize)
-                onDrawBehind {
-                    onDrawBehind(cache, dstOffset, dstSize)
-                    drawIntoCanvas {
-                        it.saveLayer(Rect(0f, 0f, size.width, size.height), contentPaint())
+    Box(modifier = modifier) {
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .blur(10.dp)
+                .drawWithCache {
+                    val (dstOffset, dstSize) = calculateDstPlacement()
+                    onDrawBehind {
                         scale(contentScale * 1.05f) {
-                            blurred?.let { rendered ->
-                                drawImage(
-                                    image = rendered,
-                                    dstOffset = dstOffset,
-                                    dstSize = dstSize,
-                                    alpha = blurAlpha,
-                                )
-                            }
+                            drawImage(
+                                image = bitmap,
+                                dstOffset = dstOffset,
+                                dstSize = dstSize,
+                                alpha = blurAlpha,
+                            )
                         }
-                        scale(contentScale) {
-                            drawImage(bitmap, dstOffset = dstOffset, dstSize = dstSize)
-                        }
-                        it.restore()
                     }
-                    onDrawFront(cache, dstOffset, dstSize)
+                },
+        )
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .drawWithCache {
+                    val (dstOffset, dstSize) = calculateDstPlacement()
+                    val cache = drawCacheFactory(dstOffset, dstSize)
+                    onDrawBehind {
+                        onDrawBehind(cache, dstOffset, dstSize)
+                        drawIntoCanvas {
+                            it.saveLayer(Rect(0f, 0f, size.width, size.height), contentPaint())
+                            scale(contentScale) {
+                                drawImage(bitmap, dstOffset = dstOffset, dstSize = dstSize)
+                            }
+                            it.restore()
+                        }
+                        onDrawFront(cache, dstOffset, dstSize)
+                    }
                 }
-            }
-    )
+        )
+    }
 }
 
 @Composable
