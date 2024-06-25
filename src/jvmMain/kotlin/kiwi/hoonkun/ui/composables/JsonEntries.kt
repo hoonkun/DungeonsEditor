@@ -30,10 +30,7 @@ import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.drawItemFrame
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.DungeonsJsonState
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
@@ -47,7 +44,6 @@ import minecraft.dungeons.resources.DungeonsTextures
 fun JsonEntries(
     onJsonSelect: (newJson: DungeonsJsonState) -> Unit,
     focused: Boolean,
-    requestFocus: () -> Unit,
     modifier: Modifier = Modifier,
     preview: DungeonsJsonFile.Preview
 ) {
@@ -152,7 +148,7 @@ fun JsonEntries(
             Spacer(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable(rememberMutableInteractionSource(), indication = null) { requestFocus() }
+                    .consumeClick()
             )
         }
     }

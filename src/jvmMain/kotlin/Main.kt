@@ -180,7 +180,6 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                         onJsonSelect = { onSelect(it) },
                         preview = preview,
                         focused = focusedArea == AppFocusable.Entries,
-                        requestFocus = { focusedArea = AppFocusable.Entries },
                         modifier = Modifier
                             .width(entriesWidth)
                             .offset { IntOffset(entriesOffset.roundToPx(), 0) }
