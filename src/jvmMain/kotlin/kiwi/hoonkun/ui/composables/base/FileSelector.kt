@@ -182,7 +182,6 @@ fun FileSelector(
 
     LaunchedEffect(Unit) {
         requester.requestFocus()
-        textFieldScrollState.scrollBy(textFieldScrollState.maxOffset)
     }
 
     LaunchedEffect(hintTarget) {
