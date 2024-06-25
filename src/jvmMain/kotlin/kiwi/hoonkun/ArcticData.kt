@@ -8,9 +8,9 @@ import minecraft.dungeons.io.DungeonsJsonFile
 import java.io.File
 
 object ArcticSettings {
-    private val current = getOrCreate()
-
     private val json = Json { isLenient = true }
+
+    private val current = getOrCreate()
 
     var globalScale: Float by mutableStateOf(current.scale)
     var preloadTextures: Boolean by mutableStateOf(current.preloadTextures)
