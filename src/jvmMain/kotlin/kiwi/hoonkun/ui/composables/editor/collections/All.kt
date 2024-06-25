@@ -254,7 +254,6 @@ private fun NewMark(
         contentDescription = null,
         modifier = Modifier
             .fillMaxSize(0.2f)
-            .offset(2.dp, (-1.5).dp)
             .scale(scaleX = -1f, scaleY = 1f)
             .then(modifier)
     )
