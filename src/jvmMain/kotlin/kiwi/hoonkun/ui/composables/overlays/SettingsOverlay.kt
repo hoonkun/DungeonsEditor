@@ -1,6 +1,5 @@
 package kiwi.hoonkun.ui.composables.overlays
 
-import LocalWindowState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +24,6 @@ import java.io.File
 
 @Composable
 fun SettingsOverlay() {
-    val scope = rememberCoroutineScope()
-    val windowState = LocalWindowState.current
-
     ContentRoot {
         OverlayTitleDescription(title = Localizations.UiText("settings_title"))
         Spacer(modifier = Modifier.height(36.dp))

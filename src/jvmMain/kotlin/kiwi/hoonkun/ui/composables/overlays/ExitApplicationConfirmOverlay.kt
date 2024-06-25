@@ -14,6 +14,7 @@ import kiwi.hoonkun.ui.units.dp
 
 @Composable
 fun ExitApplicationConfirmOverlay(
+    description: String? = Localizations["exit_application_description"],
     onConfirm: () -> Unit,
     requestClose: () -> Unit
 ) {
@@ -25,8 +26,8 @@ fun ExitApplicationConfirmOverlay(
 
     ContentRoot {
         OverlayTitleDescription(
-            title = Localizations.UiText("exit_application_title"),
-            description = Localizations.UiText("exit_application_description")
+            title = Localizations["exit_application_title"],
+            description = description
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {

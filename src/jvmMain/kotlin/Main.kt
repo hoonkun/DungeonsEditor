@@ -131,7 +131,8 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
 
     LaunchedPakLoadEffect(
         overlays = overlays,
-        onLoad = { pakLoaded = true }
+        onLoad = { pakLoaded = true },
+        requestExit = requestExit
     )
 
     CompositionLocalProvider(
@@ -252,22 +253,7 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                                 Row(
                                     modifier = Modifier.align(Alignment.BottomStart)
                                 ) {
-                                    MainIconButton(
-                                        icon = DungeonsTextures["/Game/UI/Materials/Map/Pins/dungeon_door.png"],
-                                        onClick = {
-                                            overlays.make {
-                                                ExitApplicationConfirmOverlay(
-                                                    onConfirm = requestExit,
-                                                    requestClose = { overlays.destroy(it) }
-                                                )
-                                            }
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    MainIconButton(
-                                        icon = DungeonsTextures["/Game/UI/Materials/ChatWheel/New/quickAction_settings.png"],
-                                        onClick = { overlays.make { SettingsOverlay() } }
-                                    )
+                                    MainMenuButtons(requestExit = requestExit)
                                 }
                                 Column(
                                     horizontalAlignment = Alignment.End,
@@ -326,8 +312,34 @@ private fun AppRoot(
 }
 
 @Composable
+fun MainMenuButtons(
+    description: String? = Localizations["exit_application_description"],
+    requestExit: () -> Unit
+) {
+    val overlays = LocalOverlayState.current
+
+    MainIconButton(
+        bitmap = Resources.Drawables.leave,
+        onClick = {
+            overlays.make {
+                ExitApplicationConfirmOverlay(
+                    description = description,
+                    onConfirm = requestExit,
+                    requestClose = { overlays.destroy(it) }
+                )
+            }
+        }
+    )
+    Spacer(modifier = Modifier.width(16.dp))
+    MainIconButton(
+        bitmap = Resources.Drawables.settings,
+        onClick = { overlays.make { SettingsOverlay() } }
+    )
+}
+
+@Composable
 private fun MainIconButton(
-    icon: ImageBitmap,
+    bitmap: ImageBitmap,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -342,7 +354,7 @@ private fun MainIconButton(
         onClick = { onClick() }
     ) {
         Image(
-            bitmap = icon,
+            bitmap = bitmap,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             filterQuality = FilterQuality.None
@@ -351,7 +363,11 @@ private fun MainIconButton(
 }
 
 @Composable
-private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
+private fun LaunchedPakLoadEffect(
+    overlays: OverlayState,
+    onLoad: () -> Unit,
+    requestExit: () -> Unit
+) {
     LaunchedEffect(true) {
         fun onPakLoaded(indexingOverlayId: String) {
             onLoad()
@@ -368,7 +384,10 @@ private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
 
             overlays.destroy(indexingOverlayId)
             overlays.make(canBeDismissed = false) { overlayId ->
-                PakNotFoundOverlay(onSelect = { onNewPakPathSelected(overlayId, it) })
+                PakNotFoundOverlay(
+                    onSelect = { onNewPakPathSelected(overlayId, it) },
+                    requestExit = requestExit
+                )
             }
         }
 
