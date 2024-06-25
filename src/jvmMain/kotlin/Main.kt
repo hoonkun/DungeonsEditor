@@ -34,10 +34,7 @@ import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
-import kiwi.hoonkun.ui.composables.overlays.ExitApplicationConfirmOverlay
-import kiwi.hoonkun.ui.composables.overlays.PakIndexingOverlay
-import kiwi.hoonkun.ui.composables.overlays.PakNotFoundOverlay
-import kiwi.hoonkun.ui.composables.overlays.SettingsOverlay
+import kiwi.hoonkun.ui.composables.overlays.*
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.states.*
@@ -381,7 +378,16 @@ private fun LaunchedPakLoadEffect(overlays: OverlayState, onLoad: () -> Unit) {
         ) { id ->
             PakIndexingOverlay(
                 onSuccess = { onPakLoaded(id) },
-                onFailure = { onPakNotFound(id) }
+                onFailure = { onPakNotFound(id) },
+                onError = { error ->
+                    overlays.destroy(id)
+                    overlays.make(canBeDismissed = false) {
+                        ErrorOverlay(
+                            e = error,
+                            title = Localizations["error_pak_title"]
+                        )
+                    }
+                }
             )
         }
     }

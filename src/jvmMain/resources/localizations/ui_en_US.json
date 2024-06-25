@@ -87,5 +87,9 @@
   "settings_off": "Off",
   "exit_application_title": "Do you really want to exit application?",
   "exit_application_description": "All changes made after last save will not be saved.",
-  "exit": "Exit"
+  "exit": "Exit",
+  "error_pak_title": "Pak Indexing Error",
+  "error_save": "Save Error",
+  "error_save_description": "Try save another location?",
+  "error_detail_label": "Please capture this screen and open an issue in github."
 }

@@ -89,5 +89,9 @@
   "settings_off": "꺼짐",
   "exit_application_title": "정말 에디터를 종료하시겠어요?",
   "exit_application_description": "모든 파일의 마지막 저장 이후 발생한 변경사항은 저장되지 않아요.",
-  "exit": "종료하기"
+  "exit": "종료하기",
+  "error_pak_title": "Pak 인덱싱 실패",
+  "error_save": "저장 실패",
+  "error_save_description": "다른 경로에 저장해보시겠어요?",
+  "error_detail_label": "이 화면을 캡쳐해서 Github 에 이슈를 등록해주세요."
 }

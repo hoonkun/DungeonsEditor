@@ -29,7 +29,8 @@ import kotlin.math.roundToInt
 @Composable
 fun PakIndexingOverlay(
     onSuccess: () -> Unit,
-    onFailure: () -> Unit
+    onFailure: () -> Unit,
+    onError: (e: Exception) -> Unit
 ) {
     val threadScope = rememberCoroutineScope { newFixedThreadPoolContext(8, "PakTextureIndexingPool") }
 
@@ -72,48 +73,53 @@ fun PakIndexingOverlay(
         }
 
         withContext(Dispatchers.IO) {
-            initState = initState.copy(leadingText = "Pak 파일을 읽고있습니다")
+            try {
+                initState = initState.copy(leadingText = "Pak 파일을 읽고있습니다")
 
-            if (!DungeonsPakRegistry.initialize(customPakLocation)) {
-                onFailure()
-                return@withContext
-            }
+                if (!DungeonsPakRegistry.initialize(customPakLocation)) {
+                    onFailure()
+                    return@withContext
+                }
 
-            initState = initState.copy(leadingText = Localizations.UiText("progress_text_reading_localization"))
+                initState = initState.copy(leadingText = Localizations.UiText("progress_text_reading_localization"))
 
-            DungeonsLocalizations.initialize()
+                DungeonsLocalizations.initialize()
 
-            if (ArcticSettings.preloadTextures) {
-                initState = initState.copy(leadingText = Localizations.UiText("progress_text_reading_textures"))
+                if (ArcticSettings.preloadTextures) {
+                    initState = initState.copy(leadingText = Localizations.UiText("progress_text_reading_textures"))
 
-                val targetItems = DungeonsDatabase.items.toSet()
-                val targetEnchantments = DungeonsDatabase.enchantments
+                    val targetItems = DungeonsDatabase.items.toSet()
+                    val targetEnchantments = DungeonsDatabase.enchantments
 
-                itemState = itemState.copy(leadingText = Localizations.UiText("progress_text_item_texture"))
-                enchantmentState = enchantmentState.copy(leadingText = Localizations.UiText("progress_text_enchantment_texture"))
+                    itemState = itemState.copy(leadingText = Localizations.UiText("progress_text_item_texture"))
+                    enchantmentState =
+                        enchantmentState.copy(leadingText = Localizations.UiText("progress_text_enchantment_texture"))
 
-                targetItems.loadEach(
-                    itemProgresses,
-                    loader = { it.load() },
-                    then = { itemState = itemState.copy(trailingText = it.name) }
+                    targetItems.loadEach(
+                        itemProgresses,
+                        loader = { it.load() },
+                        then = { itemState = itemState.copy(trailingText = it.name) }
+                    )
+                    targetEnchantments.loadEach(
+                        enchantmentProgresses,
+                        loader = { it.load() },
+                        then = { enchantmentState = enchantmentState.copy(trailingText = it.name) }
+                    )
+
+                    while (itemProgresses.any { !it.completed } || enchantmentProgresses.any { !it.completed })
+                        yield()
+                }
+
+                initState = LoadState(
+                    leadingText = Localizations.UiText("progress_text_completed"),
+                    trailingText = Localizations.UiText("cleaning_up")
                 )
-                targetEnchantments.loadEach(
-                    enchantmentProgresses,
-                    loader =  { it.load() },
-                    then = { enchantmentState = enchantmentState.copy(trailingText = it.name) }
-                )
 
-                while (itemProgresses.any { !it.completed } || enchantmentProgresses.any { !it.completed })
-                    yield()
+                delay(500)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e)
             }
-
-            initState = LoadState(
-                leadingText = Localizations.UiText("progress_text_completed"),
-                trailingText = Localizations.UiText("cleaning_up")
-            )
-
-            delay(500)
-            onSuccess()
         }
     }
 

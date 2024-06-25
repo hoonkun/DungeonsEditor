@@ -8,6 +8,7 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.BasePathToggleProperty
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.states.EditorState
+import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
@@ -19,6 +20,7 @@ fun FileSaveOverlay(
     postSave: () -> Unit = { },
     requestClose: () -> Unit
 ) {
+    val overlays = LocalOverlayState.current
     var createBackup by remember { mutableStateOf(false) }
 
     Box(
@@ -51,9 +53,19 @@ fun FileSaveOverlay(
                 Spacer(modifier = Modifier.width(30.dp))
             },
             onSelect = {
-                editor.stored.save(DungeonsJsonFile(it), createBackup)
-                requestClose()
-                postSave()
+                try {
+                    editor.stored.save(DungeonsJsonFile(it), createBackup)
+                    requestClose()
+                    postSave()
+                } catch (e: Exception) {
+                    overlays.make {
+                        ErrorOverlay(
+                            e = e,
+                            title = Localizations["error_save"],
+                            description = Localizations["error_save_description"]
+                        )
+                    }
+                }
             }
         )
     }
