@@ -156,11 +156,10 @@ private fun ItemDataDetailOverlay(
                 modifier = Modifier.padding(start = 25.dp)
             ) {
                 ItemRarityButton(data, rarity) { rarity = it }
-                Text(
+                AutosizeText(
                     text = data.name,
-                    color = Color.White,
-                    fontSize = 50.sp,
-                    fontWeight = FontWeight.Bold
+                    style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
+                    maxFontSize = 50.sp,
                 )
 
                 Box(modifier = Modifier.requiredHeightIn(max = 150.dp)) {

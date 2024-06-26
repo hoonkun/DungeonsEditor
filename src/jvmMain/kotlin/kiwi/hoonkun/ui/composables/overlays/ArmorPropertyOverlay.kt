@@ -50,11 +50,10 @@ import kiwi.hoonkun.ui.states.ArmorProperty
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.toFixed
 import minecraft.dungeons.resources.ArmorPropertyData
 import minecraft.dungeons.resources.DungeonsDatabase
-import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.values.DungeonsPower
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -211,17 +210,28 @@ private fun HolderPreview(
                         enabled = false,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    ItemModifiedButton(holder = holder, readonly = true)
+                    ItemModifiedButton(holder = holder, readonly = true, hideUnits = true)
                 }
                 Row(modifier = Modifier.padding(horizontal = 12.dp)) {
-                    Text(
-                        text = holder.data.name, fontSize = 40.sp, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(end = 8.dp).alignByBaseline()
+                    AutosizeText(
+                        text = holder.data.name,
+                        maxFontSize = 40.sp,
+                        style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .weight(1f)
+                            .alignByBaseline()
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alignByBaseline()) {
-                        PowerIcon()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .alignByBaseline()
+                            .padding(start = 16.dp)
+                            .requiredWidth(100.dp)
+                    ) {
+                        PowerIcon(Modifier.size(24.dp))
                         Text(
-                            text = "${DungeonsLocalizations["/gearpower_POWER"]} ${DungeonsPower.toInGamePower(holder.power).toFixed(3)}",
+                            text = "${DungeonsPower.toInGamePower(holder.power).roundToInt()}",
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }

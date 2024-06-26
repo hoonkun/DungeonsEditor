@@ -27,7 +27,7 @@ fun AutosizeText(
     maxFontSize: TextUnit = TextUnit.Unspecified,
     style: TextStyle = LocalTextStyle.current,
     contentAlignment: Alignment? = null,
-    maxLines: Int = Int.MAX_VALUE,
+    maxLines: Int = 1,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     val alignment: Alignment = contentAlignment ?: when (style.textAlign) {

@@ -189,7 +189,8 @@ fun ItemNetheriteEnchantButton(
 @Composable
 fun ItemModifiedButton(
     holder: Item,
-    readonly: Boolean = false
+    readonly: Boolean = false,
+    hideUnits: Boolean = false,
 ) {
     ItemAlterButtonAnimatable(targetState = holder.modified == true) { modified ->
         ItemAlterButton(
@@ -219,7 +220,9 @@ fun ItemModifiedButton(
                     modifier = Modifier.requiredWidth(28.dp).padding(end = 2.dp).offset(y = (-1).dp)
                 )
             }
-            Text(text = Localizations.UiText("times"), fontSize = 18.sp)
+            if (!hideUnits) {
+                Text(text = Localizations["times"], fontSize = 18.sp)
+            }
         }
     }
 }
