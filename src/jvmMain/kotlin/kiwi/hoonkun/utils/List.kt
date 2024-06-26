@@ -1,10 +1,12 @@
 package kiwi.hoonkun.utils
 
-fun <T> MutableList<T>.padEnd(minSize: Int, factory: (Int) -> T): MutableList<T> {
+fun <T> List<T>.padEnd(minSize: Int, factory: (Int) -> T): List<T> {
     if (size >= minSize) return this
 
-    while (size < minSize) { add(factory(size)) }
-    return this
+    val result = toMutableList()
+
+    while (result.size < minSize) { result.add(factory(result.size)) }
+    return result
 }
 
 fun <T> MutableList<T>.replace(from: T, into: T) {

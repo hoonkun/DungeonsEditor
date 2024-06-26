@@ -24,7 +24,7 @@ fun RarityColor(rarity: String, type: RarityColorType): Color {
     return when (rarity) {
         "Common" ->
             when (type) {
-                RarityColorType.Translucent -> Color(0x00aaaaaa)
+                RarityColorType.Translucent -> Color(0x25ffffff)
                 RarityColorType.Opaque -> Color(0xffaaaaaa)
             }
         "Rare" ->

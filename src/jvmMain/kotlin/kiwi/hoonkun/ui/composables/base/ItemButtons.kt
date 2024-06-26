@@ -15,11 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.Enchantment
@@ -29,7 +31,65 @@ import kiwi.hoonkun.ui.units.sp
 import kiwi.hoonkun.utils.Retriever
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.resources.EnchantmentData
 import minecraft.dungeons.resources.ItemData
+
+
+@Composable
+fun ItemAlterButton(
+    color: Color = Color(0x15ffffff),
+    enabled: Boolean = true,
+    horizontalPadding: Dp = 10.dp,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = { },
+    content: @Composable RowScope.() -> Unit
+) {
+    val interaction = rememberMutableInteractionSource()
+    val hovered by interaction.collectIsHoveredAsState()
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(3.dp)
+            .then(modifier)
+            .requiredHeight(35.dp)
+            .then(
+                if (enabled)
+                    Modifier
+                        .clickable(interaction, null, role = Role.Button) { onClick() }
+                        .hoverable(interaction)
+                else
+                    Modifier
+            )
+            .background(color, shape = RoundedCornerShape(6.dp))
+            .drawBehind { drawInteractionBorder(hovered, false) }
+            .padding(vertical = 4.dp, horizontal = horizontalPadding),
+        content = content
+    )
+}
+
+@Composable
+fun ItemAlterButton(
+    text: String,
+    color: Color = Color(0x25ffffff),
+    enabled: Boolean = true,
+    onClick: () -> Unit = { },
+    modifier: Modifier = Modifier
+) {
+    ItemAlterButton(
+        color = color,
+        enabled = enabled,
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            color = Color.White
+        )
+    }
+}
+
 
 @Composable
 fun ItemRarityButton(
@@ -47,60 +107,27 @@ fun ItemRarityButton(
 }
 
 @Composable
-fun ItemAlterButton(
-    text: String,
-    color: Color = Color(0x25ffffff),
-    enabled: Boolean = true,
-    onClick: () -> Unit
-) {
-    val interaction = rememberMutableInteractionSource()
-    val hovered by interaction.collectIsHoveredAsState()
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(35.dp)
-            .clickable(interaction, null, role = Role.Button, enabled = enabled) { onClick() }
-            .hoverable(interaction, enabled)
-            .background(color, shape = RoundedCornerShape(6.dp))
-            .drawBehind { drawInteractionBorder(hovered, false) }
-            .padding(vertical = 4.dp, horizontal = 10.dp)
+fun BuiltInEnchantments(data: EnchantmentData) {
+    ItemAlterButton(
+        color = Color(0x25ffffff),
+        enabled = false
     ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            color = Color.White
+        Image(
+            bitmap = data.icon,
+            contentDescription = null,
+            modifier = Modifier
+                .requiredSize(30.dp)
+                .drawBehind {
+                    drawImage(
+                        image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
+                        dstSize = (size * 0.9f).round(),
+                        dstOffset = (center - (size * 0.9f / 2f).let { Offset(it.width, it.height) }).round()
+                    )
+                }
         )
+        Text(text = data.name, fontSize = 18.sp, modifier = Modifier.padding(start = 8.dp))
     }
 }
-
-@Composable
-fun ItemAlterButton(
-    color: Color = Color(0x15ffffff),
-    enabled: Boolean = true,
-    horizontalPadding: Dp = 10.dp,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit
-) {
-    val interaction = rememberMutableInteractionSource()
-    val hovered by interaction.collectIsHoveredAsState()
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(3.dp)
-            .then(modifier)
-            .height(35.dp)
-            .clickable(interaction, null, role = Role.Button, enabled = enabled) { onClick() }
-            .hoverable(interaction, enabled)
-            .background(color, shape = RoundedCornerShape(6.dp))
-            .drawBehind { drawInteractionBorder(hovered, false) }
-            .padding(vertical = 4.dp, horizontal = horizontalPadding),
-        content = content
-    )
-}
-
 
 @Composable
 fun ItemNetheriteEnchantButton(

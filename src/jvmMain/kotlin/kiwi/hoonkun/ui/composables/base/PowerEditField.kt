@@ -20,6 +20,7 @@ fun PowerEditField(
     power: Double,
     onPowerChange: (Double) -> Unit,
     modifier: Modifier = Modifier,
+    hideLabel: Boolean = false
 ) {
     var value by remember(power) { mutableStateOf("${power.toFixed(3)}") }
 
@@ -28,8 +29,10 @@ fun PowerEditField(
         modifier = modifier
     ) {
         PowerIcon()
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(DungeonsLocalizations["/gearpower_POWER"]!!, fontSize = 25.sp, color = Color.White)
+        if (!hideLabel) {
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(DungeonsLocalizations["/gearpower_POWER"]!!, fontSize = 25.sp, color = Color.White)
+        }
         Spacer(modifier = Modifier.width(15.dp))
         TextFieldValidatable(
             value = value,

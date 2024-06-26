@@ -367,6 +367,9 @@ data class EnchantmentData(
         val CommonGlidedInvestedPoints = listOf(2, 3, 4)
         val PowerfulGlidedInvestedPoints = listOf(3, 4, 5)
 
+        fun AppliedExclusiveOf(itemData: ItemData) =
+            DungeonsDatabase.enchantments.find { it.id == ExclusiveEnchantments.entries.firstOrNull { it.value.contains(itemData.type) }?.key }
+
         private val PowerfulEnchantments =
             Json.decodeFromString<List<String>>(resourceText("databases/enchantments_powerful.json")).toSet()
 

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.round
+import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.*
@@ -106,6 +107,7 @@ private fun Content(item: Item, editor: EditorState) {
             PowerEditField(
                 power = DungeonsPower.toInGamePower(item.power),
                 onPowerChange = { item.power = DungeonsPower.toSerializedPower(it) },
+                hideLabel = ArcticSettings.locale == "en"
             )
             Spacer(modifier = Modifier.weight(1f))
             ItemAlterRight(item, editor)
@@ -167,8 +169,8 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
                     enter = defaultFadeIn(),
                     exit = defaultFadeOut()
                 ) {
-                    ItemEditionOverlay(
-                        target = item,
+                    ItemOverlay(
+                        state = remember { ItemOverlayEditState(target = item) },
                         requestClose = { overlays.destroy(it) }
                     )
                 }

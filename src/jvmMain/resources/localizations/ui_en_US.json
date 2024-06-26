@@ -58,6 +58,7 @@
   "select": "select",
   "open": "Open",
   "add": "Add",
+  "replace": "Replace",
   "item_creation_other_options_description": "You can edit other properties after adding this item!",
   "item_creation_armor_property_description": "Default set of armor properties are manually hard coded, so it may not accurate.",
   "enchantment_unset": "Set this slot as inactivated.\nApplying this to netherite enchantment will delete this item's glided property.",

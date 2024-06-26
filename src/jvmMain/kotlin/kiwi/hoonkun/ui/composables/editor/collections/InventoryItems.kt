@@ -17,7 +17,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import kiwi.hoonkun.ui.composables.overlays.InventoryFullOverlay
-import kiwi.hoonkun.ui.composables.overlays.ItemCreationOverlay
+import kiwi.hoonkun.ui.composables.overlays.ItemOverlay
+import kiwi.hoonkun.ui.composables.overlays.ItemOverlayCreateState
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
@@ -55,16 +56,17 @@ fun InventoryItems(
             onCreateItem = {
                 if (editorState.noSpaceInInventory)
                     overlays.make { InventoryFullOverlay() }
-                else
+                else {
                     overlays.make(
                         enter = defaultFadeIn(),
                         exit = defaultFadeOut()
                     ) {
-                        ItemCreationOverlay(
-                            editorState = editorState,
+                        ItemOverlay(
+                            state = remember { ItemOverlayCreateState(editorState) },
                             requestClose = { overlays.destroy(it) }
                         )
                     }
+                }
             }
         )
         ItemsLazyGrid(
