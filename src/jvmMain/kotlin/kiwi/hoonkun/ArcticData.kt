@@ -18,6 +18,8 @@ object ArcticSettings {
     var locale by mutableStateOf(current.locale)
     var customPakLocation by mutableStateOf(current.customPakLocation)
 
+    var minimizeAnimations by mutableStateOf(current.minimizeAnimations)
+
     private val recentFiles = current.recentFiles.toMutableStateList()
 
     val recentSummaries by derivedStateOf {
@@ -52,6 +54,7 @@ object ArcticSettings {
                     customPakLocation,
                     preloadTextures,
                     globalScale,
+                    minimizeAnimations
                 )
             )
         )
@@ -72,7 +75,8 @@ object ArcticSettings {
             recentFiles = raw.recentFiles.filter { File(it).exists() }.let { it.slice(0 until 4.coerceAtMost(it.size)) },
             customPakLocation = raw.customPakLocation,
             scale = raw.scale.coerceIn(0.4f..1.35f),
-            preloadTextures = raw.preloadTextures
+            preloadTextures = raw.preloadTextures,
+            minimizeAnimations = raw.minimizeAnimations
         )
     }
 }
@@ -84,5 +88,6 @@ private data class SerializableArcticSettings(
     val recentFiles: List<String> = emptyList(),
     val customPakLocation: String? = null,
     val preloadTextures: Boolean = true,
-    val scale: Float = 0.55f
+    val scale: Float = 0.55f,
+    val minimizeAnimations: Boolean = false,
 )

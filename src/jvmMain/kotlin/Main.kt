@@ -1,8 +1,9 @@
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollbarStyle
@@ -38,12 +39,13 @@ import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.overlays.*
-import kiwi.hoonkun.ui.reusables.round
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
+import kotlin.collections.set
 import kotlin.random.Random
 
 
@@ -85,31 +87,35 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
 
     val focusedArea = remember(selectedJsonSourcePath) { if (selectedJsonSourcePath != null) AppFocusable.Editor else AppFocusable.Entries }
 
-    val blur by animateFloatAsState(if (overlays.any()) 50f else 0f)
+    val blur by minimizableAnimateFloatAsState(
+        targetValue = if (overlays.any()) 50f else 0f,
+        animationSpec = minimizableSpecDefault()
+    )
 
     val entriesWidth = 550.dp
 
     val slideRatio = 0.2f
-    val containerOffset by animateDpAsState(
+    val containerOffset by minimizableAnimateDpAsState(
         targetValue =
             if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * (-slideRatio / 2))
             else (windowWidth * (slideRatio / 2)),
-        animationSpec = spring(stiffness = Spring.StiffnessLow)
+        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
     )
-    val tabsOffset by animateDpAsState(
+    val tabsOffset by minimizableAnimateDpAsState(
         targetValue = if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null || states.size > 0) (-114).dp else 0.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessLow)
+        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
     )
-    val entriesOffset by animateDpAsState(
+    val entriesOffset by minimizableAnimateDpAsState(
         targetValue =
             if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * slideRatio) - 12.dp
             else 0.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessLow)
+        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
     )
-    val entriesBrightness by animateFloatAsState(
+    val entriesBrightness by minimizableAnimateFloatAsState(
         targetValue =
             if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) 0.75f
-            else 0f
+            else 0f,
+        animationSpec = minimizableSpec { spring() }
     )
 
     var preview by remember { mutableStateOf<DungeonsJsonFile.Preview>(DungeonsJsonFile.Preview.None) }
@@ -147,8 +153,10 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                 .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
                 .then(appPointerListeners.onGlobalPointerEventModifier())
         ) {
-            AnimatedVisibility(
+             MinimizableAnimatedVisibility(
                 visible = pakLoaded,
+                enter = minimizableEnterTransition { expandIn() + fadeIn() },
+                exit = minimizableExitTransition { shrinkOut() + fadeOut() },
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer { renderEffect = if (blur == 0f) null else BlurEffect(blur, blur) }

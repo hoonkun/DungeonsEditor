@@ -1,6 +1,6 @@
 package kiwi.hoonkun.ui.composables.base
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -20,9 +20,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.rememberComponentRectPositionProvider
-import kiwi.hoonkun.ui.reusables.getValue
-import kiwi.hoonkun.ui.reusables.mutableRefOf
-import kiwi.hoonkun.ui.reusables.setValue
+import kiwi.hoonkun.ArcticSettings
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.LocalAppPointerListeners
 import kiwi.hoonkun.ui.units.dp
 import kotlinx.coroutines.Job
@@ -88,10 +87,10 @@ fun AnimatedTooltipArea(
             popupPositionProvider = tooltipPositionProvider,
             onDismissRequest = { isVisible = false }
         ) {
-            AnimatedVisibility(
+             MinimizableAnimatedVisibility(
                 visible = isVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
+                enter = minimizableEnterTransition { fadeIn() },
+                exit = if (ArcticSettings.minimizeAnimations) ExitTransition.None else fadeOut(),
                 modifier = Modifier
             ) {
                 Box {

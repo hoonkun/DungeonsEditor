@@ -24,10 +24,7 @@ import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.*
-import kiwi.hoonkun.ui.reusables.IfNotNull
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.round
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.states.LocalOverlayState
@@ -37,9 +34,9 @@ import minecraft.dungeons.values.DungeonsPower
 
 @Composable
 fun ItemDetail(item: Item?, editor: EditorState) {
-    AnimatedContent(
+    MinimizableAnimatedContent(
         targetState = item,
-        transitionSpec = {
+        transitionSpec = minimizableContentTransform spec@ {
             val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
             val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
             enter togetherWith exit using SizeTransform(clip = false)

@@ -1,8 +1,6 @@
 package kiwi.hoonkun.ui.composables.base
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -27,10 +25,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.defaultTween
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 
 
@@ -47,11 +42,11 @@ fun TextFieldValidatable(
 ) {
     val source = rememberMutableInteractionSource()
     val focused by source.collectIsFocusedAsState()
-    val lineColor by animateColorAsState(
+    val lineColor by minimizableAnimateColorAsState(
         targetValue =
             if (!focused) Color(if (hideDecorationIfNotFocused) 0x00ff884c else 0xff676767)
             else Color(0xffff884c),
-        animationSpec = defaultTween()
+        animationSpec = minimizableSpec { defaultTween() }
     )
 
     val focusManager = LocalFocusManager.current
@@ -84,9 +79,10 @@ fun TextFieldValidatable(
                     }
                 }
         )
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = focused to valid,
-            transitionSpec = { defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false) },
+            transitionSpec = minimizableContentTransform spec@ {                defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false)
+            },
             modifier = Modifier
                 .requiredSize(200.dp, 100.dp)
                 .offset {

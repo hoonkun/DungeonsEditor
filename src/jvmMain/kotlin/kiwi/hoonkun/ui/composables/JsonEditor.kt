@@ -2,6 +2,7 @@ package kiwi.hoonkun.ui.composables
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,8 +21,7 @@ import kiwi.hoonkun.ui.composables.editor.collections.EquippedItems
 import kiwi.hoonkun.ui.composables.editor.collections.InventoryItems
 import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
 import kiwi.hoonkun.ui.composables.editor.details.Tips
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
 
@@ -40,11 +40,11 @@ fun JsonEditor(
             .background(Color(0xff202020))
     ) {
         tabs()
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = state,
-            transitionSpec = spec@ {
+            transitionSpec = minimizableContentTransform spec@ {
                 if (targetState == null || initialState == null)
-                    return@spec fadeIn() togetherWith fadeOut() using SizeTransform(clip = false)
+                    return@spec fadeIn() togetherWith fadeOut() using SizeTransform(clip = false) { _, _ -> snap() }
 
                 val floatSpec = spring<Float>(stiffness = Spring.StiffnessLow)
                 val intOffsetSpec = spring<IntOffset>(stiffness = Spring.StiffnessLow)
@@ -68,7 +68,10 @@ fun JsonEditorTabButton(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
     onClick: () -> Unit
 ) {
-    val color by animateColorAsState(if (selected) Color(0xff3f8e4f) else Color(0xff363636))
+    val color by minimizableAnimateColorAsState(
+        targetValue = if (selected) Color(0xff3f8e4f) else Color(0xff363636),
+        animationSpec = minimizableSpec { spring() }
+    )
 
     RetroButton(
         color = { color },
@@ -97,9 +100,9 @@ private fun Content(
                 .weight(1f)
                 .padding(start = 100.dp, end = 170.dp)
         ) {
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = editorState.view,
-                transitionSpec = {
+                transitionSpec = minimizableContentTransform spec@ {
                     val a = if (targetState == EditorState.EditorView.Inventory) -50 else 50
                     val b = if (targetState == EditorState.EditorView.Inventory) 50 else -50
                     val enter = defaultFadeIn() + slideIn { IntOffset(a.dp.value.toInt(), 0) }
@@ -136,9 +139,9 @@ private fun Content(
                     }
                 }
             }
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = editorState.selection.hasSelection,
-                transitionSpec = {
+                transitionSpec = minimizableContentTransform spec@ {
                     val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
                     val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
                     enter togetherWith exit using SizeTransform(clip = false)

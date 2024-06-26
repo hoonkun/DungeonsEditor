@@ -1,8 +1,7 @@
 package kiwi.hoonkun.ui.composables
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -49,7 +48,10 @@ fun JsonEntries(
 ) {
     val hasPreview = preview is DungeonsJsonFile.Preview.Valid
 
-    val hideAlpha by animateFloatAsState(if (hasPreview) 0f else 1f)
+    val hideAlpha by minimizableAnimateFloatAsState(
+        targetValue = if (hasPreview) 0f else 1f,
+        animationSpec = minimizableSpec { spring() }
+    )
     val hideIfPreviewNotPresents = remember { Modifier.graphicsLayer { alpha = 0.25f + (1 - hideAlpha) * 0.75f } }
     val hideIfPreviewPresents = remember { Modifier.graphicsLayer { alpha = 0.25f + hideAlpha * 0.75f } }
 
@@ -69,9 +71,11 @@ fun JsonEntries(
                 )
             }
             item {
-                AnimatedContent(
+                MinimizableAnimatedContent(
                     targetState = preview,
-                    transitionSpec = { defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false) }
+                    transitionSpec = minimizableContentTransform {
+                        defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false)
+                    }
                 ) {
                     when (it) {
                         is DungeonsJsonFile.Preview.None -> {
@@ -115,7 +119,9 @@ fun JsonEntries(
                     JsonPreview(
                         summary = summary,
                         onClick = { onJsonSelect(json) },
-                        modifier = hideIfPreviewPresents.animateItemPlacement()
+                        modifier = hideIfPreviewPresents.animateItemPlacement(
+                            animationSpec = minimizableFiniteSpec { spring() }
+                        )
                     )
                 }
             }
@@ -138,7 +144,9 @@ fun JsonEntries(
                     JsonPreview(
                         summary = summary,
                         onClick = { onJsonSelect(json) },
-                        modifier = hideIfPreviewPresents.animateItemPlacement()
+                        modifier = hideIfPreviewPresents.animateItemPlacement(
+                            animationSpec = minimizableFiniteSpec { spring() }
+                        )
                     )
                 }
             }
@@ -195,8 +203,14 @@ private fun JsonPreview(
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
 
-    val hoverOffset by animateFloatAsState(if (hovered) 24f else 0f)
-    val hoverBackgroundAlpha by animateFloatAsState(if (hovered) 0.15f else 0f)
+    val hoverOffset by minimizableAnimateFloatAsState(
+        targetValue = if (hovered) 24f else 0f,
+        animationSpec = minimizableSpec { spring() }
+    )
+    val hoverBackgroundAlpha by minimizableAnimateFloatAsState(
+        targetValue = if (hovered) 0.15f else 0f,
+        animationSpec = minimizableSpec { spring() }
+    )
 
     Column(
         modifier = modifier

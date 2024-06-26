@@ -2,7 +2,7 @@ package kiwi.hoonkun.ui.composables.overlays
 
 import LocalWindowState
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -72,9 +72,8 @@ private class EnchantmentDataCollectionState(
 private fun rememberEnchantmentDataCollectionState(original: Enchantment) =
     remember(original) { EnchantmentDataCollectionState(original) }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AnimatedVisibilityScope.EnchantmentOverlay(
+fun AnimatedVisibilityScope?.EnchantmentOverlay(
     initialSelected: Enchantment,
     requestClose: () -> Unit
 ) {
@@ -94,8 +93,9 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
         EnchantmentDataCollection(
             state = state,
             modifier = Modifier
-                .animateEnterExit(
-                    enter = slideIn { with(density) { IntOffset(-60.dp.roundToPx(), 0) } },
+                .minimizableAnimateEnterExit(
+                    scope = this@EnchantmentOverlay,
+                    enter = minimizableEnterTransition { slideIn { with(density) { IntOffset(-60.dp.roundToPx(), 0) } } },
                     exit = ExitTransition.None
                 )
         )
@@ -105,15 +105,16 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                 state = state,
                 offset = childOffset,
                 modifier = Modifier
-                    .animateEnterExit(
-                        enter = slideIn { with(density) { IntOffset(60.dp.roundToPx(), 0) } },
+                    .minimizableAnimateEnterExit(
+                        scope = this@EnchantmentOverlay,
+                        enter = minimizableEnterTransition { slideIn { with(density) { IntOffset(60.dp.roundToPx(), 0) } } },
                         exit = ExitTransition.None
                     )
             )
 
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = state.selected,
-                transitionSpec = {
+                transitionSpec = minimizableContentTransform spec@ {
                     val initialIndex = state.enchantments.indexOf(initialState)
                     val targetIndex = state.enchantments.indexOf(targetState)
 
@@ -131,8 +132,9 @@ fun AnimatedVisibilityScope.EnchantmentOverlay(
                 modifier = Modifier
                     .fillMaxHeight()
                     .align(Alignment.Center)
-                    .animateEnterExit(
-                        enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
+                    .minimizableAnimateEnterExit(
+                        scope = this@EnchantmentOverlay,
+                        enter = minimizableEnterTransition { slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } } },
                         exit = ExitTransition.None
                     )
             ) { preview ->
@@ -266,12 +268,18 @@ private fun HolderPreview(
                         derivedStateOf { slot.all.find { it.level > 0 }?.let { each === it } != false }
                     }
 
-                    val scale by animateFloatAsState(if (each.level > 0) 1.25f else 1f)
-                    val grayscaleAmount by animateFloatAsState(if (enabled) 1f else 0f)
+                    val scale by minimizableAnimateFloatAsState(
+                        targetValue = if (each.level > 0) 1.25f else 1f,
+                        animationSpec = minimizableSpec { spring() }
+                    )
+                    val grayscaleAmount by minimizableAnimateFloatAsState(
+                        targetValue = if (enabled) 1f else 0f,
+                        animationSpec = minimizableSpec { spring() }
+                    )
 
-                    AnimatedContent(
+                    MinimizableAnimatedContent(
                         targetState = each.data,
-                        transitionSpec = {
+                        transitionSpec = minimizableContentTransform {
                             val enter =
                                 if (targetState.id == "Unset") defaultFadeIn()
                                 else defaultFadeIn() + scaleIn(initialScale = 1.5f)
@@ -428,9 +436,9 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
             .background(Color(0xff080808))
             .consumeClick()
     ) {
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = data,
-            transitionSpec = {
+            transitionSpec = minimizableContentTransform spec@ {
                 val initialIndex = DungeonsDatabase.enchantments.indexOf(initialState)
                 val targetIndex = DungeonsDatabase.enchantments.indexOf(targetState)
 

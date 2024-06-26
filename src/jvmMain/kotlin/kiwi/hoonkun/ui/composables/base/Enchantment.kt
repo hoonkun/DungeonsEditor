@@ -26,9 +26,8 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import kiwi.hoonkun.ui.reusables.offsetRelative
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
-import kiwi.hoonkun.ui.reusables.round
+import kiwi.hoonkun.ArcticSettings
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
@@ -70,25 +69,34 @@ fun EnchantmentImage(
     }
 
     val drawFront = if (patterns != null) {
-        val interpolation by animateShineInterpolation()
-        val interpolatedR by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 0) } }
-        val interpolatedG by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 1) } }
-        val interpolatedB by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 2) } }
-
-        val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, offset, size ->
-            drawIntoCanvas {
-                it.saveLayer(Rect(0f, 0f, this.size.width, this.size.height), paint)
-                drawImage(image = patterns.r, dstOffset = offset, dstSize = size, alpha = interpolatedR * MaxAlpha)
-                drawImage(image = patterns.g, dstOffset = offset, dstSize = size, alpha = interpolatedG * MaxAlpha)
-                drawImage(image = patterns.b, dstOffset = offset, dstSize = size, alpha = interpolatedB * MaxAlpha)
-                it.restore()
+        if (ArcticSettings.minimizeAnimations) {
+            val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
+                onDrawFront(cache)
             }
 
-            onDrawFront(cache)
+            func
+        } else {
+            val interpolation by animateShineInterpolation()
+            val interpolatedR by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 0) } }
+            val interpolatedG by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 1) } }
+            val interpolatedB by remember { derivedStateOf { interpolateShineAlpha(interpolation, ChannelDelay * 2) } }
+
+            val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, offset, size ->
+                drawIntoCanvas {
+                    it.saveLayer(Rect(0f, 0f, this.size.width, this.size.height), paint)
+                    drawImage(image = patterns.r, dstOffset = offset, dstSize = size, alpha = interpolatedR * MaxAlpha)
+                    drawImage(image = patterns.g, dstOffset = offset, dstSize = size, alpha = interpolatedG * MaxAlpha)
+                    drawImage(image = patterns.b, dstOffset = offset, dstSize = size, alpha = interpolatedB * MaxAlpha)
+                    it.restore()
+                }
+
+                onDrawFront(cache)
+            }
+            func
         }
-        func
     } else {
         val func: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
+            onDrawFront(cache)
         }
         func
     }
@@ -165,9 +173,9 @@ fun EnchantmentLevel(
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
-    AnimatedContent(
+    MinimizableAnimatedContent(
         targetState = level,
-        transitionSpec = {
+        transitionSpec = minimizableContentTransform spec@ {
             val offset = with(density) { (if (initialState < targetState) (-20).dp else 20.dp).roundToPx() }
             val enter = fadeIn() + slideIn { IntOffset(0, offset) }
             val exit = fadeOut() + slideOut { IntOffset(0, -offset) }

@@ -1,6 +1,5 @@
 package kiwi.hoonkun.ui.composables.editor
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
@@ -27,9 +26,7 @@ import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.Currency
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
@@ -227,9 +224,9 @@ private fun InventorySwitcher(
             )
         }
 
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = current,
-            transitionSpec = {
+            transitionSpec = minimizableContentTransform spec@ {
                 val enter = defaultFadeIn()
                 val exit = defaultFadeOut()
                 enter togetherWith exit using SizeTransform(false)

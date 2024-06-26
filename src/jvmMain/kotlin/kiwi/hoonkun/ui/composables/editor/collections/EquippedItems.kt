@@ -1,7 +1,7 @@
 package kiwi.hoonkun.ui.composables.editor.collections
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
@@ -25,9 +25,9 @@ fun EquippedItems(items: List<Item?>, selection: EditorState.SelectionState) {
 
     Row {
         EquippedItemsToggleButton(collapsed) { collapsed = !collapsed }
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = collapsed,
-            transitionSpec = {
+            transitionSpec = minimizableContentTransform spec@ {
                 val enter = slideInVertically(initialOffsetY = { -it / 10 }) + fadeIn()
                 val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
                 enter togetherWith exit using SizeTransform(false)
@@ -47,7 +47,10 @@ private fun EquippedItemsToggleButton(collapsed: Boolean, onToggle: () -> Unit) 
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val rotation by animateFloatAsState(if (collapsed) 180f else 0f)
+    val rotation by minimizableAnimateFloatAsState(
+        targetValue = if (collapsed) 180f else 0f,
+        animationSpec = minimizableSpec { spring() }
+    )
 
     Image(
         bitmap = DungeonsTextures["/Game/UI/Materials/Menu/arrow_gamemode.png"],

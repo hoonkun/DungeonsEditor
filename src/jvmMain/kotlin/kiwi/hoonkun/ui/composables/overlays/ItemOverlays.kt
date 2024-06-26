@@ -24,10 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
-import kiwi.hoonkun.ui.reusables.VariantFilterIcon
-import kiwi.hoonkun.ui.reusables.consumeClick
-import kiwi.hoonkun.ui.reusables.offsetRelative
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.ArmorProperty
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
@@ -73,9 +70,8 @@ class ItemOverlayEditState(val target: Item): ItemOverlayState {
             .sortedBy { "${if (it.unique) 0 else 1}_${it.name}_${it.type.replace(Regex("_.+"), "")}" }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AnimatedVisibilityScope.ItemOverlay(
+fun AnimatedVisibilityScope?.ItemOverlay(
     state: ItemOverlayState,
     requestClose: () -> Unit
 ) {
@@ -86,7 +82,10 @@ fun AnimatedVisibilityScope.ItemOverlay(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxSize()
-            .animateEnterExit(enter = fadeIn() + slideIn { with(density) { IntOffset(0, 45.dp.roundToPx()) } })
+            .minimizableAnimateEnterExit(
+                scope = this@ItemOverlay,
+                enter = minimizableEnterTransition { fadeIn() + slideIn { with(density) { IntOffset(0, 45.dp.roundToPx()) } } }
+            )
     ) {
         Box(contentAlignment = Alignment.TopCenter) {
             if (state is ItemOverlayCreateState) {
@@ -96,9 +95,9 @@ fun AnimatedVisibilityScope.ItemOverlay(
                     modifier = Modifier.offset(ItemDataCollectionWidth / 2).offsetRelative(x = 0.5f)
                 )
             }
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = state.variant to state.collection,
-                transitionSpec = {
+                transitionSpec = minimizableContentTransform spec@ {
                     val offset =
                         if (ItemVariants.indexOf(targetState.first) > ItemVariants.indexOf(initialState.first)) 30.dp
                         else (-30).dp
@@ -118,9 +117,11 @@ fun AnimatedVisibilityScope.ItemOverlay(
                 )
             }
         }
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = state.selected,
-            transitionSpec = { fadeIn() togetherWith fadeOut() using SizeTransform(false) },
+            transitionSpec = minimizableContentTransform spec@ {
+                fadeIn() togetherWith fadeOut() using SizeTransform(false)
+            },
             contentKey = { it != null },
             modifier = Modifier.offset(y = (60 - 48).dp / 2f)
         ) {
@@ -185,9 +186,9 @@ private fun ItemDataDetail(
                 WarningText(text = Localizations["item_creation_armor_property_description"])
         }
 
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = data,
-            transitionSpec = {
+            transitionSpec = minimizableContentTransform spec@ {
                 val a = if (state.collection.indexOf(initialState) > state.collection.indexOf(targetState)) (-50).dp else 50.dp
                 val b = a * -1
 
@@ -310,7 +311,10 @@ private fun ItemCreationVariantFilter(
     val selected = filter == variant
     val onClick = { onFilterChange(variant) }
 
-    val color by animateColorAsState(if (selected) Color(0xff3f8e4f) else Color(0xff454545))
+    val color by minimizableAnimateColorAsState(
+        targetValue = if (selected) Color(0xff3f8e4f) else Color(0xff454545),
+        animationSpec = minimizableSpec { spring() }
+    )
 
     RetroButton(
         color = { color },

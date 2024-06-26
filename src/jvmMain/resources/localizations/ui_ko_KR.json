@@ -86,6 +86,7 @@
   "settings_pak_location": "커스텀 리소스 경로",
   "settings_global_scale": "UI 크기",
   "settings_preload_textures": "구동 시 텍스쳐 미리 로드",
+  "settings_minimize_animations": "애니메이션 최소화",
   "settings_on": "켜짐",
   "settings_off": "꺼짐",
   "exit_application_title": "정말 에디터를 종료하시겠어요?",

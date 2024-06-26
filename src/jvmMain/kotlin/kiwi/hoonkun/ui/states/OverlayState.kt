@@ -1,7 +1,7 @@
 package kiwi.hoonkun.ui.states
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,9 +12,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import kiwi.hoonkun.ui.reusables.defaultFadeIn
-import kiwi.hoonkun.ui.reusables.defaultFadeOut
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kotlinx.coroutines.delay
 import java.util.*
 
@@ -28,7 +26,7 @@ class OverlayState {
         canBeDismissed: Boolean = true,
         enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
         exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-        content: @Composable AnimatedVisibilityScope.(id: String) -> Unit
+        content: @Composable AnimatedVisibilityScope?.(id: String) -> Unit
     ) {
         val newOverlay = Overlay(
             backdropOptions = backdropOptions,
@@ -75,12 +73,15 @@ class OverlayState {
     @Composable
     private fun Content(item: Overlay) {
         val isLastItem by remember { derivedStateOf { stack.lastOrNull { it.state == Overlay.State.Idle } != item } }
-        val blur by animateFloatAsState(if (isLastItem) 50f else 0f)
+        val blur by minimizableAnimateFloatAsState(
+            targetValue = if (isLastItem) 50f else 0f,
+            animationSpec = minimizableSpec { spring() }
+        )
 
-        AnimatedVisibility(
+         MinimizableAnimatedVisibility(
             visible = item.visible,
-            enter = item.enter,
-            exit = item.exit,
+            enter = minimizableEnterTransition { item.enter },
+            exit = minimizableExitTransition { item.exit },
             modifier = Modifier.graphicsLayer { renderEffect = if (blur == 0f) null else BlurEffect(blur, blur) }
         ) {
             item.content(this, item.id)
@@ -89,10 +90,10 @@ class OverlayState {
 
     @Composable
     private fun Backdrop(item: Overlay) {
-        AnimatedVisibility(
+         MinimizableAnimatedVisibility(
             visible = item.visible,
-            enter = defaultFadeIn(),
-            exit = defaultFadeOut(),
+            enter = minimizableEnterTransition { defaultFadeIn() },
+            exit = minimizableExitTransition { defaultFadeOut() },
             label = "BackdropOf(${item.id})"
         ) {
             Box(
@@ -117,7 +118,7 @@ data class Overlay(
     val canBeDismissed: Boolean = true,
     val enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
     val exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-    val content: @Composable AnimatedVisibilityScope.(id: String) -> Unit,
+    val content: @Composable AnimatedVisibilityScope?.(id: String) -> Unit,
 ) {
     var state by mutableStateOf(State.Initial)
     val visible: Boolean get() = state == State.Idle

@@ -1,6 +1,6 @@
 package kiwi.hoonkun.ui.composables.base
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
+import kiwi.hoonkun.ui.reusables.minimizableAnimateFloatAsState
+import kiwi.hoonkun.ui.reusables.minimizableSpec
 import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.units.dp
 
@@ -49,7 +51,10 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
     val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
 
-    val blurAlpha by animateFloatAsState(if (enabled) 1f else 0f)
+    val blurAlpha by minimizableAnimateFloatAsState(
+        targetValue = if (enabled) 1f else 0f,
+        animationSpec = minimizableSpec { spring() }
+    )
 
     val paddingLeft = remember { with(density) { contentPadding.calculateLeftPadding(layoutDirection).toPx() } }
     val paddingTop = remember { with(density) { contentPadding.calculateTopPadding().toPx() } }

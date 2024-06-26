@@ -86,6 +86,7 @@
   "settings_pak_location": "Custom Resource Path",
   "settings_global_scale": "UI Scale",
   "settings_preload_textures": "Preload Textures when Startup",
+  "settings_minimize_animations": "Minimize animations",
   "settings_on": "On",
   "settings_off": "Off",
   "exit_application_title": "Do you really want to exit application?",

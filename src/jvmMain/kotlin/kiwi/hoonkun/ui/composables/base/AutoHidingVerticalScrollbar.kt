@@ -1,6 +1,5 @@
 package kiwi.hoonkun.ui.composables.base
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -8,6 +7,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import kiwi.hoonkun.ui.reusables.defaultTween
+import kiwi.hoonkun.ui.reusables.minimizableAnimateFloatAsState
+import kiwi.hoonkun.ui.reusables.minimizableSpec
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.conflate
 
@@ -19,9 +20,9 @@ fun AutoHidingVerticalScrollbar(
     val adapter = rememberScrollbarAdapter(scrollState)
 
     var visible by remember { mutableStateOf(false) }
-    val scrollbarAlpha by animateFloatAsState(
+    val scrollbarAlpha by minimizableAnimateFloatAsState(
         targetValue = if (visible) 1f else 0f,
-        animationSpec = defaultTween()
+        animationSpec = minimizableSpec { defaultTween() }
     )
 
     LaunchedEffect(scrollState) {

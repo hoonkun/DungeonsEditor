@@ -2,6 +2,8 @@ package kiwi.hoonkun.ui.composables.overlays
 
 import LocalWindowState
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,9 +58,8 @@ import minecraft.dungeons.values.DungeonsPower
 import kotlin.math.roundToInt
 
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AnimatedVisibilityScope.ArmorPropertyOverlay(
+fun AnimatedVisibilityScope?.ArmorPropertyOverlay(
     holder: Item,
     initialSelected: ArmorProperty?,
     requestClose: () -> Unit
@@ -78,8 +79,9 @@ fun AnimatedVisibilityScope.ArmorPropertyOverlay(
     ) {
         ArmorPropertyDataCollection(
             state = state,
-            modifier = Modifier.animateEnterExit(
-                enter = slideIn { IntOffset(-60.dp.value.toInt(), 0) },
+            modifier = Modifier.minimizableAnimateEnterExit(
+                scope = this@ArmorPropertyOverlay,
+                enter = minimizableEnterTransition { slideIn { IntOffset(-60.dp.value.toInt(), 0) } },
                 exit = ExitTransition.None
             )
         )
@@ -89,15 +91,18 @@ fun AnimatedVisibilityScope.ArmorPropertyOverlay(
                 state = state,
                 offset = childOffset,
                 modifier = Modifier
-                    .animateEnterExit(
-                        enter = slideIn { with(density) { IntOffset(-60.dp.roundToPx(), 0) } },
+                    .minimizableAnimateEnterExit(
+                        scope = this@ArmorPropertyOverlay,
+                        enter = minimizableEnterTransition { slideIn { with(density) { IntOffset(-60.dp.roundToPx(), 0) } } },
                         exit = ExitTransition.None
                     )
-                    .animateContentSize()
+                    .animateContentSize(
+                        animationSpec = minimizableFiniteSpec { spring(stiffness = Spring.StiffnessLow) }
+                    )
             )
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = state.selected,
-                transitionSpec = {
+                transitionSpec = minimizableContentTransform spec@ {
                     val initialIndex = state.properties.indexOf(initialState)
                     val targetIndex = state.properties.indexOf(targetState)
 
@@ -115,8 +120,9 @@ fun AnimatedVisibilityScope.ArmorPropertyOverlay(
                 modifier = Modifier
                     .fillMaxHeight()
                     .align(Alignment.Center)
-                    .animateEnterExit(
-                        enter = slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } },
+                    .minimizableAnimateEnterExit(
+                        scope = this@ArmorPropertyOverlay,
+                        enter = minimizableEnterTransition { slideIn { with(density) { IntOffset(0, 60.dp.roundToPx()) } } },
                         exit = ExitTransition.None
                     )
             ) { selected ->
@@ -395,9 +401,9 @@ private fun ArmorPropertyDetail(
             .consumeClick()
             .padding(30.dp)
     ) {
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = property?.data,
-            transitionSpec = {
+            transitionSpec = minimizableContentTransform spec@ {
                 val initialIndex = state.datasets.indexOf(initialState)
                 val targetIndex = state.datasets.indexOf(targetState)
 

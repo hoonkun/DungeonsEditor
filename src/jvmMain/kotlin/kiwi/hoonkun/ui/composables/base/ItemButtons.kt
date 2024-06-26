@@ -169,9 +169,9 @@ fun ItemNetheriteEnchantButton(
             enabled = enabled,
             onClick = { onClick(enchantment) }
         ) {
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = enchantment.data,
-                transitionSpec = {
+                transitionSpec = minimizableContentTransform spec@ {
                     val enter =
                         if (targetState.id == "Unset") defaultFadeIn()
                         else defaultFadeIn() + scaleIn(initialScale = 1.5f)
@@ -257,11 +257,11 @@ fun ItemModifiedButton(
 @Composable
 private fun ItemAlterButtonAnimatable(
     targetState: Boolean,
-    content: @Composable AnimatedContentScope.(Boolean) -> Unit
+    content: @Composable (Boolean) -> Unit
 ) {
-    AnimatedContent(
+    MinimizableAnimatedContent(
         targetState = targetState,
-        transitionSpec = {
+        transitionSpec = minimizableContentTransform spec@ {
             val enterSpec = tween<Float>(220, delayMillis = 90)
             val enter = fadeIn(animationSpec = enterSpec) + scaleIn(initialScale = 0.92f, animationSpec = enterSpec)
             val exit = fadeOut(animationSpec = tween(90))

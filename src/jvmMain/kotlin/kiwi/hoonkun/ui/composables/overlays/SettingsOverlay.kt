@@ -1,6 +1,6 @@
 package kiwi.hoonkun.ui.composables.overlays
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.LocalTextStyle
@@ -17,6 +17,8 @@ import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.reusables.handCursor
+import kiwi.hoonkun.ui.reusables.minimizableAnimateColorAsState
+import kiwi.hoonkun.ui.reusables.minimizableSpec
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
@@ -69,6 +71,17 @@ fun SettingsOverlay() {
                 onSelectedChange = { ArcticSettings.withSave { preloadTextures = it } }
             )
         }
+        SettingsRow {
+            SettingLabel(text = Localizations.UiText("settings_minimize_animations"))
+            Spacer(modifier = Modifier.weight(1f))
+            SettingBooleanValue(
+                text =
+                    if (ArcticSettings.minimizeAnimations) Localizations.UiText("settings_on")
+                    else Localizations.UiText("settings_off"),
+                selected = ArcticSettings.minimizeAnimations,
+                onSelectedChange = { ArcticSettings.withSave { minimizeAnimations = it } }
+            )
+        }
         SettingsColumn {
             SettingLabel(
                 text = Localizations.UiText("settings_pak_location"),
@@ -99,7 +112,10 @@ private fun SelectableRetroButton(
     selected: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val color by animateColorAsState(if (selected) Color(0xff3f8e4f) else Color(0xff343434))
+    val color by minimizableAnimateColorAsState(
+        targetValue = if (selected) Color(0xff3f8e4f) else Color(0xff343434),
+        animationSpec = minimizableSpec { spring() }
+    )
 
     RetroButton(
         text = text,
@@ -133,7 +149,7 @@ private fun SettingsColumn(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column (
-        modifier = Modifier.padding(bottom = 24.dp).requiredWidth(ContentWidth),
+        modifier = Modifier.padding(top = 12.dp, bottom = 24.dp).requiredWidth(ContentWidth),
         content = content
     )
 }
