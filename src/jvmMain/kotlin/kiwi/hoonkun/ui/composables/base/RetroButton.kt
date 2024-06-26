@@ -158,7 +158,7 @@ fun RetroButton(
 
 enum class RetroButtonHoverInteraction { Outline, Overlay }
 
-val RetroButtonDefaultSizeModifier = Modifier.size(190.dp, 55.dp)
+val RetroButtonDefaultSizeModifier get() = Modifier.size(190.dp, 55.dp)
 
 data class RetroButtonDpCornerRadius(
     val topStart: Dp = 8.dp,
