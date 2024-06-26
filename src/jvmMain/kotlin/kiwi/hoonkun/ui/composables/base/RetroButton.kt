@@ -34,6 +34,7 @@ fun RetroButton(
     radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
     stroke: Dp = 5.dp,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
+    contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     onClick: () -> Unit,
     content: @Composable RowScope.() -> Unit
 ) {
@@ -43,7 +44,7 @@ fun RetroButton(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = contentArrangement,
         modifier = modifier
             .drawWithCache {
                 val solidColor = if (enabled) color() else disabledColor
@@ -76,6 +77,7 @@ fun RetroButton(
     disabledColor: Color = Color(0xff666666),
     radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
     stroke: Dp = 5.dp,
+    contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     onClick: () -> Unit,
     content: @Composable RowScope.() -> Unit
@@ -88,6 +90,7 @@ fun RetroButton(
         disabledColor = disabledColor,
         radius = radius,
         stroke = stroke,
+        contentArrangement = contentArrangement,
         contentPadding = contentPadding,
         onClick = onClick,
         content = content
@@ -105,6 +108,7 @@ fun RetroButton(
     textStyle: TextStyle = LocalTextStyle.current,
     radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
     stroke: Dp = 5.dp,
+    contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     onClick: () -> Unit
 ) {
@@ -118,6 +122,7 @@ fun RetroButton(
         disabledColor = disabledColor,
         radius = radius,
         stroke = stroke,
+        contentArrangement = contentArrangement,
         contentPadding = contentPadding,
         onClick = onClick
     )
@@ -134,6 +139,7 @@ fun RetroButton(
     textStyle: TextStyle = LocalTextStyle.current,
     radius: RetroButtonDpCornerRadius = RetroButtonDpCornerRadius(),
     stroke: Dp = 5.dp,
+    contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     onClick: () -> Unit
 ) {
@@ -145,6 +151,7 @@ fun RetroButton(
         disabledColor = disabledColor,
         radius = radius,
         stroke = stroke,
+        contentArrangement = contentArrangement,
         contentPadding = contentPadding,
         onClick = onClick
     ) {

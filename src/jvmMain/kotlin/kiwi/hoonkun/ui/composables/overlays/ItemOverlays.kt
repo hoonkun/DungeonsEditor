@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
@@ -233,7 +234,6 @@ private fun ItemCreationVariantFilters(
     Column(
         horizontalAlignment = Alignment.End,
         modifier = Modifier
-            .requiredWidth(200.dp)
             .padding(top = 58.dp)
             .then(modifier)
     ) {
@@ -266,10 +266,11 @@ private fun ItemCreationVariantFilter(
             bottomEnd = 0.dp,
             bottomStart = 8.dp
         ),
-        contentPadding = PaddingValues(end = 50.dp),
+        contentPadding = PaddingValues(end = 50.dp, start = 20.dp),
+        contentArrangement = Arrangement.Start,
         modifier = Modifier
             .padding(bottom = 16.dp)
-            .size(210.dp, 65.dp)
+            .size(245.dp, 65.dp)
             .offset { with (density) { IntOffset(offset.roundToPx(), 0.dp.roundToPx()) } },
         onClick = onClick
     ) {
@@ -286,7 +287,7 @@ private fun ItemCreationVariantFilter(
     }
 }
 
-private const val Columns = 5
+private const val Columns = 4
 
 @Composable
 private fun ItemDataCollection(
@@ -307,7 +308,7 @@ private fun ItemDataCollection(
             .consumeClick()
             .padding(horizontal = 20.dp)
     ) {
-        item(span = { GridItemSpan(5) }) { CollectionCategoryHeader(variant) }
+        item(span = { GridItemSpan(Columns) }) { CollectionCategoryHeader(variant) }
         items(collection) { ItemDataIcon(it, onItemSelect) }
     }
 }
@@ -345,6 +346,7 @@ private fun ItemDataIcon(data: ItemData, onItemSelect: (ItemData) -> Unit) {
             text = data.name,
             color = Color.White,
             fontSize = 18.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier.offset(y = (-10).dp)
         )
     }
