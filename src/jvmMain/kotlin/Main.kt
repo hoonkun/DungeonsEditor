@@ -3,7 +3,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.ScrollbarStyle
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
@@ -35,7 +38,6 @@ import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.overlays.*
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.reusables.round
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
@@ -81,7 +83,7 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
 
     val states = remember { mutableStateMapOf<String, EditorState>() }
 
-    var focusedArea by remember { mutableStateOf<AppFocusable>(AppFocusable.Entries) }
+    val focusedArea = remember(selectedJsonSourcePath) { if (selectedJsonSourcePath != null) AppFocusable.Editor else AppFocusable.Entries }
 
     val blur by animateFloatAsState(if (overlays.any()) 50f else 0f)
 
@@ -118,16 +120,12 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
             states[it.sourcePath] = EditorState(DungeonsJsonState(file.read(), file))
         }
         selectedJsonSourcePath = it.sourcePath
-        focusedArea = AppFocusable.Editor
         preview = DungeonsJsonFile.Preview.None
 
         ArcticSettings.updateRecentFiles(it.sourcePath)
     }
 
-    val onTabSelect: (String?) -> Unit = {
-        selectedJsonSourcePath = it
-        focusedArea = if (it != null) AppFocusable.Editor else AppFocusable.Entries
-    }
+    val onTabSelect: (String?) -> Unit = { selectedJsonSourcePath = it }
 
     LaunchedPakLoadEffect(
         overlays = overlays,
@@ -188,11 +186,7 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                     )
                     JsonEditor(
                         state = selectedJsonSourcePath?.let { states[it] },
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable(rememberMutableInteractionSource(), null) {
-                                focusedArea = AppFocusable.Editor
-                            },
+                        modifier = Modifier.weight(1f),
                         requestClose = {
                             val path = selectedJsonSourcePath
                             selectedJsonSourcePath = null
