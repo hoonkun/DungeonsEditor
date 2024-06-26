@@ -165,7 +165,6 @@ private fun ItemDataDetail(
     }
 
     val scroll = rememberScrollState()
-    val adapter = rememberScrollbarAdapter(scroll)
 
     Column(
         modifier = Modifier
@@ -235,7 +234,7 @@ private fun ItemDataDetail(
                             if (flavour != null)
                                 Text(text = flavour, fontSize = 18.sp)
                         }
-                        VerticalScrollbar(adapter, modifier = Modifier.align(Alignment.TopEnd))
+                        AutoHidingVerticalScrollbar(scrollState = scroll, modifier = Modifier.align(Alignment.TopEnd))
                     }
 
                     if (state is ItemOverlayCreateState) {

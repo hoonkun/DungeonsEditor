@@ -94,5 +94,7 @@
   "error_pak_title": "Pak Indexing Error",
   "error_save": "Save Error",
   "error_save_description": "Try save another location?",
-  "error_detail_label": "Please capture this screen and open an issue in github."
+  "error_detail_label": "Please capture this screen and open an issue in github.",
+  "tip": "No selected items",
+  "tip_desc": "You can left click or right click\nto preview items in this area."
 }

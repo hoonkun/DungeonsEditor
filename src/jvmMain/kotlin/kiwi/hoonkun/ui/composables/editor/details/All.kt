@@ -1,17 +1,18 @@
 package kiwi.hoonkun.ui.composables.editor.details
 
-import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.ui.composables.base.AutoHidingVerticalScrollbar
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
@@ -20,7 +21,6 @@ import kiwi.hoonkun.ui.units.sp
 @Composable
 fun ItemComparator(editor: EditorState) {
     val scroll = rememberScrollState()
-    val adapter = rememberScrollbarAdapter(scroll)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -28,6 +28,7 @@ fun ItemComparator(editor: EditorState) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scroll)
+                .padding(vertical = 24.dp)
         ) {
             ItemDetail(
                 item = editor.selection.primary,
@@ -39,11 +40,10 @@ fun ItemComparator(editor: EditorState) {
                 editor = editor
             )
         }
-        VerticalScrollbar(
-            adapter = adapter,
+        AutoHidingVerticalScrollbar(
+            scrollState = scroll,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .offset(x = 20.dp)
         )
     }
 }
@@ -51,28 +51,25 @@ fun ItemComparator(editor: EditorState) {
 @Composable
 fun Tips() =
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize().alpha(0.85f)
     ) {
-        TipsTitle()
-        for (i in 0 until 6) {
-            Tip(Localizations.UiText("tips_$i"))
-        }
+        Text(
+            text = Localizations["tip"],
+            textAlign = TextAlign.Center,
+            style = LocalTextStyle.current.copy(
+                color = Color.White.copy(alpha = 0.75f),
+                fontSize = 24.sp
+            )
+        )
+        Text(
+            text = Localizations["tip_desc"],
+            textAlign = TextAlign.Center,
+            style = LocalTextStyle.current.copy(
+                color = Color.White.copy(alpha = 0.5f),
+                fontSize = 24.sp
+            ),
+            modifier = Modifier.padding(top = 16.dp)
+        )
     }
-
-@Composable
-private fun TipsTitle() =
-    Text(
-        text = Localizations.UiText("tips_title"),
-        fontSize = 48.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(vertical = 30.dp)
-    )
-
-@Composable
-private fun Tip(text: String) =
-    Text(
-        text = text,
-        fontSize = 24.sp,
-        modifier = Modifier.padding(vertical = 20.dp)
-    )

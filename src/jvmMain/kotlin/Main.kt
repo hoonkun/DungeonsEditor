@@ -136,7 +136,7 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
     CompositionLocalProvider(
         LocalTextStyle provides LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.White),
         LocalOverlayState provides overlays,
-        LocalScrollbarStyle provides GlobalScrollBarStyle,
+        LocalScrollbarStyle provides remember(0xC0FFEE.dp) { GlobalScrollBarStyle },
         LocalWindowState provides windowState,
     ) {
         AppRoot(
@@ -432,12 +432,12 @@ interface AppFocusable {
     data object Editor: AppFocusable
 }
 
-private val GlobalScrollBarStyle =
+private val GlobalScrollBarStyle get() =
     ScrollbarStyle(
-        thickness = 20.dp,
+        thickness = 16.dp,
         minimalHeight = 100.dp,
-        hoverColor = Color.White.copy(alpha = 0.3f),
-        unhoverColor = Color.White.copy(alpha = 0.15f),
+        hoverColor = Color.White.copy(alpha = 0.25f),
+        unhoverColor = Color.White.copy(alpha = 0.1f),
         hoverDurationMillis = 0,
         shape = RoundedCornerShape(3.dp),
     )
