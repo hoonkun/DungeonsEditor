@@ -106,7 +106,6 @@ private fun Content(item: Item, editor: EditorState) {
             PowerEditField(
                 power = DungeonsPower.toInGamePower(item.power),
                 onPowerChange = { item.power = DungeonsPower.toSerializedPower(it) },
-                modifier = Modifier.requiredWidth(200.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             ItemAlterRight(item, editor)

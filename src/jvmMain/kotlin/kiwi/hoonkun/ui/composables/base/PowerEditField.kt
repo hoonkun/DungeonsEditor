@@ -37,7 +37,7 @@ fun PowerEditField(
             validator = { it.toDoubleOrNull() != null },
             onSubmit = { onPowerChange(value.toDouble()) },
             textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
-            modifier = Modifier.offset(y = (-2).dp)
+            modifier = Modifier.offset(y = (-2).dp).width(100.dp)
         )
     }
 }
