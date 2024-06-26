@@ -73,6 +73,8 @@
   "recent_files": "Recent Files",
   "detected_files": "Detected Files",
   "file_selector_preview": "Selector Preview",
+  "file_selector_no_selection": "No file selected",
+  "file_selector_invalid": "Invalid file was selected",
   "enchantment_empty_slot": "Enchantment does not set.\nSelect preferred enchantment in left area!",
   "enchantment_deactivate": "Deactivate",
   "effect_delete": "click again to delete",
