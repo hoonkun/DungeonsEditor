@@ -182,7 +182,7 @@ private fun SummaryHeader(
     Text(
         text = text,
         modifier = modifier
-            .width(225.dp)
+            .width(250.dp)
             .padding(vertical = 16.dp)
             .background(Color(0xffff8800))
             .padding(start = 36.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
