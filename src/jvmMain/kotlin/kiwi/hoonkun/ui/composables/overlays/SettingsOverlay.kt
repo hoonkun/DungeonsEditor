@@ -65,8 +65,8 @@ fun SettingsOverlay() {
             Spacer(modifier = Modifier.weight(1f))
             SettingBooleanValue(
                 text =
-                if (ArcticSettings.preloadTextures) Localizations.UiText("settings_on")
-                else Localizations.UiText("settings_off"),
+                    if (ArcticSettings.preloadTextures) Localizations.UiText("settings_on")
+                    else Localizations.UiText("settings_off"),
                 selected = ArcticSettings.preloadTextures,
                 onSelectedChange = { ArcticSettings.withSave { preloadTextures = it } }
             )
