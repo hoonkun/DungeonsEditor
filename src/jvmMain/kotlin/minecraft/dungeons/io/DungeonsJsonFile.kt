@@ -25,6 +25,11 @@ class DungeonsJsonFile(path: String): File(path) {
     }
 
     object Detector {
+        private val ParentPaths = listOf("Saved Games", "저장된 게임")
+        private val DirectoryIdentifier = ParentPaths.map {
+            "/$it/Mojang Studios/Dungeons".replace("/", separator)
+        }
+
         val results = detectDungeonsJson()
             .let { it.slice(0 until 3.coerceAtMost(it.size)) }
             .mapNotNull {
@@ -43,22 +48,23 @@ class DungeonsJsonFile(path: String): File(path) {
             return result
         }
 
-        private val DirectoryIdentifier = "/Saved Games/Mojang Studios/Dungeons".replace("/", separator)
-
-        private fun detectWindows(base: String = System.getProperty("user.home")): List<String> {
-            val location = "$base$DirectoryIdentifier"
-            val characters = File(location).listFiles()?.flatMap { File("${it.absolutePath}${separator}Characters").listFiles()?.toList() ?: emptyList() } ?: emptyList()
-            return characters.map { it.absolutePath }
-        }
+        private fun detectWindows(base: String = System.getProperty("user.home")): List<String> =
+            DirectoryIdentifier.flatMap { directory ->
+                File("$base$directory").listFiles()
+                    ?.flatMap { File("${it.absolutePath}${separator}Characters").listFiles()?.toList() ?: emptyList() }
+                    ?.map { it.absolutePath }
+                    ?: emptyList()
+            }
 
         private fun detectLinux(): List<String> {
             val baseLocation = Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata/")
             if (!baseLocation.exists()) return emptyList()
-            val bases = Files.walk(baseLocation)
-                .filter { it.absolutePathString().endsWith(DirectoryIdentifier) && it.isDirectory() }
-            val characters = mutableListOf<String>()
-            bases.forEach { characters.addAll(detectWindows(it.absolutePathString().removeSuffix(DirectoryIdentifier))) }
-            return characters
+            return DirectoryIdentifier.flatMap { directory ->
+                Files.walk(baseLocation)
+                    .toList()
+                    .filter { it.absolutePathString().endsWith(directory) && it.isDirectory() }
+                    .flatMap { detectWindows(it.absolutePathString().removeSuffix(directory)) }
+            }
         }
     }
 
