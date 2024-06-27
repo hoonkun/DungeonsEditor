@@ -162,7 +162,7 @@ private fun CloseFileButton(
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             CloseFileConfirmOverlay(
                 onConfirm = onClick,
-                requestClose = { overlays.destroy(it) }
+                requestClose = it
             )
         }
     }
@@ -176,7 +176,7 @@ private fun SaveButton(editor: EditorState) {
             FileSaveOverlay(
                 editor = editor,
                 postSave = { overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) { FileSaveCompleteOverlay() } },
-                requestClose = { overlays.destroy(it) }
+                requestClose = it
             )
         }
     }

@@ -28,6 +28,7 @@ import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.ArmorProperty
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
+import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsDatabase
@@ -73,7 +74,7 @@ class ItemOverlayEditState(val target: Item): ItemOverlayState {
 @Composable
 fun AnimatedVisibilityScope?.ItemOverlay(
     state: ItemOverlayState,
-    requestClose: () -> Unit
+    requestClose: OverlayCloser
 ) {
     val density = LocalDensity.current
 

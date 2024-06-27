@@ -42,7 +42,7 @@ fun OverlayTitleDescription(
 }
 
 @Composable
-fun ContentRoot(content: @Composable ColumnScope.() -> Unit) =
+fun OverlayRoot(content: @Composable ColumnScope.() -> Unit) =
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

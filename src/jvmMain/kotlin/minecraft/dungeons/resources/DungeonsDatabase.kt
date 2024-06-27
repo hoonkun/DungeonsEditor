@@ -111,7 +111,7 @@ data class ItemData(
     val type: String,
     val dataPath: String,
     val variant: String
-) {
+): DungeonsDatabaseLoadable {
 
     val unique by lazy { variant != "Artifact" && listOf("_Unique", "_Spooky", "_Winter", "_Year").any { type.contains(it) } }
 
@@ -134,7 +134,7 @@ data class ItemData(
 
     val isArtifact = variant == "Artifact"
 
-    fun load() {
+    override fun load() {
         inventoryIcon
         largeIcon
     }
@@ -172,7 +172,7 @@ data class ItemData(
 data class EnchantmentData(
     val id: String,
     val dataPath: String,
-) {
+): DungeonsDatabaseLoadable {
     val powerful = PowerfulEnchantments.contains(id)
     val stackable = StackableEnchantments.contains(id)
     val applyFor = mutableSetOf<String>()
@@ -219,7 +219,7 @@ data class EnchantmentData(
         else null
     }
 
-    fun load() {
+    override fun load() {
         icon
         shinePatterns
     }
@@ -409,6 +409,10 @@ data class ArmorPropertyData(
             ?.replace("{2}", "K")
             ?.replace("  ", " ")
             ?.trim()
+}
+
+interface DungeonsDatabaseLoadable {
+    fun load()
 }
 
 typealias BlendingFunction = (Float, Float) -> Float

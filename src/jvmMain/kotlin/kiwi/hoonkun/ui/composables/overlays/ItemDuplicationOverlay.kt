@@ -12,13 +12,14 @@ import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
+import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 
 @Composable
 fun ItemDuplicateLocationConfirmOverlay(
     editor: EditorState,
     target: Item,
-    requestClose: () -> Unit
+    requestClose: OverlayCloser
 ) {
     val onClose = { requestClose() }
 
@@ -34,7 +35,7 @@ fun ItemDuplicateLocationConfirmOverlay(
 
     val where = target.where ?: editor.view
 
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
             title = Localizations.UiText("inventory_duplicate_title", where.localizedName),
             description = Localizations.UiText("inventory_duplicate_description", editor.view.localizedName)

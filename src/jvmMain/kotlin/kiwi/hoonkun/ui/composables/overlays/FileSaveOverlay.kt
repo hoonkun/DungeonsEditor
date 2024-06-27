@@ -9,6 +9,7 @@ import kiwi.hoonkun.ui.composables.base.BasePathToggleProperty
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
+import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
@@ -18,7 +19,7 @@ import java.io.File
 fun FileSaveOverlay(
     editor: EditorState,
     postSave: () -> Unit = { },
-    requestClose: () -> Unit
+    requestClose: OverlayCloser
 ) {
     val overlays = LocalOverlayState.current
     var createBackup by remember { mutableStateOf(false) }
@@ -32,7 +33,7 @@ fun FileSaveOverlay(
         OverlayDescriptionText(Localizations.UiText("tap_to_cancel"), fontSize = 18.sp)
     }
 
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
             title = Localizations.UiText("file_save_title"),
             description = Localizations.UiText("file_save_description")
@@ -62,7 +63,7 @@ fun FileSaveOverlay(
                 } catch (e: Exception) {
                     overlays.make {
                         ErrorOverlay(
-                            e = e,
+                            error = e,
                             title = Localizations["error_save"],
                             description = Localizations["error_save_description"]
                         )

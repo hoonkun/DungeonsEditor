@@ -63,7 +63,7 @@ fun InventoryItems(
                     ) {
                         ItemOverlay(
                             state = remember { ItemOverlayCreateState(editorState) },
-                            requestClose = { overlays.destroy(it) }
+                            requestClose = it
                         )
                     }
                 }

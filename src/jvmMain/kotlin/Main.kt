@@ -22,14 +22,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.*
 import androidx.compose.ui.zIndex
 import kiwi.hoonkun.ArcticSettings
+import kiwi.hoonkun.core.PakIndexingState
+import kiwi.hoonkun.core.rememberPakIndexingState
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.composables.JsonEditor
@@ -38,7 +38,8 @@ import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
-import kiwi.hoonkun.ui.composables.overlays.*
+import kiwi.hoonkun.ui.composables.overlays.ExitApplicationConfirmOverlay
+import kiwi.hoonkun.ui.composables.overlays.SettingsOverlay
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.*
 import kiwi.hoonkun.ui.units.dp
@@ -51,36 +52,58 @@ import kotlin.random.Random
 
 fun main() = application {
     val windowSize = remember(0xC0FFEE.dp) { DpSize(1800.dp, 1400.dp) }
-
-    val arcticWindowState = remember {
-        ArcticWindowState(WindowState(size = windowSize, position = WindowPosition(Alignment.Center)))
-    }
+    val windowState = rememberWindowState(
+        size = windowSize,
+        position = WindowPosition(Alignment.Center)
+    )
 
     SideEffect {
-        arcticWindowState.parent.size = windowSize
-        arcticWindowState.parent.position = WindowPosition(Alignment.Center)
+        windowState.size = windowSize
+        windowState.position = WindowPosition(Alignment.Center)
     }
 
     Window(
         onCloseRequest = ::exitApplication,
-        state = arcticWindowState.parent,
+        state = windowState,
         resizable = false,
-        visible = arcticWindowState.visible,
         title = "Dungeons Editor",
         icon = Resources.Drawables.icon(),
     ) {
-        App(arcticWindowState, ::exitApplication)
+        App(
+            arcticWindowState = windowState,
+            requestExitApp = ::exitApplication
+        )
     }
 }
 
 @Composable
-private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
-    val overlays = rememberOverlayState()
+private fun App(
+    arcticWindowState: WindowState,
+    requestExitApp: () -> Unit
+) {
+    val overlays = LocalOverlayState.current
     val appPointerListeners = LocalAppPointerListeners.current
 
-    val windowWidth = windowState.size.width
+    val arcticTextStyle = remember(0xC0FFEE.dp) {
+        TextStyle(
+            color = Color.White,
+            fontSize = 20.sp,
+        )
+    }
+    val arcticScrollbarStyle = remember(0xC0FFEE.dp) {
+        ScrollbarStyle(
+            thickness = 16.dp,
+            minimalHeight = 100.dp,
+            hoverColor = Color.White.copy(alpha = 0.25f),
+            unhoverColor = Color.White.copy(alpha = 0.1f),
+            hoverDurationMillis = 0,
+            shape = RoundedCornerShape(3.dp),
+        )
+    }
 
-    var pakLoaded by remember { mutableStateOf(false) }
+    val pakIndexingState by rememberPakIndexingState()
+
+    val windowWidth = arcticWindowState.size.width
     var selectedJsonSourcePath: String? by remember { mutableStateOf(null) }
 
     val states = remember { mutableStateMapOf<String, EditorState>() }
@@ -133,17 +156,10 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
 
     val onTabSelect: (String?) -> Unit = { selectedJsonSourcePath = it }
 
-    LaunchedPakLoadEffect(
-        overlays = overlays,
-        onLoad = { pakLoaded = true },
-        requestExit = requestExit
-    )
-
     CompositionLocalProvider(
-        LocalTextStyle provides LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.White),
-        LocalOverlayState provides overlays,
-        LocalScrollbarStyle provides remember(0xC0FFEE.dp) { GlobalScrollBarStyle },
-        LocalWindowState provides windowState,
+        LocalTextStyle provides arcticTextStyle,
+        LocalScrollbarStyle provides arcticScrollbarStyle,
+        LocalWindowState provides arcticWindowState,
     ) {
         AppRoot(
             overlays = overlays,
@@ -154,7 +170,7 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                 .then(appPointerListeners.onGlobalPointerEventModifier())
         ) {
              MinimizableAnimatedVisibility(
-                visible = pakLoaded,
+                visible = pakIndexingState == PakIndexingState.Loaded,
                 enter = minimizableEnterTransition { expandIn() + fadeIn() },
                 exit = minimizableExitTransition { shrinkOut() + fadeOut() },
                 modifier = Modifier
@@ -255,7 +271,7 @@ private fun App(windowState: ArcticWindowState, requestExit: () -> Unit) {
                                 Row(
                                     modifier = Modifier.align(Alignment.BottomStart)
                                 ) {
-                                    MainMenuButtons(requestExit = requestExit)
+                                    MainMenuButtons(requestExit = requestExitApp)
                                 }
                                 Column(
                                     horizontalAlignment = Alignment.End,
@@ -323,11 +339,11 @@ fun MainMenuButtons(
     MainIconButton(
         bitmap = Resources.Drawables.leave,
         onClick = {
-            overlays.make {
+            overlays.make { requestClose ->
                 ExitApplicationConfirmOverlay(
                     description = description,
                     onConfirm = requestExit,
-                    requestClose = { overlays.destroy(it) }
+                    requestClose = requestClose
                 )
             }
         }
@@ -364,88 +380,11 @@ private fun MainIconButton(
     }
 }
 
-@Composable
-private fun LaunchedPakLoadEffect(
-    overlays: OverlayState,
-    onLoad: () -> Unit,
-    requestExit: () -> Unit
-) {
-    LaunchedEffect(true) {
-        fun onPakLoaded(indexingOverlayId: String) {
-            onLoad()
-            overlays.destroy(indexingOverlayId)
-        }
-
-        fun onPakNotFound(indexingOverlayId: String) {
-            fun onNewPakPathSelected(notFoundOverlayId: String, path: String) {
-                ArcticSettings.customPakLocation = path
-                ArcticSettings.save()
-
-                overlays.destroy(notFoundOverlayId)
-            }
-
-            overlays.destroy(indexingOverlayId)
-            overlays.make(canBeDismissed = false) { overlayId ->
-                PakNotFoundOverlay(
-                    onSelect = { onNewPakPathSelected(overlayId, it) },
-                    requestExit = requestExit
-                )
-            }
-        }
-
-        overlays.make(
-            canBeDismissed = false,
-            backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)
-        ) { id ->
-            PakIndexingOverlay(
-                onSuccess = { onPakLoaded(id) },
-                onFailure = { onPakNotFound(id) },
-                onError = { error ->
-                    overlays.destroy(id)
-                    overlays.make(canBeDismissed = false) {
-                        ErrorOverlay(
-                            e = error,
-                            title = Localizations["error_pak_title"]
-                        )
-                    }
-                }
-            )
-        }
-    }
-}
-
-@Stable
-class ArcticWindowState(initialState: WindowState) {
-    var parent: WindowState by mutableStateOf(initialState)
-
-    val isMinimized get() = parent.isMinimized
-    val placement get() = parent.placement
-    val position get() = parent.position
-    val size get() = parent.size
-
-    var visible by mutableStateOf(true)
-}
-
 val LocalWindowState = staticCompositionLocalOf {
-    ArcticWindowState(
-        WindowState(
-            size = DpSize(1800.dp, 1400.dp),
-            position = WindowPosition(Alignment.Center)
-        )
-    )
+    WindowState(size = DpSize(1800.dp, 1400.dp), position = WindowPosition(Alignment.Center))
 }
 
 interface AppFocusable {
     data object Entries: AppFocusable
     data object Editor: AppFocusable
 }
-
-private val GlobalScrollBarStyle get() =
-    ScrollbarStyle(
-        thickness = 16.dp,
-        minimalHeight = 100.dp,
-        hoverColor = Color.White.copy(alpha = 0.25f),
-        unhoverColor = Color.White.copy(alpha = 0.1f),
-        hoverDurationMillis = 0,
-        shape = RoundedCornerShape(3.dp),
-    )

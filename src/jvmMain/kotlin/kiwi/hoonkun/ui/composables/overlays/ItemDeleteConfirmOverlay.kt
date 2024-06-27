@@ -12,6 +12,7 @@ import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.Item
+import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 
 
@@ -19,7 +20,7 @@ import kiwi.hoonkun.ui.units.dp
 fun ItemDeleteConfirmOverlay(
     editor: EditorState,
     target: Item,
-    requestClose: () -> Unit
+    requestClose: OverlayCloser
 ) {
     val onNegative = { requestClose() }
     val onPositive = {
@@ -27,7 +28,7 @@ fun ItemDeleteConfirmOverlay(
         requestClose()
     }
 
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
             title = Localizations.UiText(
                 key = "inventory_delete_title",

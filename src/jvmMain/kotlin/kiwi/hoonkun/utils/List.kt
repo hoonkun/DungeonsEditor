@@ -15,3 +15,6 @@ fun <T> MutableList<T>.replace(from: T, into: T) {
     removeAt(index)
     add(index, into)
 }
+
+fun <T> List<T>.chunkedMerge(size: Int, merger: (chunked: List<T>) -> T): List<T> =
+    this.chunked(size).map(merger)

@@ -46,6 +46,7 @@
   "cleaning_up": "cleaning up",
   "pak_indexing_title": "Reading game resources",
   "pak_indexing_description": "This may take a bit, please wait until finishes!",
+  "pak_reading": "Reading Pak files",
   "no_recent_files": "No Recent Files!",
   "no_detected_files": "No Detected Files!",
   "pak_not_found_title": "Cannot find game resources.",

@@ -80,7 +80,7 @@ private fun Content(item: Item, editor: EditorState) {
                     overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
                         EnchantmentOverlay(
                             initialSelected = enchantment,
-                            requestClose = { overlays.destroy(it) }
+                            requestClose = it
                         )
                     }
                 }
@@ -168,7 +168,7 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
                 ) {
                     ItemOverlay(
                         state = remember { ItemOverlayEditState(target = item) },
-                        requestClose = { overlays.destroy(it) }
+                        requestClose = it
                     )
                 }
             }
@@ -188,7 +188,7 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
                     ItemDuplicateLocationConfirmOverlay(
                         editor = editor,
                         target = item,
-                        requestClose = { overlays.destroy(it) }
+                        requestClose = it
                     )
                 }
             }
@@ -203,7 +203,7 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
                 ItemDeleteConfirmOverlay(
                     editor = editor,
                     target = item,
-                    requestClose = { overlays.destroy(it) }
+                    requestClose = it
                 )
             }
         }

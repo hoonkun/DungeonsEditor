@@ -56,7 +56,7 @@ private fun ItemEnchantmentEach(
         overlays.make(
             enter = defaultFadeIn(),
             exit = defaultFadeOut(),
-            content = { EnchantmentOverlay(initialSelected = enchantment, requestClose = { overlays.destroy(it) }) }
+            content = { EnchantmentOverlay(initialSelected = enchantment, requestClose = it) }
         )
     }
 

@@ -75,7 +75,7 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
                         ArmorPropertyOverlay(
                             holder = property.holder,
                             initialSelected = property,
-                            requestClose = { overlays.destroy(it) }
+                            requestClose = it
                         )
                     }
                 }
@@ -167,7 +167,7 @@ private fun ArmorPropertyAddButton(item: Item) {
                     ArmorPropertyOverlay(
                         holder = item,
                         initialSelected = null,
-                        requestClose = { overlays.destroy(it) }
+                        requestClose = it
                     )
                 }
             }

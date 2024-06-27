@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import kotlinx.coroutines.*
@@ -28,9 +29,10 @@ import kotlin.math.roundToInt
 @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class, ExperimentalStdlibApi::class)
 @Composable
 fun PakIndexingOverlay(
-    onSuccess: () -> Unit,
-    onFailure: () -> Unit,
-    onError: (e: Exception) -> Unit
+    onLoaded: () -> Unit,
+    onNotFound: () -> Unit,
+    onError: (e: Exception) -> Unit,
+    requestClose: OverlayCloser
 ) {
     val threadScope = rememberCoroutineScope { newFixedThreadPoolContext(8, "PakTextureIndexingPool") }
 
@@ -77,7 +79,7 @@ fun PakIndexingOverlay(
                 initState = initState.copy(leadingText = "Pak 파일을 읽고있습니다")
 
                 if (!DungeonsPakRegistry.initialize(customPakLocation)) {
-                    onFailure()
+                    onNotFound()
                     return@withContext
                 }
 
@@ -116,22 +118,24 @@ fun PakIndexingOverlay(
                 )
 
                 delay(500)
-                onSuccess()
+                onLoaded()
             } catch (e: Exception) {
                 onError(e)
+            } finally {
+                requestClose()
             }
         }
     }
 
     DisposableEffect(Unit) { onDispose { threadScope.coroutineContext[CloseableCoroutineDispatcher]?.close() } }
 
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
             title = Localizations.UiText("pak_indexing_title"),
             description = Localizations.UiText("pak_indexing_description")
         )
 
-        if (!ArcticSettings.preloadTextures) return@ContentRoot
+        if (!ArcticSettings.preloadTextures) return@OverlayRoot
 
         Spacer(modifier = Modifier.height(50.dp))
         Column(modifier = Modifier.width(700.dp)) {

@@ -26,7 +26,7 @@ import java.io.File
 
 @Composable
 fun SettingsOverlay() {
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(title = Localizations.UiText("settings_title"))
         Spacer(modifier = Modifier.height(36.dp))
 
