@@ -43,15 +43,16 @@ fun AnimatedTooltipArea(
 ) {
     val scope = rememberCoroutineScope()
 
-    var job by remember { mutableRefOf<Job?>(null) }
-    var parentBounds by remember { mutableRefOf(Rect.Zero) }
+    val job = remember { mutableRefOf<Job?>(null) }
+    val parentBounds = remember { mutableRefOf(Rect.Zero) }
 
     var isVisible by remember { mutableStateOf(false) }
 
     val appPointerListeners = LocalAppPointerListeners.current
 
     fun hideIfNotHovered(globalPosition: Offset) {
-        if (parentBounds.contains(globalPosition)) return
+        if (parentBounds.value.contains(globalPosition)) return
+        job.value?.cancel()
         isVisible = false
     }
 
@@ -64,19 +65,19 @@ fun AnimatedTooltipArea(
 
     Box(
         modifier = modifier
-            .onGloballyPositioned { parentBounds = it.boundsInWindow() }
+            .onGloballyPositioned { parentBounds.value = it.boundsInWindow() }
             .onPointerEvent(PointerEventType.Enter) {
-                job?.cancel()
-                job = scope.launch {
+                job.value?.cancel()
+                job.value = scope.launch {
                     delay(delayMillis)
                     isVisible = true
                 }
             }
             .onPointerEvent(PointerEventType.Move) {
-                hideIfNotHovered(parentBounds.topLeft + it.position)
+                hideIfNotHovered(parentBounds.value.topLeft + it.position)
             }
             .onPointerEvent(PointerEventType.Exit) {
-                hideIfNotHovered(parentBounds.topLeft + it.position)
+                hideIfNotHovered(parentBounds.value.topLeft + it.position)
             }
             .onPointerEvent(PointerEventType.Press) {
                 isVisible = false
