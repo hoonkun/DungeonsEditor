@@ -38,8 +38,7 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
-import kiwi.hoonkun.ui.reusables.rememberFocusRequester
-import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
+import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import kiwi.hoonkun.utils.Retriever
@@ -55,17 +54,19 @@ fun FileSelector(
     modifier: Modifier = Modifier,
     defaultCandidate: Retriever<File?> = { null },
     maxRows: Int = 3,
-    initialPath: String = File.separator,
     initialUseBasePath: Boolean = true,
+    initialPath: String = if (initialUseBasePath || isLinux) File.separator else if (isWindows) WindowsDefaultDrive else File.separator,
     options: @Composable () -> Unit = { },
 ) {
-    val rememberedDefaultCandidate = remember(defaultCandidate) { defaultCandidate()?.toStateFile() }
     val textFieldScrollState = rememberTextFieldScrollState(orientation = Orientation.Horizontal)
 
     var useBasePath by remember { mutableStateOf(initialUseBasePath) }
 
-    var path by remember { mutableStateOf(TextFieldValue(initialPath, selection = TextRange(1))) }
+    var path by remember { mutableStateOf(TextFieldValue(initialPath, selection = TextRange(initialPath.length))) }
     val entirePath by remember(path.text) { derivedStateOf { "${if (useBasePath) BasePath else ""}${path.text}" } }
+
+    val rememberedDefaultCandidate = remember(defaultCandidate) { defaultCandidate()?.toStateFile() }
+    val rememberedInitialPath = remember { initialPath }
 
     val keys = remember { KeySet(ctrl = false, shift = false) }
 
@@ -93,10 +94,13 @@ fun FileSelector(
         mutableStateOf(newState)
     }
     val hint = remember(path.text, hintTarget, rememberedDefaultCandidate) {
-        if (path.text == "/" && hintTarget == null && rememberedDefaultCandidate != null)
-            return@remember rememberedDefaultCandidate.absolutePath.drop(1)
+        val target = hintTarget
+            ?: (if (rememberedInitialPath == path.text) rememberedDefaultCandidate else null)
+            ?: return@remember ""
 
-        val target = hintTarget ?: return@remember ""
+        if (target === rememberedDefaultCandidate) {
+            return@remember rememberedDefaultCandidate.absolutePath.removePrefix(rememberedInitialPath)
+        }
 
         val entered = path.text.let { it.substring(it.lastIndexOf(File.separator) + 1, it.length) }
         val entire = target.name
@@ -114,12 +118,24 @@ fun FileSelector(
         var newPath = it.text
         newPath = newPath.replace("//", "/")
 
-        val pasted = newPath.length - path.text.length > 2
-        if (pasted && newPath.startsWith(BasePath) && useBasePath) {
-            useBasePath = false
-        }
-        if (pasted && newPath.startsWith("\\$BasePath") && useBasePath) {
-            newPath = newPath.replace("\\$BasePath", "")
+        if (newPath.length - path.text.length > 2) {
+            if (newPath.startsWith(BasePath) && useBasePath) {
+                useBasePath = false
+            }
+            if (newPath.startsWith("\\$BasePath") && useBasePath) {
+                newPath = newPath.replace("\\$BasePath", "")
+            }
+            if (newPath.startsWith("\\\\") && !useBasePath) {
+                newPath = newPath.replace("\\\\", "\\")
+            }
+            WindowsDrives.forEach {
+                if (newPath.startsWith("$it$BasePath") && useBasePath) {
+                    newPath = newPath.replace("$it$BasePath", "")
+                }
+                if (newPath.startsWith("$it$it") && !useBasePath) {
+                    newPath = newPath.replace("$it$it", it)
+                }
+            }
         }
 
         TextFieldValue(
@@ -133,7 +149,10 @@ fun FileSelector(
     }
 
     val complete = complete@ {
-        val target = (if (path.text == "/" && hintTarget == null) rememberedDefaultCandidate else hintTarget) ?: return@complete false
+        val target = hintTarget
+            ?: (if (rememberedInitialPath == path.text) rememberedDefaultCandidate else null)
+            ?: return@complete false
+
         if (target === rememberedDefaultCandidate) {
             useBasePath = false
         }
@@ -194,8 +213,10 @@ fun FileSelector(
         Row {
             options()
             BasePathToggleProperty(key = "useBasePath", value = if (useBasePath) "true" else "false") {
-                if (it && isWindows && path.text.isEmpty()) path = path.copy(text = "\\")
-                else if (isWindows && path.text == File.separator) path = path.copy(text = "")
+                if (it && isWindows && (path.text == WindowsDefaultDrive || path.text == ""))
+                    path = path.copy(text = "\\")
+                else if (isWindows && (path.text == File.separator || path.text == ""))
+                    path = path.copy(text = WindowsDefaultDrive)
                 useBasePath = it
             }
             Spacer(modifier = Modifier.width(30.dp))
@@ -545,6 +566,9 @@ private enum class CandidateType(
     Directory("directories", SelectorColors.Directories, { it.isDirectory && !it.isFile }),
     File("files", SelectorColors.Files, { !it.isDirectory })
 }
+
+private const val WindowsDefaultDrive = "C:\\"
+private val WindowsDrives = listOf(/*"A", "B", */"C", "D", "E", "F").map { "$it:\\" }
 
 private val isWindows = File.separator == "\\"
 private val isLinux = File.separator == "/"

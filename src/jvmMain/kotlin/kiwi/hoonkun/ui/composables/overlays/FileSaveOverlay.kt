@@ -40,6 +40,8 @@ fun FileSaveOverlay(
         Spacer(modifier = Modifier.height(20.dp))
         FileSelector(
             defaultCandidate = { File(editor.stored.sourcePath) },
+            initialPath = editor.stored.sourcePath.let { it.slice(0..it.indexOf(File.separator)) },
+            initialUseBasePath = false,
             modifier = Modifier
                 .size(1050.dp, 640.dp)
                 .padding(start = 25.dp, end = 25.dp, top = 32.dp),
