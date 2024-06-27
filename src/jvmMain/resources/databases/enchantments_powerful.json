@@ -1,0 +1,30 @@
+[
+  "GravityMelee",
+  "Swirling",
+  "VoidTouchedMelee",
+  "Exploding",
+  "RadianceMelee",
+  "Shockwave",
+  "CriticalHit",
+  "PotionThirstMelee",
+
+  "GravityPulse",
+  "FinalShout",
+  "Chilling",
+  "Protection",
+  "DeathBarter",
+  "MultiDodge",
+  "PoisonFocus",
+  "SoulFocus",
+  "FireFocus",
+  "Reckless",
+
+  "TempoTheft",
+  "LevitationShot",
+  "ChainReaction",
+  "VoidTouchedRanged",
+  "Gravity",
+  "MultiCharge",
+  "PotionThirstRanged",
+  "ShockWeb"
+]

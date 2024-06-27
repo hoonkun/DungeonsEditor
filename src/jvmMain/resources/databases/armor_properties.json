@@ -1,0 +1,220 @@
+{
+  "AllyDamageBoost": [
+    "MercenaryArmor",
+    "SpelunkersArmor",
+    "SpelunkersArmor_Unique1",
+    "WolfArmor",
+    "WolfArmor_Unique1",
+    "WolfArmor_Unique2",
+    "DarkArmor_Unique1",
+    "WolfArmor_Winter1",
+    "SpelunkersArmor_Year1",
+    "MercenaryArmor_Spooky2"
+  ],
+  "AreaHeal": [
+    "BardsGarb",
+    "BardsGarb_Unique1",
+    "NatureArmor",
+    "NatureArmor_Unique1",
+    "SproutArmor",
+    "SproutArmor_Unique1",
+    "WolfArmor",
+    "WolfArmor_Unique1",
+    "WolfArmor_Unique2",
+    "ChampionsArmor_Unique1",
+    "BeenestArmor",
+    "BeenestArmor_Unique1",
+    "WolfArmor_Winter1"
+  ],
+  "DamageAbsorption": [],
+  "DodgeCooldownIncrease": [
+    "ReinforcedMail",
+    "ReinforcedMail_Unique1"
+  ],
+  "DodgeInvulnerability": [
+    "OcelotArmor_Unique1",
+    "SquidArmor_Unique1"
+  ],
+  "DodgeSpeedIncrease": [
+    "OcelotArmor",
+    "OcelotArmor_Unique1"
+  ],
+  "HealingAura": [
+    "TurtleArmor",
+    "TurtleArmor_Unique1"
+  ],
+  "IncreasedArrowBundleSize": [
+    "CowardsArmor",
+    "ArchersStrappings",
+    "ArchersStrappings_Unique1"
+  ],
+  "IncreasedMobTargeting": [
+    "ChampionsArmor",
+    "ChampionsArmor_Unique1",
+    "ShulkerArmor",
+    "ShulkerArmor_Unique1"
+  ],
+  "ItemCooldownDecrease": [
+    "ClimbingGear",
+    "ClimbingGear_Unique1",
+    "ClimbingGear_Unique2",
+    "EvocationRobe",
+    "EvocationRobe_Unique1",
+    "EvocationRobe_Unique2",
+    "CowardsArmor",
+    "BattleRobe",
+    "BattleRobe_Unique1"
+  ],
+  "ItemDamageBoost": [
+    "PiglinArmor",
+    "PiglinArmor_Unique1",
+    "SoulRobe",
+    "SoulRobe_Unique1",
+    "BattleRobe_Unique1",
+    "SpelunkersArmor_Unique1",
+    "SpelunkersArmor_Year1"
+  ],
+  "LifeStealAura": [
+    "GrimArmor",
+    "GrimArmor_Unique1",
+    "AssassinArmor_Unique1",
+    "GrimArmor_Spooky2"
+  ],
+  "MeleeAttackSpeedBoost": [
+    "EmeraldArmor",
+    "EmeraldArmor_Unique1",
+    "EmeraldArmor_Unique2",
+    "AssassinArmor_Unique1",
+    "AssassinArmor"
+  ],
+  "MeleeDamageBoost": [
+    "ScaleMail",
+    "ScaleMail_Unique1",
+    "FullPlateArmor_Unique1",
+    "BattleRobe",
+    "BattleRobe_Unique1",
+    "FullPlateArmor_Spooky2"
+  ],
+  "MissChance": [
+    "ReinforcedMail",
+    "ReinforcedMail_Unique1",
+    "SoulRobe_Unique1",
+    "WolfArmor_Unique1",
+    "FullPlateArmor",
+    "FullPlateArmor_Unique1",
+    "GhostArmor",
+    "GhostArmor_Unique1",
+    "WolfArmor_Winter1",
+    "FullPlateArmor_Spooky2",
+    "GhostArmor_Spooky2"
+  ],
+  "MoveSpeedAura": [
+    "EvocationRobe",
+    "EvocationRobe_Unique1",
+    "EvocationRobe_Unique2",
+    "ArchersStrappings_Unique1",
+    "SquidArmor",
+    "SquidArmor_Unique1"
+  ],
+  "MoveSpeedReduction": [],
+  "PetBat": [
+    "SpelunkersArmor",
+    "SpelunkersArmor_Unique1",
+    "SpelunkersArmor_Year1"
+  ],
+  "PotionCooldownDecrease": [
+    "ChampionsArmor",
+    "ChampionsArmor_Unique1"
+  ],
+  "RangedDamageBoost": [
+    "ArchersStrappings",
+    "ArchersStrappings_Unique1",
+    "PhantomArmor",
+    "PhantomArmor_Unique1"
+  ],
+  "SoulGatheringBoost": [
+    "SoulRobe",
+    "SoulRobe_Unique1",
+    "GrimArmour",
+    "GrimArmour_Unique1",
+    "GrimArmour_Spooky2"
+  ],
+  "SuperbDamageAbsorption": [
+    "GrimArmor_Unique1",
+    "MercenaryArmor",
+    "MercenaryArmor_Unique1",
+    "OcelotArmor",
+    "OcelotArmor_Unique1",
+    "ReinforcedMail",
+    "ReinforcedMail_Unique1",
+    "ScaleMail",
+    "ScaleMail_Unique1",
+    "SnowArmor",
+    "SnowArmor_Unique1",
+    "TurtleArmor",
+    "TurtleArmor_Unique1",
+    "FullPlateArmor_Unique1",
+    "FullPlateArmor",
+    "ChampionsArmor",
+    "ChampionsArmor_Unique1",
+    "DarkArmor",
+    "DarkArmor_Unique1",
+    "BeenestArmor_Unique1",
+    "MercenaryArmor_Spooky1",
+    "FullPlateArmor_Spooky1",
+    "GrimArmor_Spooky2",
+    "MercenaryArmor_Spooky2"
+  ],
+  "SlowResistance": [
+    "ClimbingGear_Unique1",
+    "SnowArmor",
+    "SnowArmor_Unique1"
+  ],
+  "TeleportChance": [],
+  "Beekeeper": [
+    "BeenestArmor",
+    "BeenestArmor_Unique1"
+  ],
+  "DodgeGhostForm": [
+    "GhostArmor",
+    "GhostArmor_Unique1",
+    "GhostArmor_Spooky2"
+  ],
+  "EmeraldShield": [
+    "EmeraldArmor_Unique1"
+  ],
+  "EnvironmentalProtection": [
+    "ClimbingGear_Unique1"
+  ],
+  "Heavyweight": [
+    "ClimbingGear",
+    "ClimbingGear_Unique1",
+    "ClimbingGear_Unique2"
+  ],
+  "DodgeRoot": [
+    "SproutArmor",
+    "SproutArmor_Unique1"
+  ],
+  "ItemCooldownReset": [
+    "PiglinArmor",
+    "PiglinArmor_Unique1",
+    "NatureArmor",
+    "NatureArmor_Unique1"
+  ],
+  "SquidRollLimited": [],
+  "SquidRollQuick": [
+    "SquidArmor",
+    "SquidArmor_Unique1"
+  ],
+  "ImmunityBoost": [
+    "BardsGarb_Unique1"
+  ],
+  "InstantTransmission": [
+    "EndRobes",
+    "EndRobes_Unique1"
+  ],
+  "Resonant": [
+    "BardsGarb_Unique1",
+    "BardsGarb"
+  ]
+}

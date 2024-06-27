@@ -1,0 +1,10 @@
+{
+  "Gravity": "GravityPulse",
+  "GravityMelee": "GravityPulse",
+  "FireAspect": "FireTrail",
+  "ShadowFlash": "shadowflash",
+  "ShadowFeast": "shadowfeast",
+  "BagOfSouls": "BagOfSoul",
+  "EnigmaResonatorMelee": "EnigmaMelee",
+  "EnigmaResonatorRanged": "EnigmaRanged"
+}

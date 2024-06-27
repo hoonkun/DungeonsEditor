@@ -1,9 +1,10 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("multiplatform") version "1.8.0"
-    kotlin("plugin.serialization") version "1.6.20"
-    id("org.jetbrains.compose")
+    kotlin("multiplatform") version "2.0.0"
+    kotlin("plugin.serialization") version "2.0.0"
+    id("org.jetbrains.compose") version "1.6.11"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
 group = "kiwi.hoonkun.app.editor.dungeons"
@@ -20,16 +21,14 @@ tasks.withType<Test> {
 }
 
 kotlin {
-    jvm {
-        jvmToolchain(11)
-        withJava()
-    }
+    jvmToolchain(17)
+    jvm { withJava() }
     sourceSets {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation("org.json:json:20230227")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+                implementation("org.json:json:20240303")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
                 implementation(project(":PakReader"))
                 implementation(kotlin("reflect"))
             }
@@ -50,7 +49,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Exe, TargetFormat.AppImage)
             packageName = "DungeonsEditor"
-            packageVersion = "1.0.1"
+            packageVersion = "1.1.0"
             linux {
                 iconFile.set(project.file("src/jvmMain/resources/_icon.png"))
             }
@@ -63,4 +62,8 @@ compose.desktop {
             configurationFiles.from("proguard-rules.pro")
         }
     }
+}
+
+composeCompiler {
+    enableStrongSkippingMode.set(true)
 }
