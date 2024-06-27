@@ -10,7 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.*
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.util.fastMaxBy
+import androidx.compose.ui.util.fastMaxOfOrNull
 import kiwi.hoonkun.ArcticSettings
 
 fun <T>defaultTween() = tween<T>(250)
@@ -102,12 +108,49 @@ fun <S>MinimizableAnimatedContent(
             content = { content(it) }
         )
     } else {
-        Box(
-            contentAlignment = contentAlignment,
+        Layout(
+            measurePolicy = remember { MinimizableAnimatedContentBoxMeasurePolicy() },
             modifier = modifier,
             content = { content(targetState) }
         )
     }
+}
+
+private class MinimizableAnimatedContentBoxMeasurePolicy : MeasurePolicy {
+    override fun MeasureScope.measure(
+        measurables: List<Measurable>,
+        constraints: Constraints
+    ): MeasureResult {
+        val placeables = measurables.fastMap { it.measure(constraints) }
+        val maxWidth = placeables.fastMaxBy { it.width }?.width ?: 0
+        val maxHeight = placeables.fastMaxBy { it.height }?.height ?: 0
+
+        return layout(maxWidth, maxHeight) {
+            placeables.fastForEach {
+                it.place(0, 0)
+            }
+        }
+    }
+
+    override fun IntrinsicMeasureScope.minIntrinsicWidth(
+        measurables: List<IntrinsicMeasurable>,
+        height: Int
+    ) = measurables.fastMaxOfOrNull { it.minIntrinsicWidth(height) } ?: 0
+
+    override fun IntrinsicMeasureScope.minIntrinsicHeight(
+        measurables: List<IntrinsicMeasurable>,
+        width: Int
+    ) = measurables.fastMaxOfOrNull { it.minIntrinsicHeight(width) } ?: 0
+
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+        measurables: List<IntrinsicMeasurable>,
+        height: Int
+    ) = measurables.fastMaxOfOrNull { it.maxIntrinsicWidth(height) } ?: 0
+
+    override fun IntrinsicMeasureScope.maxIntrinsicHeight(
+        measurables: List<IntrinsicMeasurable>,
+        width: Int
+    ) = measurables.fastMaxOfOrNull { it.maxIntrinsicHeight(width) } ?: 0
 }
 
 @Composable
