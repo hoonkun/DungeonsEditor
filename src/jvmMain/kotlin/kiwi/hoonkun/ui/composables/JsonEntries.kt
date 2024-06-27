@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,10 +25,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.rememberComponentRectPositionProvider
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.ui.composables.base.AnimatedTooltipArea
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.DungeonsJsonState
@@ -37,6 +41,7 @@ import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.io.DungeonsSummary
 import minecraft.dungeons.resources.DungeonsTextures
+import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -92,6 +97,7 @@ fun JsonEntries(
                         }
                         is DungeonsJsonFile.Preview.Valid -> {
                             JsonPreview(
+                                path = it.json.sourcePath,
                                 summary = it.summary,
                                 modifier = hideIfPreviewNotPresents,
                                 onClick = { onJsonSelect(it.json) }
@@ -115,8 +121,9 @@ fun JsonEntries(
                     )
                 }
             } else {
-                items(recent, key = { it.first }) { (_, json, summary) ->
+                items(recent, key = { "recent_${it.first}" }) { (path, json, summary) ->
                     JsonPreview(
+                        path = path,
                         summary = summary,
                         onClick = { onJsonSelect(json) },
                         modifier = hideIfPreviewPresents.animateItemPlacement(
@@ -140,8 +147,9 @@ fun JsonEntries(
                     )
                 }
             } else {
-                items(detected, key = { it.first }) { (_, json, summary) ->
+                items(detected, key = { "detected_${it.first}" }) { (path, json, summary) ->
                     JsonPreview(
+                        path = path,
                         summary = summary,
                         onClick = { onJsonSelect(json) },
                         modifier = hideIfPreviewPresents.animateItemPlacement(
@@ -196,12 +204,16 @@ private fun SummaryNoEntries(
 
 @Composable
 private fun JsonPreview(
+    path: String,
     summary: DungeonsSummary,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
+
+    val directory = remember(path) { path.slice(0..path.lastIndexOf(File.separator)) }
+    val name = remember(path, directory) { path.removePrefix(directory) }
 
     val hoverOffset by minimizableAnimateFloatAsState(
         targetValue = if (hovered) 24f else 0f,
@@ -228,6 +240,34 @@ private fun JsonPreview(
             }
             .padding(vertical = 24.dp, horizontal = 36.dp)
     ) {
+        AnimatedTooltipArea(
+            tooltip = {
+                Text(
+                    text = directory,
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    modifier = Modifier
+                        .background(Color(0xff191919), shape = RoundedCornerShape(6.dp))
+                        .hoverable(source)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            },
+            delayMillis = 350,
+            tooltipPositionProvider = rememberComponentRectPositionProvider(
+                anchor = Alignment.TopStart,
+                alignment = Alignment.TopEnd,
+                offset = DpOffset(x = (-10).dp, y = (-4).dp)
+            )
+        ) {
+            Text(
+                text = directory,
+                fontSize = 16.sp,
+                color = Color.White.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Text(text = name, modifier = Modifier.padding(bottom = 12.dp))
         Row {
             CurrencyText(
                 value = "${summary.level}",
