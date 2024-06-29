@@ -2,10 +2,17 @@ package minecraft.dungeons.io
 
 import Keyset
 import androidx.compose.runtime.Stable
-import kiwi.hoonkun.ui.states.DungeonsJsonState
-import kiwi.hoonkun.ui.states.Item
+import androidx.compose.runtime.toMutableStateList
+import kiwi.hoonkun.utils.transformWithJsonObject
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.emerald
+import minecraft.dungeons.states.extensions.gold
+import minecraft.dungeons.values.DungeonsItem
+import minecraft.dungeons.values.DungeonsLevel
+import minecraft.dungeons.values.DungeonsPower
 import org.json.JSONObject
 import java.io.File
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
@@ -13,15 +20,66 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
+import kotlin.math.roundToInt
 
 
 class DungeonsJsonFile(path: String): File(path) {
 
     constructor(file: File): this(file.absolutePath)
 
-    companion object {
-        private val Magic1 = listOf(0x44, 0x30, 0x30, 0x31).map { it.toByte() }.toByteArray()
-        private val Magic2 = listOf(0x00, 0x00, 0x00, 0x00).map { it.toByte() }.toByteArray()
+    private fun magicEquals(): Boolean {
+        val array = ByteArray(4)
+        val buffer = ByteBuffer.wrap(array)
+
+        val channel = inputStream().channel
+
+        buffer.mark()
+        channel.read(buffer)
+        if (!array.contentEquals(Magic1))
+            return false
+
+        buffer.reset()
+        channel.read(buffer)
+        return array.contentEquals(Magic2)
+    }
+
+    fun validate(): Boolean {
+        if (!exists() || isDirectory || !isFile) return false
+
+        return magicEquals()
+    }
+
+    fun preview(): Preview {
+        return if (!exists() || isDirectory || !isFile)
+            Preview.None
+        else if (!magicEquals())
+            Preview.Invalid
+        else
+            Preview.Valid(absolutePath, read())
+    }
+
+    fun read(): JSONObject {
+        val content = readBytes().let { it.sliceArray(8 until it.size) }
+
+        val cipher = Cipher
+            .getInstance("AES/ECB/NoPadding")
+            .apply { init(Cipher.DECRYPT_MODE, SecretKeySpec(Keyset.StoreKey, "AES")) }
+
+        val output = cipher.doFinal(content)
+
+        return JSONObject(String(output).trim())
+    }
+
+    fun write(json: JSONObject) {
+        val input = json.toString(1).let { it.padEnd(it.length + 16 - (it.length % 16), ' ') }
+
+        val cipher = Cipher
+            .getInstance("AES/ECB/NoPadding")
+            .apply { init(Cipher.ENCRYPT_MODE, SecretKeySpec(Keyset.StoreKey, "AES")) }
+
+        val content = cipher.doFinal(input.toByteArray())
+
+        writeBytes(byteArrayOf(*Magic1, *Magic2, *content))
     }
 
     object Detector {
@@ -33,9 +91,10 @@ class DungeonsJsonFile(path: String): File(path) {
         val results = detectDungeonsJson()
             .let { it.slice(0 until 3.coerceAtMost(it.size)) }
             .mapNotNull {
-                try { DungeonsJsonFile(it).summary() }
+                try { DungeonsJsonFile(it).preview() }
                 catch (e: Exception) { null }
             }
+            .filterIsInstance<Preview.Valid>()
 
         private fun detectDungeonsJson(): List<String> {
             val windowsFiles = detectWindows()
@@ -68,75 +127,53 @@ class DungeonsJsonFile(path: String): File(path) {
         }
     }
 
+    @Stable
     sealed interface Preview {
         data object None: Preview
         data object Invalid: Preview
 
-        class Valid(val json: DungeonsJsonState, val summary: DungeonsSummary): Preview
-    }
+        @Stable
+        class Valid(
+            val path: String,
+            from: JSONObject
+        ): Preview {
+            private val currencies = from.getJSONArray(MutableDungeons.FIELD_CURRENCIES)
+                .transformWithJsonObject { MutableDungeons.Currency(it) }
+                .toMutableStateList()
 
-    fun preview(): Preview {
-        if (!exists()) return Preview.None
-        if (isDirectory) return Preview.None
-        if (!isFile) return Preview.None
-        return if (inputStream().run { readNBytes(4).contentEquals(Magic1) && readNBytes(4).contentEquals(Magic2) })
-            DungeonsJsonState(read(), this).let { Preview.Valid(it, DungeonsSummary.fromState(it)) }
-        else
-            Preview.Invalid
-    }
+            private val items = from.getJSONArray(MutableDungeons.FIELD_ITEMS)
+                .transformWithJsonObject(6) { MutableDungeons.Item(it) }
 
-    fun read(): JSONObject {
-        val content = readBytes().let { it.sliceArray(8 until it.size) }
+            val level: Int = DungeonsLevel.toInGameLevel(from.getLong(MutableDungeons.FIELD_XP)).roundToInt()
 
-        val cipher = Cipher
-            .getInstance("AES/ECB/NoPadding")
-            .apply { init(Cipher.DECRYPT_MODE, SecretKeySpec(Keyset.StoreKey, "AES")) }
+            val emerald: Int = currencies.emerald()?.count ?: 0
+            val gold: Int = currencies.gold()?.count ?: 0
 
-        val output = cipher.doFinal(content)
+            val melee: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Melee }
+            val armor: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Armor }
+            val ranged: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Ranged }
 
-        return JSONObject(String(output).trim())
-    }
+            private val artifact1: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar1 }
+            private val artifact2: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar2 }
+            private val artifact3: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar3 }
 
-    fun write(json: JSONObject) {
-        val input = json.toString(1).let { it.padEnd(it.length + 16 - (it.length % 16), ' ') }
+            val power = run {
+                val powerDividedBy4 = listOf(melee, armor, ranged)
+                    .sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) }
+                    .div(4.0)
 
-        val cipher = Cipher
-            .getInstance("AES/ECB/NoPadding")
-            .apply { init(Cipher.ENCRYPT_MODE, SecretKeySpec(Keyset.StoreKey, "AES")) }
+                val powerDividedBy12 = listOf(artifact1, artifact2, artifact3)
+                    .sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) }
+                    .div(12.0)
 
-        val content = cipher.doFinal(input.toByteArray())
-
-        writeBytes(byteArrayOf(*Magic1, *Magic2, *content))
-    }
-
-    fun summary(): Triple<String, DungeonsJsonState, DungeonsSummary> =
-        DungeonsJsonState(read(), this).let {
-            Triple(path, it, DungeonsSummary.fromState(it))
+                (powerDividedBy4 + powerDividedBy12).toInt()
+            }
         }
+    }
 
-}
-
-@Stable
-class DungeonsSummary(
-    val level: Int,
-    val power: Int,
-    val emerald: Int,
-    val gold: Int,
-    val melee: Item?,
-    val armor: Item?,
-    val ranged: Item?
-) {
     companion object {
-        fun fromState(state: DungeonsJsonState) = state.run {
-            DungeonsSummary(
-                playerLevel.toInt(),
-                playerPower,
-                currencies.find { it.type == "Emerald" }?.count ?: 0,
-                currencies.find { it.type == "Gold" }?.count ?: 0,
-                equippedMelee,
-                equippedArmor,
-                equippedRanged
-            )
-        }
+        private val Magic1 = byteArrayOf(0x44, 0x30, 0x30, 0x31)
+        private val Magic2 = byteArrayOf(0x00, 0x00, 0x00, 0x00)
     }
+
 }

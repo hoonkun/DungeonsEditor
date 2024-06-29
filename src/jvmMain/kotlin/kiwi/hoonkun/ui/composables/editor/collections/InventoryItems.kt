@@ -20,15 +20,18 @@ import kiwi.hoonkun.ui.composables.overlays.InventoryFullOverlay
 import kiwi.hoonkun.ui.composables.overlays.ItemOverlay
 import kiwi.hoonkun.ui.composables.overlays.ItemOverlayCreateState
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Item
+import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.withItemManager
+import minecraft.dungeons.values.DungeonsItem
 
 @Composable
 fun InventoryItems(
-    items: List<Item>,
-    editorState: EditorState
+    items: List<MutableDungeons.Item>,
+    editorState: DungeonsJsonEditorState
 ) {
     var filters by remember { mutableStateOf(InventoryItemFilter()) }
 
@@ -37,14 +40,18 @@ fun InventoryItems(
 
     val datasets by remember(items) {
         derivedStateOf {
-            val (variant, rarity) = filters
+            val (variant, attributes, rarity) = filters
             items.filter filter@ {
-                if (rarity == null && variant == null) return@filter true
+                if (rarity == null && variant == null && attributes == null) return@filter true
 
-                val variantMatched = variant == null || if (variant == "Enchanted") it.enchanted else it.data.variant == variant
+                val variantMatched = variant == null || it.data.variant == variant
+                val attributeMatched = attributes == null ||
+                    when(attributes) {
+                        DungeonsItem.Attributes.Enchanted -> it.enchanted
+                    }
                 val rarityMatched = rarity == null || it.rarity == rarity
 
-                variantMatched && rarityMatched
+                variantMatched && attributeMatched && rarityMatched
             }
         }
     }
@@ -54,7 +61,7 @@ fun InventoryItems(
             filters = filters,
             onFilterChange = { filters = it },
             onCreateItem = {
-                if (editorState.noSpaceInInventory)
+                if (withItemManager { editorState.stored.noSpaceAvailable })
                     overlays.make { InventoryFullOverlay() }
                 else {
                     overlays.make(
@@ -82,22 +89,26 @@ private fun UnequippedItemFilterer(
     onFilterChange: (InventoryItemFilter) -> Unit,
     onCreateItem: () -> Unit
 ) {
-    val (selectedVariant, selectedRarity) = filters
-
-    val variants = remember { listOf("Melee", "Armor", "Ranged", "Artifact", "Enchanted") }
-    val rarities = remember { listOf("Unique", "Rare", "Common") }
+    val (selectedVariant, selectedAttribute, selectedRarity) = filters
 
     Column(horizontalAlignment = Alignment.End) {
         Spacer(modifier = Modifier.height(12.5.dp))
-        for (variant in variants) {
+        for (variant in DungeonsItem.Variant.entries) {
             VariantFilterButton(
                 variant = variant,
                 selected = variant == selectedVariant,
                 onClick = { onFilterChange(filters.copy(variant = if (selectedVariant == variant) null else variant)) }
             )
         }
+        for (attribute in DungeonsItem.Attributes.entries) {
+            VariantFilterButton(
+                variant = attribute,
+                selected = attribute == selectedAttribute,
+                onClick = { onFilterChange(filters.copy(attribute = if (selectedAttribute == attribute) null else attribute)) }
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
-        for (rarity in rarities) {
+        for (rarity in DungeonsItem.Rarity.entries) {
             RarityFilterButton(
                 rarity = rarity,
                 selected = rarity == selectedRarity,
@@ -112,7 +123,7 @@ private fun UnequippedItemFilterer(
 }
 
 @Composable
-private fun VariantFilterButton(variant: String, selected: Boolean, onClick: () -> Unit) {
+private fun VariantFilterButton(variant: DungeonsItem.IconFilterable, selected: Boolean, onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -130,7 +141,7 @@ private fun VariantFilterButton(variant: String, selected: Boolean, onClick: () 
 }
 
 @Composable
-private fun RarityFilterButton(rarity: String, selected: Boolean, onClick: () -> Unit) {
+private fun RarityFilterButton(rarity: DungeonsItem.Rarity, selected: Boolean, onClick: () -> Unit) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -178,6 +189,7 @@ private fun AddItemButton(onClick: () -> Unit) {
 }
 
 private data class InventoryItemFilter(
-    val variant: String? = null,
-    val rarity: String? = null,
+    val variant: DungeonsItem.Variant? = null,
+    val attribute: DungeonsItem.Attributes? = null,
+    val rarity: DungeonsItem.Rarity? = null,
 )

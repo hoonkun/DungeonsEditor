@@ -25,9 +25,10 @@ object ArcticSettings {
     val recentSummaries by derivedStateOf {
         recentFiles
             .mapNotNull { path ->
-                try { DungeonsJsonFile(path).summary() }
+                try { DungeonsJsonFile(path).preview() }
                 catch (e: Exception) { null }
             }
+            .filterIsInstance<DungeonsJsonFile.Preview.Valid>()
     }
 
     fun updateRecentFiles(path: String) {

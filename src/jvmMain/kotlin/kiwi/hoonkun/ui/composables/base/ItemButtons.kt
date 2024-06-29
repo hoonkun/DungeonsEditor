@@ -24,15 +24,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.Enchantment
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import kiwi.hoonkun.utils.Retriever
 import minecraft.dungeons.resources.DungeonsLocalizations
+import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.resources.EnchantmentData
-import minecraft.dungeons.resources.ItemData
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.values.DungeonsItem
 
 
 @Composable
@@ -93,21 +93,25 @@ fun ItemAlterButton(
 
 @Composable
 fun ItemRarityButton(
-    data: ItemData,
-    rarity: String,
+    data: DungeonsSkeletons.Item,
+    rarity: DungeonsItem.Rarity,
     readonly: Boolean = false,
-    onClick: (String) -> Unit = { }
+    onClick: (DungeonsItem.Rarity) -> Unit = { }
 ) {
     ItemAlterButton(
-        text = "${if (data.limited) "${Localizations.UiText("season_limited")} " else ""}${DungeonsLocalizations["/rarity_${rarity.lowercase()}"]}",
+        text = "${if (data.limited) "${Localizations["season_limited"]} " else ""}${DungeonsLocalizations["/rarity_${rarity.name.lowercase()}"]}",
         color = RarityColor(rarity, RarityColorType.Translucent),
         enabled = !readonly && !data.unique,
-        onClick = { onClick(if (rarity == "Common") "Rare" else "Common") }
+        onClick = {
+            onClick(
+                if (rarity == DungeonsItem.Rarity.Common) DungeonsItem.Rarity.Rare
+                else DungeonsItem.Rarity.Common)
+        }
     )
 }
 
 @Composable
-fun BuiltInEnchantments(data: EnchantmentData) {
+fun BuiltInEnchantments(data: DungeonsSkeletons.Enchantment) {
     ItemAlterButton(
         color = Color(0x25ffffff),
         enabled = false
@@ -131,15 +135,14 @@ fun BuiltInEnchantments(data: EnchantmentData) {
 
 @Composable
 fun ItemNetheriteEnchantButton(
-    holder: Item,
-    enchantment: Enchantment?,
+    enchantment: MutableDungeons.Enchantment?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onClick: (Enchantment) -> Unit = { }
+    onClick: (MutableDungeons.Enchantment) -> Unit = { }
 ) {
     @Composable
     fun InactiveItemNetheriteEnchantButton(
-        enchantment: Retriever<Enchantment>,
+        enchantment: Retriever<MutableDungeons.Enchantment>,
         enabled: Boolean = true
     ) {
         ItemAlterButton(
@@ -159,7 +162,7 @@ fun ItemNetheriteEnchantButton(
 
     @Composable
     fun ActiveItemNetheriteEnchantButton(
-        enchantment: Enchantment,
+        enchantment: MutableDungeons.Enchantment,
         enabled: Boolean = true
     ) {
         ItemAlterButton(
@@ -205,7 +208,11 @@ fun ItemNetheriteEnchantButton(
 
     ItemAlterButtonAnimatable(targetState = enchantment?.isUnset != false) { isUnset ->
         if (isUnset) {
-            InactiveItemNetheriteEnchantButton(enchantment = { enchantment ?: holder.newNetheriteEnchant() })
+            InactiveItemNetheriteEnchantButton(
+                enchantment = {
+                    enchantment ?: MutableDungeons.Enchantment(isNetheriteEnchant = true)
+                }
+            )
         } else {
             if (enchantment == null) return@ItemAlterButtonAnimatable
             ActiveItemNetheriteEnchantButton(enchantment, enabled = enabled)
@@ -215,7 +222,7 @@ fun ItemNetheriteEnchantButton(
 
 @Composable
 fun ItemModifiedButton(
-    holder: Item,
+    holder: MutableDungeons.Item,
     readonly: Boolean = false,
     hideUnits: Boolean = false,
 ) {
@@ -226,7 +233,7 @@ fun ItemModifiedButton(
             onClick = { holder.modified = !modified }
         ) {
             Text(
-                text = if (modified) Localizations.UiText("modified") else "_",
+                text = if (modified) Localizations["modified"] else "_",
                 fontSize = 18.sp,
                 color = Color.White
             )

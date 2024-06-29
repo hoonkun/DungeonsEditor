@@ -1,12 +1,12 @@
 package minecraft.dungeons.resources
 
 import kiwi.hoonkun.ArcticSettings
-import kiwi.hoonkun.utils.ResourceReadable
+import kiwi.hoonkun.utils.resourceText
 import kotlinx.serialization.json.Json
 import minecraft.dungeons.io.DungeonsPakRegistry
 import utils.LocalizationResource
 
-object DungeonsLocalizations: ResourceReadable() {
+object DungeonsLocalizations {
     private var _texts: Map<String, Map<String, String>>? = null
     private val texts get() = _texts!!
 

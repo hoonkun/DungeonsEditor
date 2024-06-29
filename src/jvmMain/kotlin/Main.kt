@@ -5,49 +5,39 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalScrollbarStyle
-import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.*
 import androidx.compose.ui.zIndex
-import kiwi.hoonkun.ArcticSettings
+import kiwi.hoonkun.core.AppCompositionLocals
+import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.core.PakIndexingState
 import kiwi.hoonkun.core.rememberPakIndexingState
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
 import kiwi.hoonkun.ui.composables.JsonEditor
-import kiwi.hoonkun.ui.composables.JsonEditorTabButton
 import kiwi.hoonkun.ui.composables.JsonEntries
-import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.overlays.ExitApplicationConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.SettingsOverlay
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.*
+import kiwi.hoonkun.ui.states.AppState
+import kiwi.hoonkun.ui.states.LocalAppPointerListeners
+import kiwi.hoonkun.ui.states.LocalAppState
+import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
-import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
-import kotlin.collections.set
-import kotlin.random.Random
 
 
 fun main() = application {
@@ -69,106 +59,29 @@ fun main() = application {
         title = "Dungeons Editor",
         icon = Resources.Drawables.icon(),
     ) {
-        App(
-            arcticWindowState = windowState,
-            requestExitApp = ::exitApplication
-        )
+        App(windowState = windowState, scope = this@application)
     }
 }
 
 @Composable
 private fun App(
-    arcticWindowState: WindowState,
-    requestExitApp: () -> Unit
+    windowState: WindowState,
+    scope: ApplicationScope?
 ) {
     val overlays = LocalOverlayState.current
-    val appPointerListeners = LocalAppPointerListeners.current
-
-    val arcticTextStyle = remember(0xC0FFEE.dp) {
-        TextStyle(
-            color = Color.White,
-            fontSize = 20.sp,
-        )
-    }
-    val arcticScrollbarStyle = remember(0xC0FFEE.dp) {
-        ScrollbarStyle(
-            thickness = 16.dp,
-            minimalHeight = 100.dp,
-            hoverColor = Color.White.copy(alpha = 0.25f),
-            unhoverColor = Color.White.copy(alpha = 0.1f),
-            hoverDurationMillis = 0,
-            shape = RoundedCornerShape(3.dp),
-        )
-    }
 
     val pakIndexingState by rememberPakIndexingState()
-
-    val windowWidth = arcticWindowState.size.width
-    var selectedJsonSourcePath: String? by remember { mutableStateOf(null) }
-
-    val states = remember { mutableStateMapOf<String, EditorState>() }
-
-    val focusedArea = remember(selectedJsonSourcePath) { if (selectedJsonSourcePath != null) AppFocusable.Editor else AppFocusable.Entries }
 
     val blur by minimizableAnimateFloatAsState(
         targetValue = if (overlays.any()) 50f else 0f,
         animationSpec = minimizableSpecDefault()
     )
 
-    val entriesWidth = 550.dp
-
-    val slideRatio = 0.2f
-    val containerOffset by minimizableAnimateDpAsState(
-        targetValue =
-            if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * (-slideRatio / 2))
-            else (windowWidth * (slideRatio / 2)),
-        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
-    )
-    val tabsOffset by minimizableAnimateDpAsState(
-        targetValue = if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null || states.size > 0) (-114).dp else 0.dp,
-        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
-    )
-    val entriesOffset by minimizableAnimateDpAsState(
-        targetValue =
-            if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) (windowWidth * slideRatio) - 12.dp
-            else 0.dp,
-        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
-    )
-    val entriesBrightness by minimizableAnimateFloatAsState(
-        targetValue =
-            if (focusedArea == AppFocusable.Editor && selectedJsonSourcePath != null) 0.75f
-            else 0f,
-        animationSpec = minimizableSpec { spring() }
-    )
-
-    var preview by remember { mutableStateOf<DungeonsJsonFile.Preview>(DungeonsJsonFile.Preview.None) }
-
-    val onSelect: (DungeonsJsonState) -> Unit = {
-        if (!states.containsKey(it.sourcePath)) {
-            val file = DungeonsJsonFile(it.sourcePath)
-            states[it.sourcePath] = EditorState(DungeonsJsonState(file.read(), file))
-        }
-        selectedJsonSourcePath = it.sourcePath
-        preview = DungeonsJsonFile.Preview.None
-
-        ArcticSettings.updateRecentFiles(it.sourcePath)
-    }
-
-    val onTabSelect: (String?) -> Unit = { selectedJsonSourcePath = it }
-
-    CompositionLocalProvider(
-        LocalTextStyle provides arcticTextStyle,
-        LocalScrollbarStyle provides arcticScrollbarStyle,
-        LocalWindowState provides arcticWindowState,
+    AppCompositionLocals(
+        windowState = windowState,
+        scope = scope
     ) {
-        AppRoot(
-            overlays = overlays,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xff272727))
-                .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
-                .then(appPointerListeners.onGlobalPointerEventModifier())
-        ) {
+        AppRoot {
              MinimizableAnimatedVisibility(
                 visible = pakIndexingState == PakIndexingState.Loaded,
                 enter = minimizableEnterTransition { expandIn() + fadeIn() },
@@ -177,163 +90,104 @@ private fun App(
                     .fillMaxSize()
                     .graphicsLayer { renderEffect = if (blur == 0f) null else BlurEffect(blur, blur) }
             ) {
-                Image(
-                    bitmap = DungeonsTextures["/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png"],
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            renderEffect = BlurEffect(50.dp.value, 50.dp.value)
-                        }
-                        .drawWithContent {
-                            drawContent()
-                            drawRect(Color.Black.copy(alpha = 0.6f))
-                        }
-                )
-                Row(
-                    modifier = Modifier
-                        .requiredWidth(windowWidth * (1 + slideRatio))
-                        .offset { IntOffset(containerOffset.roundToPx(), 0) }
-                ) {
-                    JsonEntries(
-                        onJsonSelect = { onSelect(it) },
-                        preview = preview,
-                        focused = focusedArea == AppFocusable.Entries,
-                        modifier = Modifier
-                            .width(entriesWidth)
-                            .offset { IntOffset(entriesOffset.roundToPx(), 0) }
-                            .drawWithContent {
-                                drawContent()
-                                drawRect(Color.Black, alpha = entriesBrightness)
-                            },
-                    )
-                    JsonEditor(
-                        state = selectedJsonSourcePath?.let { states[it] },
-                        modifier = Modifier.weight(1f),
-                        requestClose = {
-                            val path = selectedJsonSourcePath
-                            selectedJsonSourcePath = null
-                            states.remove(path)
-                        },
-                        tabs = {
-                            Column(
-                                modifier = Modifier
-                                    .requiredWidth(114.dp)
-                                    .padding(top = 24.dp, start = 10.dp)
-                                    .offset { IntOffset(x = tabsOffset.roundToPx(), y = 0) }
-                            ) {
-                                JsonEditorTabButton(
-                                    bitmap = DungeonsTextures["/Game/UI/Materials/Map/Pins/mapicon_chest.png"],
-                                    selected = selectedJsonSourcePath == null,
-                                    onClick = { onTabSelect(null) },
-                                    contentPadding = PaddingValues(16.dp)
-                                )
-                                states.keys.forEach { key ->
-                                    JsonEditorTabButton(
-                                        bitmap = DungeonsTextures.pets[Random(key.hashCode()).nextInt(DungeonsTextures.pets.size)],
-                                        selected = selectedJsonSourcePath == key,
-                                        onClick = { onTabSelect(key) }
-                                    )
-                                }
-                            }
-                        },
-                        placeholder = {
-                            Box(
-                                modifier = Modifier
-                                    .requiredWidth(windowWidth - entriesWidth)
-                                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                                    .drawBehind {
-                                        val image =
-                                            DungeonsTextures["/Game/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
-                                        val dstSize = Size(
-                                            size.width,
-                                            size.width * (image.height.toFloat() / image.width)
-                                        ).round()
-                                        drawRect(
-                                            Brush.verticalGradient(
-                                                0f to Color(0xff202020).copy(alpha = 0f),
-                                                1f to Color(0xff202020),
-                                                endY = dstSize.height.toFloat(),
-                                                tileMode = TileMode.Clamp
-                                            )
-                                        )
-                                        drawImage(
-                                            image = image,
-                                            dstSize = dstSize,
-                                            blendMode = BlendMode.SrcOut
-                                        )
-                                    }
-                                    .padding(horizontal = 40.dp)
-                                    .padding(bottom = 36.dp)
-                                    .fillMaxHeight()
-                            ) {
-                                Row(
-                                    modifier = Modifier.align(Alignment.BottomStart)
-                                ) {
-                                    MainMenuButtons(requestExit = requestExitApp)
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.End,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .zIndex(1f)
-                                        .alpha(0.5f)
-                                ) {
-                                    Text(text = "Dungeons Editor, 1.1.0 by HoonKun", fontFamily = Resources.Fonts.JetbrainsMono)
-                                    Text(text = "Compatible with Minecraft Dungeons 1.17.0.0", fontFamily = Resources.Fonts.JetbrainsMono)
-                                }
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    FileSelector(
-                                        validator = {
-                                            preview = DungeonsJsonFile(it).preview()
-                                            preview is DungeonsJsonFile.Preview.Valid
-                                        },
-                                        buttonText = Localizations.UiText("open"),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .requiredHeight(525.dp)
-                                            .padding(top = 32.dp)
-                                            .offset(y = 110.dp),
-                                        onSelect = {
-                                            preview.let {
-                                                if (it is DungeonsJsonFile.Preview.Valid) {
-                                                    onSelect(it.json)
-                                                } // FileSelector onSelect preview.let if block
-                                            } // FileSelector onSelect preview.let lambda
-  /* WOW! SO LOGICAL! */                } // FileSelector onSelect lambda
-                                    ) // FileSelector parameters
-                                } // Column content lambda
-                            } // Box content lambda
-                        } // JsonEditor placeholder lambda
-                    ) // JsonEditor parameters
-                } // Row content lambda
-            } // AnimatedVisibility content lambda
-        } // AppRoot content lambda
-    } // CompositionLocalProvider content lambda
-} // function App
+                Background()
+                AppContent()
+            }
+        }
+    }
+}
 
 @Composable
 private fun AppRoot(
-    overlays: OverlayState,
-    modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
-    Box(modifier = modifier) {
-        content()
-        overlays.Stack()
+    val overlays = LocalOverlayState.current
+    val appPointerListeners = LocalAppPointerListeners.current
+
+    with(appPointerListeners) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xff272727))
+                .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
+                .onGlobalPointerEventModifier()
+        ) {
+            content()
+            overlays.Stack()
+        }
     }
+}
+
+@Composable
+private fun AppContent() {
+    val appState = LocalAppState.current
+
+    val windowWidth = LocalWindowState.current.size.width
+
+    val containerOffset by minimizableAnimateDpAsState(
+        targetValue = (windowWidth * (AppState.Constants.SlidingRatio / 2)) * if (appState.isInEditor) -1 else 1,
+        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
+    )
+
+    Row(
+        modifier = Modifier
+            .requiredWidth(windowWidth * (1 + AppState.Constants.SlidingRatio))
+            .offset { IntOffset(containerOffset.roundToPx(), 0) }
+    ) {
+        val entriesOffset by minimizableAnimateDpAsState(
+            targetValue = if (appState.isInEditor) (windowWidth * AppState.Constants.SlidingRatio) - 32.dp else 0.dp,
+            animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
+        )
+        val entriesBrightness by minimizableAnimateFloatAsState(
+            targetValue = if (appState.isInEditor) 0.75f else 0f,
+            animationSpec = minimizableSpec { spring() }
+        )
+
+        var preview by remember { mutableStateOf<DungeonsJsonFile.Preview>(DungeonsJsonFile.Preview.None) }
+
+        JsonEntries(
+            onJsonSelect = { appState.sketchEditor(it) },
+            preview = preview,
+            focused = !appState.isInEditor,
+            modifier = Modifier
+                .width(AppState.Constants.EntriesWidth)
+                .offset { IntOffset(entriesOffset.roundToPx(), 0) }
+                .drawWithContent {
+                    drawContent()
+                    drawRect(Color.Black, alpha = entriesBrightness)
+                },
+        )
+        JsonEditor(
+            state = appState.activeEditor,
+            modifier = Modifier.weight(1f),
+            onPreviewChange = { preview = it.preview() }
+        )
+    }
+}
+
+@Composable
+private fun Background() {
+    Image(
+        bitmap = DungeonsTextures["/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png"],
+        contentScale = ContentScale.Crop,
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                renderEffect = BlurEffect(50.dp.value, 50.dp.value)
+            }
+            .drawWithContent {
+                drawContent()
+                drawRect(Color.Black.copy(alpha = 0.6f))
+            }
+    )
 }
 
 @Composable
 fun MainMenuButtons(
     description: String? = Localizations["exit_application_description"],
-    requestExit: () -> Unit
 ) {
+    val appState = LocalAppState.current
     val overlays = LocalOverlayState.current
 
     MainIconButton(
@@ -342,7 +196,7 @@ fun MainMenuButtons(
             overlays.make { requestClose ->
                 ExitApplicationConfirmOverlay(
                     description = description,
-                    onConfirm = requestExit,
+                    onConfirm = appState::exitApplication,
                     requestClose = requestClose
                 )
             }
@@ -378,13 +232,4 @@ private fun MainIconButton(
             filterQuality = FilterQuality.None
         )
     }
-}
-
-val LocalWindowState = staticCompositionLocalOf {
-    WindowState(size = DpSize(1800.dp, 1400.dp), position = WindowPosition(Alignment.Center))
-}
-
-interface AppFocusable {
-    data object Entries: AppFocusable
-    data object Editor: AppFocusable
 }

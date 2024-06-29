@@ -2,6 +2,7 @@ package kiwi.hoonkun.core
 
 import MainMenuButtons
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -10,9 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.Resources
@@ -27,9 +31,8 @@ import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.utils.chunkedMerge
 import kotlinx.coroutines.*
 import minecraft.dungeons.io.DungeonsPakRegistry
-import minecraft.dungeons.resources.DungeonsDatabase
-import minecraft.dungeons.resources.DungeonsDatabaseLoadable
 import minecraft.dungeons.resources.DungeonsLocalizations
+import minecraft.dungeons.resources.DungeonsSkeletons
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -69,7 +72,6 @@ fun rememberPakIndexingState(
                                 state.value = PakIndexingState.Idle
                             },
                             requestClose = requestClose,
-                            requestExitApp = requestExitApplication
                         )
                     }
                 }
@@ -148,8 +150,8 @@ private fun PakIndexingOverlay(
                     leading = Localizations["progress_text_reading_textures"]
                 )
 
-                val targetItems = PakTextureLoader(DungeonsDatabase.items)
-                val targetEnchantments = PakTextureLoader(DungeonsDatabase.enchantments)
+                val targetItems = PakTextureLoader(DungeonsSkeletons.Item[Unit])
+                val targetEnchantments = PakTextureLoader(DungeonsSkeletons.Enchantment[Unit])
 
                 itemLoadingText = itemLoadingText.copy(
                     leading = Localizations["progress_text_item_texture"]
@@ -195,8 +197,8 @@ private fun PakIndexingOverlay(
 
     OverlayRoot {
         OverlayTitleDescription(
-            title = Localizations.UiText("pak_indexing_title"),
-            description = Localizations.UiText("pak_indexing_description")
+            title = Localizations["pak_indexing_title"],
+            description = Localizations["pak_indexing_description"]
         )
 
         if (!ArcticSettings.preloadTextures) return@OverlayRoot
@@ -237,7 +239,6 @@ private fun PakIndexingOverlay(
 private fun PakNotFoundOverlay(
     onSelect: (newPath: String) -> Unit,
     requestClose: OverlayCloser,
-    requestExitApp: () -> Unit,
 ) {
     OverlayRoot {
         OverlayTitleDescription(
@@ -271,10 +272,7 @@ private fun PakNotFoundOverlay(
                 .align(Alignment.BottomStart)
                 .scale(1.25f)
         ) {
-            MainMenuButtons(
-                description = null,
-                requestExit = requestExitApp
-            )
+            MainMenuButtons(description = null)
         }
     }
 }
@@ -284,8 +282,6 @@ private object TextProgressBarConstants {
     val ProgressStyle = SpanStyle(color = Color(0x40ff8d30))
     val PacmanStyle = SpanStyle(color = Color(0xffffcc00), fontWeight = FontWeight.Bold)
     val RemainingStyle = SpanStyle(color = Color.White.copy(alpha = 0.5f))
-
-    val TextStyle = TextStyle(textAlign = TextAlign.Center, fontFeatureSettings = "liga 0")
 }
 
 @Composable
@@ -316,7 +312,7 @@ private fun TextProgressBar(progress: Float, width: Int = 11, modifier: Modifier
             withStyle(TextProgressBarConstants.RemainingStyle) { appendRemaining() }
             append("]")
         },
-        style = TextProgressBarConstants.TextStyle,
+        style = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontFeatureSettings = "liga 0"),
         fontFamily = Resources.Fonts.JetbrainsMono,
         modifier = Modifier.alpha(if (progressInt == 0) 0.4f else 1f).fillMaxWidth().then(modifier),
     )
@@ -333,7 +329,7 @@ private fun PakIndexingText(text: PakIndexingText) {
 
 @Immutable
 private data class PakIndexingText(
-    val leading: String = Localizations.UiText("progress_text_waiting"),
+    val leading: String = Localizations["progress_text_waiting"],
     val trailing: String = ""
 )
 
@@ -352,7 +348,7 @@ private infix fun PakIndexingProgress.progress(add: Int) = copy(elapsed = elapse
 private fun List<PakIndexingProgress>.merge() =
     reduce { acc, curr -> PakIndexingProgress(elapsed = acc.elapsed + curr.elapsed, total = acc.total + curr.total) }
 
-private class PakTextureLoader<S: DungeonsDatabaseLoadable>(
+private class PakTextureLoader<S: DungeonsSkeletons.Loadable>(
     private val containers: Collection<S>
 ) {
     fun load(

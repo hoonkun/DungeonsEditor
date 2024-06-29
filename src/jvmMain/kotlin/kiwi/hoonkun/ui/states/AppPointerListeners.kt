@@ -27,8 +27,8 @@ class AppPointerListeners {
         entries.getValue(type)
 
     @OptIn(ExperimentalComposeUiApi::class)
-    fun onGlobalPointerEventModifier(): Modifier =
-        entries.entries.fold(Modifier.then(Modifier)) { acc, (event, handlers) ->
+    fun Modifier.onGlobalPointerEventModifier(): Modifier =
+        entries.entries.fold(this) { acc, (event, handlers) ->
             acc.onPointerEvent(event) { scope -> handlers.forEach { it(scope) } }
         }
 }

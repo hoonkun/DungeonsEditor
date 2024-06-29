@@ -7,8 +7,8 @@ import kiwi.hoonkun.resources.Localizations
 fun FileSaveCompleteOverlay() {
     OverlayRoot {
         OverlayTitleDescription(
-            title = Localizations.UiText("save_complete"),
-            description = Localizations.UiText("tap_to_close")
+            title = Localizations["save_complete"],
+            description = Localizations["tap_to_close"]
         )
     }
 }

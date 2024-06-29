@@ -26,20 +26,20 @@ fun CloseFileConfirmOverlay(
 
     OverlayRoot {
         OverlayTitleDescription(
-            title = Localizations.UiText("close_file_title"),
-            description = Localizations.UiText("close_file_description")
+            title = Localizations["close_file_title"],
+            description = Localizations["close_file_description"]
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = Localizations.UiText("cancel"),
+                text = Localizations["cancel"],
                 color = Color(0xffffffff),
                 hoverInteraction = RetroButtonHoverInteraction.Overlay,
                 onClick = onNegative
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = Localizations.UiText("close"),
+                text = Localizations["close"],
                 color = Color(0xffff6e25),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = onPositive

@@ -24,26 +24,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
-import kiwi.hoonkun.ui.composables.base.rememberArmorPropertyIconAsState
+import kiwi.hoonkun.ui.composables.base.rememberArmorPropertyIcon
 import kiwi.hoonkun.ui.composables.overlays.ArmorPropertyOverlay
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
-import kiwi.hoonkun.ui.states.ArmorProperty
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.values.DungeonsArmorProperty
 
 @Composable
-fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
+fun ItemArmorProperties(item: MutableDungeons.Item, properties: List<MutableDungeons.ArmorProperty>) {
     val overlays = LocalOverlayState.current
 
     val groupedProperties by remember(properties) {
         derivedStateOf {
             val sorted = properties.sortedBy { it.data.description?.length }
-            val uniques = sorted.filter { it.rarity.lowercase() == "unique" }
-            val commons = sorted.filter { it.rarity.lowercase() == "common" }
+            val uniques = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Unique }
+            val commons = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Common }
 
             uniques.groupByLength() + commons.groupByLength()
         }
@@ -73,7 +74,7 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
                         exit = defaultFadeOut()
                     ) {
                         ArmorPropertyOverlay(
-                            holder = property.holder,
+                            holder = item,
                             initialSelected = property,
                             requestClose = it
                         )
@@ -88,14 +89,14 @@ fun ItemArmorProperties(item: Item, properties: List<ArmorProperty>) {
 
 @Composable
 fun ArmorPropertyItem(
-    property: ArmorProperty,
+    property: MutableDungeons.ArmorProperty,
     selected: () -> Boolean = { false },
     onClick: () -> Unit
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val propertyRarityIcon = rememberArmorPropertyIconAsState(property)
+    val propertyRarityIcon = rememberArmorPropertyIcon(property)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -131,7 +132,7 @@ fun ArmorPropertyItem(
 }
 
 @Composable
-private fun ArmorPropertyAddButton(item: Item) {
+private fun ArmorPropertyAddButton(item: MutableDungeons.Item) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -176,8 +177,8 @@ private fun ArmorPropertyAddButton(item: Item) {
 
 private val ItemHeight get() = 40.dp
 
-fun List<ArmorProperty>.groupByLength(): List<Pair<ArmorProperty, Int>> {
-    val result = mutableListOf<Pair<ArmorProperty, Int>>()
+fun List<MutableDungeons.ArmorProperty>.groupByLength(): List<Pair<MutableDungeons.ArmorProperty, Int>> {
+    val result = mutableListOf<Pair<MutableDungeons.ArmorProperty, Int>>()
     forEach {
         val description = it.data.description ?: it.data.id
         val long = description.fold(0) { acc, c -> acc + if (c == ' ') 1 else 3 } > 35
@@ -186,7 +187,7 @@ fun List<ArmorProperty>.groupByLength(): List<Pair<ArmorProperty, Int>> {
     return result
 }
 
-fun List<Pair<ArmorProperty, Int>>.height(): Dp {
+fun List<Pair<MutableDungeons.ArmorProperty, Int>>.height(): Dp {
     var row = 1; var column = 0
     forEach { (_, span) ->
         if (column + span > 2) {

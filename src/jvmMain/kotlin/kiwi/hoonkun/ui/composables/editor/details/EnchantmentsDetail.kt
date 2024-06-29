@@ -13,18 +13,20 @@ import androidx.compose.ui.draw.scale
 import kiwi.hoonkun.ui.composables.base.EnchantmentImage
 import kiwi.hoonkun.ui.composables.base.EnchantmentLevel
 import kiwi.hoonkun.ui.composables.base.EnchantmentSlot
-import kiwi.hoonkun.ui.composables.base.EnchantmentsHolder
+import kiwi.hoonkun.ui.composables.base.MutableEnchantments
 import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.drawEnchantmentRune
-import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.states.LocalOverlayState
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.data
 
 
 @Composable
 fun ItemEnchantments(
-    enchantments: EnchantmentsHolder,
+    holder: MutableDungeons.Item,
+    enchantments: MutableEnchantments,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -35,7 +37,8 @@ fun ItemEnchantments(
         val slots = remember(enchantments) { enchantments.all.chunked(3) }
         for (slot in slots) {
             ItemEnchantmentEach(
-                slot = EnchantmentsHolder(slot),
+                holder = holder,
+                slot = MutableEnchantments(slot),
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f / 1f)
@@ -46,17 +49,24 @@ fun ItemEnchantments(
 
 @Composable
 private fun ItemEnchantmentEach(
-    slot: EnchantmentsHolder,
+    holder: MutableDungeons.Item,
+    slot: MutableEnchantments,
     modifier: Modifier = Modifier
 ) {
     val activatedEnchantment = slot.all.find { it.level > 0 }
 
     val overlays = LocalOverlayState.current
-    val makeEnchantmentOverlay: (Enchantment) -> Unit = { enchantment ->
+    val makeEnchantmentOverlay: (MutableDungeons.Enchantment) -> Unit = { enchantment ->
         overlays.make(
             enter = defaultFadeIn(),
             exit = defaultFadeOut(),
-            content = { EnchantmentOverlay(initialSelected = enchantment, requestClose = it) }
+            content = {
+                EnchantmentOverlay(
+                    holder = holder,
+                    initialSelected = enchantment,
+                    requestClose = it
+                )
+            }
         )
     }
 

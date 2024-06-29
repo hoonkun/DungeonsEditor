@@ -1,5 +1,6 @@
 package kiwi.hoonkun.ui.composables
 
+import MainMenuButtons
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
@@ -7,12 +8,21 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
+import kiwi.hoonkun.core.LocalWindowState
+import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonDpCornerRadius
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
@@ -22,24 +32,29 @@ import kiwi.hoonkun.ui.composables.editor.collections.InventoryItems
 import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
 import kiwi.hoonkun.ui.composables.editor.details.Tips
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.EditorState
+import kiwi.hoonkun.ui.states.AppState
+import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.LocalAppState
 import kiwi.hoonkun.ui.units.dp
+import minecraft.dungeons.io.DungeonsJsonFile
+import minecraft.dungeons.resources.DungeonsTextures
+import kotlin.random.Random
 
 @Composable
 fun JsonEditor(
-    state: EditorState?,
-    requestClose: () -> Unit,
+    state: DungeonsJsonEditorState?,
     modifier: Modifier = Modifier,
-    tabs: @Composable () -> Unit = { },
-    placeholder: @Composable () -> Unit = { }
+    onPreviewChange: (DungeonsJsonFile) -> Unit
 ) {
+    val appState = LocalAppState.current
+
     Box(
         modifier = Modifier
             .fillMaxHeight()
             .then(modifier)
             .background(Color(0xff202020))
     ) {
-        tabs()
+        JsonEditorTabs()
         MinimizableAnimatedContent(
             targetState = state,
             transitionSpec = minimizableContentTransform spec@ {
@@ -54,15 +69,125 @@ fun JsonEditor(
                 enter togetherWith exit using SizeTransform(clip = false)
             },
             modifier = Modifier.fillMaxHeight().background(Color(0xff202020))
-        ) {
-            if (it == null) placeholder()
-            else Content(it, requestClose)
+        ) { editor ->
+            if (editor == null)
+                JsonEditorFileSelector(
+                    onSelectorTransform = onPreviewChange,
+                    onSelectFile = { appState.sketchEditor(it.absolutePath) }
+                )
+            else
+                JsonEditorContent(
+                    editorState = editor,
+                    requestClose = appState::eraseEditor
+                )
         }
     }
 }
 
 @Composable
-fun JsonEditorTabButton(
+private fun JsonEditorFileSelector(
+    onSelectorTransform: (DungeonsJsonFile) -> Unit,
+    onSelectFile: (DungeonsJsonFile) -> Unit
+) {
+    val windowWidth = LocalWindowState.current.size.width
+
+    Box(
+        modifier = Modifier
+            .requiredWidth(windowWidth - AppState.Constants.EntriesWidth)
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawBehind {
+                val image = DungeonsTextures["/Game/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
+                val dstSize = Size(size.width, size.width * (image.height.toFloat() / image.width)).round()
+
+                drawRect(
+                    Brush.verticalGradient(
+                        0f to Color(0xff202020).copy(alpha = 0f),
+                        1f to Color(0xff202020),
+                        endY = dstSize.height.toFloat(),
+                        tileMode = TileMode.Clamp
+                    )
+                )
+                drawImage(
+                    image = image,
+                    dstSize = dstSize,
+                    blendMode = BlendMode.SrcOut
+                )
+            }
+            .padding(horizontal = 40.dp)
+            .padding(bottom = 36.dp)
+            .fillMaxHeight()
+    ) {
+        Row(
+            modifier = Modifier.align(Alignment.BottomStart)
+        ) {
+            MainMenuButtons()
+        }
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .zIndex(1f)
+                .alpha(0.5f)
+        ) {
+            Text(text = "Dungeons Editor, 1.1.0 by HoonKun", fontFamily = Resources.Fonts.JetbrainsMono)
+            Text(
+                text = "Compatible with Minecraft Dungeons 1.17.0.0",
+                fontFamily = Resources.Fonts.JetbrainsMono
+            )
+        }
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            FileSelector(
+                validator = { it.validate() },
+                transform = { DungeonsJsonFile(it).also(onSelectorTransform) },
+                onSelect = { onSelectFile(it) },
+                buttonText = Localizations["open"],
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(525.dp)
+                    .padding(top = 32.dp)
+                    .offset(y = 110.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun JsonEditorTabs() {
+    val appState = LocalAppState.current
+
+    val tabsOffset by minimizableAnimateDpAsState(
+        targetValue = if (appState.isInEditor || appState.openedEditors.size > 0) (-114).dp else 0.dp,
+        animationSpec = minimizableSpec { spring(stiffness = Spring.StiffnessLow) }
+    )
+
+    Column(
+        modifier = Modifier
+            .requiredWidth(114.dp)
+            .padding(top = 24.dp, start = 10.dp)
+            .offset { IntOffset(x = tabsOffset.roundToPx(), y = 0) }
+    ) {
+        JsonEditorTabButton(
+            bitmap = DungeonsTextures["/Game/UI/Materials/Map/Pins/mapicon_chest.png"],
+            selected = appState.activeEditorKey == null,
+            onClick = { appState.activeEditorKey = null },
+            contentPadding = PaddingValues(16.dp)
+        )
+        appState.openedEditors.keys.forEach { key ->
+            JsonEditorTabButton(
+                bitmap = DungeonsTextures.pets[Random(key.hashCode()).nextInt(DungeonsTextures.pets.size)],
+                selected = appState.activeEditorKey == key,
+                onClick = { appState.activeEditorKey = key }
+            )
+        }
+    }
+}
+
+@Composable
+private fun JsonEditorTabButton(
     bitmap: ImageBitmap,
     selected: Boolean,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
@@ -90,8 +215,8 @@ fun JsonEditorTabButton(
 }
 
 @Composable
-private fun Content(
-    editorState: EditorState,
+private fun JsonEditorContent(
+    editorState: DungeonsJsonEditorState,
     requestClose: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -103,8 +228,8 @@ private fun Content(
             MinimizableAnimatedContent(
                 targetState = editorState.view,
                 transitionSpec = minimizableContentTransform spec@ {
-                    val a = if (targetState == EditorState.EditorView.Inventory) -50 else 50
-                    val b = if (targetState == EditorState.EditorView.Inventory) 50 else -50
+                    val a = if (targetState.isInventory()) -50 else 50
+                    val b = if (targetState.isInventory()) 50 else -50
                     val enter = defaultFadeIn() + slideIn { IntOffset(a.dp.value.toInt(), 0) }
                     val exit = defaultFadeOut() + slideOut { IntOffset(b.dp.value.toInt(), 0) }
                     enter togetherWith exit using SizeTransform(false)
@@ -115,7 +240,7 @@ private fun Content(
                         .width(650.dp)
                         .padding(top = 25.dp)
                 ) {
-                    if (view == EditorState.EditorView.Inventory) {
+                    if (view.isInventory()) {
                         EquippedItems(
                             items = editorState.stored.equippedItems,
                             selection = editorState.selection
@@ -128,12 +253,12 @@ private fun Content(
                                 .background(Color.White.copy(alpha = 0.25f))
                         )
                         InventoryItems(
-                            items = editorState.stored.unequippedItems,
+                            items = editorState.stored.inventoryItems,
                             editorState = editorState,
                         )
                     } else {
                         InventoryItems(
-                            items = editorState.stored.storageChestItems,
+                            items = editorState.stored.storageItems,
                             editorState = editorState
                         )
                     }

@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -27,31 +26,27 @@ import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.Currency
-import kiwi.hoonkun.ui.states.EditorState
+import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.values.DungeonsLevel
+import minecraft.dungeons.states.extensions.withCurrencies
 
 
 @Composable
 fun EditorBottomBar(
-    editor: EditorState,
+    editor: DungeonsJsonEditorState,
     requestClose: () -> Unit
 ) {
     val stored = remember(editor) { editor.stored }
 
-    val emeraldHolder by remember(stored) { derivedStateOf { stored.currencies.find { it.type == "Emerald" } } }
-    val goldHolder by remember(stored) { derivedStateOf { stored.currencies.find { it.type == "Gold" } } }
-
     val levelIcon = remember { DungeonsTextures["/Game/UI/Materials/Character/STATS_LV_frame.png"] }
 
     var level by remember { mutableStateOf("${stored.playerLevel}") }
-    var emerald by remember { mutableStateOf("${emeraldHolder?.count ?: 0}") }
-    var gold by remember { mutableStateOf("${goldHolder?.count ?: 0}") }
+    var emerald by remember { mutableStateOf("${withCurrencies { stored.emerald }}") }
+    var gold by remember { mutableStateOf("${withCurrencies { stored.gold }}") }
 
 
     Row(
@@ -65,7 +60,7 @@ fun EditorBottomBar(
         CurrencyField(
             value = level,
             onValueChange = { level = it },
-            onSubmit = { stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) },
+            onSubmit = { stored.playerLevel = it.toDouble() },
             validator = { it.toDoubleOrNull() != null }
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -85,14 +80,7 @@ fun EditorBottomBar(
             iconScale = 0.7f,
             value = emerald,
             onValueChange = { emerald = it },
-            onSubmit = { newValue ->
-                emeraldHolder.let {
-                    if (it == null)
-                        stored.currencies.add(Currency("Emerald", newValue.toInt()))
-                    else
-                        it.count = newValue.toInt()
-                }
-            },
+            onSubmit = { newValue -> withCurrencies { editor.stored.emerald = newValue.toInt() } },
             validator = { it.toIntOrNull() != null }
         )
 
@@ -101,14 +89,7 @@ fun EditorBottomBar(
             iconScale = 0.9f,
             value = gold,
             onValueChange = { gold = it },
-            onSubmit = { newValue ->
-                goldHolder.let {
-                    if (it == null)
-                        stored.currencies.add(Currency("Gold", newValue.toInt()))
-                    else
-                        it.count = newValue.toInt()
-                }
-            },
+            onSubmit = { newValue -> withCurrencies { editor.stored.gold = newValue.toInt() } },
             validator = { it.toIntOrNull() != null }
         )
 
@@ -169,7 +150,7 @@ private fun CloseFileButton(
 }
 
 @Composable
-private fun SaveButton(editor: EditorState) {
+private fun SaveButton(editor: DungeonsJsonEditorState) {
     val overlays = LocalOverlayState.current
     IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
@@ -184,11 +165,9 @@ private fun SaveButton(editor: EditorState) {
 
 @Composable
 private fun InventorySwitcher(
-    current: EditorState.EditorView,
-    onSwitch: (EditorState.EditorView) -> Unit
+    current: DungeonsJsonEditorState.EditorView,
+    onSwitch: (DungeonsJsonEditorState.EditorView) -> Unit
 ) {
-    val density = LocalDensity.current
-
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()

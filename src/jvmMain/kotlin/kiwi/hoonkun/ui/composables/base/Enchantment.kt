@@ -28,10 +28,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.units.dp
+import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.resources.EnchantmentData
+import minecraft.dungeons.states.MutableDungeons
 import kotlin.math.sqrt
 
 
@@ -42,13 +42,13 @@ private val DarknessPaint = Paint().apply {
 
 @Composable
 fun EnchantmentImage(
-    data: EnchantmentData,
+    data: DungeonsSkeletons.Enchantment,
     modifier: Modifier = Modifier.fillMaxSize(),
     selected: Boolean = false,
     enabled: Boolean = true,
     contentPaint: (Paint) -> Paint = { it },
     onDrawFront: DrawScope.(EnchantmentDrawCache) -> Unit = { _ -> },
-    onClick: ((EnchantmentData) -> Unit)? = null,
+    onClick: ((DungeonsSkeletons.Enchantment) -> Unit)? = null,
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
@@ -138,15 +138,15 @@ fun EnchantmentOutlinePath(offset: IntOffset, size: IntSize): Path =
 data class EnchantmentDrawCache(val path: Path): BlurShadowImageDrawCache
 
 @Immutable
-data class EnchantmentsHolder(
-    val all: List<Enchantment>
+data class MutableEnchantments(
+    val all: List<MutableDungeons.Enchantment>
 )
 
 @Composable
 fun EnchantmentSlot(
-    enchantments: EnchantmentsHolder,
+    enchantments: MutableEnchantments,
     modifier: Modifier = Modifier,
-    contentEach: @Composable (Enchantment) -> Unit
+    contentEach: @Composable (MutableDungeons.Enchantment) -> Unit
 ) {
     val offsets = remember { listOf(Offset(0f, 0.5f), Offset(0.5f, 1f), Offset(1f, 0.5f)) }
 

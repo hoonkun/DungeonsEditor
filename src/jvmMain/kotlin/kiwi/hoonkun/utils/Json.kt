@@ -36,8 +36,8 @@ fun JSONObject.toBooleanMap(): Map<String, Boolean> {
         .associateWith { getBoolean(it) }
 }
 
-fun <T> JSONArray.transformWithJsonObject(transform: (json: JSONObject) -> T): List<T> {
-    return (0 until length()).map { transform(getJSONObject(it)) }
+fun <T> JSONArray.transformWithJsonObject(length: Int = length(), transform: (json: JSONObject) -> T): List<T> {
+    return (0 until length.coerceAtMost(length())).map { transform(getJSONObject(it)) }
 }
 
 fun <T> JSONArray.transform(transform: (it: Any) -> T): List<T> {

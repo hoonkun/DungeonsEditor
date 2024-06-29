@@ -13,13 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.AutoHidingVerticalScrollbar
-import kiwi.hoonkun.ui.states.EditorState
+import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 
 
 @Composable
-fun ItemComparator(editor: EditorState) {
+fun ItemComparator(editor: DungeonsJsonEditorState) {
     val scroll = rememberScrollState()
 
     Box(modifier = Modifier.fillMaxSize()) {
