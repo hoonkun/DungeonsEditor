@@ -20,7 +20,7 @@ import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.drawEnchantmentRune
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 
 
 @Composable
@@ -73,7 +73,7 @@ private fun ItemEnchantmentEach(
     if (activatedEnchantment != null) {
         Box(modifier = Modifier.scale(1.15f).then(modifier)) {
             EnchantmentImage(
-                data = activatedEnchantment.data,
+                data = activatedEnchantment.skeleton,
                 modifier = Modifier.fillMaxSize(),
                 onClick = { makeEnchantmentOverlay(activatedEnchantment) }
             )
@@ -88,7 +88,7 @@ private fun ItemEnchantmentEach(
             enchantments = slot,
             modifier = Modifier.scale(1.07f).then(modifier)
         ) { enchantment ->
-            EnchantmentImage(data = enchantment.data) { makeEnchantmentOverlay(enchantment) }
+            EnchantmentImage(data = enchantment.skeleton) { makeEnchantmentOverlay(enchantment) }
         }
     }
 }

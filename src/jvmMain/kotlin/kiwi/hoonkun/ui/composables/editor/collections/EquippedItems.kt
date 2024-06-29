@@ -14,13 +14,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 
 @Composable
-fun EquippedItems(items: List<MutableDungeons.Item?>, selection: DungeonsJsonEditorState.SelectionState) {
+fun EquippedItems(items: List<MutableDungeons.Item?>, selection: EditorState.SelectionState) {
     var collapsed by remember { mutableStateOf(false) }
 
     Row {

@@ -26,21 +26,22 @@ import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.extensions.withCurrencies
+import minecraft.dungeons.values.DungeonsItem
 
 
 @Composable
 fun EditorBottomBar(
-    editor: DungeonsJsonEditorState,
+    editor: EditorState,
     requestClose: () -> Unit
 ) {
-    val stored = remember(editor) { editor.stored }
+    val stored = remember(editor) { editor.data }
 
     val levelIcon = remember { DungeonsTextures["/Game/UI/Materials/Character/STATS_LV_frame.png"] }
 
@@ -80,7 +81,7 @@ fun EditorBottomBar(
             iconScale = 0.7f,
             value = emerald,
             onValueChange = { emerald = it },
-            onSubmit = { newValue -> withCurrencies { editor.stored.emerald = newValue.toInt() } },
+            onSubmit = { newValue -> withCurrencies { editor.data.emerald = newValue.toInt() } },
             validator = { it.toIntOrNull() != null }
         )
 
@@ -89,7 +90,7 @@ fun EditorBottomBar(
             iconScale = 0.9f,
             value = gold,
             onValueChange = { gold = it },
-            onSubmit = { newValue -> withCurrencies { editor.stored.gold = newValue.toInt() } },
+            onSubmit = { newValue -> withCurrencies { editor.data.gold = newValue.toInt() } },
             validator = { it.toIntOrNull() != null }
         )
 
@@ -150,7 +151,7 @@ private fun CloseFileButton(
 }
 
 @Composable
-private fun SaveButton(editor: DungeonsJsonEditorState) {
+private fun SaveButton(editor: EditorState) {
     val overlays = LocalOverlayState.current
     IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
@@ -165,8 +166,8 @@ private fun SaveButton(editor: DungeonsJsonEditorState) {
 
 @Composable
 private fun InventorySwitcher(
-    current: DungeonsJsonEditorState.EditorView,
-    onSwitch: (DungeonsJsonEditorState.EditorView) -> Unit
+    current: DungeonsItem.Location,
+    onSwitch: (DungeonsItem.Location) -> Unit
 ) {
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()

@@ -10,8 +10,7 @@ import androidx.compose.ui.graphics.Color
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState.EditorView.Companion.toEditorView
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.states.MutableDungeons
@@ -19,7 +18,7 @@ import minecraft.dungeons.states.extensions.withItemManager
 
 @Composable
 fun ItemDuplicateLocationConfirmOverlay(
-    editor: DungeonsJsonEditorState,
+    editor: EditorState,
     target: MutableDungeons.Item,
     requestClose: OverlayCloser
 ) {
@@ -27,24 +26,24 @@ fun ItemDuplicateLocationConfirmOverlay(
 
     val onOriginalSelected = {
         editor.selection.replace(
-            from = target,
-            new = withItemManager { editor.stored.duplicate(target) }
+            oldItem = target,
+            newItem = withItemManager { editor.data.duplicate(target) }
         )
         onClose()
     }
 
     val onHereSelected = {
-        val created = withItemManager { editor.stored.add(target.copy(), editor.view.toItemLocation()) }
+        val created = withItemManager { editor.data.add(target.copy(), editor.view) }
 
         editor.selection.clear()
         editor.selection.select(
             item = created,
-            into = DungeonsJsonEditorState.SelectionState.Slot.Primary
+            into = EditorState.SelectionState.Slot.Primary
         )
         onClose()
     }
 
-    val where = withItemManager { editor.stored.locationOf(target).toEditorView() }
+    val where = withItemManager { editor.data.locationOf(target) }
 
     OverlayRoot {
         OverlayTitleDescription(

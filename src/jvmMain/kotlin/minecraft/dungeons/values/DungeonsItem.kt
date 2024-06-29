@@ -1,5 +1,7 @@
 package minecraft.dungeons.values
 
+import kiwi.hoonkun.resources.Localizations
+
 object DungeonsItem {
 
     sealed interface Filterable
@@ -23,7 +25,21 @@ object DungeonsItem {
 
     enum class Location {
         Inventory, Storage;
-        fun other() = if (this == Inventory) Storage else Inventory
+
+        fun isInventory() = this == Inventory
+        fun isStorage() = this == Storage
+
+        fun other() =
+            when (this) {
+                Inventory -> Storage
+                Storage -> Inventory
+            }
+
+        val localizedName get() =
+            when (this) {
+                Inventory -> Localizations["inventory"]
+                Storage -> Localizations["storage"]
+            }
     }
 
     enum class EquipmentSlot {

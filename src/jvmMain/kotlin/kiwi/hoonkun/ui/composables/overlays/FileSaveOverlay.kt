@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.BasePathToggleProperty
 import kiwi.hoonkun.ui.composables.base.FileSelector
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
@@ -18,7 +18,7 @@ import java.io.File
 
 @Composable
 fun FileSaveOverlay(
-    editor: DungeonsJsonEditorState,
+    editor: EditorState,
     postSave: () -> Unit = { },
     requestClose: OverlayCloser
 ) {
@@ -59,7 +59,7 @@ fun FileSaveOverlay(
             onSelect = {
                 try {
                     withDungeonsIO {
-                        editor.stored.save(
+                        editor.data.save(
                             source = editor.source,
                             destination = DungeonsJsonFile(it),
                             createBackup = createBackup

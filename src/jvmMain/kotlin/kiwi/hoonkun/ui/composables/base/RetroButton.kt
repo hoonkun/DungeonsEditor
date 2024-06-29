@@ -22,11 +22,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
-import kiwi.hoonkun.utils.Retriever
 
 @Composable
 fun RetroButton(
-    color: Retriever<Color>,
+    color: () -> Color,
     modifier: Modifier = RetroButtonDefaultSizeModifier,
     enabled: Boolean = true,
     hoverInteraction: RetroButtonHoverInteraction,
@@ -131,7 +130,7 @@ fun RetroButton(
 @Composable
 fun RetroButton(
     text: String,
-    color: Retriever<Color>,
+    color: () -> Color,
     modifier: Modifier = RetroButtonDefaultSizeModifier,
     enabled: Boolean = true,
     hoverInteraction: RetroButtonHoverInteraction,

@@ -33,7 +33,7 @@ import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
 import kiwi.hoonkun.ui.composables.editor.details.Tips
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.AppState
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalAppState
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.io.DungeonsJsonFile
@@ -42,7 +42,7 @@ import kotlin.random.Random
 
 @Composable
 fun JsonEditor(
-    state: DungeonsJsonEditorState?,
+    state: EditorState?,
     modifier: Modifier = Modifier,
     onPreviewChange: (DungeonsJsonFile) -> Unit
 ) {
@@ -216,7 +216,7 @@ private fun JsonEditorTabButton(
 
 @Composable
 private fun JsonEditorContent(
-    editorState: DungeonsJsonEditorState,
+    editorState: EditorState,
     requestClose: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -242,7 +242,7 @@ private fun JsonEditorContent(
                 ) {
                     if (view.isInventory()) {
                         EquippedItems(
-                            items = editorState.stored.equippedItems,
+                            items = editorState.data.equippedItems,
                             selection = editorState.selection
                         )
                         Spacer(
@@ -253,12 +253,12 @@ private fun JsonEditorContent(
                                 .background(Color.White.copy(alpha = 0.25f))
                         )
                         InventoryItems(
-                            items = editorState.stored.inventoryItems,
+                            items = editorState.data.inventoryItems,
                             editorState = editorState,
                         )
                     } else {
                         InventoryItems(
-                            items = editorState.stored.storageItems,
+                            items = editorState.data.storageItems,
                             editorState = editorState
                         )
                     }

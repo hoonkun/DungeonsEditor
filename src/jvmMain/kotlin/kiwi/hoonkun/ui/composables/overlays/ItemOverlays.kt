@@ -25,14 +25,14 @@ import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withItemManager
 import minecraft.dungeons.values.DungeonsItem
 import minecraft.dungeons.values.DungeonsPower
@@ -47,7 +47,7 @@ sealed interface ItemOverlayState {
 }
 
 @Stable
-class ItemOverlayCreateState(val editorState: DungeonsJsonEditorState): ItemOverlayState {
+class ItemOverlayCreateState(val editorState: EditorState): ItemOverlayState {
     override var selected: DungeonsSkeletons.Item? by mutableStateOf(null)
 
     override var variant by mutableStateOf(DungeonsItem.Variant.entries[0])
@@ -62,7 +62,7 @@ class ItemOverlayCreateState(val editorState: DungeonsJsonEditorState): ItemOver
 class ItemOverlayEditState(val target: MutableDungeons.Item): ItemOverlayState {
     override var selected: DungeonsSkeletons.Item? by mutableStateOf(null)
 
-    override val variant: DungeonsItem.Variant = target.data.variant
+    override val variant: DungeonsItem.Variant = target.skeleton.variant
     override val collection: List<DungeonsSkeletons.Item> =
         DungeonsSkeletons.Item[Unit]
             .filter { it.variant == variant }
@@ -166,7 +166,7 @@ private fun ItemDataDetail(
     var power by remember {
         mutableStateOf(
             if (state is ItemOverlayCreateState)
-                DungeonsPower.toSerializedPower(state.editorState.stored.playerPower.toDouble())
+                DungeonsPower.toSerializedPower(state.editorState.data.playerPower.toDouble())
             else
                 0.0
         )
@@ -292,16 +292,16 @@ private fun ItemDataDetail(
                         val editor = state.editorState
 
                         val created = withItemManager {
-                            editor.stored.add(
+                            editor.data.add(
                                 newItem = newItem,
-                                where = editor.view.toItemLocation()
+                                where = editor.view
                             )
                         }
 
                         editor.selection.clear()
                         editor.selection.select(
                             item = created,
-                            into = DungeonsJsonEditorState.SelectionState.Slot.Primary
+                            into = EditorState.SelectionState.Slot.Primary
                         )
                     }
                     is ItemOverlayEditState -> {

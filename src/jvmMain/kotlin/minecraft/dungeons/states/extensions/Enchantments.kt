@@ -19,13 +19,13 @@ object MutableDungeonsEnchantmentExtensionScope {
         investedPoints =
             if (isNetheriteEnchant)
                 0
-            else if (!data.powerful && !glided)
+            else if (!skeleton.powerful && !glided)
                 CommonNonGlidedInvestedPoints.slice(0 until newLevel).sum()
-            else if (data.powerful && !glided)
+            else if (skeleton.powerful && !glided)
                 PowerfulNonGlidedInvestedPoints.slice(0 until newLevel).sum()
-            else if (!data.powerful && glided)
+            else if (!skeleton.powerful && glided)
                 CommonGlidedInvestedPoints.slice(0 until newLevel).sum()
-            else if (data.powerful && glided)
+            else if (skeleton.powerful && glided)
                 PowerfulGlidedInvestedPoints.slice(0 until newLevel).sum()
             else 0
     }

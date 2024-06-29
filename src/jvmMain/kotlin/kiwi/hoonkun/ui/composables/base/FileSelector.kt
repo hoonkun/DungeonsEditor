@@ -42,7 +42,6 @@ import kiwi.hoonkun.ui.reusables.rememberFocusRequester
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.Retriever
 import java.awt.Cursor
 import java.io.File
 
@@ -54,7 +53,7 @@ fun <S>FileSelector(
     onSelect: (S) -> Unit,
     transform: (File) -> S?,
     modifier: Modifier = Modifier,
-    defaultCandidate: Retriever<File?> = { null },
+    defaultCandidate: () -> File? = { null },
     maxRows: Int = 3,
     initialUseBasePath: Boolean = true,
     initialPath: String = if (initialUseBasePath || isLinux) File.separator else if (isWindows) WindowsDefaultDrive else File.separator,
@@ -278,7 +277,7 @@ fun FileSelector(
     buttonText: String = Localizations["save"],
     onSelect: (File) -> Unit,
     modifier: Modifier = Modifier,
-    defaultCandidate: Retriever<File?> = { null },
+    defaultCandidate: () -> File? = { null },
     maxRows: Int = 3,
     initialUseBasePath: Boolean = true,
     initialPath: String = if (initialUseBasePath || isLinux) File.separator else if (isWindows) WindowsDefaultDrive else File.separator,

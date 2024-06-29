@@ -12,7 +12,7 @@ class AppState(
 ) {
     var editorCandidate by mutableStateOf<MutableDungeons?>(null)
 
-    val openedEditors = mutableStateMapOf<String, DungeonsJsonEditorState>()
+    val openedEditors = mutableStateMapOf<String, EditorState>()
     var activeEditorKey by mutableStateOf<String?>(null)
 
     val activeEditor get() = openedEditors[activeEditorKey]
@@ -21,7 +21,7 @@ class AppState(
 
     fun sketchEditor(path: String) {
         if (!openedEditors.containsKey(path)) {
-            openedEditors[path] = DungeonsJsonEditorState.fromPath(path)
+            openedEditors[path] = EditorState.fromPath(path)
         }
 
         activeEditorKey = path

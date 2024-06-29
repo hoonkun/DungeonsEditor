@@ -23,20 +23,19 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.*
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState.EditorView.Companion.toEditorView
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.MutableDungeonsItemsExtensionScope
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withItemManager
 import minecraft.dungeons.values.DungeonsItem
 import minecraft.dungeons.values.DungeonsPower
 
 @Composable
-fun ItemDetail(item: MutableDungeons.Item?, editor: DungeonsJsonEditorState) {
+fun ItemDetail(item: MutableDungeons.Item?, editor: EditorState) {
     MinimizableAnimatedContent(
         targetState = item,
         transitionSpec = minimizableContentTransform spec@ {
@@ -52,7 +51,7 @@ fun ItemDetail(item: MutableDungeons.Item?, editor: DungeonsJsonEditorState) {
 }
 
 @Composable
-private fun Content(item: MutableDungeons.Item, editor: DungeonsJsonEditorState) {
+private fun Content(item: MutableDungeons.Item, editor: EditorState) {
     val overlays = LocalOverlayState.current
 
     Column(
@@ -61,7 +60,7 @@ private fun Content(item: MutableDungeons.Item, editor: DungeonsJsonEditorState)
             .requiredHeightIn(min = 450.dp)
             .drawBehind {
                 drawImage(
-                    image = item.data.largeIcon,
+                    image = item.skeleton.largeIcon,
                     dstOffset = Offset(size.width * 0.35f - 10f.dp.toPx(), 60f.dp.toPx()).round(),
                     dstSize = Size(size.width * 0.65f, size.width * 0.65f).round(),
                     alpha = 0.25f
@@ -73,8 +72,8 @@ private fun Content(item: MutableDungeons.Item, editor: DungeonsJsonEditorState)
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 10.dp)
         ) {
-            ItemRarityButton(item.data, item.rarity) { item.rarity = it }
-            if (item.data.variant != DungeonsItem.Variant.Artifact) {
+            ItemRarityButton(item.skeleton, item.rarity) { item.rarity = it }
+            if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
                 Spacer(modifier = Modifier.width(7.dp))
                 ItemNetheriteEnchantButton(
                     enchantment = item.netheriteEnchant
@@ -92,9 +91,9 @@ private fun Content(item: MutableDungeons.Item, editor: DungeonsJsonEditorState)
             }
         }
 
-        ItemName(item.data.name)
-        ItemDescription(item.data.flavour)
-        ItemDescription(item.data.description)
+        ItemName(item.skeleton.name)
+        ItemDescription(item.skeleton.flavour)
+        ItemDescription(item.skeleton.description)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -136,12 +135,12 @@ private fun TooltipText(text: String) =
     )
 
 @Composable
-private fun ItemAlterRight(item: MutableDungeons.Item, editor: DungeonsJsonEditorState) {
+private fun ItemAlterRight(item: MutableDungeons.Item, editor: EditorState) {
     val overlays = LocalOverlayState.current
 
-    val location = withItemManager { editor.stored.locationOf(item).toEditorView() }
+    val location = withItemManager { editor.data.locationOf(item) }
 
-    if (!editor.stored.equippedItems.contains(item)) {
+    if (!editor.data.equippedItems.contains(item)) {
         val transferText = if (location == editor.view) "transfer" else "pull"
         val tooltip = @Composable {
             TooltipText(
@@ -157,13 +156,13 @@ private fun ItemAlterRight(item: MutableDungeons.Item, editor: DungeonsJsonEdito
             ItemAlterButton(
                 text = Localizations[transferText, location.other().localizedName],
                 onClick = {
-                    val json = editor.stored
+                    val json = editor.data
                     val selectionSlot = editor.selection.slotOf(item)
                     val previousIndex = item.inventoryIndex
 
-                    with (MutableDungeonsItemsExtensionScope) { editor.stored.transfer(item) }
+                    with (MutableDungeonsItemsExtensionScope) { editor.data.transfer(item) }
 
-                    editor.selection.unselect(item)
+                    editor.selection.deselect(item)
 
                     val searchFrom =
                         if (editor.view.isInventory()) json.inventoryItems
@@ -201,10 +200,10 @@ private fun ItemAlterRight(item: MutableDungeons.Item, editor: DungeonsJsonEdito
         text = Localizations["duplicate"],
         onClick = {
             if (location == editor.view) {
-                if (editor.view.isInventory() && withItemManager { editor.stored.noSpaceAvailable })
+                if (editor.view.isInventory() && withItemManager { editor.data.noSpaceAvailable })
                     overlays.make { InventoryFullOverlay() }
                 else
-                    editor.selection.replace(from = item, new = withItemManager { editor.stored.duplicate(item) })
+                    editor.selection.replace(oldItem = item, newItem = withItemManager { editor.data.duplicate(item) })
             } else {
                 overlays.make {
                     ItemDuplicateLocationConfirmOverlay(

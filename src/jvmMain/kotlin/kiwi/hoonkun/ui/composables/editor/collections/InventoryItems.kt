@@ -20,18 +20,18 @@ import kiwi.hoonkun.ui.composables.overlays.InventoryFullOverlay
 import kiwi.hoonkun.ui.composables.overlays.ItemOverlay
 import kiwi.hoonkun.ui.composables.overlays.ItemOverlayCreateState
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withItemManager
 import minecraft.dungeons.values.DungeonsItem
 
 @Composable
 fun InventoryItems(
     items: List<MutableDungeons.Item>,
-    editorState: DungeonsJsonEditorState
+    editorState: EditorState
 ) {
     var filters by remember { mutableStateOf(InventoryItemFilter()) }
 
@@ -44,7 +44,7 @@ fun InventoryItems(
             items.filter filter@ {
                 if (rarity == null && variant == null && attributes == null) return@filter true
 
-                val variantMatched = variant == null || it.data.variant == variant
+                val variantMatched = variant == null || it.skeleton.variant == variant
                 val attributeMatched = attributes == null ||
                     when(attributes) {
                         DungeonsItem.Attributes.Enchanted -> it.enchanted
@@ -61,7 +61,7 @@ fun InventoryItems(
             filters = filters,
             onFilterChange = { filters = it },
             onCreateItem = {
-                if (withItemManager { editorState.stored.noSpaceAvailable })
+                if (withItemManager { editorState.data.noSpaceAvailable })
                     overlays.make { InventoryFullOverlay() }
                 else {
                     overlays.make(

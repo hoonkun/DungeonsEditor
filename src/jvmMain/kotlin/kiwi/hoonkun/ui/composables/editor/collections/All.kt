@@ -30,12 +30,12 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.TextUnit
 import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
+import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsItem
 import minecraft.dungeons.values.DungeonsPower
 import java.util.*
@@ -67,7 +67,7 @@ fun <T>ItemsLazyGrid(
 fun <T>ItemGridItem(
     item: T,
     simplified: Boolean = false,
-    selection: DungeonsJsonEditorState.SelectionState
+    selection: EditorState.SelectionState
 ) where T: MutableDungeons.Item? {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
@@ -81,16 +81,16 @@ fun <T>ItemGridItem(
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Primary),
             enabled = item != null,
-            onClick = { if (item != null) selection.select(item, DungeonsJsonEditorState.SelectionState.Slot.Primary) }
+            onClick = { if (item != null) selection.select(item, EditorState.SelectionState.Slot.Primary) }
         )
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
             enabled = item != null,
-            onClick = { if (item != null) selection.select(item, DungeonsJsonEditorState.SelectionState.Slot.Secondary) }
+            onClick = { if (item != null) selection.select(item, EditorState.SelectionState.Slot.Secondary) }
         )
         .drawBehind {
             val brush =
-                if (selection.selected(item))
+                if (item != null && selection.selected(item))
                     Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                 else if (hovered)
                     Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))
@@ -245,13 +245,13 @@ private fun ItemImage(
     fillFraction: Float = 0.8f,
 ) =
     Image(
-        bitmap = item.data.inventoryIcon,
+        bitmap = item.skeleton.inventoryIcon,
         contentDescription = null,
         alignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
             .drawWithContent {
-                drawItemFrame(item.rarity, item.glided, item.enchanted, item.data.variant == DungeonsItem.Variant.Artifact)
+                drawItemFrame(item.rarity, item.glided, item.enchanted, item.skeleton.variant == DungeonsItem.Variant.Artifact)
                 scale(fillFraction) {
                     this@drawWithContent.drawContent()
                 }

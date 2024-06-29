@@ -33,7 +33,7 @@ import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsArmorProperty
 
 @Composable
@@ -42,7 +42,7 @@ fun ItemArmorProperties(item: MutableDungeons.Item, properties: List<MutableDung
 
     val groupedProperties by remember(properties) {
         derivedStateOf {
-            val sorted = properties.sortedBy { it.data.description?.length }
+            val sorted = properties.sortedBy { it.skeleton.description?.length }
             val uniques = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Unique }
             val commons = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Common }
 
@@ -124,7 +124,7 @@ fun ArmorPropertyItem(
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = property.data.description ?: property.id,
+            text = property.skeleton.description ?: property.id,
             fontSize = 25.sp,
             color = Color.White
         )
@@ -180,7 +180,7 @@ private val ItemHeight get() = 40.dp
 fun List<MutableDungeons.ArmorProperty>.groupByLength(): List<Pair<MutableDungeons.ArmorProperty, Int>> {
     val result = mutableListOf<Pair<MutableDungeons.ArmorProperty, Int>>()
     forEach {
-        val description = it.data.description ?: it.data.id
+        val description = it.skeleton.description ?: it.skeleton.id
         val long = description.fold(0) { acc, c -> acc + if (c == ' ') 1 else 3 } > 35
         result.add(it to if (long) 2 else 1)
     }

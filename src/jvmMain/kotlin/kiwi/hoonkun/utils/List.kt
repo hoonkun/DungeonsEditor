@@ -1,7 +1,7 @@
 package kiwi.hoonkun.utils
 
 fun <T> List<T>.padEnd(minSize: Int, factory: (Int) -> T): List<T> {
-    if (size >= minSize) return this
+    if (size >= minSize) return this.toList()
 
     val result = toMutableList()
 
@@ -9,11 +9,11 @@ fun <T> List<T>.padEnd(minSize: Int, factory: (Int) -> T): List<T> {
     return result
 }
 
-fun <T> MutableList<T>.replace(from: T, into: T) {
-    val index = indexOf(from)
+fun <T> MutableList<T>.replace(oldElement: T, newElement: T) {
+    val index = indexOf(oldElement)
     if (index < 0) return
     removeAt(index)
-    add(index, into)
+    add(index, newElement)
 }
 
 fun <T> List<T>.chunkedMerge(size: Int, merger: (chunked: List<T>) -> T): List<T> =

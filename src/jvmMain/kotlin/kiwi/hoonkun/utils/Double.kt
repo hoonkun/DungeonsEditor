@@ -1,5 +1,7 @@
 package kiwi.hoonkun.utils
 
 import kotlin.math.pow
+import kotlin.math.truncate
 
-fun Double.toFixed(digits: Int) = (this * 10.0.pow(digits)).toInt() / (10.0.pow(digits))
+fun Double.toFixed(digits: Int) =
+    10.0.pow(digits).let { multiplier -> truncate(times(multiplier)).div(multiplier) }

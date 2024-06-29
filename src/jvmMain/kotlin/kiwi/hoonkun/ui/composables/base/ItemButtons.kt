@@ -26,12 +26,11 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.Retriever
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsItem
 
 
@@ -142,7 +141,7 @@ fun ItemNetheriteEnchantButton(
 ) {
     @Composable
     fun InactiveItemNetheriteEnchantButton(
-        enchantment: Retriever<MutableDungeons.Enchantment>,
+        enchantment: () -> MutableDungeons.Enchantment,
         enabled: Boolean = true
     ) {
         ItemAlterButton(
@@ -173,7 +172,7 @@ fun ItemNetheriteEnchantButton(
             onClick = { onClick(enchantment) }
         ) {
             MinimizableAnimatedContent(
-                targetState = enchantment.data,
+                targetState = enchantment.skeleton,
                 transitionSpec = minimizableContentTransform spec@ {
                     val enter =
                         if (targetState.id == "Unset") defaultFadeIn()

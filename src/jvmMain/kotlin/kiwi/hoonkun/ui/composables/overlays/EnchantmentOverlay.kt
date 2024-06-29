@@ -47,7 +47,7 @@ import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withEnchantments
 import minecraft.dungeons.values.DungeonsPower
 import kotlin.math.roundToInt
@@ -58,8 +58,8 @@ private class EnchantmentDataCollectionState(
     holder: MutableDungeons.Item,
     initialSelected: MutableDungeons.Enchantment
 ) {
-    val datasets = DungeonsSkeletons.Enchantment[Unit].filter { it.applyFor.contains(holder.data.variant) }
-    val initialIndex = datasets.indexOf(initialSelected.data)
+    val datasets = DungeonsSkeletons.Enchantment[Unit].filter { it.applyFor.contains(holder.skeleton.variant) }
+    val initialIndex = datasets.indexOf(initialSelected.skeleton)
 
     val netherite = holder.netheriteEnchant?.copy() ?: MutableDungeons.Enchantment(isNetheriteEnchant = true)
     val enchantments = holder.enchantments.map { it.copy() }.toMutableStateList()
@@ -191,7 +191,7 @@ private fun HolderPreview(
             .clipToBounds()
             .drawBehind {
                 drawImage(
-                    image = holder.data.largeIcon,
+                    image = holder.skeleton.largeIcon,
                     dstOffset = Offset((-20f).dp.toPx(), -30f.dp.toPx()).round(),
                     dstSize = Size(size.width * 0.5f, size.width * 0.5f).round(),
                     alpha = 0.25f
@@ -217,7 +217,7 @@ private fun HolderPreview(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 8.dp)
                 ) {
-                    ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
+                    ItemRarityButton(data = holder.skeleton, rarity = holder.rarity, readonly = true)
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemNetheriteEnchantButton(
                         modifier = Modifier
@@ -234,7 +234,7 @@ private fun HolderPreview(
                 }
                 Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                     AutosizeText(
-                        text = holder.data.name,
+                        text = holder.skeleton.name,
                         maxFontSize = 40.sp,
                         style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier
@@ -282,7 +282,7 @@ private fun HolderPreview(
                     )
 
                     MinimizableAnimatedContent(
-                        targetState = each.data,
+                        targetState = each.skeleton,
                         transitionSpec = minimizableContentTransform {
                             val enter =
                                 if (targetState.id == "Unset") defaultFadeIn()
@@ -350,7 +350,7 @@ private fun EnchantmentDataCollection(
     ) {
         items(state.datasets, key = { it.id }) { data ->
             val isUniqueInHolder = remember(data, state.selected, state.selected.id) {
-                state.enchantments.all { it.data.id != data.id }
+                state.enchantments.all { it.skeleton.id != data.id }
             }
 
             EnchantmentDataCollectionItem(

@@ -39,7 +39,7 @@ import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsItem
 import java.io.File
 
@@ -337,7 +337,7 @@ private fun JsonPreviewEquipment(
         }
     } else {
         BlurShadowImage(
-            bitmap = item.data.inventoryIcon,
+            bitmap = item.skeleton.inventoryIcon,
             modifier = modifier
                 .aspectRatio(1f / 1f),
             contentPadding = PaddingValues(all = 10.dp),

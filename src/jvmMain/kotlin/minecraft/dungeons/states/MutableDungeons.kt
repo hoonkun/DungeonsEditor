@@ -158,18 +158,18 @@ class MutableDungeons(
         var markedNew by mutableStateOf(markedNew)
 
         constructor(from: JSONObject): this(
-            inventoryIndex = from.safe { getInt(FIELD_INVENTORY_INDEX) },
+            inventoryIndex = from.tryOrNull { getInt(FIELD_INVENTORY_INDEX) },
             power = from.getDouble(FIELD_POWER),
             rarity = DungeonsItem.Rarity.fromSerialized(from.getString(FIELD_RARITY)),
             type = from.getString(FIELD_TYPE),
             upgraded = from.getBoolean(FIELD_UPGRADED),
-            enchantments = from.safe { getJSONArray(FIELD_ENCHANTMENTS).transformWithJsonObject { Enchantment(it, false) } },
-            armorProperties = from.safe { getJSONArray(FIELD_ARMOR_PROPERTIES).transformWithJsonObject { ArmorProperty(it) } },
-            netheriteEnchant = from.safe { Enchantment(getJSONObject(FIELD_NETHERITE_ENCHANT), true) },
-            modified = from.safe { getBoolean(FIELD_MODIFIED) },
-            timesModified = from.safe { getInt(FIELD_TIMES_MODIFIED) },
-            equipmentSlot = DungeonsItem.EquipmentSlot.fromSerialized(from.safe { getString(FIELD_EQUIPMENT_SLOT) }),
-            markedNew = from.safe { getBoolean(FIELD_MARKED_NEW) }
+            enchantments = from.tryOrNull { getJSONArray(FIELD_ENCHANTMENTS).transformWithJsonObject { Enchantment(it, false) } },
+            armorProperties = from.tryOrNull { getJSONArray(FIELD_ARMOR_PROPERTIES).transformWithJsonObject { ArmorProperty(it) } },
+            netheriteEnchant = from.tryOrNull { Enchantment(getJSONObject(FIELD_NETHERITE_ENCHANT), true) },
+            modified = from.tryOrNull { getBoolean(FIELD_MODIFIED) },
+            timesModified = from.tryOrNull { getInt(FIELD_TIMES_MODIFIED) },
+            equipmentSlot = DungeonsItem.EquipmentSlot.fromSerialized(from.tryOrNull { getString(FIELD_EQUIPMENT_SLOT) }),
+            markedNew = from.tryOrNull { getBoolean(FIELD_MARKED_NEW) }
         )
 
         fun copy() = Item(

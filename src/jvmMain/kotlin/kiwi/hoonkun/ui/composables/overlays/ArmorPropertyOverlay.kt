@@ -53,7 +53,7 @@ import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.states.MutableDungeons
-import minecraft.dungeons.states.extensions.data
+import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsArmorProperty
 import minecraft.dungeons.values.DungeonsPower
 import kotlin.math.roundToInt
@@ -165,7 +165,7 @@ private fun HolderPreview(
 
     val groupedProperties by remember(state.properties) {
         derivedStateOf {
-            val sorted = state.properties.sortedBy { it.data.description?.length }
+            val sorted = state.properties.sortedBy { it.skeleton.description?.length }
             val uniques = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Unique }
             val commons = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Common }
 
@@ -186,7 +186,7 @@ private fun HolderPreview(
             .clipToBounds()
             .drawBehind {
                 drawImage(
-                    image = holder.data.largeIcon,
+                    image = holder.skeleton.largeIcon,
                     dstOffset = Offset((-20f).dp.toPx(), -30f.dp.toPx()).round(),
                     dstSize = Size(size.width * 0.5f, size.width * 0.5f).round(),
                     alpha = 0.25f
@@ -210,7 +210,7 @@ private fun HolderPreview(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp, bottom = 8.dp)
                 ) {
-                    ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
+                    ItemRarityButton(data = holder.skeleton, rarity = holder.rarity, readonly = true)
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemNetheriteEnchantButton(
                         enchantment = holder.netheriteEnchant,
@@ -221,7 +221,7 @@ private fun HolderPreview(
                 }
                 Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                     AutosizeText(
-                        text = holder.data.name,
+                        text = holder.skeleton.name,
                         maxFontSize = 40.sp,
                         style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier
@@ -402,7 +402,7 @@ private fun ArmorPropertyDetail(
             .padding(30.dp)
     ) {
         MinimizableAnimatedContent(
-            targetState = property?.data,
+            targetState = property?.skeleton,
             transitionSpec = minimizableContentTransform spec@ {
                 val initialIndex = state.datasets.indexOf(initialState)
                 val targetIndex = state.datasets.indexOf(targetState)
@@ -526,10 +526,10 @@ private class ArmorPropertyOverlayState(
         .filter { it.description != null }
         .sortedBy { it.id }
     val initialIndex = datasets
-        .indexOf(initialSelected?.data)
+        .indexOf(initialSelected?.skeleton)
         .coerceAtLeast(0)
 
-    val properties = holder.armorProperties?.map { it.copy() }?.toMutableStateList() ?: mutableStateListOf()
+    val properties = holder.armorProperties.map { it.copy() }.toMutableStateList()
     var selected by mutableStateOf(properties.getOrNull(holder.armorProperties.indexOf(initialSelected)))
 }
 
