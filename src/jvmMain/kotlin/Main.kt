@@ -7,7 +7,10 @@ import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -36,7 +39,6 @@ import kiwi.hoonkun.ui.states.LocalAppPointerListeners
 import kiwi.hoonkun.ui.states.LocalAppState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
-import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
 
 
@@ -143,11 +145,9 @@ private fun AppContent() {
             animationSpec = minimizableSpec { spring() }
         )
 
-        var preview by remember { mutableStateOf<DungeonsJsonFile.Preview>(DungeonsJsonFile.Preview.None) }
-
         JsonEntries(
             onJsonSelect = { appState.sketchEditor(it) },
-            preview = preview,
+            preview = appState.editorCandidate,
             focused = !appState.isInEditor,
             modifier = Modifier
                 .width(AppState.Constants.EntriesWidth)
@@ -160,7 +160,7 @@ private fun AppContent() {
         JsonEditor(
             state = appState.activeEditor,
             modifier = Modifier.weight(1f),
-            onPreviewChange = { preview = it.preview() }
+            onPreviewChange = { appState.editorCandidate = it.preview() }
         )
     }
 }
