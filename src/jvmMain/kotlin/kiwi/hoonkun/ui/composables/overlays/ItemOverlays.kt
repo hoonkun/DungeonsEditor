@@ -165,7 +165,7 @@ private fun ItemDataDetail(
     var power by remember {
         mutableStateOf(
             if (state is ItemOverlayCreateState)
-                DungeonsPower.toSerializedPower(state.editorState.data.playerPower.toDouble())
+                state.editorState.data.playerPower.toDouble()
             else
                 0.0
         )
@@ -254,8 +254,8 @@ private fun ItemDataDetail(
 
                     if (state is ItemOverlayCreateState) {
                         PowerEditField(
-                            power = DungeonsPower.toInGamePower(power),
-                            onPowerChange = { power = DungeonsPower.toSerializedPower(it) },
+                            power = power,
+                            onPowerChange = { power = it },
                             modifier = Modifier.align(Alignment.End)
                         )
                     }
@@ -271,7 +271,7 @@ private fun ItemDataDetail(
                     is ItemOverlayCreateState -> {
                         val newItem = MutableDungeons.Item(
                             inventoryIndex = 0,
-                            power = power,
+                            power = DungeonsPower.toSerializedPower(power),
                             rarity = rarity,
                             type = data.type,
                             upgraded = false,

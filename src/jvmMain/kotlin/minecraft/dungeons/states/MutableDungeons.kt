@@ -9,6 +9,7 @@ import minecraft.dungeons.values.DungeonsLevel
 import minecraft.dungeons.values.DungeonsPower
 import org.json.JSONObject
 import java.util.*
+import kotlin.math.roundToInt
 
 @Stable
 class MutableDungeons(
@@ -46,22 +47,21 @@ class MutableDungeons(
     val playerPower by derivedStateOf {
         val powerDividedBy4 = equippedItems
             .slice(0 until 3)
-            .sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) }
+            .sumOf { it?.power ?: 0.0 }
             .div(4.0)
 
         val powerDividedBy12 = equippedItems
             .slice(3 until 6)
-            .sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) }
+            .sumOf { it?.power ?: 0.0 }
             .div(12.0)
 
-        (powerDividedBy4 + powerDividedBy12).toInt()
+        (powerDividedBy4 + powerDividedBy12).roundToInt()
     }
 
-    private var serializedLevelState: Long by mutableStateOf(from.getLong(FIELD_XP))
-    private val inGameLevelState by derivedStateOf { DungeonsLevel.toInGameLevel(serializedLevelState).toFixed(3) }
+    private var xp: Long by mutableStateOf(from.getLong(FIELD_XP))
     var playerLevel: Double
-        get() = inGameLevelState
-        set(value) { serializedLevelState = DungeonsLevel.toSerializedLevel(value) }
+        get() = DungeonsLevel.toInGameLevel(xp).toFixed(3)
+        set(value) { xp = DungeonsLevel.toSerializedLevel(value) }
 
     val totalSpentEnchantmentPoints by derivedStateOf {
         val inventorySum = allItems.sumOf { item -> item.enchantments.sumOf { it.investedPoints } }
@@ -75,7 +75,7 @@ class MutableDungeons(
             replace(FIELD_ITEMS, allItems.map { it.export() })
             replace(FIELD_STORAGE_CHEST_ITEMS, storageItems.map { it.export() })
             replace(FIELD_CURRENCIES, currencies.map { it.export() })
-            replace(FIELD_XP, serializedLevelState)
+            replace(FIELD_XP, xp)
         }
 
     companion object {
@@ -132,7 +132,11 @@ class MutableDungeons(
         var equipmentSlot by mutableStateOf(equipmentSlot)
         var inventoryIndex by mutableStateOf(inventoryIndex)
 
-        var power by mutableStateOf(power)
+        private var _power by mutableStateOf(power)
+        var power: Double
+            get() = DungeonsPower.toInGamePower(_power)
+            set(value) { _power = DungeonsPower.toSerializedPower(value) }
+
         var rarity by mutableStateOf(rarity)
 
         var upgraded by mutableStateOf(upgraded)
@@ -173,7 +177,7 @@ class MutableDungeons(
         )
 
         fun copy() = Item(
-            power = power,
+            power = _power,
             rarity = rarity,
             type = type,
             upgraded = upgraded,
@@ -190,7 +194,7 @@ class MutableDungeons(
         fun export() =
             JSONObject().apply {
                 put(FIELD_TYPE, type)
-                put(FIELD_POWER, power)
+                put(FIELD_POWER, _power)
                 put(FIELD_RARITY, rarity)
                 put(FIELD_UPGRADED, upgraded)
 

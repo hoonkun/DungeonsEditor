@@ -32,7 +32,6 @@ import minecraft.dungeons.states.extensions.MutableDungeonsItemsExtensionScope
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withItemManager
 import minecraft.dungeons.values.DungeonsItem
-import minecraft.dungeons.values.DungeonsPower
 
 @Composable
 fun ItemDetail(item: MutableDungeons.Item?, editor: EditorState) {
@@ -104,8 +103,8 @@ private fun Content(item: MutableDungeons.Item, editor: EditorState) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             PowerEditField(
-                power = DungeonsPower.toInGamePower(item.power),
-                onPowerChange = { item.power = DungeonsPower.toSerializedPower(it) },
+                power = item.power,
+                onPowerChange = { item.power = it },
                 hideLabel = ArcticSettings.locale == "en"
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -138,7 +137,7 @@ private fun TooltipText(text: String) =
 private fun ItemAlterRight(item: MutableDungeons.Item, editor: EditorState) {
     val overlays = LocalOverlayState.current
 
-    val location = withItemManager { editor.data.locationOf(item) }
+    val location = remember(item) { withItemManager { editor.data.locationOf(item) } }
 
     if (!editor.data.equippedItems.contains(item)) {
         val transferText = if (location == editor.view) "transfer" else "pull"

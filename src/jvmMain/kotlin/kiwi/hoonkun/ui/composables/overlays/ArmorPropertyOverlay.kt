@@ -54,7 +54,6 @@ import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsArmorProperty
-import minecraft.dungeons.values.DungeonsPower
 import kotlin.math.roundToInt
 
 
@@ -237,7 +236,7 @@ private fun HolderPreview(
                     ) {
                         PowerIcon(Modifier.size(24.dp))
                         Text(
-                            text = "${DungeonsPower.toInGamePower(holder.power).roundToInt()}",
+                            text = "${holder.power.roundToInt()}",
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }

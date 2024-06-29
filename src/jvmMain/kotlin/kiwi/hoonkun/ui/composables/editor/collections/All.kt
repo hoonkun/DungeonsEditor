@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonSkippableComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -37,8 +36,8 @@ import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsItem
-import minecraft.dungeons.values.DungeonsPower
 import java.util.*
+import kotlin.math.roundToInt
 
 @Composable
 @NonSkippableComposable
@@ -199,7 +198,7 @@ private fun PowerText(
     fontSize: TextUnit = 22.sp
 ) =
     Text(
-        text = "${remember(power) { DungeonsPower.toInGamePower(power).toInt()} }",
+        text = "${power.roundToInt()}",
         style = LocalTextStyle.current.copy(
             color = Color.White.copy(alpha = 0.85f),
             fontSize = fontSize,

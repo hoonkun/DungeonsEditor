@@ -9,7 +9,6 @@ import minecraft.dungeons.states.extensions.emerald
 import minecraft.dungeons.states.extensions.gold
 import minecraft.dungeons.values.DungeonsItem
 import minecraft.dungeons.values.DungeonsLevel
-import minecraft.dungeons.values.DungeonsPower
 import org.json.JSONObject
 import java.io.File
 import java.nio.ByteBuffer
@@ -159,11 +158,11 @@ class DungeonsJsonFile(path: String): File(path) {
 
             val power = run {
                 val powerDividedBy4 = listOf(melee, armor, ranged)
-                    .sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) }
+                    .sumOf { it?.power ?: 0.0 }
                     .div(4.0)
 
                 val powerDividedBy12 = listOf(artifact1, artifact2, artifact3)
-                    .sumOf { DungeonsPower.toInGamePower(it?.power ?: 0.0) }
+                    .sumOf { it?.power ?: 0.0 }
                     .div(12.0)
 
                 (powerDividedBy4 + powerDividedBy12).toInt()
