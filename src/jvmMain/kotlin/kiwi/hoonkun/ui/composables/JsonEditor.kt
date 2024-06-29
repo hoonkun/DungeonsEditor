@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
 import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonDpCornerRadius

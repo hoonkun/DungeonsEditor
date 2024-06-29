@@ -37,7 +37,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.reusables.rememberFocusRequester
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp

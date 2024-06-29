@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.overlays.ErrorOverlay
 import kiwi.hoonkun.ui.composables.overlays.OverlayRoot

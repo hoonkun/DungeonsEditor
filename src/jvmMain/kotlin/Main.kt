@@ -23,7 +23,7 @@ import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.core.PakIndexingState
 import kiwi.hoonkun.core.rememberPakIndexingState
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.RetroButton

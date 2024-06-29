@@ -1,4 +1,4 @@
-package kiwi.hoonkun.ui
+package kiwi.hoonkun.resources
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toComposeImageBitmap

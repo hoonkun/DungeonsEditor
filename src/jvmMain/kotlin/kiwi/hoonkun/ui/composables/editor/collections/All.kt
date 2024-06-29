@@ -28,7 +28,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.TextUnit
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.DungeonsJsonEditorState
 import kiwi.hoonkun.ui.units.dp

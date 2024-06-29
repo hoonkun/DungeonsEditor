@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.rememberComponentRectPositionProvider
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.AnimatedTooltipArea
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
 import kiwi.hoonkun.ui.reusables.*
