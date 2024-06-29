@@ -157,19 +157,19 @@ private fun ItemAlterRight(item: MutableDungeons.Item, editor: EditorState) {
                 text = Localizations[transferText, location.other().localizedName],
                 onClick = {
                     val json = editor.data
-                    val selectionSlot = editor.selection.slotOf(item)
+                    val selectionSlot = editor.selectedSlotOf(item)
                     val previousIndex = item.inventoryIndex
 
                     with (MutableDungeonsItemsExtensionScope) { editor.data.transfer(item) }
 
-                    editor.selection.deselect(item)
+                    editor.deselect(item)
 
                     val searchFrom =
                         if (editor.view.isInventory()) json.inventoryItems
                         else json.storageItems
                     val newSelection = searchFrom.find { it.inventoryIndex == previousIndex }
                     if (newSelection != null && selectionSlot != null)
-                        editor.selection.select(newSelection, selectionSlot, unselectIfAlreadySelected = false)
+                        editor.select(newSelection, selectionSlot, unselectIfAlreadySelected = false)
                 }
             )
         }
@@ -203,7 +203,7 @@ private fun ItemAlterRight(item: MutableDungeons.Item, editor: EditorState) {
                 if (editor.view.isInventory() && withItemManager { editor.data.noSpaceAvailable })
                     overlays.make { InventoryFullOverlay() }
                 else
-                    editor.selection.replace(oldItem = item, newItem = withItemManager { editor.data.duplicate(item) })
+                    editor.reselect(oldItem = item, newItem = withItemManager { editor.data.duplicate(item) })
             } else {
                 overlays.make {
                     ItemDuplicateLocationConfirmOverlay(

@@ -297,10 +297,10 @@ private fun ItemDataDetail(
                             )
                         }
 
-                        editor.selection.clear()
-                        editor.selection.select(
+                        editor.deselectAll()
+                        editor.select(
                             item = created,
-                            into = EditorState.SelectionState.Slot.Primary
+                            into = EditorState.Slot.Primary
                         )
                     }
                     is ItemOverlayEditState -> {

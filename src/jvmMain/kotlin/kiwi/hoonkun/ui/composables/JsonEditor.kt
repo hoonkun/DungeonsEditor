@@ -243,7 +243,7 @@ private fun JsonEditorContent(
                     if (view.isInventory()) {
                         EquippedItems(
                             items = editorState.data.equippedItems,
-                            selection = editorState.selection
+                            editor = editorState
                         )
                         Spacer(
                             modifier = Modifier
@@ -265,7 +265,7 @@ private fun JsonEditorContent(
                 }
             }
             MinimizableAnimatedContent(
-                targetState = editorState.selection.hasSelection,
+                targetState = editorState.hasSelection,
                 transitionSpec = minimizableContentTransform spec@ {
                     val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
                     val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()

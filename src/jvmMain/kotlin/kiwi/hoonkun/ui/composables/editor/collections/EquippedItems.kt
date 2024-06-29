@@ -20,7 +20,7 @@ import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 
 @Composable
-fun EquippedItems(items: List<MutableDungeons.Item?>, selection: EditorState.SelectionState) {
+fun EquippedItems(items: List<MutableDungeons.Item?>, editor: EditorState) {
     var collapsed by remember { mutableStateOf(false) }
 
     Row {
@@ -36,7 +36,7 @@ fun EquippedItems(items: List<MutableDungeons.Item?>, selection: EditorState.Sel
             ItemsLazyGrid(
                 columns = if (collapsed) 6 else 3,
                 items = items,
-                itemContent = { item -> ItemGridItem(item, collapsed, selection) }
+                itemContent = { item -> ItemGridItem(item, collapsed, editor) }
             )
         }
     }

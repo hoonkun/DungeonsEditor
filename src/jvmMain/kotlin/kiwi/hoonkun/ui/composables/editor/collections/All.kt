@@ -67,7 +67,7 @@ fun <T>ItemsLazyGrid(
 fun <T>ItemGridItem(
     item: T,
     simplified: Boolean = false,
-    selection: EditorState.SelectionState
+    editor: EditorState
 ) where T: MutableDungeons.Item? {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
@@ -81,16 +81,16 @@ fun <T>ItemGridItem(
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Primary),
             enabled = item != null,
-            onClick = { if (item != null) selection.select(item, EditorState.SelectionState.Slot.Primary) }
+            onClick = { if (item != null) editor.select(item, EditorState.Slot.Primary) }
         )
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
             enabled = item != null,
-            onClick = { if (item != null) selection.select(item, EditorState.SelectionState.Slot.Secondary) }
+            onClick = { if (item != null) editor.select(item, EditorState.Slot.Secondary) }
         )
         .drawBehind {
             val brush =
-                if (item != null && selection.selected(item))
+                if (item != null && editor.selected(item))
                     Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                 else if (hovered)
                     Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))

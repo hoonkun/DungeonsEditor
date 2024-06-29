@@ -24,7 +24,7 @@ fun ItemDuplicateLocationConfirmOverlay(
     val onClose = { requestClose() }
 
     val onOriginalSelected = {
-        editor.selection.replace(
+        editor.reselect(
             oldItem = target,
             newItem = withItemManager { editor.data.duplicate(target) }
         )
@@ -34,10 +34,10 @@ fun ItemDuplicateLocationConfirmOverlay(
     val onHereSelected = {
         val created = withItemManager { editor.data.add(target.copy(), editor.view) }
 
-        editor.selection.clear()
-        editor.selection.select(
+        editor.deselectAll()
+        editor.select(
             item = created,
-            into = EditorState.SelectionState.Slot.Primary
+            into = EditorState.Slot.Primary
         )
         onClose()
     }

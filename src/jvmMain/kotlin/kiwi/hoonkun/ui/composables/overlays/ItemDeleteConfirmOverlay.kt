@@ -24,7 +24,7 @@ fun ItemDeleteConfirmOverlay(
 ) {
     val onNegative = { requestClose() }
     val onPositive = {
-        editor.selection.deselect(target)
+        editor.deselect(target)
         withItemManager { editor.data.remove(target) }
         requestClose()
     }

@@ -35,7 +35,6 @@ fun InventoryItems(
 ) {
     var filters by remember { mutableStateOf(InventoryItemFilter()) }
 
-    val selection = editorState.selection
     val overlays = LocalOverlayState.current
 
     val datasets by remember(items) {
@@ -78,7 +77,7 @@ fun InventoryItems(
         )
         ItemsLazyGrid(
             items = datasets,
-            itemContent = { item -> ItemGridItem(item, selection = selection) }
+            itemContent = { item -> ItemGridItem(item, editor = editorState) }
         )
     }
 }

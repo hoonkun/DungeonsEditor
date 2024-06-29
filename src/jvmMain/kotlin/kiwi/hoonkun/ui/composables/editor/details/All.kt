@@ -31,12 +31,12 @@ fun ItemComparator(editor: EditorState) {
                 .padding(vertical = 24.dp)
         ) {
             ItemDetail(
-                item = editor.selection.primary,
+                item = editor.primary,
                 editor = editor
             )
             Spacer(modifier = Modifier.height(20.dp))
             ItemDetail(
-                item = editor.selection.secondary,
+                item = editor.secondary,
                 editor = editor
             )
         }

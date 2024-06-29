@@ -21,7 +21,7 @@ class AppState(
 
     fun sketchEditor(path: String) {
         if (!openedEditors.containsKey(path)) {
-            openedEditors[path] = EditorState.fromPath(path)
+            openedEditors[path] = EditorState(path)
         }
 
         activeEditorKey = path
