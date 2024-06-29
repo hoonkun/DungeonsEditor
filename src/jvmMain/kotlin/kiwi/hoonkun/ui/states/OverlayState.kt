@@ -26,7 +26,7 @@ class OverlayState {
         canBeDismissed: Boolean = true,
         enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
         exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-        content: @Composable AnimatedVisibilityScope?.(requestClose: OverlayCloser) -> Unit
+        content: @Composable AnimatedVisibilityScope?.(requestClose: () -> Unit) -> Unit
     ) {
         val newOverlay = Overlay(
             backdropOptions = backdropOptions,
@@ -111,10 +111,6 @@ class OverlayState {
     }
 }
 
-fun interface OverlayCloser {
-    operator fun invoke()
-}
-
 @Stable
 data class Overlay(
     val id: String = UUID.randomUUID().toString(),
@@ -122,7 +118,7 @@ data class Overlay(
     val canBeDismissed: Boolean = true,
     val enter: EnterTransition = defaultFadeIn() + scaleIn(initialScale = 1.1f),
     val exit: ExitTransition = defaultFadeOut() + scaleOut(targetScale = 1.1f),
-    val content: @Composable AnimatedVisibilityScope?.(requestClose: OverlayCloser) -> Unit,
+    val content: @Composable AnimatedVisibilityScope?.(requestClose: () -> Unit) -> Unit,
 ) {
     var state by mutableStateOf(State.Initial)
     val visible: Boolean get() = state == State.Idle

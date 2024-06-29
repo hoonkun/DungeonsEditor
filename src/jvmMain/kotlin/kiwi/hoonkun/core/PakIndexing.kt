@@ -26,7 +26,6 @@ import kiwi.hoonkun.ui.composables.overlays.OverlayRoot
 import kiwi.hoonkun.ui.composables.overlays.OverlayTitleDescription
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.utils.chunkedMerge
 import kotlinx.coroutines.*
@@ -107,7 +106,7 @@ sealed interface PakIndexingState {
 @Composable
 private fun PakIndexingOverlay(
     onStateChanged: (PakIndexingState) -> Unit,
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     var indexingText by remember {
         mutableStateOf(value = PakIndexingText())
@@ -238,7 +237,7 @@ private fun PakIndexingOverlay(
 @Composable
 private fun PakNotFoundOverlay(
     onSelect: (newPath: String) -> Unit,
-    requestClose: OverlayCloser,
+    requestClose: () -> Unit,
 ) {
     OverlayRoot {
         OverlayTitleDescription(

@@ -48,7 +48,6 @@ import kiwi.hoonkun.ui.composables.editor.details.ArmorPropertyItem
 import kiwi.hoonkun.ui.composables.editor.details.groupByLength
 import kiwi.hoonkun.ui.composables.editor.details.height
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsSkeletons
@@ -63,7 +62,7 @@ import kotlin.math.roundToInt
 fun AnimatedVisibilityScope?.ArmorPropertyOverlay(
     holder: MutableDungeons.Item,
     initialSelected: MutableDungeons.ArmorProperty?,
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     val density = LocalDensity.current
     val windowState = LocalWindowState.current

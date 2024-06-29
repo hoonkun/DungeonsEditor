@@ -9,7 +9,6 @@ import kiwi.hoonkun.ui.composables.base.BasePathToggleProperty
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
@@ -20,7 +19,7 @@ import java.io.File
 fun FileSaveOverlay(
     editor: EditorState,
     postSave: () -> Unit = { },
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     val overlays = LocalOverlayState.current
     var createBackup by remember { mutableStateOf(false) }

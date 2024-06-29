@@ -40,7 +40,6 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsLocalizations
@@ -75,7 +74,7 @@ private fun rememberEnchantmentDataCollectionState(holder: MutableDungeons.Item,
 fun AnimatedVisibilityScope?.EnchantmentOverlay(
     holder: MutableDungeons.Item,
     initialSelected: MutableDungeons.Enchantment,
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     val density = LocalDensity.current
     val windowState = LocalWindowState.current

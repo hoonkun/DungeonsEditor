@@ -11,7 +11,6 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.withItemManager
@@ -20,7 +19,7 @@ import minecraft.dungeons.states.extensions.withItemManager
 fun ItemDuplicateLocationConfirmOverlay(
     editor: EditorState,
     target: MutableDungeons.Item,
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     val onClose = { requestClose() }
 

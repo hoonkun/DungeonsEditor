@@ -10,14 +10,13 @@ import androidx.compose.ui.graphics.Color
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 
 @Composable
 fun ExitApplicationConfirmOverlay(
     description: String? = Localizations["exit_application_description"],
     onConfirm: () -> Unit,
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     val onNegative = { requestClose() }
     val onPositive = {

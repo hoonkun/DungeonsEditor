@@ -26,7 +26,6 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.OverlayCloser
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsSkeletons
@@ -72,7 +71,7 @@ class ItemOverlayEditState(val target: MutableDungeons.Item): ItemOverlayState {
 @Composable
 fun AnimatedVisibilityScope?.ItemOverlay(
     state: ItemOverlayState,
-    requestClose: OverlayCloser
+    requestClose: () -> Unit
 ) {
     val density = LocalDensity.current
 
