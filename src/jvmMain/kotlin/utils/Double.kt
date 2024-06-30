@@ -1,4 +1,4 @@
-package kiwi.hoonkun.utils
+package utils
 
 import kotlin.math.pow
 import kotlin.math.truncate

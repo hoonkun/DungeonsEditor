@@ -27,11 +27,11 @@ import kiwi.hoonkun.ui.composables.overlays.OverlayTitleDescription
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
 import kiwi.hoonkun.ui.units.dp
-import kiwi.hoonkun.utils.chunkedMerge
 import kotlinx.coroutines.*
 import minecraft.dungeons.io.DungeonsPakRegistry
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsSkeletons
+import utils.chunkedMerge
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 

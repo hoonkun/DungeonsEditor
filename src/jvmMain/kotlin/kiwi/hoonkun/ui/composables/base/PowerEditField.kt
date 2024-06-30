@@ -10,9 +10,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.toFixed
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
+import utils.toFixed
 
 
 @Composable

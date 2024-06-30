@@ -2,12 +2,12 @@ package minecraft.dungeons.resources
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import kiwi.hoonkun.utils.nameWithoutExtension
-import kiwi.hoonkun.utils.removeExtension
 import minecraft.dungeons.io.DungeonsPakRegistry
 import pak.PakIndex
 import parsers.Texture2d
 import utils.TextureDecoder
+import utils.nameWithoutExtension
+import utils.removeExtension
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte

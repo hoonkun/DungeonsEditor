@@ -1,4 +1,4 @@
-package kiwi.hoonkun.utils
+package utils
 
 fun <T> List<T>.padEnd(minSize: Int, factory: (Int) -> T): List<T> {
     if (size >= minSize) return this.toList()

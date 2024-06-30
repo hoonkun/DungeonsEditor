@@ -1,4 +1,4 @@
-package kiwi.hoonkun.utils
+package utils
 
 fun String.removeExtension() =
     replaceAfterLast(".", "").removeSuffix(".")

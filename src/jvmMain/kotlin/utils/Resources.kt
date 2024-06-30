@@ -1,4 +1,4 @@
-package kiwi.hoonkun.utils
+package utils
 
 import androidx.compose.ui.res.useResource
 

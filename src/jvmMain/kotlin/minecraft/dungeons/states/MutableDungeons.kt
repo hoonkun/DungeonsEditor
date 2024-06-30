@@ -2,12 +2,12 @@ package minecraft.dungeons.states
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import kiwi.hoonkun.utils.*
 import minecraft.dungeons.values.DungeonsArmorProperty
 import minecraft.dungeons.values.DungeonsItem
 import minecraft.dungeons.values.DungeonsLevel
 import minecraft.dungeons.values.DungeonsPower
 import org.json.JSONObject
+import utils.*
 import java.util.*
 import kotlin.math.roundToInt
 

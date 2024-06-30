@@ -1,8 +1,8 @@
 package kiwi.hoonkun.resources
 
 import kiwi.hoonkun.ArcticSettings
-import kiwi.hoonkun.utils.resourceText
 import kotlinx.serialization.json.Json
+import utils.resourceText
 
 object Localizations {
 
