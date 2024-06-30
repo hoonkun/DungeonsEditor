@@ -1,15 +1,15 @@
 {
-  "VoidTouchedMelee": "VoidStrikeMelee",
-  "VoidTouchedRanged": "VoidStrikeRanged",
-  "CriticalHit": "Critical",
-  "FireAspect": "Fire",
-  "AnimaConduitMelee": "Anima",
-  "AnimaConduitRanged": "AnimaRanged",
-  "PoisonedMelee": "Poisoned",
-  "PoisonedRanged": "Poisoned",
-  "SoulSiphon": "Soul",
-  "Shockwave": "Shock",
-  "Gravity": "GravityRanged",
-  "MultiShot": "Multi",
-  "TempoTheft": "Tempo"
+  "VoidTouchedMelee": "Enchantment/VoidStrikeMelee",
+  "VoidTouchedRanged": "Enchantment/VoidStrikeRanged",
+  "CriticalHit": "Enchantment/Critical",
+  "FireAspect": "Enchantment/Fire",
+  "AnimaConduitMelee": "Enchantment/Anima",
+  "AnimaConduitRanged": "Enchantment/AnimaRanged",
+  "PoisonedMelee": "Enchantment/Poisoned",
+  "PoisonedRanged": "Enchantment/Poisoned",
+  "SoulSiphon": "Enchantment/Soul",
+  "Shockwave": "Enchantment/Shock",
+  "Gravity": "Enchantment/GravityRanged",
+  "MultiShot": "Enchantment/Multi",
+  "TempoTheft": "Enchantment/Tempo"
 }

@@ -47,14 +47,14 @@ fun DrawScope.drawItemFrame(
     if (enchanted) drawRect(EnchantmentPointsBackgroundGradient())
 
     drawImage(
-        image = DungeonsTextures["/Game/UI/Materials/Inventory2/Slot/v2_${if (isArtifact) "item" else "gear"}_${backName}_slot.png"],
+        image = DungeonsTextures["/UI/Materials/Inventory2/Slot/v2_${if (isArtifact) "item" else "gear"}_${backName}_slot.png"],
         srcSize = IntSize(322, 322),
         dstSize = IntSize(size.width.toInt(), size.height.toInt()),
         alpha = 0.75f
     )
     if (rarity != DungeonsItem.Rarity.Common) {
         drawImage(
-            image = DungeonsTextures["/Game/UI/Materials/Inventory2/Slot/v2_${backName}_overlay.png"],
+            image = DungeonsTextures["/UI/Materials/Inventory2/Slot/v2_${backName}_overlay.png"],
             srcSize = IntSize(322, 322),
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
             alpha = 0.75f
@@ -88,7 +88,7 @@ fun DrawScope.drawUniqueIndicator() {
 
 @Stable
 fun DrawScope.drawEnchantmentRune(topOffset: Dp = (-175).dp) {
-    val image = DungeonsTextures["/Game/UI/Inventory/Runes.png"]
+    val image = DungeonsTextures["/UI/Inventory/Runes.png"]
     translate(top = topOffset.toPx()) {
         scale(1.35f) {
             drawImage(

@@ -228,7 +228,7 @@ private fun ItemDataDetail(
                 ) {
                     Row {
                         ItemRarityButton(capturedData, rarity) { rarity = it }
-                        capturedData.appliedExclusiveEnchantments?.let {
+                        capturedData.appliedExclusiveEnchantment?.let {
                             Spacer(modifier = Modifier.width(8.dp))
                             BuiltInEnchantments(it)
                         }
@@ -453,7 +453,7 @@ private fun ItemDataItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemRarityButton(data, rarity = DungeonsItem.Rarity.Common, readonly = true)
                 }
-                data.appliedExclusiveEnchantments?.let {
+                data.appliedExclusiveEnchantment?.let {
                     Spacer(modifier = Modifier.width(8.dp))
                     BuiltInEnchantments(it)
                 }
@@ -484,7 +484,7 @@ private fun AddButton(
             modifier = Modifier.padding(end = 24.dp)
         )
         Image(
-            bitmap = DungeonsTextures["/Game/UI/Materials/Character/right_arrow_carousel.png"],
+            bitmap = DungeonsTextures["/UI/Materials/Character/right_arrow_carousel.png"],
             contentDescription = null,
             filterQuality = FilterQuality.None,
             modifier = Modifier.size(28.dp)

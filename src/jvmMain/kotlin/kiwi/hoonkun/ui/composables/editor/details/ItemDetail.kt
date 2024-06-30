@@ -96,8 +96,8 @@ private fun Content(item: MutableDungeons.Item, editor: EditorState) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        IfNotNull(item.armorProperties) {
-            ItemArmorProperties(item, it)
+        if (item.skeleton.variant == DungeonsItem.Variant.Armor) {
+            ItemArmorProperties(item, item.armorProperties)
             Spacer(modifier = Modifier.height(20.dp))
         }
 
@@ -111,11 +111,11 @@ private fun Content(item: MutableDungeons.Item, editor: EditorState) {
             ItemAlterRight(item, editor)
         }
 
-        IfNotNull(item.enchantments) {
+        if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
             Spacer(modifier = Modifier.height(30.dp))
             ItemEnchantments(
                 holder = item,
-                enchantments = MutableEnchantments(it),
+                enchantments = MutableEnchantments(item.enchantments),
                 modifier = Modifier.fillMaxWidth()
             )
         }

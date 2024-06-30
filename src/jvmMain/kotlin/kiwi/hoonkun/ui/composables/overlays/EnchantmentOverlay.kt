@@ -281,13 +281,6 @@ private fun HolderPreview(
 
                     MinimizableAnimatedContent(
                         targetState = each.skeleton,
-                        transitionSpec = minimizableContentTransform {
-                            val enter =
-                                if (targetState.id == "Unset") defaultFadeIn()
-                                else defaultFadeIn() + scaleIn(initialScale = 1.5f)
-                            val exit = defaultFadeOut()
-                            enter togetherWith exit using SizeTransform(clip = false)
-                        },
                         modifier = Modifier
                             .drawWithCache {
                                 onDrawBehind {
@@ -302,7 +295,13 @@ private fun HolderPreview(
                                         style = Stroke(width = 6.dp.toPx())
                                     )
                                 }
-                            }
+                            },
+                        transitionSpec = minimizableContentTransform {
+                            val enter = defaultFadeIn() +
+                                if (targetState.isValid()) scaleIn(initialScale = 1.5f) else EnterTransition.None
+                            val exit = defaultFadeOut()
+                            enter togetherWith exit using SizeTransform(clip = false)
+                        }
                     ) {
                         EnchantmentImage(
                             data = it,
@@ -359,7 +358,7 @@ private fun EnchantmentDataCollection(
                     val newId = if (newData.id == state.selected.id) "Unset" else newData.id
                     state.selected.id = newId
                     state.selected.level =
-                        if (newId == "Unset")
+                        if (state.selected.isNotValid())
                             0
                         else if (state.selected.isNetheriteEnchant)
                             state.selected.level.coerceAtLeast(1)
@@ -459,14 +458,14 @@ private fun EnchantmentDetail(
             },
             contentAlignment = Alignment.Center
         ) { capturedData ->
-            if (capturedData.id == "Unset") {
-                UnsetEnchantmentPreview()
-            } else {
+            if (capturedData.isValid()) {
                 ValidEnchantmentPreview(
                     data = capturedData,
                     parent = enchantment,
                     onLevelChange = onLevelChange
                 )
+            } else {
+                UnsetEnchantmentPreview()
             }
         }
     }
@@ -576,5 +575,5 @@ private fun PowerfulEnchantmentIndicator() =
 
 @Stable
 private fun LevelImage(level: Int) =
-    if (level == 0) DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png"]
-    else DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png"]
+    if (level == 0) DungeonsTextures["/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png"]
+    else DungeonsTextures["/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png"]

@@ -122,7 +122,7 @@ fun BuiltInEnchantments(data: DungeonsSkeletons.Enchantment) {
                 .requiredSize(30.dp)
                 .drawBehind {
                     drawImage(
-                        image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
+                        image = DungeonsTextures["/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
                         dstSize = (size * 0.9f).round(),
                         dstOffset = (center - (size * 0.9f / 2f).let { Offset(it.width, it.height) }).round()
                     )
@@ -152,7 +152,7 @@ fun ItemNetheriteEnchantButton(
             onClick = { onClick(enchantment()) }
         ) {
             Image(
-                bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"],
+                bitmap = DungeonsTextures["/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"],
                 contentDescription = null,
                 modifier = Modifier.size(28.dp)
             )
@@ -174,9 +174,8 @@ fun ItemNetheriteEnchantButton(
             MinimizableAnimatedContent(
                 targetState = enchantment.skeleton,
                 transitionSpec = minimizableContentTransform spec@ {
-                    val enter =
-                        if (targetState.id == "Unset") defaultFadeIn()
-                        else defaultFadeIn() + scaleIn(initialScale = 1.5f)
+                    val enter = defaultFadeIn() +
+                        if (targetState.isValid()) scaleIn(initialScale = 1.5f) else EnterTransition.None
                     val exit = defaultFadeOut()
                     enter togetherWith exit using SizeTransform(clip = false)
                 },
@@ -184,7 +183,7 @@ fun ItemNetheriteEnchantButton(
                     .requiredSize(30.dp)
                     .drawBehind {
                         drawImage(
-                            image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
+                            image = DungeonsTextures["/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
                             dstSize = size.round()
                         )
                     }
@@ -205,16 +204,16 @@ fun ItemNetheriteEnchantButton(
         }
     }
 
-    ItemAlterButtonAnimatable(targetState = enchantment?.isUnset != false) { isUnset ->
-        if (isUnset) {
+    ItemAlterButtonAnimatable(targetState = enchantment?.isValid() == true) { isValid ->
+        if (isValid) {
+            if (enchantment == null) return@ItemAlterButtonAnimatable
+            ActiveItemNetheriteEnchantButton(enchantment, enabled = enabled)
+        } else {
             InactiveItemNetheriteEnchantButton(
                 enchantment = {
                     enchantment ?: MutableDungeons.Enchantment(isNetheriteEnchant = true)
                 }
             )
-        } else {
-            if (enchantment == null) return@ItemAlterButtonAnimatable
-            ActiveItemNetheriteEnchantButton(enchantment, enabled = enabled)
         }
     }
 }

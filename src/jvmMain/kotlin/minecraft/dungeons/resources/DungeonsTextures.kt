@@ -2,6 +2,8 @@ package minecraft.dungeons.resources
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import kiwi.hoonkun.utils.nameWithoutExtension
+import kiwi.hoonkun.utils.removeExtension
 import minecraft.dungeons.io.DungeonsPakRegistry
 import pak.PakIndex
 import parsers.Texture2d
@@ -12,45 +14,43 @@ import java.awt.image.DataBufferByte
 import java.awt.image.Raster
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 
 object DungeonsTextures {
 
     private val lock = ReentrantLock()
 
-    private lateinit var _pets: List<ImageBitmap>
-    val pets get() = _pets
+    private val cache: MutableMap<String, ImageBitmap> = mutableMapOf()
 
-    operator fun get(key: String): ImageBitmap = get { key }
-
-    fun get(
-        key: String? = null,
-        preprocess: (BufferedImage) -> BufferedImage = { it },
-        pathFactory: () -> String
+    operator fun get(
+        path: String,
+        cacheKey: String = path,
     ): ImageBitmap =
-        cache.getOrPut(key ?: pathFactory()) {
-            val rawPath = pathFactory().replaceAfterLast('.', "").removeSuffix(".")
+        cache.getOrPut(cacheKey) {
+            val rawPath = path.removeExtension()
             val pakPath =
-                if (!rawPath.startsWith("/Dungeons/Content")) "/Dungeons/Content".plus(rawPath.removePrefix("/Game"))
+                if (!rawPath.startsWith("/Dungeons/Content")) "/Dungeons/Content$rawPath"
                 else rawPath
 
-            val pakPackage = lock.withLock { DungeonsPakRegistry.index.getPackage(pakPath) }
-                ?: throw RuntimeException("could not find ingame resource in pak file: $pakPath")
+            val (width, height, bytes) = lock.withLock { DungeonsPakRegistry.index.getPackage(pakPath) }
+                ?.getExport<Texture2d>()
+                ?.let { try { TextureDecoder.decode(it) } catch (e: Exception) { null } }
+                ?: throw RuntimeException("could not load texture: $pakPath")
 
-            val texture = pakPackage.getExport<Texture2d>()
-                ?: throw RuntimeException("could not find texture data in pak package: $pakPath")
-
-            val decoded = TextureDecoder.decode(texture)
-
-            val image = BufferedImage(decoded.width, decoded.height, BufferedImage.TYPE_4BYTE_ABGR)
-            image.data = Raster.createRaster(image.sampleModel, DataBufferByte(decoded.data, decoded.data.size), Point())
-
-            preprocess(image).toComposeImageBitmap()
+            BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
+                .apply { data = Raster.createRaster(sampleModel, DataBufferByte(bytes, bytes.size), Point()) }
+                .toComposeImageBitmap()
         }
 
     fun cached(key: String): ImageBitmap? = cache[key]
 
-    private val cache: MutableMap<String, ImageBitmap> = mutableMapOf()
+    object Pets {
+        operator fun invoke(unused: Unit): List<ImageBitmap> = unused.let { DataHolder.pets }
+        operator fun get(randomKey: String): ImageBitmap =
+            DataHolder.pets[Random(randomKey.hashCode()).nextInt(0 until DataHolder.pets.size)]
+    }
 
     object Initializer {
         fun run(index: PakIndex) {
@@ -59,24 +59,35 @@ object DungeonsTextures {
                 "filter_cosmetic", "levelupflair_cosmetic", "healingflair_cosmetic", "mobflair_cosmetic", "respawnflair_cosmetic"
             )
 
-            _pets = index
+            DataHolder.pets.clear()
+
+            index
                 .filter { path ->
                     val lowercased = path.lowercase()
-                    if (!lowercased.endsWith(".uasset")) return@filter false
-                    val withoutExtension = lowercased.replaceAfterLast(".", "").removeSuffix(".")
-                    if (!withoutExtension.endsWith("_cosmetic")) return@filter false
+                    val name = lowercased.nameWithoutExtension()
 
-                    return@filter excluded.all { !withoutExtension.endsWith(it) }
+                    lowercased.endsWith("_cosmetic.uasset") && excluded.all { !name.endsWith(it) }
                 }
-                .mapNotNull {
-                    val pakPackage = DungeonsPakRegistry.index.getPackage(it.removeSuffix(".uasset")) ?: return@mapNotNull null
-                    val texture = pakPackage.getExport<Texture2d>() ?: return@mapNotNull null
-                    val decoded = try { TextureDecoder.decode(texture) } catch (e: Exception) { return@mapNotNull null }
+                .forEach {
+                    val pakPackage = DungeonsPakRegistry.index.getPackage(it.removeExtension())
+                        ?: return@forEach
+                    val texture = pakPackage.getExport<Texture2d>()
+                        ?: return@forEach
+                    val (width, height, bytes) =
+                        try { TextureDecoder.decode(texture) }
+                        catch (e: Exception) { return@forEach }
 
-                    BufferedImage(decoded.width, decoded.height, BufferedImage.TYPE_4BYTE_ABGR)
-                        .apply { data = Raster.createRaster(sampleModel, DataBufferByte(decoded.data, decoded.data.size), Point()) }
-                        .toComposeImageBitmap()
+                    DataHolder.pets.add(
+                        BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
+                            .apply { data = Raster.createRaster(sampleModel, DataBufferByte(bytes, bytes.size), Point()) }
+                            .toComposeImageBitmap()
+                    )
                 }
         }
     }
+
+    private object DataHolder {
+        val pets: MutableList<ImageBitmap> = mutableListOf()
+    }
+
 }

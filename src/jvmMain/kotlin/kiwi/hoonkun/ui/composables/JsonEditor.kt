@@ -38,7 +38,6 @@ import kiwi.hoonkun.ui.states.LocalAppState
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.io.DungeonsJsonFile
 import minecraft.dungeons.resources.DungeonsTextures
-import kotlin.random.Random
 
 @Composable
 fun JsonEditor(
@@ -96,7 +95,7 @@ private fun JsonEditorFileSelector(
             .requiredWidth(windowWidth - AppState.Constants.EntriesWidth)
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawBehind {
-                val image = DungeonsTextures["/Game/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
+                val image = DungeonsTextures["/UI/Materials/LoadingScreens/loadingscreen_subdungeon.png"]
                 val dstSize = Size(size.width, size.width * (image.height.toFloat() / image.width)).round()
 
                 drawRect(
@@ -171,14 +170,14 @@ private fun JsonEditorTabs() {
             .offset { IntOffset(x = tabsOffset.roundToPx(), y = 0) }
     ) {
         JsonEditorTabButton(
-            bitmap = DungeonsTextures["/Game/UI/Materials/Map/Pins/mapicon_chest.png"],
+            bitmap = DungeonsTextures["/UI/Materials/Map/Pins/mapicon_chest.png"],
             selected = appState.activeEditorKey == null,
             onClick = { appState.activeEditorKey = null },
             contentPadding = PaddingValues(16.dp)
         )
         appState.openedEditors.keys.forEach { key ->
             JsonEditorTabButton(
-                bitmap = DungeonsTextures.pets[Random(key.hashCode()).nextInt(DungeonsTextures.pets.size)],
+                bitmap = DungeonsTextures.Pets[key],
                 selected = appState.activeEditorKey == key,
                 onClick = { appState.activeEditorKey = key }
             )

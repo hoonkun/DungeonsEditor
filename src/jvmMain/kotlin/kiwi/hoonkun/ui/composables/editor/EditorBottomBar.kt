@@ -43,7 +43,7 @@ fun EditorBottomBar(
 ) {
     val stored = remember(editor) { editor.data }
 
-    val levelIcon = remember { DungeonsTextures["/Game/UI/Materials/Character/STATS_LV_frame.png"] }
+    val levelIcon = remember { DungeonsTextures["/UI/Materials/Character/STATS_LV_frame.png"] }
 
     var level by remember { mutableStateOf("${stored.playerLevel}") }
     var emerald by remember { mutableStateOf("${withCurrencies { stored.emerald }}") }
@@ -71,13 +71,13 @@ fun EditorBottomBar(
         }
 
         CurrencyText(
-            icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+            icon = "/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
             scale = 0.8f,
             value = "${stored.playerPower}"
         )
 
         CurrencyField(
-            icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+            icon = "/UI/Materials/Emeralds/emerald_indicator.png",
             iconScale = 0.7f,
             value = emerald,
             onValueChange = { emerald = it },
@@ -86,7 +86,7 @@ fun EditorBottomBar(
         )
 
         CurrencyField(
-            icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
+            icon = "/UI/Materials/Currency/GoldIndicator.png",
             iconScale = 0.9f,
             value = gold,
             onValueChange = { gold = it },
@@ -95,7 +95,7 @@ fun EditorBottomBar(
         )
 
         CurrencyText(
-            icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
+            icon = "/UI/Materials/Inventory2/Salvage/enchant_icon.png",
             scale = 0.7f,
             value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
             valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
@@ -140,7 +140,7 @@ private fun CloseFileButton(
     onClick: () -> Unit
 ) {
     val overlays = LocalOverlayState.current
-    IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") {
+    IconButton("/UI/Materials/Map/Pins/dungeon_door.png") {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             CloseFileConfirmOverlay(
                 onConfirm = onClick,
@@ -153,7 +153,7 @@ private fun CloseFileButton(
 @Composable
 private fun SaveButton(editor: EditorState) {
     val overlays = LocalOverlayState.current
-    IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {
+    IconButton("/UI/Materials/Map/Pins/mapicon_chest.png") {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             FileSaveOverlay(
                 editor = editor,
@@ -173,8 +173,8 @@ private fun InventorySwitcher(
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
 
-    val leftArrow = remember { DungeonsTextures["/Game/UI/Materials/Character/left_arrow_carousel.png"] }
-    val rightArrow = remember { DungeonsTextures["/Game/UI/Materials/Character/right_arrow_carousel.png"] }
+    val leftArrow = remember { DungeonsTextures["/UI/Materials/Character/left_arrow_carousel.png"] }
+    val rightArrow = remember { DungeonsTextures["/UI/Materials/Character/right_arrow_carousel.png"] }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

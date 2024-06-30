@@ -1,9 +1,9 @@
 {
-  "ChainReaction": "Chain",
-  "EmeraldDivination": "EmeraldDivination_effect",
-  "Flee": "Flee_effect",
-  "DeathBarter": "DeathBarter_effect",
-  "Reckless": "ShardArmor",
-  "EnigmaResonatorMelee": "Enigma",
-  "EnigmaResonatorRanged": "EnigmaRanged"
+  "ChainReaction": "Enchantment/Chain_desc",
+  "EmeraldDivination": "Enchantment/EmeraldDivination_effect_desc",
+  "Flee": "Enchantment/Flee_effect_desc",
+  "DeathBarter": "Enchantment/DeathBarter_effect_desc",
+  "Reckless": "Enchantment/ShardArmor_desc",
+  "EnigmaResonatorMelee": "Enchantment/Enigma_desc",
+  "EnigmaResonatorRanged": "Enchantment/EnigmaRanged_desc"
 }

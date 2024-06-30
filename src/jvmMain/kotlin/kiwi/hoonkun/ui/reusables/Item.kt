@@ -16,7 +16,7 @@ fun VariantFilterIcon(with: DungeonsItem.IconFilterable, selected: Boolean): Ima
         DungeonsItem.Attributes.Enchanted -> "filter_enchant"
     }
     val suffix = if (selected) "" else "_default"
-    return DungeonsTextures["/Game/UI/Materials/Inventory2/Filter/$filename$suffix.png"]
+    return DungeonsTextures["/UI/Materials/Inventory2/Filter/$filename$suffix.png"]
 }
 
 @Stable

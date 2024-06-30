@@ -274,23 +274,23 @@ private fun JsonPreview(
                 modifier = Modifier.weight(1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    CurrencyImage(DungeonsTextures["/Game/UI/Materials/Character/STATS_LV_frame.png"])
+                    CurrencyImage(DungeonsTextures["/UI/Materials/Character/STATS_LV_frame.png"])
                     Text(text = "LV.", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
             CurrencyText(
-                iconTextureKey = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+                iconTextureKey = "/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
                 text = "${summary.power}",
                 modifier = Modifier.weight(1f)
             )
             CurrencyText(
-                iconTextureKey = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+                iconTextureKey = "/UI/Materials/Emeralds/emerald_indicator.png",
                 text = "${summary.emerald}",
                 iconScale = 22f / 28f,
                 modifier = Modifier.weight(1f)
             )
             CurrencyText(
-                iconTextureKey = "/Game/UI/Materials/Currency/GoldIndicator.png",
+                iconTextureKey = "/UI/Materials/Currency/GoldIndicator.png",
                 text = "${summary.gold}",
                 modifier = Modifier.weight(1f)
             )

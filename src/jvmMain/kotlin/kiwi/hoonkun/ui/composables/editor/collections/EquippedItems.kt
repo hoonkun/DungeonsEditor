@@ -53,7 +53,7 @@ private fun EquippedItemsToggleButton(collapsed: Boolean, onToggle: () -> Unit) 
     )
 
     Image(
-        bitmap = DungeonsTextures["/Game/UI/Materials/Menu/arrow_gamemode.png"],
+        bitmap = DungeonsTextures["/UI/Materials/Menu/arrow_gamemode.png"],
         contentDescription = null,
         modifier = Modifier
             .size(70.dp)

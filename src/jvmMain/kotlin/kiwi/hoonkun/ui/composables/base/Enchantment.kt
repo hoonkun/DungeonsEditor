@@ -18,7 +18,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -56,7 +59,7 @@ fun EnchantmentImage(
 
     val paint = remember(pressed, contentPaint) { contentPaint(if (pressed) DarknessPaint else DefaultPaint) }
 
-    val patterns = remember(data) { data.shinePatterns?.let { EnchantmentPatterns(it[0], it[1], it[2]) } }
+    val patterns = data.shinePatterns
 
     val drawBehind: DrawScope.(EnchantmentDrawCache, IntOffset, IntSize) -> Unit = { cache, _, _ ->
         scale(0.825f) {
@@ -107,7 +110,7 @@ fun EnchantmentImage(
         drawCacheFactory = { offset, size -> EnchantmentDrawCache(EnchantmentOutlinePath(offset, size)) },
         onDrawBehind = drawBehind,
         onDrawFront = drawFront,
-        contentScale = if (data.id == "Unset") 0.75f else 1f,
+        contentScale = if (data.isValid()) 1f else 0.75f,
         contentPaint = { paint },
         modifier = Modifier
             .rotate(degrees = 45f)
@@ -154,7 +157,7 @@ fun EnchantmentSlot(
         val sizeModifier = Modifier.fillMaxSize(0.5f)
 
         Image(
-            bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/enchant_icon.png"],
+            bitmap = DungeonsTextures["/UI/Materials/Inventory2/Enchantment2/enchant_icon.png"],
             contentDescription = null,
             modifier = sizeModifier.offsetRelative(0.5f, 0f).scale(0.375f)
         )
@@ -194,7 +197,7 @@ fun EnchantmentLevel(
                 .drawBehind {
                     if (capturedLevel == 0) return@drawBehind
                     drawImage(
-                        image = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${capturedLevel}_normal_text.png"],
+                        image = DungeonsTextures["/UI/Materials/Inventory2/Enchantment/Inspector2/level_${capturedLevel}_normal_text.png"],
                         dstSize = size.round()
                     )
                 }
@@ -247,10 +250,3 @@ private fun interpolateShineAlpha(x: Float, delay: Int): Float {
         else (EaseOutCubic(1 - (normalized - (IdleAlpha)) / AlphaSnap) * 16f).toInt() / 16f
     }
 }
-
-@Immutable
-private data class EnchantmentPatterns(
-    val r: ImageBitmap,
-    val g: ImageBitmap,
-    val b: ImageBitmap
-)

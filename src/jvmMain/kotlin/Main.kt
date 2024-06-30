@@ -168,7 +168,7 @@ private fun AppContent() {
 @Composable
 private fun Background() {
     Image(
-        bitmap = DungeonsTextures["/Game/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png"],
+        bitmap = DungeonsTextures["/UI/Materials/LoadingScreens/Loading_Ancient_Hunt.png"],
         contentScale = ContentScale.Crop,
         contentDescription = null,
         modifier = Modifier

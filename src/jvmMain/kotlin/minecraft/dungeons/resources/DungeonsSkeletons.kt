@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.utils.nameWithoutExtension
+import kiwi.hoonkun.utils.removeExtension
 import kiwi.hoonkun.utils.resourceText
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -35,28 +37,34 @@ object DungeonsSkeletons {
         val builtInProperties = ArmorProperty[Unit].filter { it.defaultIn.contains(type) }
 
         val name get() =
-            DungeonsLocalizations[DungeonsLocalizations.Corrections.ItemName[type] ?: "ItemType/${type}"]
-                ?: Localizations["Unknown_item"]
+            DungeonsLocalizations[ItemName[type] ?: "ItemType/$type"] ?: Localizations["unknown_item"]
 
         val flavour get() =
-            DungeonsLocalizations["ItemType/Flavour_${DungeonsLocalizations.Corrections.ItemFlavour[type] ?: type}"]
+            DungeonsLocalizations[ItemFlavour[type] ?: "ItemType/Flavour_$type"]
 
         val description get() =
-            DungeonsLocalizations["ItemType/Desc_${DungeonsLocalizations.Corrections.ItemDescription[type] ?: type}"]
+            DungeonsLocalizations[ItemDescription[type] ?: "ItemType/Desc_$type"]
 
         val inventoryIcon: ImageBitmap by lazy {
-            retrieveImage("Inventory") { it.endsWith("_icon_inventory") }
+            retrieveImage(
+                key = "Inventory",
+                { it.endsWith("_icon_inventory") }
+            )
         }
 
         val largeIcon: ImageBitmap by lazy {
-            retrieveImage("Large", fallback = { it.endsWith("_icon_inventory") }) { it.endsWith("_icon") }
+            retrieveImage(
+                key = "Large",
+                { it.endsWith("_icon") },
+                { it.endsWith("_icon_inventory") }
+            )
         }
 
-        val appliedExclusiveEnchantments by lazy {
+        val appliedExclusiveEnchantment by lazy {
             ExclusiveEnchantments.entries
                 .firstOrNull { it.value.contains(type) }
                 ?.key
-                ?.let { DungeonsSkeletons.Enchantment[it] }
+                ?.let { Enchantment[it] }
         }
 
         override fun load() {
@@ -66,40 +74,35 @@ object DungeonsSkeletons {
 
         private fun retrieveImage(
             key: String,
-            fallback: ((String) -> Boolean)? = null,
-            criteria: (String) -> Boolean
+            vararg criteria: (String) -> Boolean
         ): ImageBitmap {
             val cacheKey = "$type-$key"
             val cached = DungeonsTextures.cached(cacheKey)
             if (cached != null) return cached
 
-            val imagePath = dataPath.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
+            val matches = criteria.firstNotNullOfOrNull { predicate ->
+                DungeonsPakRegistry.index
+                    .filter { it.startsWith(dataPath) }
+                    .find { predicate(it.lowercase().removeExtension()) }
+            }
+                ?: throw RuntimeException("no image resource found with item $type, which type is $key")
 
-            val indexes = DungeonsPakRegistry.index.filter { it.startsWith("$imagePath/") }
-
-            val candidate1 = indexes.find { criteria(it.lowercase().replaceAfterLast('.', "").removeSuffix(".")) }
-            if (candidate1 != null)
-                return DungeonsTextures.get(cacheKey) { candidate1 }
-
-            if (fallback == null)
-                throw RuntimeException("no image resource found with item $type, which type is $key")
-
-            val candidate2 = indexes.find { fallback(it.lowercase().replaceAfterLast('.', "").removeSuffix(".")) }
-            if (candidate2 != null)
-                return DungeonsTextures.get(cacheKey) { candidate2 }
-
-            throw RuntimeException("no image resource found with item $type, which type is $key")
+            return DungeonsTextures[matches, cacheKey]
         }
 
-        companion object: Element {
-            operator fun get(unused: Unit) = unused.let { DataHolder.items }
+        companion object Item: Element {
+            operator fun get(unused: Unit): Set<DungeonsSkeletons.Item> = unused.let { DataHolder.items }
             operator fun get(key: String) = DataHolder.items.find { it.type == key }
 
-            val UniqueSuffixes = listOf("_Unique", "_Spooky", "_Winter", "_Year")
-            val LimitedSuffixes = listOf("_Spooky", "_Winter", "_Year")
+            private val UniqueSuffixes = listOf("_Unique", "_Spooky", "_Winter", "_Year")
+            private val LimitedSuffixes = listOf("_Spooky", "_Winter", "_Year")
 
-            private val ExclusiveEnchantments: Map<String, List<String>> =
-                Json.decodeFromString(resourceText("databases/enchantments_exclusive.json"))
+            private val ExclusiveEnchantments: Map<String, List<String>> = Json.decodeDatabaseResource("enchantments_exclusive.json")
+
+            private val ItemCorrections = Json.decodeLocResource("corrections_item_base.json")
+            private val ItemName = ItemCorrections + Json.decodeLocResource("corrections_item_name.json")
+            private val ItemFlavour = ItemCorrections + Json.decodeLocResource("corrections_item_flavour.json")
+            private val ItemDescription = ItemCorrections + Json.decodeLocResource("corrections_item_description.json")
         }
     }
 
@@ -111,49 +114,65 @@ object DungeonsSkeletons {
     ): Loadable {
 
         val powerful = PowerfulEnchantments.contains(id)
+
         val stackable = StackableEnchantments.contains(id)
+
         val applyFor = mutableSetOf<DungeonsItem.Variant>()
             .apply {
                 if (ArmorEnchantments.contains(id)) add(DungeonsItem.Variant.Armor)
                 if (MeleeEnchantments.contains(id)) add(DungeonsItem.Variant.Melee)
                 if (RangedEnchantments.contains(id)) add(DungeonsItem.Variant.Ranged)
-                // if (ExclusiveEnchantments.containsKey(id)) add("Exclusive") // ?
             }
             .toSet()
 
-        val specialDescValues = EnchantmentSpecialDescValue.getOrElse(id) { emptyList() }
-
         val name: String get() =
-            DungeonsLocalizations["Enchantment/${DungeonsLocalizations.Corrections.EnchantmentName[id] ?: id}"] ?: "???"
+            DungeonsLocalizations[EnchantmentName[id] ?: "Enchantment/$id"] ?: Localizations["unknown_enchantment"]
 
         val description: String? get() =
-            if (id == "Unset") Localizations["enchantment_unset"]
-            else DungeonsLocalizations["Enchantment/${DungeonsLocalizations.Corrections.EnchantmentDescription[id] ?: id}_desc"].replaceFormatStrings()
+            DungeonsLocalizations[EnchantmentDescription[id] ?: "Enchantment/${id}_desc"].replaceFormatStrings()
 
         val effect: String? get() =
-            if (id == "Unset") Localizations["enchantment_unset_effect"]
-            else (DungeonsLocalizations[DungeonsLocalizations.Corrections.EnchantmentFixedEffect[id] ?: "Enchantment/${DungeonsLocalizations.Corrections.EnchantmentEffect[id] ?: id}_effect"]).replaceFormatStrings()
+            DungeonsLocalizations[EnchantmentEffect[id] ?: "Enchantment/${id}_effect"].replaceFormatStrings()
 
         val icon: ImageBitmap by lazy {
-            retrieveImage(id) { it.startsWith("t_") && it.endsWith("_icon") && !it.endsWith("shine_icon") }
-                ?: throw RuntimeException("no image resource found: {$id}!")
+            if (isNotValid())
+                return@lazy DungeonsTextures["/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"]
+
+            retrieveImage(
+                cacheKey = "$id-Icon",
+                criteria = { it.startsWith("t_") && it.endsWith("_icon") && !it.endsWith("shine_icon") }
+            )
+                ?: throw RuntimeException("no image resource found: $id!")
         }
 
         private val shinePattern: ImageBitmap? by lazy {
-            if (id == "Unset") null
-            else retrieveImage("${id}_shine") { it.startsWith("t_") && it.endsWith("shine_icon") }
+            if (isNotValid())
+                return@lazy null
+
+            retrieveImage(
+                cacheKey = "$id-ShinePattern",
+                criteria = { it.startsWith("t_") && it.endsWith("shine_icon") }
+            )
+                ?.toAwtImage()
+                ?.let {
+                    BufferedImage(it.width, it.height, BufferedImage.TYPE_INT_RGB).apply {
+                        createGraphics().apply {
+                            color = Color.BLACK
+                            fillRect(0, 0, width, height)
+                            drawImage(it, 0, 0, null)
+                        }
+                            .dispose()
+                    }
+                }
+                ?.toComposeImageBitmap()
         }
 
-        private val shinePatternR: ImageBitmap? by lazy { filterShineColor(2) }
-        private val shinePatternG: ImageBitmap? by lazy { filterShineColor(1) }
-        private val shinePatternB: ImageBitmap? by lazy { filterShineColor(0) }
+        val shinePatterns: ShinePatterns? by lazy {
+            val r = filterShinePattern(2) ?: return@lazy null
+            val g = filterShinePattern(1) ?: return@lazy null
+            val b = filterShinePattern(0) ?: return@lazy null
 
-        val shinePatterns: List<ImageBitmap>? by lazy {
-            val r = shinePatternR
-            val g = shinePatternG
-            val b = shinePatternB
-            if (r != null && g != null && b != null) listOf(r, g, b)
-            else null
+            ShinePatterns(r, g, b)
         }
 
         override fun load() {
@@ -161,7 +180,22 @@ object DungeonsSkeletons {
             shinePatterns
         }
 
-        private fun filterShineColor(channel: Int): ImageBitmap? {
+        fun isValid() = id != "Unset"
+        fun isNotValid() = id == "Unset"
+
+        private fun retrieveImage(
+            cacheKey: String,
+            criteria: (String) -> Boolean
+        ): ImageBitmap? {
+            val cached = DungeonsTextures.cached(cacheKey)
+            if (cached != null) return cached
+
+            return DungeonsPakRegistry.index.filter { it.startsWith(dataPath) }
+                .find { criteria(it.lowercase().nameWithoutExtension()) }
+                ?.let { DungeonsTextures[it, cacheKey] }
+        }
+
+        private fun filterShinePattern(channel: Int): ImageBitmap? {
             val source = shinePattern?.toAwtImage() ?: return null
             val backdrop = icon.toAwtImage()
 
@@ -268,59 +302,29 @@ object DungeonsSkeletons {
             return new.toComposeImageBitmap()
         }
 
-        private fun retrieveImage(cacheKey: String, criteria: (String) -> Boolean): ImageBitmap? {
-            if (id == "Unset") { return DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"] }
+        @Immutable
+        data class ShinePatterns(
+            val r: ImageBitmap,
+            val g: ImageBitmap,
+            val b: ImageBitmap
+        )
 
-            val cached = DungeonsTextures.cached(cacheKey)
-            if (cached != null) return cached
-
-            val imagePath = Enchantment[id]?.dataPath?.let { "/Dungeons/Content".plus(it.removePrefix("/Game")) }
-                ?: throw RuntimeException("unknown enchantment id!")
-
-            val indexes = DungeonsPakRegistry.index.filter { it.startsWith(imagePath) }
-            val pakPath = indexes.find { criteria(it.replaceBeforeLast('/', "").removePrefix("/").replaceAfterLast(".", "").removeSuffix(".").lowercase()) }
-
-            val preprocess: (BufferedImage) -> BufferedImage =
-                if (cacheKey.endsWith("_shine")) {
-                    {
-                        val newImage = BufferedImage(it.width, it.height, BufferedImage.TYPE_INT_RGB)
-                        val graphics = newImage.createGraphics()
-                        graphics.color = Color.BLACK
-                        graphics.fillRect(0, 0, newImage.width, newImage.height)
-                        graphics.drawImage(it, 0, 0, null)
-                        graphics.dispose()
-                        newImage
-                    }
-                } else {
-                    { it }
-                }
-
-            return if (pakPath != null) DungeonsTextures.get(cacheKey, preprocess) { pakPath } else null
-        }
-
-        companion object: Element {
-            operator fun get(unused: Unit) = unused.let { DataHolder.enchantments }
+        companion object Enchantment: Element {
+            operator fun get(unused: Unit): Set<DungeonsSkeletons.Enchantment> = unused.let { DataHolder.enchantments }
             operator fun get(key: String) = DataHolder.enchantments.find { it.id == key }
 
-            private val PowerfulEnchantments =
-                Json.decodeFromString<List<String>>(resourceText("databases/enchantments_powerful.json")).toSet()
-
-            private val ArmorEnchantments =
-                Json.decodeFromString<List<String>>(resourceText("databases/enchantments_armor.json")).toSet()
-
-            private val MeleeEnchantments =
-                Json.decodeFromString<List<String>>(resourceText("databases/enchantments_melee.json")).toSet()
-
-            private val RangedEnchantments =
-                Json.decodeFromString<List<String>>(resourceText("databases/enchantments_ranged.json")).toSet()
-
-            private val StackableEnchantments =
-                Json.decodeFromString<List<String>>(resourceText("databases/enchantments_stackable.json")).toSet()
-
-            private val EnchantmentSpecialDescValue: Map<String, List<String>> =
-                Json.decodeFromString(resourceText("databases/enchantments_special_descriptions.json"))
-
             private fun String?.replaceFormatStrings() = this?.replace("{0}", "N")
+
+            private val PowerfulEnchantments: Set<String> = Json.decodeDatabaseResource("enchantments_powerful.json")
+            private val ArmorEnchantments: Set<String> = Json.decodeDatabaseResource("enchantments_armor.json")
+            private val MeleeEnchantments: Set<String> = Json.decodeDatabaseResource("enchantments_melee.json")
+            private val RangedEnchantments: Set<String> = Json.decodeDatabaseResource("enchantments_ranged.json")
+            private val StackableEnchantments: Set<String> = Json.decodeDatabaseResource("enchantments_stackable.json")
+
+            private val EnchantmentCorrections = Json.decodeLocResource("corrections_enchantment_base.json")
+            private val EnchantmentName = EnchantmentCorrections + Json.decodeLocResource("corrections_enchantment_name.json")
+            private val EnchantmentDescription = EnchantmentCorrections + Json.decodeLocResource("corrections_enchantment_description.json")
+            private val EnchantmentEffect = EnchantmentCorrections + Json.decodeLocResource("corrections_enchantment_effect.json")
         }
     }
 
@@ -331,95 +335,100 @@ object DungeonsSkeletons {
         val defaultIn: List<String> = emptyList()
     ) {
         val description get() =
-            (DungeonsLocalizations["ArmorProperties/${DungeonsLocalizations.Corrections.ArmorProperty[id] ?: id}_description"])
+            (DungeonsLocalizations["ArmorProperties/${ArmorPropertyCorrections[id] ?: id}_description"])
                 ?.replace("{0}", "N")
                 ?.replace("{1}", "M")
                 ?.replace("{2}", "K")
                 ?.replace("  ", " ")
                 ?.trim()
 
-        companion object: Element {
-            operator fun get(unused: Unit) = unused.let { DataHolder.armorProperties }
+        companion object ArmorProperty: Element {
+            operator fun get(unused: Unit): Set<DungeonsSkeletons.ArmorProperty> = unused.let { DataHolder.armorProperties }
             operator fun get(key: String) = DataHolder.armorProperties.find { it.id == key }
+
+            val ArmorPropertyCorrections = Json.decodeLocResource("corrections_armor_properties.json")
         }
     }
 
     object Initializer {
 
         private val KeyMappings: Map<String, String> =
-            Json.decodeFromString(resourceText("databases/key_mappings.json"))
+            Json.decodeDatabaseResource("key_mappings.json")
 
-        private val ExcludedItems =
-            Json.decodeFromString<List<String>>(resourceText("databases/excluded_items.json")).toSet()
+        private val ExcludedItems: Set<String> =
+            Json.decodeDatabaseResource("excluded_items.json")
+
+        init {
+            DataHolder.armorProperties = Json.decodeDatabaseResource<Map<String, List<String>>>("armor_properties.json")
+                .map { (k, v) -> ArmorProperty(k, v) }
+                .toMutableSet()
+        }
 
         fun run(index: PakIndex) {
-            DataHolder.armorProperties = Json.decodeFromString<Map<String, List<String>>>(resourceText("databases/armor_properties.json"))
-                .map { (k, v) -> ArmorProperty(k, v) }
-                .toSet()
+            DataHolder.items.clear()
+            DataHolder.enchantments.clear()
 
-            val items = mutableSetOf<Item>()
-            val enchantments = mutableSetOf(Enchantment(id = "Unset", ""))
+            DataHolder.enchantments.add(Enchantment(id = "Unset", ""))
 
-            index.forEach { pathString ->
-                val path = Path(pathString)
-                val dataPath = "/Game".plus(path.parent.pathString.replace("\\", "/").removePrefix("/Dungeons/Content"))
+            index.toList()
+                .mapNotNull {
+                    val path = Path(it)
 
-                if (pathString.contains("ArmorProperties") && !pathString.contains("Cues")) {
-                    return@forEach
+                    val isInvalid = it.contains("ArmorProperties") && !it.contains("Cues")
+                    val isLevel = it.contains("data") && it.contains("levels")
+                    val isNotTexture = !path.name.startsWith("T") || !it.lowercase().contains("_icon")
+
+                    if (isInvalid || isLevel || isNotTexture) return@mapNotNull null
+                    path
                 }
+                .forEach { path ->
+                    val string = path.pathString
+                    val name = path.nameWithoutExtension
 
-                if (pathString.contains("data") && pathString.contains("levels")) {
-                    return@forEach
+                    val dataPath = path.parent.pathString.replace("\\", "/")
+
+                    val correctedName = KeyMappings[path.parent.name] ?: path.parent.name
+
+                    if (string.contains("Enchantments") && name.endsWith("_icon", ignoreCase = true)) {
+                        if (DataHolder.enchantments.any { it.id == correctedName }) return@forEach
+
+                        DataHolder.enchantments.add(Enchantment(correctedName, dataPath))
+                    }
+
+                    if (name.endsWith("_icon_inventory", ignoreCase = true)) run block@{
+                        if (ExcludedItems.any { path.parent.name == it }) return@block
+                        if (DataHolder.items.any { it.type == correctedName }) return@block
+
+                        val type =
+                            if (dataPath.contains("MeleeWeapons")) DungeonsItem.Variant.Melee
+                            else if (dataPath.contains("RangedWeapons")) DungeonsItem.Variant.Ranged
+                            else if (dataPath.contains("Armor")) DungeonsItem.Variant.Armor
+                            else if (string.contains("Items")) DungeonsItem.Variant.Artifact
+                            else return@forEach
+
+                        DataHolder.items.add(Item(correctedName, dataPath, type))
+                    }
                 }
-
-                if (!path.name.startsWith("T") || !pathString.lowercase().contains("_icon")) {
-                    return@forEach
-                }
-
-                val correctedName = KeyMappings[path.parent.name] ?: path.parent.name
-
-                if (pathString.contains("Enchantments") && path.nameWithoutExtension.endsWith("_icon", true)) {
-                    val enchantment = Enchantment(correctedName, dataPath)
-                    if (enchantments.contains(enchantment)) return@forEach
-
-                    enchantments.add(enchantment)
-                }
-
-                if (path.nameWithoutExtension.endsWith("_icon_inventory", true)) {
-                    if (ExcludedItems.any { path.parent.name == it }) return@forEach
-
-                    val type =
-                        if (dataPath.contains("MeleeWeapons")) DungeonsItem.Variant.Melee
-                        else if (dataPath.contains("RangedWeapons")) DungeonsItem.Variant.Ranged
-                        else if (dataPath.contains("Armor")) DungeonsItem.Variant.Armor
-                        else if (pathString.contains("Items")) DungeonsItem.Variant.Artifact
-                        else return@forEach
-
-                    val item = Item(correctedName, dataPath, type)
-                    items.removeIf { it.type == item.type }
-                    items.add(item)
-                }
-
-            }
-
-            DataHolder.items = items
-            DataHolder.enchantments = enchantments
         }
 
     }
 
     private object DataHolder {
-        var armorProperties: Set<ArmorProperty> = emptySet()
-        var enchantments: Set<Enchantment> = emptySet()
-        var items: Set<Item> = emptySet()
+        var armorProperties = mutableSetOf<ArmorProperty>()
+        var enchantments = mutableSetOf<Enchantment>()
+        var items = mutableSetOf<Item>()
     }
 
     interface Element
 
-    interface Loadable {
-        fun load()
-    }
+    interface Loadable { fun load() }
 
-    class NotFoundException(key: String, type: Element):
-        Exception("No skeleton found: ${type::class.simpleName?.replace("Skeleton", "")}[$key]")
+    class NotFoundException(key: String, type: Element): Exception("No skeleton found: ${type::class.simpleName}[$key]")
+
+    private inline fun <reified T>Json.decodeDatabaseResource(path: String, prefix: String = "databases/"): T =
+        decodeFromString<T>(resourceText("$prefix$path"))
+
+    private fun Json.decodeLocResource(path: String, prefix: String = "localizations/") =
+        decodeFromString<Map<String, String>>(resourceText("$prefix$path"))
+
 }

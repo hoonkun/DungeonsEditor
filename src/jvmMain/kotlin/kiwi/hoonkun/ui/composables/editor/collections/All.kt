@@ -229,7 +229,7 @@ private fun InvestedEnchantmentPointsText(
         )
         Spacer(modifier = Modifier.width(5.dp))
         Image(
-            bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png"],
+            bitmap = DungeonsTextures["/UI/Materials/Inventory2/Item/salvage_enchanticon.png"],
             contentDescription = null,
             modifier = Modifier
                 .applyZeroIntrinsics()
@@ -262,7 +262,7 @@ private fun NewMark(
     modifier: Modifier = Modifier
 ) =
     Image(
-        bitmap = DungeonsTextures["/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png"],
+        bitmap = DungeonsTextures["/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png"],
         contentDescription = null,
         modifier = Modifier
             .fillMaxSize(0.2f)

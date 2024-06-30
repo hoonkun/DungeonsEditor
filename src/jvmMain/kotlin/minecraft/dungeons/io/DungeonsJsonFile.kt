@@ -26,7 +26,7 @@ class DungeonsJsonFile(path: String): File(path) {
 
     constructor(file: File): this(file.absolutePath)
 
-    private fun magicEquals(): Boolean {
+    private fun magicValid(): Boolean {
         val array = ByteArray(4)
         val buffer = ByteBuffer.wrap(array)
 
@@ -45,13 +45,13 @@ class DungeonsJsonFile(path: String): File(path) {
     fun validate(): Boolean {
         if (!exists() || isDirectory || !isFile) return false
 
-        return magicEquals()
+        return magicValid()
     }
 
     fun preview(): Preview {
         return if (!exists() || isDirectory || !isFile)
             Preview.None
-        else if (!magicEquals())
+        else if (!magicValid())
             Preview.Invalid
         else
             Preview.Valid(absolutePath, read())

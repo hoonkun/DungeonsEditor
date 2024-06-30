@@ -15,5 +15,5 @@ private val nameMap = mapOf(
 @Composable
 fun rememberArmorPropertyIcon(property: MutableDungeons.ArmorProperty): ImageBitmap =
     remember(property.rarity) {
-        DungeonsTextures["/Game/UI/Materials/Inventory2/Inspector/${nameMap.getValue(property.rarity)}_bullit.png"]
+        DungeonsTextures["/UI/Materials/Inventory2/Inspector/${nameMap.getValue(property.rarity)}_bullit.png"]
     }

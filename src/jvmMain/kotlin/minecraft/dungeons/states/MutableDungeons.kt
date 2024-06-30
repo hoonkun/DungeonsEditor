@@ -209,12 +209,11 @@ class MutableDungeons(
                 if (exportedArmorProperties.isNotEmpty())
                     put(FIELD_ARMOR_PROPERTIES, exportedArmorProperties)
 
-
                 netheriteEnchant?.let { if (it.id != "Unset") put(FIELD_NETHERITE_ENCHANT, it.export()) }
 
                 val exportedEnchantments = enchantments
                     .chunked(3)
-                    .filter { slot -> !slot.all { enchantment -> enchantment.id == "Unset" } }
+                    .filter { slot -> slot.any { enchantment -> enchantment.isValid() } }
                     .flatten()
                     .map { enchantment -> enchantment.export() }
                 if (exportedEnchantments.isNotEmpty())
@@ -249,7 +248,8 @@ class MutableDungeons(
         var level: Int by mutableStateOf(level)
         var investedPoints: Int by mutableStateOf(investedPoints)
 
-        val isUnset get() = id == "Unset"
+        fun isValid() = id != "Unset"
+        fun isNotValid() = id == "Unset"
 
         constructor(
             from: JSONObject,
