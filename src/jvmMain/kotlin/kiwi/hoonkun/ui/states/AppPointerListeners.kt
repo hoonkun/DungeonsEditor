@@ -23,12 +23,11 @@ class AppPointerListeners {
         PointerEventType.Release to mutableStateListOf()
     )
 
-    operator fun get(type: PointerEventType) =
-        entries.getValue(type)
+    operator fun get(type: PointerEventType) = entries.getValue(type)
 
     @OptIn(ExperimentalComposeUiApi::class)
-    fun Modifier.onGlobalPointerEventModifier(): Modifier =
-        entries.entries.fold(this) { acc, (event, handlers) ->
+    fun onGlobalPointerEvent(): Modifier =
+        entries.entries.fold(Modifier.then(Modifier)) { acc, (event, handlers) ->
             acc.onPointerEvent(event) { scope -> handlers.forEach { it(scope) } }
         }
 }

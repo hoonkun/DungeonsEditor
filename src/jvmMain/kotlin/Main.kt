@@ -106,17 +106,15 @@ private fun AppRoot(
     val overlays = LocalOverlayState.current
     val appPointerListeners = LocalAppPointerListeners.current
 
-    with(appPointerListeners) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xff272727))
-                .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
-                .onGlobalPointerEventModifier()
-        ) {
-            content()
-            overlays.Stack()
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xff272727))
+            .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
+            .then(appPointerListeners.onGlobalPointerEvent())
+    ) {
+        content()
+        overlays.Stack()
     }
 }
 
