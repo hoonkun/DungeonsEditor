@@ -48,7 +48,7 @@ import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withEnchantments
-import kotlin.math.roundToInt
+import minecraft.dungeons.values.roundToInt
 
 
 @Stable

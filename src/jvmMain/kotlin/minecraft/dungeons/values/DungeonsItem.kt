@@ -4,8 +4,30 @@ import kiwi.hoonkun.resources.Localizations
 
 object DungeonsItem {
 
-    sealed interface Filterable
-    sealed interface IconFilterable
+    enum class Rarity(val serialized: String): Filterable {
+        Unique("Unique"),
+        Rare("Rare"),
+        Common("Common");
+
+        companion object {
+            fun fromSerialized(value: String): Rarity =
+                Rarity.entries.first { it.serialized == value }
+        }
+    }
+
+    enum class EquipmentSlot(val serialized: String) {
+        Melee("MeleeGear"),
+        Ranged("RangedGear"),
+        Armor("ArmorGear"),
+        HotBar1("HotbarSlot1"),
+        HotBar2("HotbarSlot2"),
+        HotBar3("HotbarSlot3");
+
+        companion object {
+            fun fromSerialized(value: String?): EquipmentSlot? =
+                value?.let { v -> EquipmentSlot.entries.first { it.serialized == v } }
+        }
+    }
 
     enum class Attributes: Filterable, IconFilterable {
         Enchanted
@@ -13,14 +35,6 @@ object DungeonsItem {
 
     enum class Variant: Filterable, IconFilterable {
         Melee, Ranged, Armor, Artifact
-    }
-
-    enum class Rarity: Filterable {
-        Unique, Rare, Common;
-
-        companion object {
-            fun fromSerialized(serialized: String): Rarity = Rarity.valueOf(serialized)
-        }
     }
 
     enum class Location {
@@ -42,21 +56,7 @@ object DungeonsItem {
             }
     }
 
-    enum class EquipmentSlot {
-        Melee, Ranged, Armor, HotBar1, HotBar2, HotBar3;
-
-        companion object {
-            fun fromSerialized(serialized: String?): EquipmentSlot? =
-                when(serialized) {
-                    "MeleeGear" -> Melee
-                    "RangedGear" -> Ranged
-                    "ArmorGear" -> Armor
-                    "HotbarSlot1" -> HotBar1
-                    "HotbarSlot2" -> HotBar2
-                    "HotbarSlot3" -> HotBar3
-                    else -> null
-                }
-        }
-    }
+    sealed interface Filterable
+    sealed interface IconFilterable
 
 }

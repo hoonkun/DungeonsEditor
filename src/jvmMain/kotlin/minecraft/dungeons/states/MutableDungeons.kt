@@ -2,14 +2,13 @@ package minecraft.dungeons.states
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import minecraft.dungeons.values.DungeonsArmorProperty
-import minecraft.dungeons.values.DungeonsItem
-import minecraft.dungeons.values.DungeonsLevel
-import minecraft.dungeons.values.DungeonsPower
+import minecraft.dungeons.values.*
 import org.json.JSONObject
-import utils.*
+import utils.padEnd
+import utils.replace
+import utils.transformWithJsonObject
+import utils.tryOrNull
 import java.util.*
-import kotlin.math.roundToInt
 
 @Stable
 class MutableDungeons(
@@ -47,21 +46,23 @@ class MutableDungeons(
     val playerPower by derivedStateOf {
         val powerDividedBy4 = equippedItems
             .slice(0 until 3)
-            .sumOf { it?.power ?: 0.0 }
+            .filterNotNull()
+            .sumOf { it.power.value }
             .div(4.0)
 
         val powerDividedBy12 = equippedItems
             .slice(3 until 6)
-            .sumOf { it?.power ?: 0.0 }
+            .filterNotNull()
+            .sumOf { it.power.value }
             .div(12.0)
 
-        (powerDividedBy4 + powerDividedBy12).roundToInt()
+        (powerDividedBy4 + powerDividedBy12).asInGamePower()
     }
 
-    private var xp: Long by mutableStateOf(from.getLong(FIELD_XP))
-    var playerLevel: Double
-        get() = DungeonsLevel.toInGameLevel(xp).toFixed(3)
-        set(value) { xp = DungeonsLevel.toSerializedLevel(value) }
+    private var xp: SerializedDungeonsLevel by mutableStateOf(from.getLong(FIELD_XP).asSerializedLevel())
+    var playerLevel: InGameDungeonsLevel
+        get() = xp.toInGame()
+        set(value) { xp = value.toSerialized() }
 
     val totalSpentEnchantmentPoints by derivedStateOf {
         val inventorySum = allItems.sumOf { item -> item.enchantments.sumOf { it.investedPoints } }
@@ -75,7 +76,7 @@ class MutableDungeons(
             replace(FIELD_ITEMS, allItems.map { it.export() })
             replace(FIELD_STORAGE_CHEST_ITEMS, storageItems.map { it.export() })
             replace(FIELD_CURRENCIES, currencies.map { it.export() })
-            replace(FIELD_XP, xp)
+            replace(FIELD_XP, xp.value)
         }
 
     companion object {
@@ -114,7 +115,7 @@ class MutableDungeons(
     @Stable
     class Item(
         type: String,
-        power: Double,
+        power: SerializedDungeonsPower,
         rarity: DungeonsItem.Rarity,
         inventoryIndex: Int?,
         equipmentSlot: DungeonsItem.EquipmentSlot? = null,
@@ -133,9 +134,9 @@ class MutableDungeons(
         var inventoryIndex by mutableStateOf(inventoryIndex)
 
         private var _power by mutableStateOf(power)
-        var power: Double
-            get() = DungeonsPower.toInGamePower(_power)
-            set(value) { _power = DungeonsPower.toSerializedPower(value) }
+        var power: InGameDungeonsPower
+            get() = _power.toInGame()
+            set(value) { _power = value.toSerialized() }
 
         var rarity by mutableStateOf(rarity)
 
@@ -163,7 +164,7 @@ class MutableDungeons(
 
         constructor(from: JSONObject): this(
             inventoryIndex = from.tryOrNull { getInt(FIELD_INVENTORY_INDEX) },
-            power = from.getDouble(FIELD_POWER),
+            power = from.getDouble(FIELD_POWER).asSerializedPower(),
             rarity = DungeonsItem.Rarity.fromSerialized(from.getString(FIELD_RARITY)),
             type = from.getString(FIELD_TYPE),
             upgraded = from.getBoolean(FIELD_UPGRADED),
@@ -194,12 +195,12 @@ class MutableDungeons(
         fun export() =
             JSONObject().apply {
                 put(FIELD_TYPE, type)
-                put(FIELD_POWER, _power)
-                put(FIELD_RARITY, rarity)
+                put(FIELD_POWER, _power.value)
+                put(FIELD_RARITY, rarity.serialized)
                 put(FIELD_UPGRADED, upgraded)
 
                 inventoryIndex?.let { put(FIELD_INVENTORY_INDEX, it) }
-                equipmentSlot?.let { put(FIELD_EQUIPMENT_SLOT, it) }
+                equipmentSlot?.let { put(FIELD_EQUIPMENT_SLOT, it.serialized) }
 
                 modified?.let { put(FIELD_MODIFIED, it) }
                 timesModified?.let { put(FIELD_TIMES_MODIFIED, it) }
@@ -308,7 +309,7 @@ class MutableDungeons(
         fun export() =
             JSONObject().apply {
                 put(FIELD_ID, id)
-                put(FIELD_RARITY, rarity)
+                put(FIELD_RARITY, rarity.serialized)
             }
 
         companion object {

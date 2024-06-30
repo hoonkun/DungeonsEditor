@@ -51,10 +51,11 @@ import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsSkeletons
+import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsArmorProperty
-import kotlin.math.roundToInt
+import minecraft.dungeons.values.roundToInt
 
 
 @Composable
@@ -451,10 +452,8 @@ private fun ArmorPropertyRarityToggle(property: MutableDungeons.ArmorProperty) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val rarityIcon = rememberArmorPropertyIcon(property)
-
     Image(
-        bitmap = rarityIcon,
+        bitmap = DungeonsTextures[property.rarity.texture],
         contentDescription = null,
         modifier = Modifier
             .size(41.dp)

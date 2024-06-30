@@ -34,6 +34,8 @@ import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.extensions.withCurrencies
 import minecraft.dungeons.values.DungeonsItem
+import minecraft.dungeons.values.asInGameLevel
+import minecraft.dungeons.values.truncate
 
 
 @Composable
@@ -61,7 +63,7 @@ fun EditorBottomBar(
         CurrencyField(
             value = level,
             onValueChange = { level = it },
-            onSubmit = { stored.playerLevel = it.toDouble() },
+            onSubmit = { stored.playerLevel = it.toDouble().asInGameLevel() },
             validator = { it.toDoubleOrNull() != null }
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -97,8 +99,8 @@ fun EditorBottomBar(
         CurrencyText(
             icon = "/UI/Materials/Inventory2/Salvage/enchant_icon.png",
             scale = 0.7f,
-            value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
-            valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
+            value = "${stored.playerLevel.truncate() - stored.totalSpentEnchantmentPoints}",
+            valid = stored.playerLevel.truncate() - stored.totalSpentEnchantmentPoints >= 0,
             width = 50.dp
         )
 

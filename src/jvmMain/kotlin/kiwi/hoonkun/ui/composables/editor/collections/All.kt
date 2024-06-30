@@ -36,8 +36,9 @@ import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsItem
+import minecraft.dungeons.values.InGameDungeonsPower
+import minecraft.dungeons.values.roundToInt
 import java.util.*
-import kotlin.math.roundToInt
 
 @Composable
 @NonSkippableComposable
@@ -193,7 +194,7 @@ private fun EmptyItemSlot(
 
 @Composable
 private fun PowerText(
-    power: Double,
+    power: InGameDungeonsPower,
     modifier: Modifier,
     fontSize: TextUnit = 22.sp
 ) =

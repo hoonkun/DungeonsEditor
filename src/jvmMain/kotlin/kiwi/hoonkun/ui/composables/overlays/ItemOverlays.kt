@@ -34,7 +34,8 @@ import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withItemManager
 import minecraft.dungeons.values.DungeonsItem
-import minecraft.dungeons.values.DungeonsPower
+import minecraft.dungeons.values.InGameDungeonsPower
+import minecraft.dungeons.values.toSerialized
 
 
 @Stable
@@ -164,10 +165,8 @@ private fun ItemDataDetail(
     }
     var power by remember {
         mutableStateOf(
-            if (state is ItemOverlayCreateState)
-                state.editorState.data.playerPower.toDouble()
-            else
-                0.0
+            if (state is ItemOverlayCreateState) state.editorState.data.playerPower
+            else InGameDungeonsPower.Zero
         )
     }
 
@@ -271,7 +270,7 @@ private fun ItemDataDetail(
                     is ItemOverlayCreateState -> {
                         val newItem = MutableDungeons.Item(
                             inventoryIndex = 0,
-                            power = DungeonsPower.toSerializedPower(power),
+                            power = power.toSerialized(),
                             rarity = rarity,
                             type = data.type,
                             upgraded = false,

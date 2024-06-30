@@ -12,17 +12,19 @@ import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.values.InGameDungeonsPower
+import minecraft.dungeons.values.asInGamePower
 import utils.toFixed
 
 
 @Composable
 fun PowerEditField(
-    power: Double,
-    onPowerChange: (Double) -> Unit,
+    power: InGameDungeonsPower,
+    onPowerChange: (InGameDungeonsPower) -> Unit,
     modifier: Modifier = Modifier,
     hideLabel: Boolean = false
 ) {
-    var value by remember(power) { mutableStateOf("${power.toFixed(3)}") }
+    var value by remember(power) { mutableStateOf("${power.value.toFixed(3)}") }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -38,7 +40,7 @@ fun PowerEditField(
             value = value,
             onValueChange = { value = it },
             validator = { it.toDoubleOrNull() != null },
-            onSubmit = { onPowerChange(value.toDouble()) },
+            onSubmit = { onPowerChange(value.toDouble().asInGamePower()) },
             textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
             modifier = Modifier.offset(y = (-2).dp).width(100.dp)
         )

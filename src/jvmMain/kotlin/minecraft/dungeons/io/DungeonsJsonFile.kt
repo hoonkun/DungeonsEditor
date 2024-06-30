@@ -6,8 +6,7 @@ import androidx.compose.runtime.toMutableStateList
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.emerald
 import minecraft.dungeons.states.extensions.gold
-import minecraft.dungeons.values.DungeonsItem
-import minecraft.dungeons.values.DungeonsLevel
+import minecraft.dungeons.values.*
 import org.json.JSONObject
 import utils.transformWithJsonObject
 import java.io.File
@@ -19,7 +18,6 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
-import kotlin.math.roundToInt
 
 
 class DungeonsJsonFile(path: String): File(path) {
@@ -143,29 +141,32 @@ class DungeonsJsonFile(path: String): File(path) {
             private val items = from.getJSONArray(MutableDungeons.FIELD_ITEMS)
                 .transformWithJsonObject(6) { MutableDungeons.Item(it) }
 
-            val level: Int = DungeonsLevel.toInGameLevel(from.getLong(MutableDungeons.FIELD_XP)).roundToInt()
+            val level: Int = from.getLong(MutableDungeons.FIELD_XP)
+                .asSerializedLevel()
+                .toInGame()
+                .truncate()
 
-            val emerald: Int = currencies.emerald()?.count ?: 0
-            val gold: Int = currencies.gold()?.count ?: 0
+            val emerald = currencies.emerald()?.count ?: 0
+            val gold = currencies.gold()?.count ?: 0
 
-            val melee: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Melee }
-            val armor: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Armor }
-            val ranged: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Ranged }
+            val melee = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Melee }
+            val armor = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Armor }
+            val ranged = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.Ranged }
 
-            private val artifact1: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar1 }
-            private val artifact2: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar2 }
-            private val artifact3: MutableDungeons.Item? = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar3 }
+            private val artifact1 = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar1 }
+            private val artifact2 = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar2 }
+            private val artifact3 = items.find { it.equipmentSlot == DungeonsItem.EquipmentSlot.HotBar3 }
 
             val power = run {
-                val powerDividedBy4 = listOf(melee, armor, ranged)
-                    .sumOf { it?.power ?: 0.0 }
+                val powerDividedBy4 = listOfNotNull(melee, armor, ranged)
+                    .sumOf { it.power.value }
                     .div(4.0)
 
-                val powerDividedBy12 = listOf(artifact1, artifact2, artifact3)
-                    .sumOf { it?.power ?: 0.0 }
+                val powerDividedBy12 = listOfNotNull(artifact1, artifact2, artifact3)
+                    .sumOf { it.power.value }
                     .div(12.0)
 
-                (powerDividedBy4 + powerDividedBy12).toInt()
+                (powerDividedBy4 + powerDividedBy12).asInGamePower()
             }
         }
     }

@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
-import kiwi.hoonkun.ui.composables.base.rememberArmorPropertyIcon
 import kiwi.hoonkun.ui.composables.overlays.ArmorPropertyOverlay
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
@@ -32,6 +31,7 @@ import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
+import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsArmorProperty
@@ -96,8 +96,6 @@ fun ArmorPropertyItem(
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val propertyRarityIcon = rememberArmorPropertyIcon(property)
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -118,7 +116,7 @@ fun ArmorPropertyItem(
             .clickable(interaction, null) { onClick() }
     ) {
         Image(
-            bitmap = propertyRarityIcon,
+            bitmap = DungeonsTextures[property.rarity.texture],
             contentDescription = null,
             modifier = Modifier.size(30.dp)
         )
