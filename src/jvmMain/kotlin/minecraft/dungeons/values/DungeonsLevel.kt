@@ -6,15 +6,20 @@ import kotlin.math.sqrt
 
 
 @JvmInline
-value class InGameDungeonsLevel(val value: Double)
+value class InGameDungeonsLevel(val value: Double) {
+    override fun toString(): String = value.toString()
+}
 
 fun InGameDungeonsLevel.toSerialized() =
     SerializedDungeonsLevel((100 * (value - 1) * (3 * value - 1)).toLong())
 
 fun InGameDungeonsLevel.truncate() = kotlin.math.truncate(value).roundToInt()
+fun InGameDungeonsLevel.toFixed(digits: Int) = value.toFixed(digits)
 
 @JvmInline
-value class SerializedDungeonsLevel(val value: Long)
+value class SerializedDungeonsLevel(val value: Long) {
+    override fun toString(): String = value.toString()
+}
 
 fun SerializedDungeonsLevel.toInGame() =
     InGameDungeonsLevel(((1.0 / 30.0) * (sqrt(3 * value + 100.0) + 20)).toFixed(4))

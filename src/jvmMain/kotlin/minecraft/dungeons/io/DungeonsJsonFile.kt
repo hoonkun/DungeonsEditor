@@ -166,7 +166,7 @@ class DungeonsJsonFile(path: String): File(path) {
                     .sumOf { it.power.value }
                     .div(12.0)
 
-                (powerDividedBy4 + powerDividedBy12).asInGamePower()
+                (powerDividedBy4 + powerDividedBy12).asInGamePower().truncate()
             }
         }
     }

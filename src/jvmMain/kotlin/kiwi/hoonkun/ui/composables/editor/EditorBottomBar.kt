@@ -35,6 +35,7 @@ import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.extensions.withCurrencies
 import minecraft.dungeons.values.DungeonsItem
 import minecraft.dungeons.values.asInGameLevel
+import minecraft.dungeons.values.toFixed
 import minecraft.dungeons.values.truncate
 
 
@@ -47,7 +48,7 @@ fun EditorBottomBar(
 
     val levelIcon = remember { DungeonsTextures["/UI/Materials/Character/STATS_LV_frame.png"] }
 
-    var level by remember { mutableStateOf("${stored.playerLevel}") }
+    var level by remember { mutableStateOf("${stored.playerLevel.toFixed(3)}") }
     var emerald by remember { mutableStateOf("${withCurrencies { stored.emerald }}") }
     var gold by remember { mutableStateOf("${withCurrencies { stored.gold }}") }
 
@@ -75,7 +76,7 @@ fun EditorBottomBar(
         CurrencyText(
             icon = "/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
             scale = 0.8f,
-            value = "${stored.playerPower}"
+            value = "${stored.playerPower.truncate()}"
         )
 
         CurrencyField(
