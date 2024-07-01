@@ -27,6 +27,7 @@ import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
+import kotlinx.collections.immutable.toImmutableList
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.MutableDungeonsItemsExtensionScope
 import minecraft.dungeons.states.extensions.skeleton
@@ -115,7 +116,7 @@ private fun Content(item: MutableDungeons.Item, editor: EditorState) {
             Spacer(modifier = Modifier.height(30.dp))
             ItemEnchantments(
                 holder = item,
-                enchantments = MutableEnchantments(item.enchantments),
+                enchantments = item.enchantments.toImmutableList(),
                 modifier = Modifier.fillMaxWidth()
             )
         }

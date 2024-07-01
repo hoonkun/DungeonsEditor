@@ -29,6 +29,7 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation("org.json:json:20240303")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
                 implementation(project(":PakReader"))
                 implementation(kotlin("reflect"))
             }

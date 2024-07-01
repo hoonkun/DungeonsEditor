@@ -14,10 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -42,6 +39,7 @@ import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
+import kotlinx.collections.immutable.toImmutableList
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
@@ -258,7 +256,7 @@ private fun HolderPreview(
         }
 
         Row(modifier = Modifier.drawBehind { drawEnchantmentRune(topOffset = (-150).dp) }) {
-            val slots = remember { state.enchantments.chunked(3).map { MutableEnchantments(it) } }
+            val slots = remember { state.enchantments.chunked(3).map { it.toImmutableList() } }
             slots.forEach { slot ->
                 EnchantmentSlot(
                     enchantments = slot,
@@ -267,7 +265,7 @@ private fun HolderPreview(
                         .aspectRatio(1f / 1f)
                 ) { each ->
                     val enabled by remember {
-                        derivedStateOf { slot.all.find { it.level > 0 }?.let { each === it } != false }
+                        derivedStateOf { slot.find { it.level > 0 }?.let { each === it } != false }
                     }
 
                     val scale by minimizableAnimateFloatAsState(
@@ -542,23 +540,28 @@ private fun EnchantmentLevelSelector(
         if (!isNetheriteEnchant) {
             RetroButton(
                 text = Localizations["enchantment_deactivate"],
-                color = if (currentLevel == 0) Color(0xfff54242) else Color.Transparent,
+                color = if (currentLevel == 0) Color(0xfff54242) else Color(0x2AfA7272),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = { onLevelChange(0) },
-                modifier = Modifier.weight(1.5f)
+                stroke = 3.dp,
+                radius = RetroButtonDpCornerRadius(all = 4.dp),
+                modifier = Modifier.height(40.dp).weight(1.5f)
             )
         }
 
-        for (indicatingLevel in 0..3) {
+        for (indicatingLevel in 1..3) {
             RetroButton(
-                color = if (currentLevel == 0) Color(0xfff54242) else Color.Transparent,
+                color = if (currentLevel == indicatingLevel) Color(0xff6642f5) else Color(0x1Fffffff),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
-                onClick = { onLevelChange(0) },
-                modifier = Modifier.padding(start = 4.dp).weight(1.5f)
+                onClick = { onLevelChange(indicatingLevel) },
+                stroke = 3.dp,
+                radius = RetroButtonDpCornerRadius(all = 6.dp),
+                modifier = Modifier.height(40.dp).padding(start = 4.dp).weight(1f)
             ) {
                 Image(
                     bitmap = LevelImage(indicatingLevel),
                     contentDescription = null,
+                    modifier = Modifier.scale(1.5f)
                 )
             }
         }

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
+import kotlinx.collections.immutable.ImmutableList
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
@@ -140,14 +141,9 @@ fun EnchantmentOutlinePath(offset: IntOffset, size: IntSize): Path =
 @Stable
 data class EnchantmentDrawCache(val path: Path): BlurShadowImageDrawCache
 
-@Immutable
-data class MutableEnchantments(
-    val all: List<MutableDungeons.Enchantment>
-)
-
 @Composable
 fun EnchantmentSlot(
-    enchantments: MutableEnchantments,
+    enchantments: ImmutableList<MutableDungeons.Enchantment>,
     modifier: Modifier = Modifier,
     contentEach: @Composable (MutableDungeons.Enchantment) -> Unit
 ) {
@@ -162,7 +158,7 @@ fun EnchantmentSlot(
             modifier = sizeModifier.offsetRelative(0.5f, 0f).scale(0.375f)
         )
 
-        enchantments.all.zip(offsets).forEach { (enchantment, offset) ->
+        enchantments.zip(offsets).forEach { (enchantment, offset) ->
             Box(sizeModifier.offsetRelative(offset)) { contentEach(enchantment) }
         }
     }

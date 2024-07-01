@@ -35,7 +35,6 @@ import kiwi.hoonkun.ui.composables.overlays.ExitApplicationConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.SettingsOverlay
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.AppState
-import kiwi.hoonkun.ui.states.LocalAppPointerListeners
 import kiwi.hoonkun.ui.states.LocalAppState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
@@ -104,14 +103,12 @@ private fun AppRoot(
     content: @Composable BoxScope.() -> Unit
 ) {
     val overlays = LocalOverlayState.current
-    val appPointerListeners = LocalAppPointerListeners.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xff272727))
             .onKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.Escape) overlays.pop() else false }
-            .then(appPointerListeners.onGlobalPointerEvent())
     ) {
         content()
         overlays.Stack()

@@ -182,6 +182,8 @@ data class RetroButtonDpCornerRadius(
     }
 }
 
+fun RetroButtonDpCornerRadius(all: Dp) = RetroButtonDpCornerRadius(all, all, all, all)
+
 data class RetroButtonCornerRadius(
     val topStart: Float = 0f,
     val topEnd: Float = 0f,

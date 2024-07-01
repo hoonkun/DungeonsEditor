@@ -1,29 +1,26 @@
 package kiwi.hoonkun.ui.composables.base
 
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.round
 import kiwi.hoonkun.ui.reusables.minimizableAnimateFloatAsState
 import kiwi.hoonkun.ui.reusables.minimizableSpec
 import kiwi.hoonkun.ui.reusables.round
@@ -48,60 +45,43 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
     onDrawBehind: DrawScope.(T, IntOffset, IntSize) -> Unit = { _, _, _ -> },
     onDrawFront: DrawScope.(T, IntOffset, IntSize) -> Unit = { _, _, _ -> }
 ) {
-    val layoutDirection = LocalLayoutDirection.current
-    val density = LocalDensity.current
-
     val blurAlpha by minimizableAnimateFloatAsState(
         targetValue = if (enabled) 1f else 0f,
         animationSpec = minimizableSpec { spring() }
     )
 
-    val paddingLeft = remember { with(density) { contentPadding.calculateLeftPadding(layoutDirection).toPx() } }
-    val paddingTop = remember { with(density) { contentPadding.calculateTopPadding().toPx() } }
-    val paddingHorizontal = remember { with(density) { paddingLeft + contentPadding.calculateRightPadding(layoutDirection).toPx() } }
-    val paddingVertical = remember { with(density) { paddingTop + contentPadding.calculateBottomPadding().toPx() } }
-
-    val calculateDstPlacement: CacheDrawScope.() -> Pair<IntOffset, IntSize> = {
-        Offset(paddingLeft, paddingTop).round() to Size(size.width - paddingHorizontal, size.height - paddingVertical).round()
-    }
-
     Box(modifier = modifier) {
-        Spacer(
+        Image(
+            bitmap = bitmap,
+            contentDescription = null,
             modifier = Modifier
                 .matchParentSize()
+                .drawWithCache {
+                    val cache = drawCacheFactory(IntOffset.Zero, size.round())
+                    onDrawBehind { onDrawBehind(cache, IntOffset.Zero, size.round()) }
+                }
+                .padding(contentPadding)
                 .blur(10.dp)
-                .drawWithCache {
-                    val (dstOffset, dstSize) = calculateDstPlacement()
-                    onDrawBehind {
-                        scale(contentScale * 1.05f) {
-                            drawImage(
-                                image = bitmap,
-                                dstOffset = dstOffset,
-                                dstSize = dstSize,
-                                alpha = blurAlpha,
-                            )
-                        }
-                    }
-                },
+                .scale(contentScale * 1.05f)
+                .graphicsLayer { alpha = blurAlpha }
         )
-        Spacer(
+        Image(
+            bitmap = bitmap,
+            contentDescription = null,
             modifier = Modifier
                 .matchParentSize()
                 .drawWithCache {
-                    val (dstOffset, dstSize) = calculateDstPlacement()
-                    val cache = drawCacheFactory(dstOffset, dstSize)
-                    onDrawBehind {
-                        onDrawBehind(cache, dstOffset, dstSize)
+                    val cache = drawCacheFactory(IntOffset.Zero, size.round())
+                    onDrawWithContent {
                         drawIntoCanvas {
                             it.saveLayer(Rect(0f, 0f, size.width, size.height), contentPaint())
-                            scale(contentScale) {
-                                drawImage(bitmap, dstOffset = dstOffset, dstSize = dstSize)
-                            }
+                            scale(contentScale) { this@onDrawWithContent.drawContent() }
                             it.restore()
                         }
-                        onDrawFront(cache, dstOffset, dstSize)
+                        onDrawFront(cache, IntOffset.Zero, size.round())
                     }
                 }
+                .padding(contentPadding)
         )
     }
 }
