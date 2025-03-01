@@ -11,52 +11,62 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.withItemManager
 
 @Composable
 fun ItemDuplicateLocationConfirmOverlay(
     editor: EditorState,
-    target: Item,
+    target: MutableDungeons.Item,
     requestClose: () -> Unit
 ) {
     val onClose = { requestClose() }
 
     val onOriginalSelected = {
-        target.parent.addItem(editor, target.copy(), target)
+        editor.reselect(
+            oldItem = target,
+            newItem = withItemManager { editor.data.duplicate(target) }
+        )
         onClose()
     }
 
     val onHereSelected = {
-        target.parent.addItem(editor, target.copy())
+        val created = withItemManager { editor.data.add(target.copy(), editor.view) }
+
+        editor.deselectAll()
+        editor.select(
+            item = created,
+            into = EditorState.Slot.Primary
+        )
         onClose()
     }
 
-    val where = target.where ?: editor.view
+    val where = withItemManager { editor.data.locationOf(target) }
 
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
-            title = Localizations.UiText("inventory_duplicate_title", where.localizedName),
-            description = Localizations.UiText("inventory_duplicate_description", editor.view.localizedName)
+            title = Localizations["inventory_duplicate_title", where.localizedName],
+            description = Localizations["inventory_duplicate_description", editor.view.localizedName]
         )
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = Localizations.UiText("inventory_duplicate_button_source"),
+                text = Localizations["inventory_duplicate_button_source"],
                 color = Color(0xff3f8e4f),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = onOriginalSelected
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = Localizations.UiText("cancel"),
+                text = Localizations["cancel"],
                 color = Color(0xffffffff),
                 hoverInteraction = RetroButtonHoverInteraction.Overlay,
                 onClick = onClose
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = Localizations.UiText("inventory_duplicate_button_here"),
+                text = Localizations["inventory_duplicate_button_here"],
                 color = Color(0xff3f8e4f),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = onHereSelected

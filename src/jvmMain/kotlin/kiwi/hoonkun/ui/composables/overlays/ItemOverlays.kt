@@ -25,47 +25,46 @@ import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.ArmorProperty
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import minecraft.dungeons.resources.DungeonsDatabase
+import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.resources.EnchantmentData
-import minecraft.dungeons.resources.ItemData
-import minecraft.dungeons.values.DungeonsPower
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.states.extensions.withItemManager
+import minecraft.dungeons.values.DungeonsItem
+import minecraft.dungeons.values.InGameDungeonsPower
+import minecraft.dungeons.values.toSerialized
 
-
-private val ItemVariants = listOf("Melee", "Ranged", "Armor", "Artifact")
 
 @Stable
 sealed interface ItemOverlayState {
-    var selected: ItemData?
+    var selected: DungeonsSkeletons.Item?
 
-    val variant: String
-    val collection: List<ItemData>
+    val variant: DungeonsItem.Variant
+    val collection: List<DungeonsSkeletons.Item>
 }
 
 @Stable
 class ItemOverlayCreateState(val editorState: EditorState): ItemOverlayState {
-    override var selected: ItemData? by mutableStateOf(null)
+    override var selected: DungeonsSkeletons.Item? by mutableStateOf(null)
 
-    override var variant by mutableStateOf(ItemVariants[0])
-    override val collection: List<ItemData> by derivedStateOf {
-        DungeonsDatabase.items
+    override var variant by mutableStateOf(DungeonsItem.Variant.entries[0])
+    override val collection: List<DungeonsSkeletons.Item> by derivedStateOf {
+        DungeonsSkeletons.Item[Unit]
             .filter { it.variant == variant }
             .sortedBy { "${if (it.unique) 0 else 1}_${it.name}_${it.type.replace(Regex("_.+"), "")}" }
     }
 }
 
 @Stable
-class ItemOverlayEditState(val target: Item): ItemOverlayState {
-    override var selected: ItemData? by mutableStateOf(null)
+class ItemOverlayEditState(val target: MutableDungeons.Item): ItemOverlayState {
+    override var selected: DungeonsSkeletons.Item? by mutableStateOf(null)
 
-    override val variant: String = target.data.variant
-    override val collection: List<ItemData> =
-        DungeonsDatabase.items
+    override val variant: DungeonsItem.Variant = target.skeleton.variant
+    override val collection: List<DungeonsSkeletons.Item> =
+        DungeonsSkeletons.Item[Unit]
             .filter { it.variant == variant }
             .sortedBy { "${if (it.unique) 0 else 1}_${it.name}_${it.type.replace(Regex("_.+"), "")}" }
 }
@@ -98,8 +97,11 @@ fun AnimatedVisibilityScope?.ItemOverlay(
             MinimizableAnimatedContent(
                 targetState = state.variant to state.collection,
                 transitionSpec = minimizableContentTransform spec@ {
+                    val previousIndex = DungeonsItem.Variant.entries.indexOf(initialState.first)
+                    val nextIndex = DungeonsItem.Variant.entries.indexOf(targetState.first)
+
                     val offset =
-                        if (ItemVariants.indexOf(targetState.first) > ItemVariants.indexOf(initialState.first)) 30.dp
+                        if (nextIndex > previousIndex) 30.dp
                         else (-30).dp
 
                     val enter = fadeIn() + slideIn { with(density) { IntOffset(0, offset.roundToPx()) } }
@@ -149,19 +151,22 @@ val ItemDataCollectionDefaultModifier get() = Modifier
 
 @Composable
 private fun ItemDataDetail(
-    data: ItemData,
+    data: DungeonsSkeletons.Item,
     state: ItemOverlayState,
     postSubmit: () -> Unit,
 ) {
     val density = LocalDensity.current
 
-    var rarity by remember { mutableStateOf(if (data.unique) "Unique" else "Common") }
+    var rarity by remember {
+        mutableStateOf(
+            if (data.unique) DungeonsItem.Rarity.Unique
+            else DungeonsItem.Rarity.Common
+        )
+    }
     var power by remember {
         mutableStateOf(
-            if (state is ItemOverlayCreateState)
-                DungeonsPower.toSerializedPower(state.editorState.stored.playerPower.toDouble())
-            else
-                0.0
+            if (state is ItemOverlayCreateState) state.editorState.data.playerPower
+            else InGameDungeonsPower.Zero
         )
     }
 
@@ -180,9 +185,9 @@ private fun ItemDataDetail(
                 .height(48.dp)
         ) Descriptions@ {
             if (state is ItemOverlayEditState) return@Descriptions
-            if (data.variant != "Artifact")
+            if (data.variant != DungeonsItem.Variant.Artifact)
                 WarningText(text = Localizations["item_creation_other_options_description"])
-            if (data.variant == "Armor")
+            if (data.variant == DungeonsItem.Variant.Armor)
                 WarningText(text = Localizations["item_creation_armor_property_description"])
         }
 
@@ -198,23 +203,31 @@ private fun ItemDataDetail(
                 enter togetherWith exit
             },
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(vertical = 16.dp)
                 .weight(1f)
                 .background(Color(0xff080808))
                 .padding(all = 16.dp)
         ) { capturedData ->
-            Row {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Image(
                     bitmap = capturedData.largeIcon,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f / 1f)
                 )
                 Column(
-                    modifier = Modifier.padding(start = 25.dp, end = 16.dp).padding(vertical = 16.dp)
+                    modifier = Modifier
+                        .padding(start = 25.dp, end = 16.dp)
+                        .padding(vertical = 16.dp)
+                        .weight(1f)
                 ) {
                     Row {
                         ItemRarityButton(capturedData, rarity) { rarity = it }
-                        EnchantmentData.AppliedExclusiveOf(capturedData)?.let {
+                        capturedData.appliedExclusiveEnchantment?.let {
                             Spacer(modifier = Modifier.width(8.dp))
                             BuiltInEnchantments(it)
                         }
@@ -240,8 +253,8 @@ private fun ItemDataDetail(
 
                     if (state is ItemOverlayCreateState) {
                         PowerEditField(
-                            power = DungeonsPower.toInGamePower(power),
-                            onPowerChange = { power = DungeonsPower.toSerializedPower(it) },
+                            power = power,
+                            onPowerChange = { power = it },
                             modifier = Modifier.align(Alignment.End)
                         )
                     }
@@ -255,23 +268,39 @@ private fun ItemDataDetail(
             onClick = {
                 when (state) {
                     is ItemOverlayCreateState -> {
-                        val newItem = Item(
-                            parent = state.editorState.stored,
+                        val newItem = MutableDungeons.Item(
                             inventoryIndex = 0,
-                            power = power,
+                            power = power.toSerialized(),
                             rarity = rarity,
                             type = data.type,
                             upgraded = false,
-                            enchantments = if (data.variant != "Artifact") listOf() else null,
+                            enchantments = if (data.variant != DungeonsItem.Variant.Artifact) listOf() else null,
                             armorProperties = null,
                             markedNew = true
                         )
-                        if (data.variant == "Armor")
-                            newItem.armorProperties = data.builtInProperties
-                                .map { ArmorProperty(holder = newItem, id = it.id, rarity = "Common") }
-                                .toMutableStateList()
+                        if (data.variant == DungeonsItem.Variant.Armor) {
+                            newItem.armorProperties.clear()
+                            newItem.armorProperties.addAll(
+                                data.builtInProperties
+                                    .map { MutableDungeons.ArmorProperty(id = it.id) }
+                                    .toMutableStateList()
+                            )
+                        }
 
-                        newItem.parent.addItem(state.editorState, newItem)
+                        val editor = state.editorState
+
+                        val created = withItemManager {
+                            editor.data.add(
+                                newItem = newItem,
+                                where = editor.view
+                            )
+                        }
+
+                        editor.deselectAll()
+                        editor.select(
+                            item = created,
+                            into = EditorState.Slot.Primary
+                        )
                     }
                     is ItemOverlayEditState -> {
                         state.target.type = data.type
@@ -285,8 +314,8 @@ private fun ItemDataDetail(
 
 @Composable
 private fun ItemCreationVariantFilters(
-    filter: String,
-    onFilterChange: (String) -> Unit,
+    filter: DungeonsItem.Variant,
+    onFilterChange: (DungeonsItem.Variant) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -295,8 +324,13 @@ private fun ItemCreationVariantFilters(
             .padding(top = 58.dp)
             .then(modifier)
     ) {
-        for (item in ItemVariants) {
-            ItemCreationVariantFilter(Localizations[item.lowercase()], item, filter, onFilterChange)
+        for (item in DungeonsItem.Variant.entries) {
+            ItemCreationVariantFilter(
+                text = Localizations[item.name.lowercase()],
+                variant = item,
+                filter = filter,
+                onFilterChange = onFilterChange
+            )
         }
     }
 }
@@ -304,9 +338,9 @@ private fun ItemCreationVariantFilters(
 @Composable
 private fun ItemCreationVariantFilter(
     text: String,
-    variant: String,
-    filter: String,
-    onFilterChange: (String) -> Unit,
+    variant: DungeonsItem.Variant,
+    filter: DungeonsItem.Variant,
+    onFilterChange: (DungeonsItem.Variant) -> Unit,
 ) {
     val selected = filter == variant
     val onClick = { onFilterChange(variant) }
@@ -348,9 +382,9 @@ private fun ItemCreationVariantFilter(
 
 @Composable
 private fun ItemDataCollection(
-    collection: List<ItemData>,
+    collection: List<DungeonsSkeletons.Item>,
     state: ItemOverlayState,
-    onItemSelect: (ItemData) -> Unit,
+    onItemSelect: (DungeonsSkeletons.Item) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -365,9 +399,9 @@ private fun ItemDataCollection(
 
 @Composable
 private fun ItemDataItem(
-    data: ItemData,
+    data: DungeonsSkeletons.Item,
     selected: Boolean,
-    onItemSelect: (ItemData) -> Unit
+    onItemSelect: (DungeonsSkeletons.Item) -> Unit
 ) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
@@ -412,13 +446,13 @@ private fun ItemDataItem(
                 modifier = Modifier.requiredHeight(35.dp)
             ) {
                 if (data.unique || data.limited) {
-                    ItemRarityButton(data, "Unique")
+                    ItemRarityButton(data, DungeonsItem.Rarity.Unique)
                 } else {
-                    ItemRarityButton(data, rarity = "Rare", readonly = true)
+                    ItemRarityButton(data, rarity = DungeonsItem.Rarity.Rare, readonly = true)
                     Spacer(modifier = Modifier.width(8.dp))
-                    ItemRarityButton(data, rarity = "Common", readonly = true)
+                    ItemRarityButton(data, rarity = DungeonsItem.Rarity.Common, readonly = true)
                 }
-                EnchantmentData.AppliedExclusiveOf(data)?.let {
+                data.appliedExclusiveEnchantment?.let {
                     Spacer(modifier = Modifier.width(8.dp))
                     BuiltInEnchantments(it)
                 }
@@ -449,7 +483,7 @@ private fun AddButton(
             modifier = Modifier.padding(end = 24.dp)
         )
         Image(
-            bitmap = DungeonsTextures["/Game/UI/Materials/Character/right_arrow_carousel.png"],
+            bitmap = DungeonsTextures["/UI/Materials/Character/right_arrow_carousel.png"],
             contentDescription = null,
             filterQuality = FilterQuality.None,
             modifier = Modifier.size(28.dp)

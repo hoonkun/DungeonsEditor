@@ -24,15 +24,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.round
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.Enchantment
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.Retriever
 import minecraft.dungeons.resources.DungeonsLocalizations
+import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.resources.EnchantmentData
-import minecraft.dungeons.resources.ItemData
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.values.DungeonsItem
 
 
 @Composable
@@ -93,21 +92,25 @@ fun ItemAlterButton(
 
 @Composable
 fun ItemRarityButton(
-    data: ItemData,
-    rarity: String,
+    data: DungeonsSkeletons.Item,
+    rarity: DungeonsItem.Rarity,
     readonly: Boolean = false,
-    onClick: (String) -> Unit = { }
+    onClick: (DungeonsItem.Rarity) -> Unit = { }
 ) {
     ItemAlterButton(
-        text = "${if (data.limited) "${Localizations.UiText("season_limited")} " else ""}${DungeonsLocalizations["/rarity_${rarity.lowercase()}"]}",
+        text = "${if (data.limited) "${Localizations["season_limited"]} " else ""}${DungeonsLocalizations["/rarity_${rarity.name.lowercase()}"]}",
         color = RarityColor(rarity, RarityColorType.Translucent),
         enabled = !readonly && !data.unique,
-        onClick = { onClick(if (rarity == "Common") "Rare" else "Common") }
+        onClick = {
+            onClick(
+                if (rarity == DungeonsItem.Rarity.Common) DungeonsItem.Rarity.Rare
+                else DungeonsItem.Rarity.Common)
+        }
     )
 }
 
 @Composable
-fun BuiltInEnchantments(data: EnchantmentData) {
+fun BuiltInEnchantments(data: DungeonsSkeletons.Enchantment) {
     ItemAlterButton(
         color = Color(0x25ffffff),
         enabled = false
@@ -119,7 +122,7 @@ fun BuiltInEnchantments(data: EnchantmentData) {
                 .requiredSize(30.dp)
                 .drawBehind {
                     drawImage(
-                        image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
+                        image = DungeonsTextures["/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
                         dstSize = (size * 0.9f).round(),
                         dstOffset = (center - (size * 0.9f / 2f).let { Offset(it.width, it.height) }).round()
                     )
@@ -131,15 +134,14 @@ fun BuiltInEnchantments(data: EnchantmentData) {
 
 @Composable
 fun ItemNetheriteEnchantButton(
-    holder: Item,
-    enchantment: Enchantment?,
+    enchantment: MutableDungeons.Enchantment?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onClick: (Enchantment) -> Unit = { }
+    onClick: (MutableDungeons.Enchantment) -> Unit = { }
 ) {
     @Composable
     fun InactiveItemNetheriteEnchantButton(
-        enchantment: Retriever<Enchantment>,
+        enchantment: () -> MutableDungeons.Enchantment,
         enabled: Boolean = true
     ) {
         ItemAlterButton(
@@ -150,7 +152,7 @@ fun ItemNetheriteEnchantButton(
             onClick = { onClick(enchantment()) }
         ) {
             Image(
-                bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"],
+                bitmap = DungeonsTextures["/UI/Materials/Inventory2/Enchantment2/locked_enchantment_slot.png"],
                 contentDescription = null,
                 modifier = Modifier.size(28.dp)
             )
@@ -159,7 +161,7 @@ fun ItemNetheriteEnchantButton(
 
     @Composable
     fun ActiveItemNetheriteEnchantButton(
-        enchantment: Enchantment,
+        enchantment: MutableDungeons.Enchantment,
         enabled: Boolean = true
     ) {
         ItemAlterButton(
@@ -170,11 +172,10 @@ fun ItemNetheriteEnchantButton(
             onClick = { onClick(enchantment) }
         ) {
             MinimizableAnimatedContent(
-                targetState = enchantment.data,
+                targetState = enchantment.skeleton,
                 transitionSpec = minimizableContentTransform spec@ {
-                    val enter =
-                        if (targetState.id == "Unset") defaultFadeIn()
-                        else defaultFadeIn() + scaleIn(initialScale = 1.5f)
+                    val enter = defaultFadeIn() +
+                        if (targetState.isValid()) scaleIn(initialScale = 1.5f) else EnterTransition.None
                     val exit = defaultFadeOut()
                     enter togetherWith exit using SizeTransform(clip = false)
                 },
@@ -182,7 +183,7 @@ fun ItemNetheriteEnchantButton(
                     .requiredSize(30.dp)
                     .drawBehind {
                         drawImage(
-                            image = DungeonsTextures["/Game/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
+                            image = DungeonsTextures["/Content_DLC4/UI/Materials/Inventory/gilded_bullit.png"],
                             dstSize = size.round()
                         )
                     }
@@ -203,19 +204,23 @@ fun ItemNetheriteEnchantButton(
         }
     }
 
-    ItemAlterButtonAnimatable(targetState = enchantment?.isUnset != false) { isUnset ->
-        if (isUnset) {
-            InactiveItemNetheriteEnchantButton(enchantment = { enchantment ?: holder.newNetheriteEnchant() })
-        } else {
+    ItemAlterButtonAnimatable(targetState = enchantment?.isValid() == true) { isValid ->
+        if (isValid) {
             if (enchantment == null) return@ItemAlterButtonAnimatable
             ActiveItemNetheriteEnchantButton(enchantment, enabled = enabled)
+        } else {
+            InactiveItemNetheriteEnchantButton(
+                enchantment = {
+                    enchantment ?: MutableDungeons.Enchantment(isNetheriteEnchant = true)
+                }
+            )
         }
     }
 }
 
 @Composable
 fun ItemModifiedButton(
-    holder: Item,
+    holder: MutableDungeons.Item,
     readonly: Boolean = false,
     hideUnits: Boolean = false,
 ) {
@@ -226,7 +231,7 @@ fun ItemModifiedButton(
             onClick = { holder.modified = !modified }
         ) {
             Text(
-                text = if (modified) Localizations.UiText("modified") else "_",
+                text = if (modified) Localizations["modified"] else "_",
                 fontSize = 18.sp,
                 color = Color.White
             )

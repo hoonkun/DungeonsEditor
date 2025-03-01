@@ -30,23 +30,23 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.rememberComponentRectPositionProvider
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.AnimatedTooltipArea
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.DungeonsJsonState
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.io.DungeonsJsonFile
-import minecraft.dungeons.io.DungeonsSummary
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.values.DungeonsItem
 import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun JsonEntries(
-    onJsonSelect: (newJson: DungeonsJsonState) -> Unit,
+    onJsonSelect: (path: String) -> Unit,
     focused: Boolean,
     modifier: Modifier = Modifier,
     preview: DungeonsJsonFile.Preview
@@ -71,7 +71,7 @@ fun JsonEntries(
         LazyColumn(contentPadding = PaddingValues(vertical = 36.dp)) {
             stickyHeader {
                 SummaryHeader(
-                    text = Localizations.UiText("file_selector_preview"),
+                    text = Localizations["file_selector_preview"],
                     modifier = hideIfPreviewNotPresents
                 )
             }
@@ -85,22 +85,22 @@ fun JsonEntries(
                     when (it) {
                         is DungeonsJsonFile.Preview.None -> {
                             SummaryNoEntries(
-                                text = Localizations.UiText("file_selector_no_selection"),
+                                text = Localizations["file_selector_no_selection"],
                                 modifier = hideIfPreviewNotPresents
                             )
                         }
                         is DungeonsJsonFile.Preview.Invalid -> {
                             SummaryNoEntries(
-                                text = Localizations.UiText("file_selector_invalid"),
+                                text = Localizations["file_selector_invalid"],
                                 modifier = hideIfPreviewNotPresents
                             )
                         }
                         is DungeonsJsonFile.Preview.Valid -> {
                             JsonPreview(
-                                path = it.json.sourcePath,
-                                summary = it.summary,
+                                path = it.path,
+                                summary = it,
                                 modifier = hideIfPreviewNotPresents,
-                                onClick = { onJsonSelect(it.json) }
+                                onClick = onJsonSelect
                             )
                         }
                     }
@@ -109,23 +109,23 @@ fun JsonEntries(
             item { SectionSpacing() }
             stickyHeader {
                 SummaryHeader(
-                    text = Localizations.UiText("recent_files"),
+                    text = Localizations["recent_files"],
                     modifier = hideIfPreviewPresents
                 )
             }
             if (recent.isEmpty()) {
                 item {
                     SummaryNoEntries(
-                        text = Localizations.UiText("no_recent_files"),
+                        text = Localizations["no_recent_files"],
                         modifier = hideIfPreviewPresents
                     )
                 }
             } else {
-                items(recent, key = { "recent_${it.first}" }) { (path, json, summary) ->
+                items(recent, key = { "recent_${it.path}" }) { preview ->
                     JsonPreview(
-                        path = path,
-                        summary = summary,
-                        onClick = { onJsonSelect(json) },
+                        path = preview.path,
+                        summary = preview,
+                        onClick = { onJsonSelect(preview.path) },
                         modifier = hideIfPreviewPresents.animateItem(
                             fadeInSpec = minimizableFiniteSpec { spring() },
                             fadeOutSpec = minimizableFiniteSpec { spring() },
@@ -137,23 +137,23 @@ fun JsonEntries(
             item { SectionSpacing() }
             stickyHeader {
                 SummaryHeader(
-                    text = Localizations.UiText("detected_files"),
+                    text = Localizations["detected_files"],
                     modifier = hideIfPreviewPresents
                 )
             }
             if (detected.isEmpty()) {
                 item {
                     SummaryNoEntries(
-                        text = Localizations.UiText("no_detected_files"),
+                        text = Localizations["no_detected_files"],
                         modifier = hideIfPreviewPresents
                     )
                 }
             } else {
-                items(detected, key = { "detected_${it.first}" }) { (path, json, summary) ->
+                items(detected, key = { "detected_${it.path}" }) { preview ->
                     JsonPreview(
-                        path = path,
-                        summary = summary,
-                        onClick = { onJsonSelect(json) },
+                        path = preview.path,
+                        summary = preview,
+                        onClick = { onJsonSelect(preview.path) },
                         modifier = hideIfPreviewPresents.animateItem(
                             fadeInSpec = minimizableFiniteSpec { spring() },
                             fadeOutSpec = minimizableFiniteSpec { spring() },
@@ -209,9 +209,9 @@ private fun SummaryNoEntries(
 @Composable
 private fun JsonPreview(
     path: String,
-    summary: DungeonsSummary,
+    summary: DungeonsJsonFile.Preview.Valid,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    onClick: (String) -> Unit,
 ) {
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
@@ -232,7 +232,7 @@ private fun JsonPreview(
         modifier = modifier
             .width(510.dp)
             .hoverable(source)
-            .clickable(source, null) { onClick() }
+            .clickable(source, null) { onClick(path) }
             .offset { IntOffset(hoverOffset.dp.roundToPx(), 0) }
             .drawBehind {
                 drawRoundRect(
@@ -278,23 +278,23 @@ private fun JsonPreview(
                 modifier = Modifier.weight(1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    CurrencyImage(DungeonsTextures["/Game/UI/Materials/Character/STATS_LV_frame.png"])
+                    CurrencyImage(DungeonsTextures["/UI/Materials/Character/STATS_LV_frame.png"])
                     Text(text = "LV.", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
             CurrencyText(
-                iconTextureKey = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+                iconTextureKey = "/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
                 text = "${summary.power}",
                 modifier = Modifier.weight(1f)
             )
             CurrencyText(
-                iconTextureKey = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+                iconTextureKey = "/UI/Materials/Emeralds/emerald_indicator.png",
                 text = "${summary.emerald}",
                 iconScale = 22f / 28f,
                 modifier = Modifier.weight(1f)
             )
             CurrencyText(
-                iconTextureKey = "/Game/UI/Materials/Currency/GoldIndicator.png",
+                iconTextureKey = "/UI/Materials/Currency/GoldIndicator.png",
                 text = "${summary.gold}",
                 modifier = Modifier.weight(1f)
             )
@@ -321,7 +321,7 @@ private fun JsonPreview(
 
 @Composable
 private fun JsonPreviewEquipment(
-    item: Item?,
+    item: MutableDungeons.Item?,
     modifier: Modifier = Modifier
 ) {
     if (item == null) {
@@ -329,7 +329,7 @@ private fun JsonPreviewEquipment(
             contentAlignment = Alignment.Center,
             modifier = modifier
                 .aspectRatio(1f / 1f)
-                .drawBehind { drawItemFrame("Common") }
+                .drawBehind { drawItemFrame(DungeonsItem.Rarity.Common) }
         ) {
             Text(
                 text = "-",
@@ -341,7 +341,7 @@ private fun JsonPreviewEquipment(
         }
     } else {
         BlurShadowImage(
-            bitmap = item.data.inventoryIcon,
+            bitmap = item.skeleton.inventoryIcon,
             modifier = modifier
                 .aspectRatio(1f / 1f),
             contentPadding = PaddingValues(all = 10.dp),

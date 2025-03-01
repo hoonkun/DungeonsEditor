@@ -7,8 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,14 +24,18 @@ import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.*
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import minecraft.dungeons.values.DungeonsPower
+import kotlinx.collections.immutable.toImmutableList
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.MutableDungeonsItemsExtensionScope
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.states.extensions.withItemManager
+import minecraft.dungeons.values.DungeonsItem
 
 @Composable
-fun ItemDetail(item: Item?, editor: EditorState) {
+fun ItemDetail(item: MutableDungeons.Item?, editor: EditorState) {
     MinimizableAnimatedContent(
         targetState = item,
         transitionSpec = minimizableContentTransform spec@ {
@@ -49,7 +51,7 @@ fun ItemDetail(item: Item?, editor: EditorState) {
 }
 
 @Composable
-private fun Content(item: Item, editor: EditorState) {
+private fun Content(item: MutableDungeons.Item, editor: EditorState) {
     val overlays = LocalOverlayState.current
 
     Column(
@@ -58,7 +60,7 @@ private fun Content(item: Item, editor: EditorState) {
             .requiredHeightIn(min = 450.dp)
             .drawBehind {
                 drawImage(
-                    image = item.data.largeIcon,
+                    image = item.skeleton.largeIcon,
                     dstOffset = Offset(size.width * 0.35f - 10f.dp.toPx(), 60f.dp.toPx()).round(),
                     dstSize = Size(size.width * 0.65f, size.width * 0.65f).round(),
                     alpha = 0.25f
@@ -70,17 +72,17 @@ private fun Content(item: Item, editor: EditorState) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 10.dp)
         ) {
-            ItemRarityButton(item.data, item.rarity) { item.rarity = it }
-            if (item.data.variant != "Artifact") {
+            ItemRarityButton(item.skeleton, item.rarity) { item.rarity = it }
+            if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
                 Spacer(modifier = Modifier.width(7.dp))
                 ItemNetheriteEnchantButton(
-                    holder = item,
                     enchantment = item.netheriteEnchant
                 ) { enchantment ->
                     overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
                         EnchantmentOverlay(
+                            holder = item,
                             initialSelected = enchantment,
-                            requestClose = { overlays.destroy(it) }
+                            requestClose = it
                         )
                     }
                 }
@@ -89,30 +91,34 @@ private fun Content(item: Item, editor: EditorState) {
             }
         }
 
-        ItemName(item.data.name)
-        ItemDescription(item.data.flavour)
-        ItemDescription(item.data.description)
+        ItemName(item.skeleton.name)
+        ItemDescription(item.skeleton.flavour)
+        ItemDescription(item.skeleton.description)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        IfNotNull(item.armorProperties) {
-            ItemArmorProperties(item, it)
+        if (item.skeleton.variant == DungeonsItem.Variant.Armor) {
+            ItemArmorProperties(item, item.armorProperties)
             Spacer(modifier = Modifier.height(20.dp))
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             PowerEditField(
-                power = DungeonsPower.toInGamePower(item.power),
-                onPowerChange = { item.power = DungeonsPower.toSerializedPower(it) },
+                power = item.power,
+                onPowerChange = { item.power = it },
                 hideLabel = ArcticSettings.locale == "en"
             )
             Spacer(modifier = Modifier.weight(1f))
             ItemAlterRight(item, editor)
         }
 
-        IfNotNull(item.enchantments) {
+        if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
             Spacer(modifier = Modifier.height(30.dp))
-            ItemEnchantments(EnchantmentsHolder(it), modifier = Modifier.fillMaxWidth())
+            ItemEnchantments(
+                holder = item,
+                enchantments = item.enchantments.toImmutableList(),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -120,7 +126,7 @@ private fun Content(item: Item, editor: EditorState) {
 @Composable
 private fun TooltipText(text: String) =
     Text(
-        text = Localizations.UiText(text),
+        text = Localizations[text],
         color = Color.White,
         fontSize = 20.sp,
         modifier = Modifier
@@ -129,18 +135,17 @@ private fun TooltipText(text: String) =
     )
 
 @Composable
-private fun ItemAlterRight(item: Item, editor: EditorState) {
+private fun ItemAlterRight(item: MutableDungeons.Item, editor: EditorState) {
     val overlays = LocalOverlayState.current
 
-    IfNotNull(item.where) { itemLocation ->
-        val equipped by remember { derivedStateOf { item.parent.equippedItems.contains(item) } }
-        if (equipped) return@IfNotNull
+    val location = remember(item) { withItemManager { editor.data.locationOf(item) } }
 
-        val transferText = if (itemLocation == editor.view) "transfer" else "pull"
+    if (!editor.data.equippedItems.contains(item)) {
+        val transferText = if (location == editor.view) "transfer" else "pull"
         val tooltip = @Composable {
             TooltipText(
-                if (transferText == "transfer") Localizations.UiText("transfer_tooltip", item.where!!.other().localizedName)
-                else Localizations.UiText("pull_tooltip", itemLocation.localizedName, editor.view.localizedName)
+                if (transferText == "transfer") Localizations["transfer_tooltip", location.other().localizedName]
+                else Localizations["pull_tooltip", location.localizedName, editor.view.localizedName]
             )
         }
 
@@ -149,18 +154,34 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
             delayMillis = 0
         ) {
             ItemAlterButton(
-                text = Localizations.UiText(transferText, itemLocation.other().localizedName),
-                onClick = { item.transfer(editor) }
+                text = Localizations[transferText, location.other().localizedName],
+                onClick = {
+                    val json = editor.data
+                    val selectionSlot = editor.selectedSlotOf(item)
+                    val previousIndex = item.inventoryIndex
+
+                    with (MutableDungeonsItemsExtensionScope) { editor.data.transfer(item) }
+
+                    editor.deselect(item)
+
+                    val searchFrom =
+                        if (editor.view.isInventory()) json.inventoryItems
+                        else json.storageItems
+                    val newSelection = searchFrom.find { it.inventoryIndex == previousIndex }
+                    if (newSelection != null && selectionSlot != null)
+                        editor.select(newSelection, selectionSlot, unselectIfAlreadySelected = false)
+                }
             )
         }
     }
+
     Spacer(modifier = Modifier.width(7.dp))
     AnimatedTooltipArea(
-        tooltip = { TooltipText(Localizations.UiText("change_type_tooltip")) },
+        tooltip = { TooltipText(Localizations["change_type_tooltip"]) },
         delayMillis = 0,
     ) {
         ItemAlterButton(
-            text = Localizations.UiText("change_type"),
+            text = Localizations["change_type"],
             onClick = {
                 overlays.make(
                     enter = defaultFadeIn(),
@@ -168,7 +189,7 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
                 ) {
                     ItemOverlay(
                         state = remember { ItemOverlayEditState(target = item) },
-                        requestClose = { overlays.destroy(it) }
+                        requestClose = it
                     )
                 }
             }
@@ -176,19 +197,19 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
     }
     Spacer(modifier = Modifier.width(7.dp))
     ItemAlterButton(
-        text = Localizations.UiText("duplicate"),
+        text = Localizations["duplicate"],
         onClick = {
-            if (item.where == editor.view) {
-                if (editor.view == EditorState.EditorView.Inventory && editor.noSpaceInInventory)
+            if (location == editor.view) {
+                if (editor.view.isInventory() && withItemManager { editor.data.noSpaceAvailable })
                     overlays.make { InventoryFullOverlay() }
                 else
-                    item.parent.addItem(editor, item.copy(), item)
+                    editor.reselect(oldItem = item, newItem = withItemManager { editor.data.duplicate(item) })
             } else {
                 overlays.make {
                     ItemDuplicateLocationConfirmOverlay(
                         editor = editor,
                         target = item,
-                        requestClose = { overlays.destroy(it) }
+                        requestClose = it
                     )
                 }
             }
@@ -196,14 +217,14 @@ private fun ItemAlterRight(item: Item, editor: EditorState) {
     )
     Spacer(modifier = Modifier.width(7.dp))
     ItemAlterButton(
-        text = Localizations.UiText("delete"),
+        text = Localizations["delete"],
         color = Color(0x25ff6d0c),
         onClick =  {
             overlays.make {
                 ItemDeleteConfirmOverlay(
                     editor = editor,
                     target = item,
-                    requestClose = { overlays.destroy(it) }
+                    requestClose = it
                 )
             }
         }

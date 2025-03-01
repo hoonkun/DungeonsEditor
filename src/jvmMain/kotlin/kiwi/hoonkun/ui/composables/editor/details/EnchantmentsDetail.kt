@@ -13,18 +13,21 @@ import androidx.compose.ui.draw.scale
 import kiwi.hoonkun.ui.composables.base.EnchantmentImage
 import kiwi.hoonkun.ui.composables.base.EnchantmentLevel
 import kiwi.hoonkun.ui.composables.base.EnchantmentSlot
-import kiwi.hoonkun.ui.composables.base.EnchantmentsHolder
 import kiwi.hoonkun.ui.composables.overlays.EnchantmentOverlay
 import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.drawEnchantmentRune
-import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.states.LocalOverlayState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
 
 
 @Composable
 fun ItemEnchantments(
-    enchantments: EnchantmentsHolder,
+    holder: MutableDungeons.Item,
+    enchantments: ImmutableList<MutableDungeons.Enchantment>,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,10 +35,11 @@ fun ItemEnchantments(
             .aspectRatio(3f / 1f)
             .drawBehind { drawEnchantmentRune() }
     ) {
-        val slots = remember(enchantments) { enchantments.all.chunked(3) }
+        val slots = remember(enchantments) { enchantments.chunked(3).map { it.toImmutableList() } }
         for (slot in slots) {
             ItemEnchantmentEach(
-                slot = EnchantmentsHolder(slot),
+                holder = holder,
+                slot = slot,
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f / 1f)
@@ -46,24 +50,31 @@ fun ItemEnchantments(
 
 @Composable
 private fun ItemEnchantmentEach(
-    slot: EnchantmentsHolder,
+    holder: MutableDungeons.Item,
+    slot: ImmutableList<MutableDungeons.Enchantment>,
     modifier: Modifier = Modifier
 ) {
-    val activatedEnchantment = slot.all.find { it.level > 0 }
+    val activatedEnchantment = slot.find { it.level > 0 }
 
     val overlays = LocalOverlayState.current
-    val makeEnchantmentOverlay: (Enchantment) -> Unit = { enchantment ->
+    val makeEnchantmentOverlay: (MutableDungeons.Enchantment) -> Unit = { enchantment ->
         overlays.make(
             enter = defaultFadeIn(),
             exit = defaultFadeOut(),
-            content = { EnchantmentOverlay(initialSelected = enchantment, requestClose = { overlays.destroy(it) }) }
+            content = {
+                EnchantmentOverlay(
+                    holder = holder,
+                    initialSelected = enchantment,
+                    requestClose = it
+                )
+            }
         )
     }
 
     if (activatedEnchantment != null) {
         Box(modifier = Modifier.scale(1.15f).then(modifier)) {
             EnchantmentImage(
-                data = activatedEnchantment.data,
+                data = activatedEnchantment.skeleton,
                 modifier = Modifier.fillMaxSize(),
                 onClick = { makeEnchantmentOverlay(activatedEnchantment) }
             )
@@ -78,7 +89,7 @@ private fun ItemEnchantmentEach(
             enchantments = slot,
             modifier = Modifier.scale(1.07f).then(modifier)
         ) { enchantment ->
-            EnchantmentImage(data = enchantment.data) { makeEnchantmentOverlay(enchantment) }
+            EnchantmentImage(data = enchantment.skeleton) { makeEnchantmentOverlay(enchantment) }
         }
     }
 }

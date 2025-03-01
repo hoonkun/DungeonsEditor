@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonSkippableComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -28,14 +27,17 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.TextUnit
-import kiwi.hoonkun.ui.Resources
+import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.values.DungeonsPower
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.values.DungeonsItem
+import minecraft.dungeons.values.InGameDungeonsPower
+import minecraft.dungeons.values.roundToInt
 import java.util.*
 
 @Composable
@@ -44,7 +46,7 @@ fun <T>ItemsLazyGrid(
     columns: Int = 3,
     items: List<T>,
     itemContent: @Composable LazyGridItemScope.(T) -> Unit
-) where T: Item? {
+) where T: MutableDungeons.Item? {
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         contentPadding = PaddingValues(10.dp),
@@ -62,7 +64,11 @@ fun <T>ItemsLazyGrid(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorState.SelectionState) where T: Item? {
+fun <T>ItemGridItem(
+    item: T,
+    simplified: Boolean = false,
+    editor: EditorState
+) where T: MutableDungeons.Item? {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
@@ -75,16 +81,16 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorState
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Primary),
             enabled = item != null,
-            onClick = { if (item != null) selection.select(item, EditorState.SelectionState.Slot.Primary) }
+            onClick = { if (item != null) editor.select(item, EditorState.Slot.Primary) }
         )
         .onClick(
             matcher = PointerMatcher.mouse(PointerButton.Secondary),
             enabled = item != null,
-            onClick = { if (item != null) selection.select(item, EditorState.SelectionState.Slot.Secondary) }
+            onClick = { if (item != null) editor.select(item, EditorState.Slot.Secondary) }
         )
         .drawBehind {
             val brush =
-                if (selection.selected(item))
+                if (item != null && editor.selected(item))
                     Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                 else if (hovered)
                     Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))
@@ -111,7 +117,7 @@ fun <T>ItemGridItem(item: T, simplified: Boolean = false, selection: EditorState
 
 @Composable
 fun ItemSlot(
-    item: Item,
+    item: MutableDungeons.Item,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 17.dp, vertical = 12.dp),
     fillFraction: Float = 0.8f,
@@ -148,7 +154,7 @@ fun ItemSlot(
 
 @Composable
 fun ItemSlotSimplified(
-    item: Item,
+    item: MutableDungeons.Item,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
@@ -163,30 +169,37 @@ private fun EmptyItemSlot(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(
-                RarityColor(
-                    "Common",
-                    RarityColorType.Translucent
-                ), Color.Transparent)))
-            .border(7.dp, Brush.linearGradient(listOf(
-                RarityColor(
-                    "Common",
-                    RarityColorType.Opaque
-                ), Color.Transparent,
-                RarityColor("Common", RarityColorType.Opaque)
-            )), shape = RectangleShape)
+            .background(
+                brush = Brush.linearGradient(
+                    listOf(
+                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Translucent),
+                        Color.Transparent
+                    )
+                )
+            )
+            .border(
+                width = 7.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Opaque),
+                        Color.Transparent,
+                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Opaque)
+                    )
+                ),
+                shape = RectangleShape
+            )
             .padding(20.dp)
             .then(modifier)
     )
 
 @Composable
 private fun PowerText(
-    power: Double,
+    power: InGameDungeonsPower,
     modifier: Modifier,
     fontSize: TextUnit = 22.sp
 ) =
     Text(
-        text = "${remember(power) { DungeonsPower.toInGamePower(power).toInt()} }",
+        text = "${power.roundToInt()}",
         style = LocalTextStyle.current.copy(
             color = Color.White.copy(alpha = 0.85f),
             fontSize = fontSize,
@@ -217,7 +230,7 @@ private fun InvestedEnchantmentPointsText(
         )
         Spacer(modifier = Modifier.width(5.dp))
         Image(
-            bitmap = DungeonsTextures["/Game/UI/Materials/Inventory2/Item/salvage_enchanticon.png"],
+            bitmap = DungeonsTextures["/UI/Materials/Inventory2/Item/salvage_enchanticon.png"],
             contentDescription = null,
             modifier = Modifier
                 .applyZeroIntrinsics()
@@ -228,17 +241,17 @@ private fun InvestedEnchantmentPointsText(
 
 @Composable
 private fun ItemImage(
-    item: Item,
+    item: MutableDungeons.Item,
     fillFraction: Float = 0.8f,
 ) =
     Image(
-        bitmap = item.data.inventoryIcon,
+        bitmap = item.skeleton.inventoryIcon,
         contentDescription = null,
         alignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
             .drawWithContent {
-                drawItemFrame(item.rarity, item.glided, item.enchanted, item.data.variant == "Artifact")
+                drawItemFrame(item.rarity, item.glided, item.enchanted, item.skeleton.variant == DungeonsItem.Variant.Artifact)
                 scale(fillFraction) {
                     this@drawWithContent.drawContent()
                 }
@@ -250,7 +263,7 @@ private fun NewMark(
     modifier: Modifier = Modifier
 ) =
     Image(
-        bitmap = DungeonsTextures["/Game/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png"],
+        bitmap = DungeonsTextures["/UI/Materials/HotBar2/Icons/inventoryslot_newitem.png"],
         contentDescription = null,
         modifier = Modifier
             .fillMaxSize(0.2f)

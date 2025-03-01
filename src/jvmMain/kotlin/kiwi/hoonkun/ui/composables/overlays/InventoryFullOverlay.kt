@@ -5,10 +5,10 @@ import kiwi.hoonkun.resources.Localizations
 
 @Composable
 fun InventoryFullOverlay() {
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
-            title = Localizations.UiText("inventory_full_title"),
-            description = Localizations.UiText("tap_to_close")
+            title = Localizations["inventory_full_title"],
+            description = Localizations["tap_to_close"]
         )
     }
 }

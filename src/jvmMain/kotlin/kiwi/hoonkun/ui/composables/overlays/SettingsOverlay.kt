@@ -26,12 +26,12 @@ import java.io.File
 
 @Composable
 fun SettingsOverlay() {
-    ContentRoot {
-        OverlayTitleDescription(title = Localizations.UiText("settings_title"))
+    OverlayRoot {
+        OverlayTitleDescription(title = Localizations["settings_title"])
         Spacer(modifier = Modifier.height(36.dp))
 
         SettingsRow {
-            SettingLabel(text = Localizations.UiText("settings_lang"))
+            SettingLabel(text = Localizations["settings_lang"])
             Spacer(modifier = Modifier.weight(1f))
             SelectableRetroButton(
                 text = "한국어",
@@ -48,7 +48,7 @@ fun SettingsOverlay() {
             )
         }
         SettingsRow {
-            SettingLabel(text = Localizations.UiText("settings_global_scale"))
+            SettingLabel(text = Localizations["settings_global_scale"])
             Spacer(modifier = Modifier.weight(1f))
             ScaleCandidates.forEach { (name, value) ->
                 Spacer(modifier = Modifier.width(16.dp))
@@ -61,36 +61,36 @@ fun SettingsOverlay() {
             }
         }
         SettingsRow {
-            SettingLabel(text = Localizations.UiText("settings_preload_textures"))
+            SettingLabel(text = Localizations["settings_preload_textures"])
             Spacer(modifier = Modifier.weight(1f))
             SettingBooleanValue(
                 text =
-                    if (ArcticSettings.preloadTextures) Localizations.UiText("settings_on")
-                    else Localizations.UiText("settings_off"),
+                    if (ArcticSettings.preloadTextures) Localizations["settings_on"]
+                    else Localizations["settings_off"],
                 selected = ArcticSettings.preloadTextures,
                 onSelectedChange = { ArcticSettings.withSave { preloadTextures = it } }
             )
         }
         SettingsRow {
-            SettingLabel(text = Localizations.UiText("settings_minimize_animations"))
+            SettingLabel(text = Localizations["settings_minimize_animations"])
             Spacer(modifier = Modifier.weight(1f))
             SettingBooleanValue(
                 text =
-                    if (ArcticSettings.minimizeAnimations) Localizations.UiText("settings_on")
-                    else Localizations.UiText("settings_off"),
+                    if (ArcticSettings.minimizeAnimations) Localizations["settings_on"]
+                    else Localizations["settings_off"],
                 selected = ArcticSettings.minimizeAnimations,
                 onSelectedChange = { ArcticSettings.withSave { minimizeAnimations = it } }
             )
         }
         SettingsColumn {
             SettingLabel(
-                text = Localizations.UiText("settings_pak_location"),
+                text = Localizations["settings_pak_location"],
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             val existingCustomPakLocation = remember { ArcticSettings.customPakLocation }
             FileSelector(
-                buttonText = Localizations.UiText("select"),
+                buttonText = Localizations["select"],
                 validator = { it.isDirectory && it.listFiles()?.any { file -> file.extension == "pak" } == true },
                 onSelect = { ArcticSettings.withSave { customPakLocation = it.absolutePath } },
                 initialPath = existingCustomPakLocation ?: File.separator,

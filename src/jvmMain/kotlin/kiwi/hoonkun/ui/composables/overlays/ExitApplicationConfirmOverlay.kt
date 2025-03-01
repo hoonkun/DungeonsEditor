@@ -24,7 +24,7 @@ fun ExitApplicationConfirmOverlay(
         requestClose()
     }
 
-    ContentRoot {
+    OverlayRoot {
         OverlayTitleDescription(
             title = Localizations["exit_application_title"],
             description = description
@@ -32,14 +32,14 @@ fun ExitApplicationConfirmOverlay(
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = Localizations.UiText("cancel"),
+                text = Localizations["cancel"],
                 color = Color(0xffffffff),
                 hoverInteraction = RetroButtonHoverInteraction.Overlay,
                 onClick = onNegative
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = Localizations.UiText("exit"),
+                text = Localizations["exit"],
                 color = Color(0xffff6e25),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = onPositive

@@ -15,12 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.states.MutableDungeons
 
 @Composable
-fun EquippedItems(items: List<Item?>, selection: EditorState.SelectionState) {
+fun EquippedItems(items: List<MutableDungeons.Item?>, editor: EditorState) {
     var collapsed by remember { mutableStateOf(false) }
 
     Row {
@@ -36,7 +36,7 @@ fun EquippedItems(items: List<Item?>, selection: EditorState.SelectionState) {
             ItemsLazyGrid(
                 columns = if (collapsed) 6 else 3,
                 items = items,
-                itemContent = { item -> ItemGridItem(item, collapsed, selection) }
+                itemContent = { item -> ItemGridItem(item, collapsed, editor) }
             )
         }
     }
@@ -53,7 +53,7 @@ private fun EquippedItemsToggleButton(collapsed: Boolean, onToggle: () -> Unit) 
     )
 
     Image(
-        bitmap = DungeonsTextures["/Game/UI/Materials/Menu/arrow_gamemode.png"],
+        bitmap = DungeonsTextures["/UI/Materials/Menu/arrow_gamemode.png"],
         contentDescription = null,
         modifier = Modifier
             .size(70.dp)

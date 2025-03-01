@@ -1,11 +1,7 @@
 package minecraft.dungeons.io
 
 import Keyset
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import minecraft.dungeons.resources.DungeonsDatabase
+import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
 import pak.PakIndex
 import pak.PathPakFilter
@@ -17,25 +13,24 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
 object DungeonsPakRegistry {
-    private var _index: PakIndex? by mutableStateOf(null)
-    val index by derivedStateOf { _index!! }
+    lateinit var index: PakIndex
 
     fun initialize(customLocation: String? = null): Boolean {
-        if (_index != null) return true
+        if (this::index.isInitialized) return true
 
         val pakPath = detectPakPath(customLocation) ?: return false
 
         val newIndex = PakIndex(
-            File(pakPath).listFiles()!!.sortedBy { it.name },
+            target = File(pakPath).listFiles()!!.sortedBy { it.name },
             useCache = true,
             caseSensitive = true,
             filter = PathPakFilter(listOf("/Dungeons/Content"), false)
         )
         newIndex.useKey(Guid.Zero, Keyset.PakKey)
 
-        _index = newIndex
+        index = newIndex
 
-        DungeonsDatabase.Initializer.run(newIndex)
+        DungeonsSkeletons.Initializer.run(newIndex)
         DungeonsTextures.Initializer.run(newIndex)
 
         return true
@@ -69,7 +64,10 @@ object DungeonsPakRegistry {
         val candidate = candidates.find { File(it.split("/").joinToString(File.separator)).exists() }
         if (candidate != null) return candidate
 
-        val files = try { Files.walk(Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata")) } catch (e: NoSuchFileException) { return null }
+        val files =
+            try { Files.walk(Path("${System.getProperty("user.home")}/.local/share/Steam/steamapps/compatdata")) }
+            catch (e: NoSuchFileException) { return null }
+
         val found = files.toList().find { it.absolutePathString().endsWith("/Dungeons/Content/Paks") }
 
         return found?.absolutePathString()

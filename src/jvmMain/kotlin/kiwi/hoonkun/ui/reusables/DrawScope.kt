@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.values.DungeonsItem
 
 
 @Stable
@@ -30,31 +31,30 @@ fun DrawScope.drawInteractionBorder(hovered: Boolean, selected: Boolean = false)
 
 @Stable
 fun DrawScope.drawItemFrame(
-    rarity: String,
+    rarity: DungeonsItem.Rarity,
     glided: Boolean = false,
     enchanted: Boolean = false,
     isArtifact: Boolean = false
 ) {
     val backName =
         when(rarity) {
-            "Common" -> "main"
-            "Rare" -> "rare"
-            "Unique" -> "unique"
-            else -> "main"
+            DungeonsItem.Rarity.Common -> "main"
+            DungeonsItem.Rarity.Rare -> "rare"
+            DungeonsItem.Rarity.Unique -> "unique"
         }
 
     if (glided) drawRect(GlidedItemBackgroundGradient())
     if (enchanted) drawRect(EnchantmentPointsBackgroundGradient())
 
     drawImage(
-        image = DungeonsTextures["/Game/UI/Materials/Inventory2/Slot/v2_${if (isArtifact) "item" else "gear"}_${backName}_slot.png"],
+        image = DungeonsTextures["/UI/Materials/Inventory2/Slot/v2_${if (isArtifact) "item" else "gear"}_${backName}_slot.png"],
         srcSize = IntSize(322, 322),
         dstSize = IntSize(size.width.toInt(), size.height.toInt()),
         alpha = 0.75f
     )
-    if (rarity == "Rare" || rarity == "Unique") {
+    if (rarity != DungeonsItem.Rarity.Common) {
         drawImage(
-            image = DungeonsTextures["/Game/UI/Materials/Inventory2/Slot/v2_${backName}_overlay.png"],
+            image = DungeonsTextures["/UI/Materials/Inventory2/Slot/v2_${backName}_overlay.png"],
             srcSize = IntSize(322, 322),
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
             alpha = 0.75f
@@ -76,7 +76,7 @@ private fun GlidedItemBackgroundGradient() =
 
 @Stable
 fun DrawScope.drawUniqueIndicator() {
-    val color = RarityColor("Unique", RarityColorType.Opaque)
+    val color = RarityColor(DungeonsItem.Rarity.Unique, RarityColorType.Opaque)
     drawCircle(
         Brush.radialGradient(
             0f to color.copy(alpha = 0.45f),
@@ -88,7 +88,7 @@ fun DrawScope.drawUniqueIndicator() {
 
 @Stable
 fun DrawScope.drawEnchantmentRune(topOffset: Dp = (-175).dp) {
-    val image = DungeonsTextures["/Game/UI/Inventory/Runes.png"]
+    val image = DungeonsTextures["/UI/Inventory/Runes.png"]
     translate(top = topOffset.toPx()) {
         scale(1.35f) {
             drawImage(

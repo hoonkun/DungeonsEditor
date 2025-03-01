@@ -1,14 +1,9 @@
 package kiwi.hoonkun.ui.composables.overlays
 
-import LocalWindowState
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -37,44 +32,45 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
+import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.Enchantment
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import minecraft.dungeons.resources.DungeonsDatabase
+import kotlinx.collections.immutable.toImmutableList
 import minecraft.dungeons.resources.DungeonsLocalizations
+import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.resources.EnchantmentData
-import minecraft.dungeons.values.DungeonsPower
-import kotlin.math.roundToInt
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.states.extensions.withEnchantments
+import minecraft.dungeons.values.roundToInt
 
 
 @Stable
 private class EnchantmentDataCollectionState(
-    initialSelected: Enchantment
+    holder: MutableDungeons.Item,
+    initialSelected: MutableDungeons.Enchantment
 ) {
-    val holder = initialSelected.holder
+    val datasets = DungeonsSkeletons.Enchantment[Unit].filter { it.applyFor.contains(holder.skeleton.variant) }
+    val initialIndex = datasets.indexOf(initialSelected.skeleton)
 
-    val datasets = DungeonsDatabase.enchantments.filter { it.applyFor.contains(initialSelected.holder.data.variant) }
-    val initialIndex = datasets.indexOf(initialSelected.data)
+    val netherite = holder.netheriteEnchant?.copy() ?: MutableDungeons.Enchantment(isNetheriteEnchant = true)
+    val enchantments = holder.enchantments.map { it.copy() }.toMutableStateList()
 
-    val netherite = holder.netheriteEnchant?.copy() ?: Enchantment.Unset(holder).apply { isNetheriteEnchant = true }
-    val enchantments = holder.enchantments?.map { it.copy() }?.toMutableStateList()
-        ?: List(9) { Enchantment.Unset(holder) }.toMutableStateList()
-
-    var selected by mutableStateOf(enchantments.getOrNull(holder.enchantments?.indexOf(initialSelected) ?: -1) ?: netherite)
+    var selected by mutableStateOf(enchantments.getOrNull(holder.enchantments.indexOf(initialSelected)) ?: netherite)
 }
 
 @Composable
-private fun rememberEnchantmentDataCollectionState(original: Enchantment) =
-    remember(original) { EnchantmentDataCollectionState(original) }
+private fun rememberEnchantmentDataCollectionState(holder: MutableDungeons.Item, original: MutableDungeons.Enchantment) =
+    remember(original) { EnchantmentDataCollectionState(holder, original) }
 
 @Composable
 fun AnimatedVisibilityScope?.EnchantmentOverlay(
-    initialSelected: Enchantment,
+    holder: MutableDungeons.Item,
+    initialSelected: MutableDungeons.Enchantment,
     requestClose: () -> Unit
 ) {
     val density = LocalDensity.current
@@ -83,7 +79,7 @@ fun AnimatedVisibilityScope?.EnchantmentOverlay(
     val parentHeight = (windowState.size.height - DetailHeight) / 2f
     val childOffset = parentHeight / 2f - DetailHeight / 2f - 25.dp
 
-    val state = rememberEnchantmentDataCollectionState(initialSelected)
+    val state = rememberEnchantmentDataCollectionState(holder, initialSelected)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -103,6 +99,7 @@ fun AnimatedVisibilityScope?.EnchantmentOverlay(
         Box(modifier = Modifier.requiredSize(675.dp, parentHeight)) {
             HolderPreview(
                 state = state,
+                holder = holder,
                 offset = childOffset,
                 modifier = Modifier
                     .minimizableAnimateEnterExit(
@@ -138,11 +135,14 @@ fun AnimatedVisibilityScope?.EnchantmentOverlay(
                         exit = ExitTransition.None
                     )
             ) { preview ->
-                EnchantmentDetail(preview)
+                EnchantmentDetail(
+                    enchantment = preview,
+                    onLevelChange = { withEnchantments { preview.applyInvestedPoints(holder.glided, it) } }
+                )
                 Row(modifier = Modifier.offsetRelative(x = 0f, y = 1f).offset(y = -childOffset)) {
                     Spacer(modifier = Modifier.weight(1f))
                     RetroButton(
-                        text = Localizations.UiText("cancel"),
+                        text = Localizations["cancel"],
                         color = Color.White,
                         hoverInteraction = RetroButtonHoverInteraction.Overlay,
                         onClick = { requestClose() },
@@ -150,12 +150,14 @@ fun AnimatedVisibilityScope?.EnchantmentOverlay(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     RetroButton(
-                        text = Localizations.UiText("ok"),
+                        text = Localizations["ok"],
                         color = Color(0xff3f8e4f),
                         hoverInteraction = RetroButtonHoverInteraction.Outline,
                         onClick = {
-                            state.holder.enchantments = state.enchantments
-                            state.holder.netheriteEnchant = state.netherite
+                            holder.enchantments.clear()
+                            holder.enchantments.addAll(state.enchantments)
+
+                            holder.netheriteEnchant = state.netherite
 
                             requestClose()
                         },
@@ -170,11 +172,10 @@ fun AnimatedVisibilityScope?.EnchantmentOverlay(
 @Composable
 private fun HolderPreview(
     state: EnchantmentDataCollectionState,
+    holder: MutableDungeons.Item,
     offset: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val holder = state.holder
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,7 +187,7 @@ private fun HolderPreview(
             .clipToBounds()
             .drawBehind {
                 drawImage(
-                    image = holder.data.largeIcon,
+                    image = holder.skeleton.largeIcon,
                     dstOffset = Offset((-20f).dp.toPx(), -30f.dp.toPx()).round(),
                     dstSize = Size(size.width * 0.5f, size.width * 0.5f).round(),
                     alpha = 0.25f
@@ -212,15 +213,14 @@ private fun HolderPreview(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 8.dp)
                 ) {
-                    ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
+                    ItemRarityButton(data = holder.skeleton, rarity = holder.rarity, readonly = true)
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemNetheriteEnchantButton(
-                        holder = holder,
-                        modifier = Modifier.drawBehind {
-                            if (state.selected != state.netherite) return@drawBehind
-
-                            drawInteractionBorder(hovered = false, selected = true)
-                        },
+                        modifier = Modifier
+                            .drawBehind {
+                                if (state.selected != state.netherite) return@drawBehind
+                                drawInteractionBorder(hovered = false, selected = true)
+                            },
                         enchantment = state.netherite
                     ) {
                         state.selected = state.netherite
@@ -230,7 +230,7 @@ private fun HolderPreview(
                 }
                 Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                     AutosizeText(
-                        text = holder.data.name,
+                        text = holder.skeleton.name,
                         maxFontSize = 40.sp,
                         style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier
@@ -247,7 +247,7 @@ private fun HolderPreview(
                     ) {
                         PowerIcon(Modifier.size(24.dp))
                         Text(
-                            text = "${DungeonsPower.toInGamePower(holder.power).roundToInt()}",
+                            text = "${holder.power.roundToInt()}",
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -256,7 +256,7 @@ private fun HolderPreview(
         }
 
         Row(modifier = Modifier.drawBehind { drawEnchantmentRune(topOffset = (-150).dp) }) {
-            val slots = remember { state.enchantments.chunked(3).map { EnchantmentsHolder(it) } }
+            val slots = remember { state.enchantments.chunked(3).map { it.toImmutableList() } }
             slots.forEach { slot ->
                 EnchantmentSlot(
                     enchantments = slot,
@@ -265,7 +265,7 @@ private fun HolderPreview(
                         .aspectRatio(1f / 1f)
                 ) { each ->
                     val enabled by remember {
-                        derivedStateOf { slot.all.find { it.level > 0 }?.let { each === it } != false }
+                        derivedStateOf { slot.find { it.level > 0 }?.let { each === it } != false }
                     }
 
                     val scale by minimizableAnimateFloatAsState(
@@ -278,14 +278,7 @@ private fun HolderPreview(
                     )
 
                     MinimizableAnimatedContent(
-                        targetState = each.data,
-                        transitionSpec = minimizableContentTransform {
-                            val enter =
-                                if (targetState.id == "Unset") defaultFadeIn()
-                                else defaultFadeIn() + scaleIn(initialScale = 1.5f)
-                            val exit = defaultFadeOut()
-                            enter togetherWith exit using SizeTransform(clip = false)
-                        },
+                        targetState = each.skeleton,
                         modifier = Modifier
                             .drawWithCache {
                                 onDrawBehind {
@@ -300,7 +293,13 @@ private fun HolderPreview(
                                         style = Stroke(width = 6.dp.toPx())
                                     )
                                 }
-                            }
+                            },
+                        transitionSpec = minimizableContentTransform {
+                            val enter = defaultFadeIn() +
+                                if (targetState.isValid()) scaleIn(initialScale = 1.5f) else EnterTransition.None
+                            val exit = defaultFadeOut()
+                            enter togetherWith exit using SizeTransform(clip = false)
+                        }
                     ) {
                         EnchantmentImage(
                             data = it,
@@ -346,7 +345,7 @@ private fun EnchantmentDataCollection(
     ) {
         items(state.datasets, key = { it.id }) { data ->
             val isUniqueInHolder = remember(data, state.selected, state.selected.id) {
-                state.enchantments.all { it.data.id != data.id }
+                state.enchantments.all { it.skeleton.id != data.id }
             }
 
             EnchantmentDataCollectionItem(
@@ -357,7 +356,7 @@ private fun EnchantmentDataCollection(
                     val newId = if (newData.id == state.selected.id) "Unset" else newData.id
                     state.selected.id = newId
                     state.selected.level =
-                        if (newId == "Unset")
+                        if (state.selected.isNotValid())
                             0
                         else if (state.selected.isNetheriteEnchant)
                             state.selected.level.coerceAtLeast(1)
@@ -372,10 +371,10 @@ private fun EnchantmentDataCollection(
 
 @Composable
 private fun EnchantmentDataCollectionItem(
-    data: EnchantmentData,
+    data: DungeonsSkeletons.Enchantment,
     enabled: Boolean,
     selected: Boolean,
-    onItemSelect: (EnchantmentData) -> Unit
+    onItemSelect: (DungeonsSkeletons.Enchantment) -> Unit
 ) {
     val deleteIcon = remember { useResource("ic_close.png") { loadImageBitmap(it) } }
 
@@ -411,7 +410,7 @@ private fun EnchantmentDataCollectionItem(
             maxFontSize = 20.sp
         )
         Text(
-            text = Localizations.UiText("effect_delete"),
+            text = Localizations["effect_delete"],
             style = LocalTextStyle.current.copy(fontSize = 14.sp, textAlign = TextAlign.Center),
             modifier = Modifier.graphicsLayer { alpha = if (selected) 1f else 0f }
         )
@@ -426,8 +425,11 @@ private val SelectedPaint = Paint().apply {
 private val DetailHeight get() = 300.dp
 
 @Composable
-private fun EnchantmentDetail(enchantment: Enchantment) {
-    val data = remember(enchantment.id) { DungeonsDatabase.enchantments.first { it.id == enchantment.id } }
+private fun EnchantmentDetail(
+    enchantment: MutableDungeons.Enchantment,
+    onLevelChange: (Int) -> Unit
+) {
+    val data = remember(enchantment.id) { DungeonsSkeletons.Enchantment[Unit].first { it.id == enchantment.id } }
     val density = LocalDensity.current
 
     Box(
@@ -439,8 +441,8 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
         MinimizableAnimatedContent(
             targetState = data,
             transitionSpec = minimizableContentTransform spec@ {
-                val initialIndex = DungeonsDatabase.enchantments.indexOf(initialState)
-                val targetIndex = DungeonsDatabase.enchantments.indexOf(targetState)
+                val initialIndex = DungeonsSkeletons.Enchantment[Unit].indexOf(initialState)
+                val targetIndex = DungeonsSkeletons.Enchantment[Unit].indexOf(targetState)
 
                 val offset = with(density) {
                     if (initialIndex < targetIndex) 50.dp.roundToPx()
@@ -454,10 +456,14 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
             },
             contentAlignment = Alignment.Center
         ) { capturedData ->
-            if (capturedData.id == "Unset") {
-                UnsetEnchantmentPreview()
+            if (capturedData.isValid()) {
+                ValidEnchantmentPreview(
+                    data = capturedData,
+                    parent = enchantment,
+                    onLevelChange = onLevelChange
+                )
             } else {
-                ValidEnchantmentPreview(capturedData, enchantment)
+                UnsetEnchantmentPreview()
             }
         }
     }
@@ -467,7 +473,7 @@ private fun EnchantmentDetail(enchantment: Enchantment) {
 private fun UnsetEnchantmentPreview() {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         Text(
-            text = Localizations.UiText("enchantment_empty_slot"),
+            text = Localizations["enchantment_empty_slot"],
             modifier = Modifier.alpha(0.75f),
             textAlign = TextAlign.Center
         )
@@ -476,13 +482,14 @@ private fun UnsetEnchantmentPreview() {
 
 @Composable
 private fun ValidEnchantmentPreview(
-    capturedData: EnchantmentData,
-    parent: Enchantment
+    data: DungeonsSkeletons.Enchantment,
+    parent: MutableDungeons.Enchantment,
+    onLevelChange: (Int) -> Unit
 ) {
     Row {
         Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
             EnchantmentImage(
-                data = capturedData,
+                data = data,
                 enabled = false,
                 modifier = Modifier.fillMaxSize()
             )
@@ -490,23 +497,27 @@ private fun ValidEnchantmentPreview(
         }
         Column(modifier = Modifier.padding(end = 36.dp).padding(vertical = 36.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
-                EnchantmentNameText(capturedData.name)
-                if (capturedData.powerful)
+                EnchantmentNameText(data.name)
+                if (data.powerful)
                     PowerfulEnchantmentIndicator()
             }
 
-            IfNotNull(capturedData.description) {
+            IfNotNull(data.description) {
                 Text(text = it, fontSize = 16.sp, color = Color.White.copy(0.75f))
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            IfNotNull(capturedData.effect) {
+            IfNotNull(data.effect) {
                 Text(text = it, fontSize = 20.sp, color = Color.White)
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            EnchantmentLevelSelector(parent)
+            EnchantmentLevelSelector(
+                isNetheriteEnchant = parent.isNetheriteEnchant,
+                currentLevel = parent.level,
+                onLevelChange = onLevelChange
+            )
         }
     }
 }
@@ -520,13 +531,40 @@ private fun EnchantmentNameText(text: String) =
     )
 
 @Composable
-private fun EnchantmentLevelSelector(enchantment: Enchantment) {
+private fun EnchantmentLevelSelector(
+    isNetheriteEnchant: Boolean,
+    currentLevel: Int,
+    onLevelChange: (Int) -> Unit
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (!enchantment.isNetheriteEnchant)
-            EnchantmentDeactivateItem(enchantment)
-        EnchantmentLevelSelectorItem(enchantment, 1)
-        EnchantmentLevelSelectorItem(enchantment, 2)
-        EnchantmentLevelSelectorItem(enchantment, 3)
+        if (!isNetheriteEnchant) {
+            RetroButton(
+                text = Localizations["enchantment_deactivate"],
+                color = if (currentLevel == 0) Color(0xfff54242) else Color(0x2AfA7272),
+                hoverInteraction = RetroButtonHoverInteraction.Outline,
+                onClick = { onLevelChange(0) },
+                stroke = 3.dp,
+                radius = RetroButtonDpCornerRadius(all = 4.dp),
+                modifier = Modifier.height(40.dp).weight(1.5f)
+            )
+        }
+
+        for (indicatingLevel in 1..3) {
+            RetroButton(
+                color = if (currentLevel == indicatingLevel) Color(0xff6642f5) else Color(0x1Fffffff),
+                hoverInteraction = RetroButtonHoverInteraction.Outline,
+                onClick = { onLevelChange(indicatingLevel) },
+                stroke = 3.dp,
+                radius = RetroButtonDpCornerRadius(all = 6.dp),
+                modifier = Modifier.height(40.dp).padding(start = 4.dp).weight(1f)
+            ) {
+                Image(
+                    bitmap = LevelImage(indicatingLevel),
+                    contentDescription = null,
+                    modifier = Modifier.scale(1.5f)
+                )
+            }
+        }
     }
 }
 
@@ -538,56 +576,7 @@ private fun PowerfulEnchantmentIndicator() =
         modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
     )
 
+@Stable
 private fun LevelImage(level: Int) =
-    if (level == 0) DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png"]
-    else DungeonsTextures["/Game/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png"]
-
-@Composable
-private fun RowScope.EnchantmentDeactivateItem(enchantment: Enchantment) =
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = LevelModifier(enchantment, 0, Modifier.weight(1.75f))
-    ) {
-        Text(text = Localizations.UiText("enchantment_deactivate"), fontSize = 18.sp)
-    }
-
-@Composable
-private fun RowScope.EnchantmentLevelSelectorItem(enchantment: Enchantment, level: Int) =
-    Image(
-        bitmap = LevelImage(level),
-        contentDescription = null,
-        modifier = LevelModifier(enchantment, level, Modifier.weight(1f))
-    )
-
-@Composable
-private fun LevelModifier(
-    enchantment: Enchantment,
-    level: Int,
-    modifier: Modifier = Modifier
-): Modifier {
-    val interaction = rememberMutableInteractionSource()
-    val pressed by interaction.collectIsPressedAsState()
-    val hovered by interaction.collectIsHoveredAsState()
-
-    return Modifier
-        .padding(start = if (level != 0) 4.dp else 0.dp)
-        .height(42.dp)
-        .hoverable(interaction)
-        .clickable(interaction, null) { enchantment.applyInvestedPoints(level) }
-        .drawWithCache {
-            val indicator = RetroIndicator()
-            val baseColor = if (level == 0) Color(0xfff54242) else Color(0xff6642f5)
-            val color =
-                if (enchantment.level == level) baseColor.copy(alpha = if (pressed) 0.6f else if (hovered) 0.8f else 1f)
-                else Color.White.copy(alpha = if (pressed) 0.1f else if (hovered) 0.2f else 0f)
-
-            onDrawBehind {
-                drawPath(
-                    path = indicator,
-                    color = color
-                )
-            }
-        }
-        .scale(if (level == 0) 1f else 2f)
-        .then(modifier)
-}
+    if (level == 0) DungeonsTextures["/UI/Materials/Inventory2/Enchantment/behind_enchantments_whole_switch.png"]
+    else DungeonsTextures["/UI/Materials/Inventory2/Enchantment/Inspector2/level_${level}_normal_text.png"]

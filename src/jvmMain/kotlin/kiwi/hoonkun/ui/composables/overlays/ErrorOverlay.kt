@@ -19,7 +19,7 @@ import kiwi.hoonkun.ui.units.sp
 
 @Composable
 fun ErrorOverlay(
-    e: Exception,
+    error: Exception,
     title: String,
     description: String? = null
 ) {
@@ -59,22 +59,22 @@ fun ErrorOverlay(
                 modifier = Modifier.weight(2f)
             ) {
                 Text(
-                    text = buildExceptionNameString(e),
+                    text = buildExceptionNameString(error),
                     style = LocalTextStyle.current.copy(
                         color = Color(0xffF75464),
                         fontSize = 24.sp
                     ),
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
-                for (stackElement in e.stackTrace.slice(0 until 10.coerceAtMost(e.stackTrace.size))) {
+                for (stackElement in error.stackTrace.slice(0 until 10.coerceAtMost(error.stackTrace.size))) {
                     Text(
                         text = buildStackElementString(stackElement),
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
-                if (e.stackTrace.size > 10) {
+                if (error.stackTrace.size > 10) {
                     Text(
-                        text = "${e.stackTrace.size - 10} lines collapsed",
+                        text = "${error.stackTrace.size - 10} lines collapsed",
                         color = Color.White.copy(alpha = 0.5f),
                         modifier = Modifier.padding(top = 48.dp)
                     )

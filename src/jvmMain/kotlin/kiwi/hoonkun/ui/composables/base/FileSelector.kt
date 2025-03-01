@@ -37,22 +37,23 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.ui.Resources
-import kiwi.hoonkun.ui.reusables.*
+import kiwi.hoonkun.resources.Resources
+import kiwi.hoonkun.ui.reusables.rememberFocusRequester
+import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import kiwi.hoonkun.utils.Retriever
 import java.awt.Cursor
 import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FileSelector(
-    validator: (File) -> Boolean = { true },
-    buttonText: String = Localizations.UiText("save"),
-    onSelect: (File) -> Unit,
+fun <S>FileSelector(
+    validator: (S) -> Boolean = { true },
+    buttonText: String = Localizations["save"],
+    onSelect: (S) -> Unit,
+    transform: (File) -> S?,
     modifier: Modifier = Modifier,
-    defaultCandidate: Retriever<File?> = { null },
+    defaultCandidate: () -> File? = { null },
     maxRows: Int = 3,
     initialUseBasePath: Boolean = true,
     initialPath: String = if (initialUseBasePath || isLinux) File.separator else if (isWindows) WindowsDefaultDrive else File.separator,
@@ -109,12 +110,14 @@ fun FileSelector(
     }
 
     val selected = remember(path.text, useBasePath) {
-        File("${if (useBasePath) BasePath else ""}${path.text}").takeIf(validator)
+        File("${if (useBasePath) BasePath else ""}${path.text}")
+            .let(transform)
+            ?.takeIf(validator)
     }
 
     val requester = rememberFocusRequester()
 
-    val transform: (TextFieldValue) -> TextFieldValue = {
+    val transformPath: (TextFieldValue) -> TextFieldValue = {
         var newPath = it.text
         newPath = newPath.replace("//", "/")
 
@@ -225,7 +228,7 @@ fun FileSelector(
         PathInputBox {
             PathInput(
                 value = path,
-                onValueChange = { if (it.text.isNotEmpty() || (isWindows && !useBasePath)) path = transform(it) },
+                onValueChange = { if (it.text.isNotEmpty() || (isWindows && !useBasePath)) path = transformPath(it) },
                 onKeyEvent = onKeyEvent,
                 focusRequester = requester,
                 scrollState = textFieldScrollState,
@@ -266,6 +269,31 @@ fun FileSelector(
         )
     }
 
+}
+
+@Composable
+fun FileSelector(
+    validator: (File) -> Boolean = { true },
+    buttonText: String = Localizations["save"],
+    onSelect: (File) -> Unit,
+    modifier: Modifier = Modifier,
+    defaultCandidate: () -> File? = { null },
+    maxRows: Int = 3,
+    initialUseBasePath: Boolean = true,
+    initialPath: String = if (initialUseBasePath || isLinux) File.separator else if (isWindows) WindowsDefaultDrive else File.separator,
+    options: @Composable () -> Unit = { },
+) {
+    FileSelector(
+        validator = validator,
+        buttonText = buttonText,
+        onSelect = onSelect,
+        transform = { it },
+        defaultCandidate = defaultCandidate,
+        maxRows = maxRows,
+        initialPath = initialPath,
+        options = options,
+        modifier = modifier,
+    )
 }
 
 @Composable

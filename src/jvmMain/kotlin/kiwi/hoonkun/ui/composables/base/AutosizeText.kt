@@ -60,19 +60,20 @@ fun AutosizeText(
 
             var intrinsics = calculateIntrinsics()
 
-            val targetWidth = maxWidth - acceptableError / 2f
-
-            check(targetWidth.isFinite || maxFontSize.isSpecified) { "maxFontSize must be specified if the target with isn't finite!" }
-
             with(LocalDensity.current) {
-                if (maxFontSize.isUnspecified || targetWidth < intrinsics.minIntrinsicWidth.toDp()) {
-                    while ((targetWidth - intrinsics.minIntrinsicWidth.toDp()).toPx().absoluteValue.toDp() > acceptableError / 2f) {
-                        shrunkFontSize *= targetWidth.toPx() / intrinsics.minIntrinsicWidth
+                val targetWidth = (maxWidth - acceptableError / 2f).toPx()
+                val acceptableErrorPx = acceptableError.toPx()
+
+                check(maxWidth.isFinite || maxFontSize.isSpecified) { "maxFontSize must be specified if the target with isn't finite!" }
+
+                if (maxFontSize.isUnspecified || targetWidth < intrinsics.minIntrinsicWidth) {
+                    while ((targetWidth - intrinsics.minIntrinsicWidth).absoluteValue > acceptableErrorPx / 2f) {
+                        shrunkFontSize *= targetWidth / intrinsics.minIntrinsicWidth
                         intrinsics = calculateIntrinsics()
                     }
                 }
 
-                while (intrinsics.didExceedMaxLines || maxHeight < intrinsics.height.toDp() || maxWidth < intrinsics.minIntrinsicWidth.toDp()) {
+                while (intrinsics.didExceedMaxLines || maxHeight.toPx() < intrinsics.height || maxWidth.toPx() < intrinsics.minIntrinsicWidth) {
                     shrunkFontSize *= 0.9f
                     intrinsics = calculateIntrinsics()
                 }

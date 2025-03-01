@@ -1,69 +1,56 @@
 package kiwi.hoonkun.ui.states
 
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import kiwi.hoonkun.resources.Localizations
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import minecraft.dungeons.io.DungeonsJsonFile
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.values.DungeonsItem
 
 @Stable
 class EditorState(
-    val stored: DungeonsJsonState
+    val source: DungeonsJsonFile,
+    val data: MutableDungeons
 ) {
-    val selection: SelectionState = SelectionState()
+    private val selections: SnapshotStateMap<Slot, MutableDungeons.Item?> = mutableStateMapOf<Slot, MutableDungeons.Item?>()
+        .apply { Slot.entries.forEach { this[it] = null } }
 
-    var view: EditorView by mutableStateOf(EditorView.Inventory)
+    var view: DungeonsItem.Location by mutableStateOf(DungeonsItem.Location.Inventory)
 
-    val noSpaceInInventory get() = stored.items.size >= 300
+    val primary: MutableDungeons.Item? get() = selections[Slot.Primary]
+    val secondary: MutableDungeons.Item? get() = selections[Slot.Secondary]
 
-    enum class EditorView {
-        Inventory, Storage;
+    val hasSelection get() = selections.values.any { it != null }
 
-        val localizedName get() =
-            if (this == Inventory) Localizations.UiText("inventory")
-            else Localizations.UiText("storage")
-        fun other() = if (this == Inventory) Storage else Inventory
+    fun selectedSlotOf(item: MutableDungeons.Item) =
+        selections.entries.find { it.value == item }?.key
+
+    fun selected(item: MutableDungeons.Item) =
+        selections.values.contains(item)
+
+    fun select(
+        item: MutableDungeons.Item,
+        into: Slot,
+        unselectIfAlreadySelected: Boolean = true
+    ) {
+        if (!selected(item))
+            selections[into] = item
+        else if (unselectIfAlreadySelected)
+            deselect(item)
     }
 
-    @Stable
-    class SelectionState {
+    fun deselect(item: MutableDungeons.Item) =
+        selectedSlotOf(item)?.also { selections[it] = null }
 
-        var primary: Item? by mutableStateOf(null)
+    fun deselectAll() =
+        selections.clear()
 
-        var secondary: Item? by mutableStateOf(null)
+    fun reselect(oldItem: MutableDungeons.Item, newItem: MutableDungeons.Item) =
+        selectedSlotOf(oldItem)?.also { selections[it] = newItem }
 
-        val hasSelection get() = primary != null || secondary != null
-
-        fun slotOf(item: Item) = if (primary == item) Slot.Primary else if (secondary == item) Slot.Secondary else null
-
-        fun selected(item: Item?) = item != null && (primary == item || secondary == item)
-
-        fun select(item: Item, into: Slot, unselectIfAlreadySelected: Boolean = true) {
-            if (selected(item))
-                if (unselectIfAlreadySelected) return unselect(item)
-                else return
-            else
-                if (into == Slot.Primary) primary = item
-                else secondary = item
-        }
-
-        fun unselect(item: Item) {
-            if (primary == item) primary = null
-            if (secondary == item) secondary = null
-        }
-
-        fun replace(from: Item, new: Item) {
-            if (primary == from) primary = new
-            if (secondary == from) secondary = new
-        }
-
-        fun clear() {
-            primary = null
-            secondary = null
-        }
-
-        enum class Slot {
-            Primary, Secondary
-        }
+    enum class Slot {
+        Primary, Secondary
     }
 }
+
+fun EditorState(path: String) =
+    DungeonsJsonFile(path).let { EditorState(it, MutableDungeons(it.read())) }

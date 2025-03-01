@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -27,14 +26,17 @@ import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.Currency
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTextures
-import minecraft.dungeons.values.DungeonsLevel
+import minecraft.dungeons.states.extensions.withCurrencies
+import minecraft.dungeons.values.DungeonsItem
+import minecraft.dungeons.values.asInGameLevel
+import minecraft.dungeons.values.toFixed
+import minecraft.dungeons.values.truncate
 
 
 @Composable
@@ -42,16 +44,13 @@ fun EditorBottomBar(
     editor: EditorState,
     requestClose: () -> Unit
 ) {
-    val stored = remember(editor) { editor.stored }
+    val stored = remember(editor) { editor.data }
 
-    val emeraldHolder by remember(stored) { derivedStateOf { stored.currencies.find { it.type == "Emerald" } } }
-    val goldHolder by remember(stored) { derivedStateOf { stored.currencies.find { it.type == "Gold" } } }
+    val levelIcon = remember { DungeonsTextures["/UI/Materials/Character/STATS_LV_frame.png"] }
 
-    val levelIcon = remember { DungeonsTextures["/Game/UI/Materials/Character/STATS_LV_frame.png"] }
-
-    var level by remember { mutableStateOf("${stored.playerLevel}") }
-    var emerald by remember { mutableStateOf("${emeraldHolder?.count ?: 0}") }
-    var gold by remember { mutableStateOf("${goldHolder?.count ?: 0}") }
+    var level by remember { mutableStateOf("${stored.playerLevel.toFixed(3)}") }
+    var emerald by remember { mutableStateOf("${withCurrencies { stored.emerald }}") }
+    var gold by remember { mutableStateOf("${withCurrencies { stored.gold }}") }
 
 
     Row(
@@ -65,7 +64,7 @@ fun EditorBottomBar(
         CurrencyField(
             value = level,
             onValueChange = { level = it },
-            onSubmit = { stored.xp = DungeonsLevel.toSerializedLevel(it.toDouble()) },
+            onSubmit = { stored.playerLevel = it.toDouble().asInGameLevel() },
             validator = { it.toDoubleOrNull() != null }
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -75,48 +74,34 @@ fun EditorBottomBar(
         }
 
         CurrencyText(
-            icon = "/Game/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
+            icon = "/UI/Materials/MissionSelectMap/inspector/gear/powericon.png",
             scale = 0.8f,
-            value = "${stored.playerPower}"
+            value = "${stored.playerPower.truncate()}"
         )
 
         CurrencyField(
-            icon = "/Game/UI/Materials/Emeralds/emerald_indicator.png",
+            icon = "/UI/Materials/Emeralds/emerald_indicator.png",
             iconScale = 0.7f,
             value = emerald,
             onValueChange = { emerald = it },
-            onSubmit = { newValue ->
-                emeraldHolder.let {
-                    if (it == null)
-                        stored.currencies.add(Currency("Emerald", newValue.toInt()))
-                    else
-                        it.count = newValue.toInt()
-                }
-            },
+            onSubmit = { newValue -> withCurrencies { editor.data.emerald = newValue.toInt() } },
             validator = { it.toIntOrNull() != null }
         )
 
         CurrencyField(
-            icon = "/Game/UI/Materials/Currency/GoldIndicator.png",
+            icon = "/UI/Materials/Currency/GoldIndicator.png",
             iconScale = 0.9f,
             value = gold,
             onValueChange = { gold = it },
-            onSubmit = { newValue ->
-                goldHolder.let {
-                    if (it == null)
-                        stored.currencies.add(Currency("Gold", newValue.toInt()))
-                    else
-                        it.count = newValue.toInt()
-                }
-            },
+            onSubmit = { newValue -> withCurrencies { editor.data.gold = newValue.toInt() } },
             validator = { it.toIntOrNull() != null }
         )
 
         CurrencyText(
-            icon = "/Game/UI/Materials/Inventory2/Salvage/enchant_icon.png",
+            icon = "/UI/Materials/Inventory2/Salvage/enchant_icon.png",
             scale = 0.7f,
-            value = "${stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints}",
-            valid = stored.playerLevel.toInt() - stored.totalSpentEnchantmentPoints >= 0,
+            value = "${stored.playerLevel.truncate() - stored.totalSpentEnchantmentPoints}",
+            valid = stored.playerLevel.truncate() - stored.totalSpentEnchantmentPoints >= 0,
             width = 50.dp
         )
 
@@ -158,11 +143,11 @@ private fun CloseFileButton(
     onClick: () -> Unit
 ) {
     val overlays = LocalOverlayState.current
-    IconButton("/Game/UI/Materials/Map/Pins/dungeon_door.png") {
+    IconButton("/UI/Materials/Map/Pins/dungeon_door.png") {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             CloseFileConfirmOverlay(
                 onConfirm = onClick,
-                requestClose = { overlays.destroy(it) }
+                requestClose = it
             )
         }
     }
@@ -171,12 +156,12 @@ private fun CloseFileButton(
 @Composable
 private fun SaveButton(editor: EditorState) {
     val overlays = LocalOverlayState.current
-    IconButton("/Game/UI/Materials/Map/Pins/mapicon_chest.png") {
+    IconButton("/UI/Materials/Map/Pins/mapicon_chest.png") {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             FileSaveOverlay(
                 editor = editor,
                 postSave = { overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) { FileSaveCompleteOverlay() } },
-                requestClose = { overlays.destroy(it) }
+                requestClose = it
             )
         }
     }
@@ -184,17 +169,15 @@ private fun SaveButton(editor: EditorState) {
 
 @Composable
 private fun InventorySwitcher(
-    current: EditorState.EditorView,
-    onSwitch: (EditorState.EditorView) -> Unit
+    current: DungeonsItem.Location,
+    onSwitch: (DungeonsItem.Location) -> Unit
 ) {
-    val density = LocalDensity.current
-
     val source = rememberMutableInteractionSource()
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
 
-    val leftArrow = remember { DungeonsTextures["/Game/UI/Materials/Character/left_arrow_carousel.png"] }
-    val rightArrow = remember { DungeonsTextures["/Game/UI/Materials/Character/right_arrow_carousel.png"] }
+    val leftArrow = remember { DungeonsTextures["/UI/Materials/Character/left_arrow_carousel.png"] }
+    val rightArrow = remember { DungeonsTextures["/UI/Materials/Character/right_arrow_carousel.png"] }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

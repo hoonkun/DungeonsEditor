@@ -1,6 +1,5 @@
 package kiwi.hoonkun.ui.composables.overlays
 
-import LocalWindowState
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.round
+import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
@@ -48,20 +48,20 @@ import kiwi.hoonkun.ui.composables.editor.details.ArmorPropertyItem
 import kiwi.hoonkun.ui.composables.editor.details.groupByLength
 import kiwi.hoonkun.ui.composables.editor.details.height
 import kiwi.hoonkun.ui.reusables.*
-import kiwi.hoonkun.ui.states.ArmorProperty
-import kiwi.hoonkun.ui.states.Item
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
-import minecraft.dungeons.resources.ArmorPropertyData
-import minecraft.dungeons.resources.DungeonsDatabase
-import minecraft.dungeons.values.DungeonsPower
-import kotlin.math.roundToInt
+import minecraft.dungeons.resources.DungeonsSkeletons
+import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.skeleton
+import minecraft.dungeons.values.DungeonsArmorProperty
+import minecraft.dungeons.values.roundToInt
 
 
 @Composable
 fun AnimatedVisibilityScope?.ArmorPropertyOverlay(
-    holder: Item,
-    initialSelected: ArmorProperty?,
+    holder: MutableDungeons.Item,
+    initialSelected: MutableDungeons.ArmorProperty?,
     requestClose: () -> Unit
 ) {
     val density = LocalDensity.current
@@ -130,7 +130,7 @@ fun AnimatedVisibilityScope?.ArmorPropertyOverlay(
                 Row(modifier = Modifier.offsetRelative(x = 0f, y = 1f).offset(y = -childOffset)) {
                     Spacer(modifier = Modifier.weight(1f))
                     RetroButton(
-                        text = Localizations.UiText("cancel"),
+                        text = Localizations["cancel"],
                         color = Color.White,
                         hoverInteraction = RetroButtonHoverInteraction.Overlay,
                         onClick = { requestClose() },
@@ -138,11 +138,12 @@ fun AnimatedVisibilityScope?.ArmorPropertyOverlay(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     RetroButton(
-                        text = Localizations.UiText("ok"),
+                        text = Localizations["ok"],
                         color = Color(0xff3f8e4f),
                         hoverInteraction = RetroButtonHoverInteraction.Outline,
                         onClick = {
-                            state.holder.armorProperties = state.properties
+                            state.holder.armorProperties.clear()
+                            state.holder.armorProperties.addAll(state.properties)
                             requestClose()
                         },
                         modifier = Modifier.size(125.dp, 55.dp)
@@ -163,9 +164,9 @@ private fun HolderPreview(
 
     val groupedProperties by remember(state.properties) {
         derivedStateOf {
-            val sorted = state.properties.sortedBy { it.data.description?.length }
-            val uniques = sorted.filter { it.rarity.lowercase() == "unique" }
-            val commons = sorted.filter { it.rarity.lowercase() == "common" }
+            val sorted = state.properties.sortedBy { it.skeleton.description?.length }
+            val uniques = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Unique }
+            val commons = sorted.filter { it.rarity == DungeonsArmorProperty.Rarity.Common }
 
             uniques.groupByLength() + commons.groupByLength()
         }
@@ -184,7 +185,7 @@ private fun HolderPreview(
             .clipToBounds()
             .drawBehind {
                 drawImage(
-                    image = holder.data.largeIcon,
+                    image = holder.skeleton.largeIcon,
                     dstOffset = Offset((-20f).dp.toPx(), -30f.dp.toPx()).round(),
                     dstSize = Size(size.width * 0.5f, size.width * 0.5f).round(),
                     alpha = 0.25f
@@ -208,10 +209,9 @@ private fun HolderPreview(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 12.dp).padding(top = 12.dp, bottom = 8.dp)
                 ) {
-                    ItemRarityButton(data = holder.data, rarity = holder.rarity, readonly = true)
+                    ItemRarityButton(data = holder.skeleton, rarity = holder.rarity, readonly = true)
                     Spacer(modifier = Modifier.width(8.dp))
                     ItemNetheriteEnchantButton(
-                        holder = holder,
                         enchantment = holder.netheriteEnchant,
                         enabled = false,
                     )
@@ -220,7 +220,7 @@ private fun HolderPreview(
                 }
                 Row(modifier = Modifier.padding(horizontal = 12.dp)) {
                     AutosizeText(
-                        text = holder.data.name,
+                        text = holder.skeleton.name,
                         maxFontSize = 40.sp,
                         style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier
@@ -237,7 +237,7 @@ private fun HolderPreview(
                     ) {
                         PowerIcon(Modifier.size(24.dp))
                         Text(
-                            text = "${DungeonsPower.toInGamePower(holder.power).roundToInt()}",
+                            text = "${holder.power.roundToInt()}",
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -294,7 +294,7 @@ private fun ArmorPropertyDataCollection(state: ArmorPropertyOverlayState, modifi
 
 @Composable
 private fun ArmorPropertyCollectionItem(
-    data: ArmorPropertyData,
+    data: DungeonsSkeletons.ArmorProperty,
     state: ArmorPropertyOverlayState
 ) {
     val fontFamilyResolver = LocalFontFamilyResolver.current
@@ -306,11 +306,10 @@ private fun ArmorPropertyCollectionItem(
     val selected = state.selected.let { it != null && it.id == data.id }
 
     val onItemClick: () -> Unit = {
-        val holder = state.holder
         val replaceFrom = state.selected
         val properties = state.properties
 
-        val newProperty = ArmorProperty(holder, data.id)
+        val newProperty = MutableDungeons.ArmorProperty(data.id)
 
         if (replaceFrom != null) {
             if (replaceFrom.id == data.id) {
@@ -350,7 +349,7 @@ private fun ArmorPropertyCollectionItem(
                     LayoutDirection.Ltr
                 )
                     .measure(
-                        text = Localizations.UiText("effect_delete_multiline"),
+                        text = Localizations["effect_delete_multiline"],
                         style = style.copy(fontSize = 12.sp, textAlign = TextAlign.Center)
                     )
 
@@ -390,7 +389,7 @@ private val DetailHeight get() = 140.dp
 @Composable
 private fun ArmorPropertyDetail(
     state: ArmorPropertyOverlayState,
-    property: ArmorProperty?
+    property: MutableDungeons.ArmorProperty?
 ) {
     val density = LocalDensity.current
 
@@ -402,7 +401,7 @@ private fun ArmorPropertyDetail(
             .padding(30.dp)
     ) {
         MinimizableAnimatedContent(
-            targetState = property?.data,
+            targetState = property?.skeleton,
             transitionSpec = minimizableContentTransform spec@ {
                 val initialIndex = state.datasets.indexOf(initialState)
                 val targetIndex = state.datasets.indexOf(targetState)
@@ -421,7 +420,7 @@ private fun ArmorPropertyDetail(
         ) { capturedPropertyData ->
             if (capturedPropertyData != null) {
                 Column {
-                    Text(text = Localizations.UiText("armor_property"), fontSize = 18.sp)
+                    Text(text = Localizations["armor_property"], fontSize = 18.sp)
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -441,7 +440,7 @@ private fun ArmorPropertyDetail(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(text = Localizations.UiText("armor_property_empty"))
+                    Text(text = Localizations["armor_property_empty"])
                 }
             }
         }
@@ -449,20 +448,22 @@ private fun ArmorPropertyDetail(
 }
 
 @Composable
-private fun ArmorPropertyRarityToggle(property: ArmorProperty) {
+private fun ArmorPropertyRarityToggle(property: MutableDungeons.ArmorProperty) {
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    val rarityIcon = rememberArmorPropertyIconAsState(property)
-
     Image(
-        bitmap = rarityIcon,
+        bitmap = DungeonsTextures[property.rarity.texture],
         contentDescription = null,
         modifier = Modifier
             .size(41.dp)
             .offset(y = 1.5.dp)
             .hoverable(interaction)
-            .clickable(interaction, null) { property.rarity = if (property.rarity == "Common") "Unique" else "Common" }
+            .clickable(interaction, null) {
+                property.rarity =
+                    if (property.rarity == DungeonsArmorProperty.Rarity.Common) DungeonsArmorProperty.Rarity.Unique
+                    else DungeonsArmorProperty.Rarity.Common
+            }
             .background(Color.White.copy(if (hovered) 0.3f else 0f), shape = RoundedCornerShape(6.dp.value))
             .padding(3.dp)
     )
@@ -515,24 +516,24 @@ private fun AddButton(state: ArmorPropertyOverlayState) {
 
 @Stable
 private class ArmorPropertyOverlayState(
-    val holder: Item,
-    initialSelected: ArmorProperty?,
+    val holder: MutableDungeons.Item,
+    initialSelected: MutableDungeons.ArmorProperty?,
 ) {
-    val datasets = DungeonsDatabase.armorProperties
+    val datasets = DungeonsSkeletons.ArmorProperty[Unit]
         .filter { it.description != null }
         .sortedBy { it.id }
     val initialIndex = datasets
-        .indexOf(initialSelected?.data)
+        .indexOf(initialSelected?.skeleton)
         .coerceAtLeast(0)
 
-    val properties = holder.armorProperties?.map { it.copy() }?.toMutableStateList() ?: mutableStateListOf()
-    var selected by mutableStateOf(properties.getOrNull(holder.armorProperties?.indexOf(initialSelected) ?: -1))
+    val properties = holder.armorProperties.map { it.copy() }.toMutableStateList()
+    var selected by mutableStateOf(properties.getOrNull(holder.armorProperties.indexOf(initialSelected)))
 }
 
 @Composable
 private fun rememberArmorPropertyOverlayState(
-    holder: Item,
-    initialSelected: ArmorProperty?
+    holder: MutableDungeons.Item,
+    initialSelected: MutableDungeons.ArmorProperty?
 ) =
     remember(holder, initialSelected) {
         ArmorPropertyOverlayState(holder, initialSelected)
