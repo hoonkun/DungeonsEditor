@@ -55,7 +55,6 @@ fun AutosizeText(
                     spanStyles = listOf(),
                     placeholders = listOf(),
                     maxLines = maxLines,
-                    ellipsis = false
                 )
             }
 

@@ -126,8 +126,10 @@ fun JsonEntries(
                         path = path,
                         summary = summary,
                         onClick = { onJsonSelect(json) },
-                        modifier = hideIfPreviewPresents.animateItemPlacement(
-                            animationSpec = minimizableFiniteSpec { spring() }
+                        modifier = hideIfPreviewPresents.animateItem(
+                            fadeInSpec = minimizableFiniteSpec { spring() },
+                            fadeOutSpec = minimizableFiniteSpec { spring() },
+                            placementSpec = minimizableFiniteSpec { spring() },
                         )
                     )
                 }
@@ -152,8 +154,10 @@ fun JsonEntries(
                         path = path,
                         summary = summary,
                         onClick = { onJsonSelect(json) },
-                        modifier = hideIfPreviewPresents.animateItemPlacement(
-                            animationSpec = minimizableFiniteSpec { spring() }
+                        modifier = hideIfPreviewPresents.animateItem(
+                            fadeInSpec = minimizableFiniteSpec { spring() },
+                            fadeOutSpec = minimizableFiniteSpec { spring() },
+                            placementSpec = minimizableFiniteSpec { spring() },
                         )
                     )
                 }
