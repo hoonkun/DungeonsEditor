@@ -2,13 +2,13 @@ package minecraft.dungeons.states
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import minecraft.dungeons.resources.DungeonsTower
 import minecraft.dungeons.values.*
 import org.json.JSONObject
-import utils.padEnd
-import utils.replace
-import utils.transformWithJsonObject
-import utils.tryOrNull
+import utils.*
 import java.util.*
+import kotlin.random.Random
+import kotlin.uuid.Uuid
 
 @Stable
 class MutableDungeons(
@@ -71,20 +71,39 @@ class MutableDungeons(
         inventorySum + storageSum
     }
 
+    val uniqueSaveId = from.getString(FIELD_UNIQUE_SAVE_ID)
+
+    val hasInitialTower = from.getJSONObject(FIELD_MISSION_STATES_MAP)?.has(FIELD_TOWER_STATES) ?: false
+    val tower = from
+        .getJSONObject(FIELD_MISSION_STATES_MAP)
+        ?.getJSONObject(FIELD_TOWER_STATES)
+        ?.getJSONArray(FIELD_MISSION_STATES)
+        ?.getJSONObject(0)
+        ?.let { TowerMissionState(it) }
+        ?: TowerMissionState(uniqueSaveId)
+
     fun export() = JSONObject(from.toString())
         .apply {
             replace(FIELD_ITEMS, allItems.map { it.export() })
             replace(FIELD_STORAGE_CHEST_ITEMS, storageItems.map { it.export() })
             replace(FIELD_CURRENCIES, currencies.map { it.export() })
             replace(FIELD_XP, xp.value)
+            replace(FIELD_MISSION_STATES_MAP, getJSONObject(FIELD_MISSION_STATES_MAP).put(FIELD_TOWER_STATES, tower.export()))
         }
 
     companion object {
         const val FIELD_CURRENCIES = "currency"
         const val FIELD_ITEMS = "items"
+        const val FIELD_XP = "xp"
+
+        private const val FIELD_UNIQUE_SAVE_ID = "uniqueSaveId"
+
         private const val FIELD_NAME = "name"
         private const val FIELD_STORAGE_CHEST_ITEMS = "storageChestItems"
-        const val FIELD_XP = "xp"
+
+        private const val FIELD_MISSION_STATES_MAP = "missionStatesMap"
+        private const val FIELD_MISSION_STATES = "missionStates"
+        private const val FIELD_TOWER_STATES = "thetower"
     }
 
     @Stable
@@ -318,5 +337,336 @@ class MutableDungeons(
         }
     }
 
+    @Stable
+    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+    class TowerMissionState(
+        livesLost: Int = 0,
+        val guid: String = Uuid.random().toHexString().uppercase(), // Immutable
+        val completedOnce: Boolean = false, // Unknown, preserve input or empty, Maybe unused.
+        val offeredEnchantmentPoints: Int = 0, // Unknown, preserve input or empty, Maybe unused.
+        val seed: Long = 0, // Unknown, preserve input or empty, Maybe unused.
+        val partsDiscovered: Int = 0, // Unknown, preserve input or empty, Maybe unused.
+        val ownedDLCs: List<*> = emptyList<Any>(), // Unknown, preserve input or empty, Maybe unused.
+        val offeredItems: List<*> = emptyList<Any>(),  // Unknown, preserve input or empty, Maybe unused.
+        val missionDifficulty: Difficulty = Difficulty(), // State itself
+        val towerInfo: Info, // State itself
+    ) {
+
+        var livesLost by mutableStateOf(livesLost)
+
+        companion object {
+            private const val FIELD_GUID = "guid"
+            private const val FIELD_LIVES_LOST = "livesLost"
+            private const val FIELD_COMPLETED_ONCE = "completedOnce"
+            private const val FIELD_OFFERED_ITEMS = "offeredItems"
+            private const val FIELD_SEED = "seed"
+            private const val FIELD_PARTS_DISCOVERED = "partsDiscovered"
+            private const val FIELD_OFFERED_ENCHANTMENT_POINTS = "offeredEnchantmentPoints"
+            private const val FIELD_MISSION_DIFFICULTY = "missionDifficulty"
+            private const val FIELD_OWNED_DLCS = "ownedDLCs"
+            private const val FIELD_TOWER_INFO = "towerInfo"
+        }
+
+        constructor(from: JSONObject): this(
+            livesLost = from.getInt(FIELD_LIVES_LOST),
+            guid = from.getString(FIELD_GUID),
+            completedOnce = from.getBoolean(FIELD_COMPLETED_ONCE),
+            offeredEnchantmentPoints = from.getInt(FIELD_OFFERED_ENCHANTMENT_POINTS),
+            seed = from.getLong(FIELD_SEED),
+            partsDiscovered = from.getInt(FIELD_PARTS_DISCOVERED),
+            ownedDLCs = from.getJSONArray(FIELD_OWNED_DLCS).toList(),
+            offeredItems = from.getJSONArray(FIELD_OFFERED_ITEMS).toList(),
+            missionDifficulty = Difficulty(from.getJSONObject(FIELD_MISSION_DIFFICULTY)),
+            towerInfo = Info(from.getJSONObject(FIELD_TOWER_INFO))
+        )
+
+        constructor(from: String): this(
+            towerInfo = Info(
+                towerMobGroupConfig = DungeonsTower.mobGroupConfig, // FIXME!!
+                towerPlayersData = listOf(Info.PlayerData(localSaveGUID = from)),
+            )
+        )
+
+        fun export() = JSONObject().apply {
+            put(FIELD_GUID, guid)
+            put(FIELD_LIVES_LOST, livesLost)
+            put(FIELD_COMPLETED_ONCE, completedOnce)
+            put(FIELD_OFFERED_ITEMS, offeredItems)
+            put(FIELD_SEED, seed)
+            put(FIELD_PARTS_DISCOVERED, partsDiscovered)
+            put(FIELD_OFFERED_ENCHANTMENT_POINTS, offeredEnchantmentPoints)
+            put(FIELD_MISSION_DIFFICULTY, missionDifficulty.export())
+            put(FIELD_OWNED_DLCS, ownedDLCs)
+            put(FIELD_TOWER_INFO, towerInfo.export())
+        }
+
+        @Stable
+        class Difficulty(
+            difficulty: Int = 1,
+            threatLevel: Int = 1,
+            private val endlessStruggle: Int = 0,
+        ) {
+            val difficulty by mutableStateOf(difficulty)
+            val threatLevel by mutableStateOf(threatLevel)
+
+            companion object {
+                private const val FIELD_DIFFICULTY = "difficulty"
+                private const val FIELD_ENDLESS_STRUGGLE = "endlessStruggle"
+                private const val FIELD_MISSION = "mission"
+                private const val FIELD_THREAT_LEVEL = "threatLevel"
+            }
+
+            constructor(from: JSONObject): this(
+                difficulty = from.getString(FIELD_DIFFICULTY).removePrefix("Difficulty_").toInt(),
+                threatLevel = from.getString(FIELD_THREAT_LEVEL).removePrefix("Threat_").toInt(),
+                endlessStruggle = from.getInt(FIELD_ENDLESS_STRUGGLE)
+            )
+
+            fun export() = JSONObject().apply {
+                put(FIELD_DIFFICULTY, "Difficulty_$difficulty")
+                put(FIELD_ENDLESS_STRUGGLE, endlessStruggle)
+                put(FIELD_MISSION, "thetower")
+                put(FIELD_THREAT_LEVEL, "Threat_$threatLevel")
+            }
+        }
+
+        @Stable
+        class Info(
+            towerCurrentFloorWasCompleted: Boolean = false,
+            towerFinished: Boolean = false,
+            towerPlayersData: List<PlayerData>,
+
+            val towerId: Uuid = Uuid.random(), // Immutable
+            val towerMobGroupConfig: JSONObject, // From thetower.json
+            val towerFinalRewards: List<*> = emptyList<Any>(), // Unknown, Preserve input or empty
+            val towerOfferedFloorRewards: Map<String, Any> = emptyMap(), // Unknown, Preserve input or empty
+            val towerConfig: Config = Config(), // State itself
+            val towerInfo: InnerInfo = InnerInfo(), // State itself
+        ) {
+
+            var towerCurrentFloorWasCompleted by mutableStateOf(towerCurrentFloorWasCompleted)
+            var towerFinished by mutableStateOf(towerFinished)
+            val towerPlayersData = towerPlayersData.toMutableStateList()
+
+            companion object {
+                private const val FIELD_TOWER_ID = "towerId"
+                private const val FIELD_TOWER_FINAL_REWARDS = "towerFinalRewards"
+                private const val FIELD_TOWER_MOB_GROUP_CONFIG = "towerMobGroupConfig"
+                private const val FIELD_TOWER_OFFERED_FLOOR_REWARDS = "towerOfferedFloorRewards"
+                private const val FIELD_TOWER_CONFIG = "towerConfig"
+                private const val FIELD_TOWER_INFO = "towerInfo"
+                private const val FIELD_TOWER_CURRENT_FLOOR_WAS_COMPLETED = "towerCurrentFloorWasCompleted"
+                private const val FIELD_TOWER_FINISHED = "towerFinished"
+                private const val FIELD_TOWER_PLAYERS_DATA = "towerPlayersData"
+            }
+
+            constructor(from: JSONObject): this(
+                towerCurrentFloorWasCompleted = from.getBoolean(FIELD_TOWER_CURRENT_FLOOR_WAS_COMPLETED),
+                towerFinished = from.getBoolean(FIELD_TOWER_FINISHED),
+                towerPlayersData = from.getJSONArray(FIELD_TOWER_PLAYERS_DATA).transformWithJsonObject { PlayerData(it) },
+                towerId = Uuid.parseHexDash(from.getString(FIELD_TOWER_ID)),
+                towerMobGroupConfig = from.getJSONObject(FIELD_TOWER_MOB_GROUP_CONFIG),
+                towerFinalRewards = from.getJSONArray(FIELD_TOWER_FINAL_REWARDS).toList(),
+                towerOfferedFloorRewards = from.getJSONObject(FIELD_TOWER_OFFERED_FLOOR_REWARDS).toMap(),
+                towerConfig = Config(from.getJSONObject(FIELD_TOWER_CONFIG)),
+                towerInfo = InnerInfo(from.getJSONObject(FIELD_TOWER_INFO))
+            )
+
+            fun export() = JSONObject().apply {
+                put(FIELD_TOWER_ID, towerId.toHexDashString())
+                put(FIELD_TOWER_FINAL_REWARDS, towerFinalRewards)
+                put(FIELD_TOWER_MOB_GROUP_CONFIG, towerMobGroupConfig)
+                put(FIELD_TOWER_OFFERED_FLOOR_REWARDS, towerOfferedFloorRewards)
+                put(FIELD_TOWER_CONFIG, towerConfig.export())
+                put(FIELD_TOWER_INFO, towerInfo.export())
+                put(FIELD_TOWER_CURRENT_FLOOR_WAS_COMPLETED, towerCurrentFloorWasCompleted)
+                put(FIELD_TOWER_FINISHED, towerFinished)
+                put(FIELD_TOWER_PLAYERS_DATA, towerPlayersData.map { it.export() })
+            }
+
+            class PlayerData(
+                val localSaveGUID: String,
+                val playerId: Long = Random.nextLong(),
+                val playerMerchantInteractions: List<Any> = emptyList(),
+                val playerLocalId: Int = -1,
+                playerArrowsAmmount: Int = 100,
+                playerEnchantmentPointsGranted: Int = 3,
+                playerIsTowerOwner: Boolean = true,
+                playerLastFloorIndex: Int = 0,
+                playerItems: List<Item> = emptyList()
+            ) {
+                var playerArrowsAmmount by mutableStateOf(playerArrowsAmmount)
+                var playerEnchantmentPointsGranted by mutableStateOf(playerEnchantmentPointsGranted)
+                var playerIsTowerOwner by mutableStateOf(playerIsTowerOwner)
+                var playerLastFloorIndex by mutableStateOf(playerLastFloorIndex)
+                val playerItems = playerItems.toMutableStateList()
+
+                companion object {
+                    private const val FIELD_LOCAL_SAVE_GUID = "localSaveGUID"
+                    private const val FIELD_ARROWS_AMOUNT = "playerArrowsAmmount"
+                    private const val FIELD_ENCHANTMENT_POINTS_GRANTED = "playerEnchantmentPointsGranted"
+                    private const val FIELD_PLAYER_ID = "playerId"
+                    private const val FIELD_PLAYER_IS_TOWER_OWNER = "playerIsTowerOwner"
+                    private const val FIELD_LAST_FLOOR_INDEX = "playerLastFloorIndex"
+                    private const val FIELD_LOCAL_ID = "playerLocalId"
+                    private const val FIELD_PLAYER_ITEMS = "playerItems"
+                    private const val FIELD_PLAYER_MERCHANT_INTERACTIONS = "playerMerchantInteractions"
+                }
+
+                constructor(from: JSONObject): this(
+                    localSaveGUID = from.getString(FIELD_LOCAL_SAVE_GUID),
+                    playerId = from.getLong(FIELD_PLAYER_ID),
+                    playerMerchantInteractions = from.getJSONArray(FIELD_PLAYER_MERCHANT_INTERACTIONS).toList(),
+                    playerArrowsAmmount = from.getInt(FIELD_ARROWS_AMOUNT),
+                    playerEnchantmentPointsGranted = from.getInt(FIELD_ENCHANTMENT_POINTS_GRANTED),
+                    playerIsTowerOwner = from.getBoolean(FIELD_PLAYER_IS_TOWER_OWNER),
+                    playerLastFloorIndex = from.getInt(FIELD_LAST_FLOOR_INDEX),
+                    playerLocalId = from.getInt(FIELD_LOCAL_ID),
+                    playerItems = from.getJSONArray(FIELD_PLAYER_ITEMS).transformWithJsonObject { Item(it) }
+                )
+
+                fun export() = JSONObject().apply {
+                    put(FIELD_LOCAL_SAVE_GUID, localSaveGUID)
+                    put(FIELD_ARROWS_AMOUNT, playerArrowsAmmount)
+                    put(FIELD_ENCHANTMENT_POINTS_GRANTED, playerEnchantmentPointsGranted)
+                    put(FIELD_PLAYER_ID, playerId)
+                    put(FIELD_PLAYER_IS_TOWER_OWNER, playerIsTowerOwner)
+                    put(FIELD_LAST_FLOOR_INDEX, playerLastFloorIndex)
+                    put(FIELD_LOCAL_ID, playerLocalId)
+                    put(FIELD_PLAYER_ITEMS, playerItems.map { it.export() })
+                    put(FIELD_PLAYER_MERCHANT_INTERACTIONS, playerMerchantInteractions)
+                }
+            }
+
+            class InnerInfo(
+                towerInfoBossesKilled: Int = 0,
+                towerInfoCurrentFloor: Int = 0,
+                towerInfoFloors: List<Floor> = List(30) { Floor() }
+            ) {
+
+                var towerInfoBossesKilled by mutableStateOf(towerInfoBossesKilled)
+                var towerInfoCurrentFloor by mutableStateOf(towerInfoCurrentFloor)
+                val towerInfoFloors = towerInfoFloors.toMutableStateList()
+
+                companion object {
+                    private const val FIELD_TOWER_INFO_BOSSES_KILLED = "towerInfoBossesKilled"
+                    private const val FIELD_TOWER_INFO_CURRENT_FLOOR = "towerInfoCurrentFloor"
+                    private const val FIELD_TOWER_INFO_FLOORS = "towerInfoFloors"
+                }
+
+                constructor(from: JSONObject): this(
+                    towerInfoBossesKilled = from.getInt(FIELD_TOWER_INFO_BOSSES_KILLED),
+                    towerInfoCurrentFloor = from.getInt(FIELD_TOWER_INFO_CURRENT_FLOOR),
+                    towerInfoFloors = from.getJSONArray(FIELD_TOWER_INFO_FLOORS).transformWithJsonObject { Floor(it) }
+                )
+
+                fun export() = JSONObject().apply {
+                    put(FIELD_TOWER_INFO_BOSSES_KILLED, towerInfoBossesKilled)
+                    put(FIELD_TOWER_INFO_CURRENT_FLOOR, towerInfoCurrentFloor)
+                    put(FIELD_TOWER_INFO_FLOORS, towerInfoFloors.map { it.export() })
+                }
+
+                class Floor(
+                    towerFloorType: Type = Type.Empty
+                ) {
+                    var towerFloorType by mutableStateOf(towerFloorType)
+
+                    companion object {
+                        private const val FIELD_TOWER_FLOOR_TYPE = "towerFloorType"
+                    }
+
+                    constructor(from: JSONObject): this(
+                        towerFloorType = Type.fromString(from.getString(FIELD_TOWER_FLOOR_TYPE))
+                    )
+
+                    fun export() = JSONObject().apply {
+                        put("towerFloorType", towerFloorType.value)
+                    }
+
+                    enum class Type(val value: String) {
+                        Empty("Empty"),
+                        Combat("Combat"),
+                        Merchant("Merchant"),
+                        Boss("Boss");
+
+                        companion object {
+                            private val valueMap = Type.entries.associateBy(Type::value)
+                            fun fromString(value: String) = valueMap.getValue(value)
+                        }
+                    }
+                }
+            }
+
+            @Stable
+            class Config(
+                floors: List<Floor> = List(30) { Floor() },
+                seed: Long = 0L
+            ) {
+                val floors = floors.toMutableStateList()
+                var seed by mutableStateOf(seed)
+
+                companion object {
+                    private const val FIELD_FLOORS = "floors"
+                    private const val FIELD_SEED = "seed"
+                }
+
+                constructor(from: JSONObject): this(
+                    floors = from.getJSONArray("floors").transformWithJsonObject { Floor(it) },
+                    seed = from.getLong("seed"),
+                )
+
+                fun export() = JSONObject().apply {
+                    put(FIELD_FLOORS, floors.map { it.export() })
+                    put(FIELD_SEED, seed)
+                }
+
+                @Stable
+                class Floor(
+                    rewards: List<Reward> = List(5) { Reward.Any },
+                    challenges: List<String>? = null,
+                    tile: String = ""
+                ) {
+                    val rewards = rewards.toMutableStateList()
+                    val challenges = challenges?.toMutableStateList() ?: mutableStateListOf()
+                    var tile by mutableStateOf(tile)
+
+                    companion object {
+                        private const val FIELD_CHALLENGES = "challenges"
+                        private const val FIELD_REWARDS = "rewards"
+                        private const val FIELD_TILE = "tile"
+                        private const val FIELD_TYPE = "type"
+                    }
+
+                    constructor(from: JSONObject): this(
+                        rewards = from.getJSONArray(FIELD_REWARDS).toStringList().map { Reward.fromString(it) },
+                        challenges = Unit.runCatching { from.getJSONArray(FIELD_CHALLENGES).toStringList() }.getOrNull(),
+                        tile = from.getString(FIELD_TILE)
+                    )
+
+                    fun export() = JSONObject().apply {
+                        if (challenges.isNotEmpty())
+                            put(FIELD_CHALLENGES, challenges)
+                        put(FIELD_REWARDS, rewards.map { it.value })
+                        put(FIELD_TILE, tile)
+                        put(FIELD_TYPE, "")
+                    }
+
+                    enum class Reward(val value: String) {
+                        Any("any"),
+                        Melee("melee"),
+                        Ranged("ranged"),
+                        Armor("armor"),
+                        Artifact("artefact");
+
+                        companion object {
+                            private val valueMap = Reward.entries.associateBy(Reward::value)
+                            fun fromString(value: String) = valueMap.getValue(value)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 
 }

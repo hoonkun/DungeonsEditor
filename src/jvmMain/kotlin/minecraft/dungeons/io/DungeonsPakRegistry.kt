@@ -3,6 +3,7 @@ package minecraft.dungeons.io
 import Keyset
 import minecraft.dungeons.resources.DungeonsSkeletons
 import minecraft.dungeons.resources.DungeonsTextures
+import minecraft.dungeons.resources.DungeonsTower
 import pak.PakIndex
 import pak.PathPakFilter
 import parsers.objects.fields.Guid
@@ -32,6 +33,7 @@ object DungeonsPakRegistry {
 
         DungeonsSkeletons.Initializer.run(newIndex)
         DungeonsTextures.Initializer.run(newIndex)
+        DungeonsTower.Initializer.run(newIndex)
 
         return true
     }

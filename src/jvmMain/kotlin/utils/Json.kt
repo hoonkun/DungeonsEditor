@@ -14,3 +14,6 @@ inline fun <reified T>JSONObject.replace(key: String, value: T): JSONObject =
 
 inline fun <reified T>JSONArray.transformWithJsonObject(length: Int = length(), transform: (json: JSONObject) -> T): List<T> =
     (0 until length.coerceAtMost(length())).map { transform(getJSONObject(it)) }
+
+fun JSONArray.toStringList(length: Int = length()): List<String> =
+    (0 until length.coerceAtMost(length())).map { getString(it) }
