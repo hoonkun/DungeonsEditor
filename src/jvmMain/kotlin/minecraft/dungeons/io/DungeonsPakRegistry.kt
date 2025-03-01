@@ -18,7 +18,7 @@ object DungeonsPakRegistry {
     fun initialize(customLocation: String? = null): Boolean {
         if (this::index.isInitialized) return true
 
-        val pakPath = detectPakPath(customLocation) ?: return false
+        val pakPath = detectWindowsPakPath(customLocation) ?: detectSteamdeckPakPath(customLocation) ?: return false
 
         val newIndex = PakIndex(
             target = File(pakPath).listFiles()!!.sortedBy { it.name },
@@ -36,7 +36,17 @@ object DungeonsPakRegistry {
         return true
     }
 
-    private fun detectPakPath(customPakLocation: String? = null): String? {
+    private fun detectSteamdeckPakPath(customPakLocation: String?): String? {
+        if (customPakLocation != null && File(customPakLocation).exists())
+            return customPakLocation
+
+        val fixedPath = "/home/deck/.steam/steam/steamapps/common/MinecraftDungeons/Dungeons/Content/Paks"
+        if (File(fixedPath).exists()) return fixedPath
+
+        return null
+    }
+
+    private fun detectWindowsPakPath(customPakLocation: String? = null): String? {
         if (customPakLocation != null && File(customPakLocation).exists())
             return customPakLocation
 
