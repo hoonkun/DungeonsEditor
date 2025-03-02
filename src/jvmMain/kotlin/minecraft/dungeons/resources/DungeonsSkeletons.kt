@@ -83,6 +83,7 @@ object DungeonsSkeletons {
             val matches = criteria.firstNotNullOfOrNull { predicate ->
                 DungeonsPakRegistry.index
                     .filter { it.startsWith(dataPath) }
+                    .sortedBy { it.length }
                     .find { predicate(it.lowercase().removeExtension()) }
             }
                 ?: throw RuntimeException("no image resource found with item $type, which type is $key")
