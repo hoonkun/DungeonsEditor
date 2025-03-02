@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -60,9 +59,9 @@ fun InventoryItems(
             filters = filters,
             onFilterChange = { filters = it },
             onCreateItem = {
-                if (withItemManager { editorState.data.noSpaceAvailable })
+                if (withItemManager { editorState.data.noSpaceAvailable }) {
                     overlays.make { InventoryFullOverlay() }
-                else {
+                } else {
                     overlays.make(
                         enter = defaultFadeIn(),
                         exit = defaultFadeOut()
@@ -144,21 +143,18 @@ private fun RarityFilterButton(rarity: DungeonsItem.Rarity, selected: Boolean, o
     val interaction = rememberMutableInteractionSource()
     val hovered by interaction.collectIsHoveredAsState()
 
-    Canvas(
+    val bitmap = remember { RarityFilterFrame(rarity) }
+
+    Image(
+        bitmap = bitmap,
+        contentDescription = null,
         modifier = Modifier
-            .size(70.dp, 40.dp)
+            .size(60.dp, 60.dp)
             .hoverable(interaction)
             .clickable(interaction, null, onClick = onClick)
             .padding(vertical = 10.dp)
             .graphicsLayer { alpha = if (selected) 1f else if (hovered) 0.55f else 0.35f }
-    ) {
-        drawRoundRect(
-            RarityColor(rarity, RarityColorType.Opaque),
-            topLeft = Offset(25.dp.toPx(), size.height / 2 - 6.dp.toPx()),
-            size = Size(size.width - 40.dp.toPx(), 12.dp.toPx()),
-            cornerRadius = CornerRadius(3.dp.toPx())
-        )
-    }
+    )
 }
 
 @Composable
