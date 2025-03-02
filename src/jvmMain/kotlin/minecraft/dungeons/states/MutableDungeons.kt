@@ -408,8 +408,8 @@ class MutableDungeons(
             threatLevel: Int = 1,
             private val endlessStruggle: Int = 0,
         ) {
-            val difficulty by mutableStateOf(difficulty)
-            val threatLevel by mutableStateOf(threatLevel)
+            var difficulty by mutableStateOf(difficulty)
+            var threatLevel by mutableStateOf(threatLevel)
 
             companion object {
                 private const val FIELD_DIFFICULTY = "difficulty"

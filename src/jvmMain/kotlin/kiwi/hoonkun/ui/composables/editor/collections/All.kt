@@ -21,14 +21,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.TextUnit
 import kiwi.hoonkun.resources.Resources
-import kiwi.hoonkun.ui.reusables.*
+import kiwi.hoonkun.ui.reusables.applyZeroIntrinsics
+import kiwi.hoonkun.ui.reusables.drawItemFrame
+import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
@@ -163,32 +164,15 @@ fun ItemSlotSimplified(
 }
 
 @Composable
-private fun EmptyItemSlot(
+fun EmptyItemSlot(
     modifier: Modifier
 ) =
     Box(
         modifier = Modifier
+            .drawBehind {
+                drawItemFrame(DungeonsItem.Rarity.Common)
+            }
             .fillMaxSize()
-            .background(
-                brush = Brush.linearGradient(
-                    listOf(
-                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Translucent),
-                        Color.Transparent
-                    )
-                )
-            )
-            .border(
-                width = 7.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Opaque),
-                        Color.Transparent,
-                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Opaque)
-                    )
-                ),
-                shape = RectangleShape
-            )
-            .padding(20.dp)
             .then(modifier)
     )
 

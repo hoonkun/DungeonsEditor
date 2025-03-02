@@ -227,7 +227,7 @@ private fun JsonEditorContent(
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             MinimizableAnimatedContent(
                 targetState = editorState.isInTowerEditMode,
-                transitionSpec = { fadeIn() togetherWith fadeOut() using SizeTransform(false) },
+                transitionSpec = minimizableContentTransform { fadeIn() togetherWith fadeOut() using SizeTransform(false) },
                 contentAlignment = Alignment.CenterEnd,
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
             ) { isInTowerEditMode ->

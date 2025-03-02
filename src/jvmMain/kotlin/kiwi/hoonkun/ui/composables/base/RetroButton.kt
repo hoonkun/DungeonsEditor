@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
@@ -109,6 +110,9 @@ fun RetroButton(
     stroke: Dp = 5.dp,
     contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
+    textOverflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE,
+    textPadding: PaddingValues = PaddingValues(horizontal = 20.dp),
     onClick: () -> Unit
 ) {
     RetroButton(
@@ -123,6 +127,9 @@ fun RetroButton(
         stroke = stroke,
         contentArrangement = contentArrangement,
         contentPadding = contentPadding,
+        textOverflow = textOverflow,
+        maxLines = maxLines,
+        textPadding = textPadding,
         onClick = onClick
     )
 }
@@ -140,6 +147,9 @@ fun RetroButton(
     stroke: Dp = 5.dp,
     contentArrangement: Arrangement.Horizontal = Arrangement.Center,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
+    textOverflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE,
+    textPadding: PaddingValues = PaddingValues(horizontal = 20.dp),
     onClick: () -> Unit
 ) {
     RetroButton(
@@ -157,7 +167,9 @@ fun RetroButton(
         Text(
             text = text,
             style = textStyle,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            overflow = textOverflow,
+            maxLines = maxLines,
+            modifier = Modifier.padding(textPadding),
         )
     }
 }

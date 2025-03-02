@@ -16,6 +16,26 @@ object DungeonsTower {
     private val _challenges = mutableListOf<String>()
     val challenges: List<String> get() = _challenges
 
+    private val areaShortNames = listOf(
+        "pp", "dt", "hh", "crc",
+        "ot", "ls", "gs", "bd",
+        "ts", "ew", "frf", "frf1",
+        "lf", "ss", "ff", "am",
+        "cc", "wp", "bc"
+    )
+    private val areaNames = listOf(
+        "pumpkinpastures", "deserttemple", "highblockhalls", "creeperwoodsbonus",
+        "overgrowntemple", "lostsettlement", "galesanctum", "basaltdeltas",
+        "thestronghold", "enderwilds", "frozenfjord", "frozenfjord",
+        "lonelyfortress", "soggyswamp", "fieryforge", "abyssalmonument",
+        "cacticanyon", "windsweptpeaks", "blightedcitadel"
+    )
+    val AreaDungeonsLocalizations = areaShortNames.zip(areaNames)
+    val AreaLocalizations = listOf(
+        "boss", "arena", "igloo", "top_tempest", "tempest", "inhabitant",
+        "puzzle", "alt", "entrance", "bottom", "top", "sec"
+    )
+
     object Initializer {
         fun run(index: PakIndex) {
             val path = index.filter { it.endsWith("thetower.json") }.first()

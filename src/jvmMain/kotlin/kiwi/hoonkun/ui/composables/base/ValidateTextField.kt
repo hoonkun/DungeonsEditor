@@ -25,6 +25,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 
@@ -55,7 +56,7 @@ fun TextFieldValidatable(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.requiredHeight(36.dp)
+        modifier = modifier.requiredHeight(36.dp).zIndex(1f)
     ) {
         BasicTextField(
             value = value,
@@ -70,9 +71,14 @@ fun TextFieldValidatable(
                     drawRect(lineColor, topLeft = Offset(0f, size.height), size = Size(size.width, 2.dp.toPx()))
                 }
                 .onKeyEvent {
-                    if (it.key != Key.Enter) false
-                    else if (!valid) false
-                    else {
+                    if (it.key == Key.Escape) {
+                        focusManager.clearFocus()
+                        true
+                    } else if (it.key != Key.Enter) {
+                        false
+                    } else if (!valid) {
+                        false
+                    } else {
                         onSubmit(value)
                         focusManager.clearFocus()
                         true
@@ -81,13 +87,12 @@ fun TextFieldValidatable(
         )
         MinimizableAnimatedContent(
             targetState = focused to valid,
-            transitionSpec = minimizableContentTransform spec@ {                defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false)
+            transitionSpec = minimizableContentTransform spec@ {
+                defaultFadeIn() togetherWith defaultFadeOut() using SizeTransform(clip = false)
             },
             modifier = Modifier
                 .requiredSize(200.dp, 100.dp)
-                .offset {
-                    IntOffset(0, if (direction == PopupDirection.Top) -77.5.dp.roundToPx() else 77.5.dp.roundToPx())
-                }
+                .offset { IntOffset(0, if (direction == PopupDirection.Top) -77.5.dp.roundToPx() else 77.5.dp.roundToPx()) }
         ) { (capturedFocused, capturedValid) ->
             Box(
                 contentAlignment =
@@ -141,16 +146,17 @@ fun TextFieldValidatable(
                         .padding(top = if (capturedValid) 6.dp else 12.dp, bottom = if (capturedValid) 16.dp else 22.dp)
 
                 ) {
+                    val offsetModifier = Modifier.offset { IntOffset(0, if (direction == PopupDirection.Bottom) 10.dp.roundToPx() else 0) }
                     if (capturedValid) {
                         RetroButton(
                             text = "확정",
                             color = Color(0xff3f8e4f),
                             hoverInteraction = RetroButtonHoverInteraction.Outline,
-                            modifier = Modifier.size(110.dp, 50.dp),
-                            onClick = { onSubmit(value) }
+                            modifier = Modifier.size(110.dp, 50.dp).then(offsetModifier),
+                            onClick = { onSubmit(value) },
                         )
                     } else {
-                        Text(text = "잘못된 값이에요!")
+                        Text(text = "잘못된 값이에요!", modifier = offsetModifier)
                     }
                 }
             }
