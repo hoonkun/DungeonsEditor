@@ -248,11 +248,17 @@ private fun JsonEditorContent(
                 }
             ) { isInTowerEditMode ->
                 if (isInTowerEditMode) {
-                    TowerEditor(
-                        state = editorState.data.tower,
-                        hasInitialTower = editorState.data.hasInitialTower,
-                        editor = editorState
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 32.dp, start = 32.dp, end = 32.dp)
+                    ) {
+                        TowerEditor(
+                            state = editorState.data.tower,
+                            hasInitialTower = editorState.data.hasInitialTower,
+                            editor = editorState
+                        )
+                    }
                 } else {
                     Row(
                         modifier = Modifier
