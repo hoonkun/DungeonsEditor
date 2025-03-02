@@ -17,10 +17,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import kiwi.hoonkun.ui.composables.base.RetroButton
+import kiwi.hoonkun.ui.composables.base.RetroButtonDpCornerRadius
+import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
@@ -107,12 +111,19 @@ fun EditorBottomBar(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        InventorySwitcher(
-            current = editor.view,
-            onSwitch = { editor.view = it }
-        )
+        InventoryButton {
+            editor.isInTowerEditMode = false
+            editor.view = DungeonsItem.Location.Inventory
+        }
+        StorageButton {
+            editor.isInTowerEditMode = false
+            editor.view = DungeonsItem.Location.Storage
+        }
+        TowerButton {
+            editor.isInTowerEditMode = true
+        }
 
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(30.dp))
 
         SaveButton(editor)
         CloseFileButton(requestClose)
@@ -139,11 +150,52 @@ private fun IconButton(icon: String, onClick: () -> Unit) {
 }
 
 @Composable
+private fun TowerButton(
+    onClick: () -> Unit
+) {
+    ToolbarIconRetroButton(
+        color = Color(0xff366c75),
+        iconPath = "/UI/Materials/MissionSelectMap/legend/Marker_TowerSavePoint.png",
+        iconModifier = Modifier.size(27.dp),
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun InventoryButton(
+    onClick: () -> Unit
+) {
+    ToolbarIconRetroButton(
+        color = Color(0xff7d6136),
+        iconPath = "/UI/Materials/Map/Pins/mapicon_chest.png",
+        iconModifier = Modifier.size(27.dp),
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun StorageButton(
+    onClick: () -> Unit
+) {
+    ToolbarIconRetroButton(
+        color = Color(0xff55367d),
+        iconPath = "/UI/Materials/Map/Pins/mapicon_chest.png",
+        iconModifier = Modifier.size(27.dp),
+        onClick = onClick
+    )
+}
+
+@Composable
 private fun CloseFileButton(
     onClick: () -> Unit
 ) {
     val overlays = LocalOverlayState.current
-    IconButton("/UI/Materials/Map/Pins/dungeon_door.png") {
+
+    ToolbarIconRetroButton(
+        color = Color(0xff77726c),
+        iconPath = "/UI/Materials/Map/close.png",
+        iconModifier = Modifier.size(35.dp)
+    ) {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             CloseFileConfirmOverlay(
                 onConfirm = onClick,
@@ -156,7 +208,11 @@ private fun CloseFileButton(
 @Composable
 private fun SaveButton(editor: EditorState) {
     val overlays = LocalOverlayState.current
-    IconButton("/UI/Materials/Map/Pins/mapicon_chest.png") {
+
+    ToolbarIconRetroButton(
+        color = Color(0xff3f8e4f),
+        iconPath = "/UI/Materials/Portrait/friend_check_play.png",
+    ) {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             FileSaveOverlay(
                 editor = editor,
@@ -165,6 +221,31 @@ private fun SaveButton(editor: EditorState) {
             )
         }
     }
+}
+
+@Composable
+private fun ToolbarIconRetroButton(
+    color: Color,
+    iconPath: String,
+    iconModifier: Modifier = Modifier.size(22.dp),
+    onClick: () -> Unit,
+) {
+    val bitmap = remember(iconPath) { DungeonsTextures[iconPath] }
+
+    RetroButton(
+        color = color,
+        hoverInteraction = RetroButtonHoverInteraction.Outline,
+        modifier = Modifier.padding(start = 16.dp).size(40.dp),
+        radius = RetroButtonDpCornerRadius(all = 4.dp),
+        stroke = 3.dp,
+        onClick = onClick,
+        content =  { Image(bitmap = bitmap, contentDescription = null, modifier = iconModifier, filterQuality = FilterQuality.None) }
+    )
+}
+
+@Composable
+private fun ToolbarIconTooltip(content: String) {
+    Text(text = content)
 }
 
 @Composable
