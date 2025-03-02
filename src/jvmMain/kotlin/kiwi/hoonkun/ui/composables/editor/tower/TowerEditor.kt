@@ -161,9 +161,9 @@ fun TowerEditor(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    (1..8).forEach {
+                    (1..7).forEach {
                         DifficultyToggle(
-                            text = "$it",
+                            text = if (it == 1) "-" else "${it - 1}",
                             selected = state.missionDifficulty.threatLevel == it,
                             difficulty = it,
                             onClick = { state.missionDifficulty.threatLevel = it }
