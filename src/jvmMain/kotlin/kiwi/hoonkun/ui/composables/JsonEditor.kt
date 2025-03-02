@@ -5,19 +5,23 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.zIndex
 import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.resources.Localizations
@@ -31,6 +35,7 @@ import kiwi.hoonkun.ui.composables.editor.collections.EquippedItems
 import kiwi.hoonkun.ui.composables.editor.collections.InventoryItems
 import kiwi.hoonkun.ui.composables.editor.details.ItemComparator
 import kiwi.hoonkun.ui.composables.editor.details.Tips
+import kiwi.hoonkun.ui.composables.editor.tower.TowerEditor
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.AppState
 import kiwi.hoonkun.ui.states.EditorState
@@ -219,72 +224,166 @@ private fun JsonEditorContent(
     requestClose: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 100.dp, end = 170.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             MinimizableAnimatedContent(
-                targetState = editorState.view,
-                transitionSpec = minimizableContentTransform spec@ {
-                    val a = if (targetState.isInventory()) -50 else 50
-                    val b = if (targetState.isInventory()) 50 else -50
-                    val enter = defaultFadeIn() + slideIn { IntOffset(a.dp.value.toInt(), 0) }
-                    val exit = defaultFadeOut() + slideOut { IntOffset(b.dp.value.toInt(), 0) }
-                    enter togetherWith exit using SizeTransform(false)
-                }
-            ) { view ->
-                Column(
-                    modifier = Modifier
-                        .width(650.dp)
-                        .padding(top = 25.dp)
-                ) {
-                    if (view.isInventory()) {
-                        EquippedItems(
-                            items = editorState.data.equippedItems,
-                            editor = editorState
-                        )
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .padding(start = 80.dp, end = 10.dp)
-                                .background(Color.White.copy(alpha = 0.25f))
-                        )
-                        InventoryItems(
-                            items = editorState.data.inventoryItems,
-                            editorState = editorState,
-                        )
-                    } else {
-                        InventoryItems(
-                            items = editorState.data.storageItems,
-                            editorState = editorState
-                        )
-                    }
+                targetState = editorState.isInTowerEditMode,
+                transitionSpec = { fadeIn() togetherWith fadeOut() using SizeTransform(false) },
+                contentAlignment = Alignment.CenterEnd,
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+            ) { isInTowerEditMode ->
+                if (isInTowerEditMode) {
+                    TowerBackground()
+                } else {
+                    InventoryBackground()
                 }
             }
             MinimizableAnimatedContent(
-                targetState = editorState.hasSelection,
-                transitionSpec = minimizableContentTransform spec@ {
-                    val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
-                    val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
-                    enter togetherWith exit using SizeTransform(clip = false)
+                targetState = editorState.isInTowerEditMode,
+                transitionSpec = minimizableContentTransform spec@{
+                    val a = if (targetState) -50 else 50
+                    val b = if (targetState) 50 else -50
+                    val enter = defaultFadeIn() + slideIn { IntOffset(0, a.dp.value.toInt()) }
+                    val exit = defaultFadeOut() + slideOut { IntOffset(0, b.dp.value.toInt()) }
+                    enter togetherWith exit using SizeTransform(false)
                 }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                        .padding(start = 50.dp)
-                ) {
-                    if (it) {
-                        ItemComparator(editor = editorState)
-                    } else {
-                        Tips()
+            ) { isInTowerEditMode ->
+                if (isInTowerEditMode) {
+                    TowerEditor(
+                        state = editorState.data.tower,
+                        hasInitialTower = editorState.data.hasInitialTower,
+                        editor = editorState
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 100.dp, end = 170.dp)
+                    ) {
+                        MinimizableAnimatedContent(
+                            targetState = editorState.view,
+                            transitionSpec = minimizableContentTransform spec@{
+                                val a = if (targetState.isInventory()) -50 else 50
+                                val b = if (targetState.isInventory()) 50 else -50
+                                val enter = defaultFadeIn() + slideIn { IntOffset(a.dp.value.toInt(), 0) }
+                                val exit = defaultFadeOut() + slideOut { IntOffset(b.dp.value.toInt(), 0) }
+                                enter togetherWith exit using SizeTransform(false)
+                            }
+                        ) { view ->
+                            Column(
+                                modifier = Modifier
+                                    .width(650.dp)
+                                    .padding(top = 25.dp)
+                            ) {
+                                if (view.isInventory()) {
+                                    EquippedItems(
+                                        items = editorState.data.equippedItems,
+                                        editor = editorState
+                                    )
+                                    Spacer(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp)
+                                            .padding(start = 80.dp, end = 10.dp)
+                                            .background(Color.White.copy(alpha = 0.25f))
+                                    )
+                                    InventoryItems(
+                                        items = editorState.data.inventoryItems,
+                                        editorState = editorState,
+                                    )
+                                } else {
+                                    InventoryItems(
+                                        items = editorState.data.storageItems,
+                                        editorState = editorState
+                                    )
+                                }
+                            }
+                        }
+                        MinimizableAnimatedContent(
+                            targetState = editorState.hasSelection,
+                            transitionSpec = minimizableContentTransform spec@{
+                                val enter = slideInVertically(initialOffsetY = { it / 10 }) + fadeIn()
+                                val exit = slideOutVertically(targetOffsetY = { -it / 10 }) + fadeOut()
+                                enter togetherWith exit using SizeTransform(clip = false)
+                            }
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .weight(1f)
+                                    .padding(start = 50.dp)
+                            ) {
+                                if (it) {
+                                    ItemComparator(editor = editorState)
+                                } else {
+                                    Tips()
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
         EditorBottomBar(editorState, requestClose)
+    }
+}
+
+@Composable
+private fun TowerBackground() {
+    val bitmap = remember { DungeonsTextures["/Content_Season1/UI/Tower/Materials/Tower_Inspector_Background.png"] }
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    ) {
+        val dstSize = Size(size.height * (bitmap.width.toFloat() / bitmap.height), size.height).round()
+        val dstOffset = Offset(size.width, size.height).round() - IntOffset(dstSize.width, dstSize.height)
+
+        drawRect(
+            Brush.horizontalGradient(
+                0f to Color(0xff202020),
+                0.1f to Color(0xff202020),
+                1f to Color(0xff202020).copy(alpha = 0.5f),
+                startX = dstOffset.x.toFloat(),
+                endX = dstOffset.x.toFloat() + dstSize.width.toFloat(),
+                tileMode = TileMode.Clamp
+            )
+        )
+        drawImage(
+            image = bitmap,
+            dstOffset = dstOffset,
+            dstSize = dstSize,
+            blendMode = BlendMode.SrcOut,
+            filterQuality = FilterQuality.None,
+        )
+    }
+}
+
+@Composable
+private fun InventoryBackground() {
+    val bitmap = remember { DungeonsTextures["/Textures/InventoryNew/master_inventory_backdrop_switch.png"] }
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    ) {
+        val dstSize = Size(size.height * (bitmap.width.toFloat() / bitmap.height), size.height).round()
+
+        drawRect(
+            Brush.horizontalGradient(
+                0f to Color(0xff202020),
+                0.3f to Color(0xff202020).copy(alpha = 0f),
+                1f to Color(0xff202020).copy(alpha = 0f),
+                endX = dstSize.width.toFloat(),
+                tileMode = TileMode.Clamp
+            )
+        )
+        drawImage(
+            image = bitmap,
+            dstSize = dstSize,
+            blendMode = BlendMode.SrcOut,
+            filterQuality = FilterQuality.None,
+        )
     }
 }
