@@ -74,6 +74,7 @@ class MutableDungeons(
     val uniqueSaveId = from.getString(FIELD_UNIQUE_SAVE_ID)
 
     val hasInitialTower = from.getJSONObject(FIELD_MISSION_STATES_MAP)?.has(FIELD_TOWER_STATES) ?: false
+    var includeEditedTower by mutableStateOf(false)
     val tower = from
         .getJSONObject(FIELD_MISSION_STATES_MAP)
         ?.getJSONObject(FIELD_TOWER_STATES)
@@ -88,7 +89,8 @@ class MutableDungeons(
             replace(FIELD_STORAGE_CHEST_ITEMS, storageItems.map { it.export() })
             replace(FIELD_CURRENCIES, currencies.map { it.export() })
             replace(FIELD_XP, xp.value)
-            replace(FIELD_MISSION_STATES_MAP, getJSONObject(FIELD_MISSION_STATES_MAP).put(FIELD_TOWER_STATES, tower.export()))
+            if (includeEditedTower)
+                replace(FIELD_MISSION_STATES_MAP, getJSONObject(FIELD_MISSION_STATES_MAP).put(FIELD_TOWER_STATES, tower.export()))
         }
 
     companion object {
