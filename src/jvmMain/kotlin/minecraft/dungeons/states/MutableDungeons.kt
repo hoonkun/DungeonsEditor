@@ -502,7 +502,7 @@ class MutableDungeons(
                 val localSaveGUID: String,
                 val playerId: Long = Random.nextLong(),
                 val playerMerchantInteractions: List<Any> = emptyList(),
-                val playerLocalId: Int = -1,
+                val playerLocalId: Long = Random.nextLong(),
                 playerArrowsAmmount: Int = 100,
                 playerEnchantmentPointsGranted: Int = 3,
                 playerIsTowerOwner: Boolean = true,
@@ -541,7 +541,7 @@ class MutableDungeons(
                     playerEnchantmentPointsGranted = from.getInt(FIELD_ENCHANTMENT_POINTS_GRANTED),
                     playerIsTowerOwner = from.getBoolean(FIELD_PLAYER_IS_TOWER_OWNER),
                     playerLastFloorIndex = from.getInt(FIELD_LAST_FLOOR_INDEX),
-                    playerLocalId = from.getInt(FIELD_LOCAL_ID),
+                    playerLocalId = from.getLong(FIELD_LOCAL_ID),
                     playerItems = from.getJSONArray(FIELD_PLAYER_ITEMS).transformWithJsonObject { Item(it) }
                 )
 
@@ -561,7 +561,7 @@ class MutableDungeons(
             class InnerInfo(
                 towerInfoBossesKilled: Int = 0,
                 towerInfoCurrentFloor: Int = 0,
-                towerInfoFloors: List<Floor> = List(30) { Floor() }
+                towerInfoFloors: List<Floor> = List(31) { Floor() }
             ) {
 
                 var towerInfoBossesKilled by mutableStateOf(towerInfoBossesKilled)
@@ -619,7 +619,7 @@ class MutableDungeons(
 
             @Stable
             class Config(
-                floors: List<Floor> = List(30) { Floor() },
+                floors: List<Floor> = List(31) { Floor() },
                 seed: Long = 0L
             ) {
                 val floors = floors.toMutableStateList()
