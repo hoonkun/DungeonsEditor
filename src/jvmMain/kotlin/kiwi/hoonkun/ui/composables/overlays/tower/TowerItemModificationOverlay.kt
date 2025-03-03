@@ -29,6 +29,7 @@ import kiwi.hoonkun.ui.composables.base.RetroIndicator
 import kiwi.hoonkun.ui.composables.editor.collections.ItemHoverBorderModifier
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
 import kiwi.hoonkun.ui.composables.editor.details.ItemDetailContent
+import kiwi.hoonkun.ui.reusables.MinimizableAnimatedContent
 import kiwi.hoonkun.ui.reusables.minimizableAnimateEnterExit
 import kiwi.hoonkun.ui.reusables.offsetRelative
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
@@ -150,7 +151,7 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
             modifier = Modifier.width(950.dp)
                 .padding(horizontal = 32.dp)
         ) {
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = item,
                 transitionSpec = {
                     val enter = fadeIn() + slideInVertically { with(density) { -30.dp.roundToPx() } }

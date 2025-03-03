@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import minecraft.dungeons.resources.DungeonsTower
 import minecraft.dungeons.values.*
+import org.json.JSONArray
 import org.json.JSONObject
 import utils.*
 import java.util.*
@@ -75,13 +76,14 @@ class MutableDungeons(
 
     val hasInitialTower = from.getJSONObject(FIELD_MISSION_STATES_MAP)?.has(FIELD_TOWER_STATES) ?: false
     var includeEditedTower by mutableStateOf(false)
-    val tower = from
-        .tryOrNull { getJSONObject(FIELD_MISSION_STATES_MAP) }
-        ?.tryOrNull { getJSONObject(FIELD_TOWER_STATES) }
-        ?.tryOrNull { getJSONArray(FIELD_MISSION_STATES) }
-        ?.tryOrNull { getJSONObject(0) }
-        ?.let { TowerMissionState(it) }
-        ?: TowerMissionState(uniqueSaveId)
+    var tower by mutableStateOf(
+        from
+            .tryOrNull { getJSONObject(FIELD_MISSION_STATES_MAP) }
+            ?.tryOrNull { getJSONObject(FIELD_TOWER_STATES) }
+            ?.tryOrNull { getJSONArray(FIELD_MISSION_STATES) }
+            ?.tryOrNull { getJSONObject(0) }
+            ?.let { TowerMissionState(it) }
+    )
 
     fun export() = JSONObject(from.toString())
         .apply {
@@ -89,8 +91,18 @@ class MutableDungeons(
             replace(FIELD_STORAGE_CHEST_ITEMS, storageItems.map { it.export() })
             replace(FIELD_CURRENCIES, currencies.map { it.export() })
             replace(FIELD_XP, xp.value)
-            if (includeEditedTower)
-                replace(FIELD_MISSION_STATES_MAP, getJSONObject(FIELD_MISSION_STATES_MAP).put(FIELD_TOWER_STATES, tower.export()))
+
+            if (!includeEditedTower) return@apply
+
+            val capturedTower = tower
+            if (capturedTower == null) {
+                getJSONObject(FIELD_MISSION_STATES_MAP).remove(FIELD_TOWER_STATES)
+            } else {
+                val towerStates = JSONObject()
+                val missionStates = JSONArray().apply { put(capturedTower.export()) }
+                towerStates.put(FIELD_MISSION_STATES, missionStates)
+                getJSONObject(FIELD_MISSION_STATES_MAP).replace(FIELD_TOWER_STATES, towerStates)
+            }
         }
 
     companion object {

@@ -66,7 +66,7 @@ private fun Content(item: MutableDungeons.Item, editor: EditorState?) {
     val itemUpdateSlideOffset = with(density) { -30.dp.roundToPx() }
 
     Box {
-        AnimatedContent(
+        MinimizableAnimatedContent(
             targetState = item.skeleton,
             transitionSpec = {
                 val enter = fadeIn() + slideInHorizontally { -itemUpdateSlideOffset }
@@ -117,7 +117,7 @@ private fun Content(item: MutableDungeons.Item, editor: EditorState?) {
                 }
             }
 
-            AnimatedContent(
+            MinimizableAnimatedContent(
                 targetState = item.skeleton,
                 transitionSpec = {
                     val enter = fadeIn() + slideInHorizontally { itemUpdateSlideOffset }
