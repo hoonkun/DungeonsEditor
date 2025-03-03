@@ -112,7 +112,11 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
                 val onItemClick = {
                     val capturedItem = item
                     if (capturedItem != null) {
+                        if (capturedItem.skeleton.unique && !it.unique) capturedItem.rarity = DungeonsItem.Rarity.Common
+                        else if (!capturedItem.skeleton.unique && it.unique) capturedItem.rarity = DungeonsItem.Rarity.Unique
+
                         capturedItem.type = it.type
+
                         if (capturedItem.skeleton.variant == DungeonsItem.Variant.Armor) {
                             capturedItem.armorProperties.clear()
                             capturedItem.armorProperties.addAll(
