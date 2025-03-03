@@ -1,16 +1,11 @@
 package kiwi.hoonkun.ui.composables.editor.tower
 
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,11 +23,14 @@ import androidx.compose.ui.zIndex
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.EmptyItemSlot
+import kiwi.hoonkun.ui.composables.editor.collections.ItemHoverBorderModifier
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
+import kiwi.hoonkun.ui.composables.overlays.tower.TowerItemModificationOverlay
 import kiwi.hoonkun.ui.composables.overlays.tower.TowerTileChallengeOverlay
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
+import kiwi.hoonkun.ui.states.Overlay
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
@@ -64,7 +62,7 @@ fun BoxScope.TowerEditor(
         }
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(32.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
 
@@ -86,7 +84,7 @@ fun BoxScope.TowerEditor(
                 .weight(1f)
                 .then(scrollableFadeModifier)
                 .verticalScroll(rememberScrollState())
-                .padding(top = 48.dp, bottom = scrollableFadeDistance),
+                .padding(top = 48.dp, bottom = scrollableFadeDistance, start = 16.dp, end = 16.dp),
         ) {
             Header("타워 기본 정보")
 
@@ -184,13 +182,14 @@ private fun TowerFloorEditor(
         }
 
         TowerFloorField("지형 및 도전") {
+            val onClick = { overlays.make(enter = fadeIn(), exit = fadeOut()) { TowerTileChallengeOverlay(config, config.tile, config.challenges, it) } }
             TowerRetroButton(
-                onClick = { overlays.make { TowerTileChallengeOverlay(config, config.tile, config.challenges, it) } },
+                onClick = onClick,
                 modifier = Modifier.weight(1.1f),
                 content = { Text(LocalizeTowerTile(config.tile)) },
             )
             TowerRetroButton(
-                onClick = { overlays.make { TowerTileChallengeOverlay(config, config.tile, config.challenges, it) } },
+                onClick = onClick,
                 modifier = Modifier.weight(2f),
                 content = { Text(config.challenges.getOrNull(0) ?: "-") }
             )
@@ -225,6 +224,8 @@ private fun TowerFloorEditor(
 @Composable
 private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionState.Info.PlayerData) {
 
+    val overlays = LocalOverlayState.current
+
     val equipments = player.playerItems.slice(indices = 0..<3)
     val artifacts = player.playerItems.padEnd(minSize = 6, factory = { null }).slice(3..<6)
 
@@ -234,15 +235,40 @@ private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionSt
     ) {
         Header("${index + 1} 번째 플레이어")
 
+        var selected by remember { mutableStateOf(-1) }
+
+        val makeItemOverlay = { index: Int ->
+            selected = index
+            val item = if (index in 0..<3) equipments[index] else artifacts[index - 3]
+
+            overlays.make(
+                backdropOptions = Overlay.BackdropOptions(
+                    blur = false,
+                    alpha = 0f,
+                    onClick = { selected = -1; destroy(it.id) }
+                ),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                TowerItemModificationOverlay(
+                    oldItem = item,
+                    onUpdate = { newItem -> player.playerItems[index] = newItem },
+                    requestClose = { selected = -1; it() }
+                )
+            }
+        }
+
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            equipments.forEach {
-                ItemSlot(it, modifier = ItemModifier())
+            equipments.forEachIndexed { index, item ->
+                ItemSlot(item, modifier = ItemModifier(selected == index) { makeItemOverlay(index) })
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            artifacts.forEach {
-                if (it == null) EmptyItemSlot(modifier = ItemModifier())
-                else ItemSlot(it, modifier = ItemModifier())
+            artifacts.forEachIndexed { index, item ->
+                val offsetIndex = index + 3
+                val modifier = ItemModifier(selected == offsetIndex) { makeItemOverlay(offsetIndex) }
+                if (item == null) EmptyItemSlot(modifier = modifier)
+                else ItemSlot(item, modifier = modifier)
             }
         }
 
@@ -270,8 +296,18 @@ private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionSt
     }
 }
 
-@Stable
-private fun RowScope.ItemModifier() = Modifier.aspectRatio(1f / 1f).weight(1f)
+@Composable
+private fun RowScope.ItemModifier(selected: Boolean, onClick: () -> Unit): Modifier {
+    val interaction = rememberMutableInteractionSource()
+    val hovered by interaction.collectIsHoveredAsState()
+
+    return Modifier
+        .aspectRatio(1f / 1f)
+        .weight(1f)
+        .hoverable(interaction)
+        .clickable(interaction, null) { onClick() }
+        .then(ItemHoverBorderModifier(selected = selected, hovered = hovered))
+}
 
 
 @Composable

@@ -1,6 +1,7 @@
 package kiwi.hoonkun.ui.composables.editor.details
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,19 +11,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.round
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.overlays.*
-import kiwi.hoonkun.ui.reusables.*
+import kiwi.hoonkun.ui.reusables.MinimizableAnimatedContent
+import kiwi.hoonkun.ui.reusables.defaultFadeIn
+import kiwi.hoonkun.ui.reusables.defaultFadeOut
+import kiwi.hoonkun.ui.reusables.minimizableContentTransform
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
@@ -51,74 +54,110 @@ fun ItemDetail(item: MutableDungeons.Item?, editor: EditorState) {
 }
 
 @Composable
-private fun Content(item: MutableDungeons.Item, editor: EditorState) {
+fun ItemDetailContent(item: MutableDungeons.Item) {
+    Content(item, null)
+}
+
+@Composable
+private fun Content(item: MutableDungeons.Item, editor: EditorState?) {
     val overlays = LocalOverlayState.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredHeightIn(min = 450.dp)
-            .drawBehind {
-                drawImage(
-                    image = item.skeleton.largeIcon,
-                    dstOffset = Offset(size.width * 0.35f - 10f.dp.toPx(), 60f.dp.toPx()).round(),
-                    dstSize = Size(size.width * 0.65f, size.width * 0.65f).round(),
-                    alpha = 0.25f
+    val density = LocalDensity.current
+    val itemUpdateSlideOffset = with(density) { -30.dp.roundToPx() }
+
+    Box {
+        AnimatedContent(
+            targetState = item.skeleton,
+            transitionSpec = {
+                val enter = fadeIn() + slideInHorizontally { -itemUpdateSlideOffset }
+                val exit = fadeOut() + slideOutHorizontally { -itemUpdateSlideOffset }
+
+                enter togetherWith exit using SizeTransform(false)
+            },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset((-10).dp, 60.dp)
+        ) {
+            Image(
+                bitmap = it.largeIcon,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth(0.65f)
+                    .aspectRatio(1f)
+                    .alpha(0.25f)
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeightIn(min = 450.dp)
+                .padding(top = 20.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 10.dp)
+            ) {
+                ItemRarityButton(item.skeleton, item.rarity) { item.rarity = it }
+                if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
+                    Spacer(modifier = Modifier.width(7.dp))
+                    ItemNetheriteEnchantButton(
+                        enchantment = item.netheriteEnchant
+                    ) { enchantment ->
+                        overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
+                            EnchantmentOverlay(
+                                holder = item,
+                                initialSelected = enchantment,
+                                requestClose = it
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(7.dp))
+                    ItemModifiedButton(item)
+                }
+            }
+
+            AnimatedContent(
+                targetState = item.skeleton,
+                transitionSpec = {
+                    val enter = fadeIn() + slideInHorizontally { itemUpdateSlideOffset }
+                    val exit = fadeOut() + slideOutHorizontally { itemUpdateSlideOffset }
+
+                    enter togetherWith exit using SizeTransform(false)
+                },
+            ) {
+                Column {
+                    ItemName(it.name)
+                    ItemDescription(it.flavour)
+                    ItemDescription(it.description)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (item.skeleton.variant == DungeonsItem.Variant.Armor) {
+                ItemArmorProperties(item, item.armorProperties)
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PowerEditField(
+                    power = item.power,
+                    onPowerChange = { item.power = it },
+                    hideLabel = ArcticSettings.locale == "en"
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                if (editor != null) ItemAlterRight(item, editor)
+            }
+
+            if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
+                Spacer(modifier = Modifier.height(30.dp))
+                ItemEnchantments(
+                    holder = item,
+                    enchantments = item.enchantments.toImmutableList(),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            .padding(top = 20.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 10.dp)
-        ) {
-            ItemRarityButton(item.skeleton, item.rarity) { item.rarity = it }
-            if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
-                Spacer(modifier = Modifier.width(7.dp))
-                ItemNetheriteEnchantButton(
-                    enchantment = item.netheriteEnchant
-                ) { enchantment ->
-                    overlays.make(enter = defaultFadeIn(), exit = defaultFadeOut()) {
-                        EnchantmentOverlay(
-                            holder = item,
-                            initialSelected = enchantment,
-                            requestClose = it
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(7.dp))
-                ItemModifiedButton(item)
-            }
-        }
-
-        ItemName(item.skeleton.name)
-        ItemDescription(item.skeleton.flavour)
-        ItemDescription(item.skeleton.description)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        if (item.skeleton.variant == DungeonsItem.Variant.Armor) {
-            ItemArmorProperties(item, item.armorProperties)
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            PowerEditField(
-                power = item.power,
-                onPowerChange = { item.power = it },
-                hideLabel = ArcticSettings.locale == "en"
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            ItemAlterRight(item, editor)
-        }
-
-        if (item.skeleton.variant != DungeonsItem.Variant.Artifact) {
-            Spacer(modifier = Modifier.height(30.dp))
-            ItemEnchantments(
-                holder = item,
-                enchantments = item.enchantments.toImmutableList(),
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }

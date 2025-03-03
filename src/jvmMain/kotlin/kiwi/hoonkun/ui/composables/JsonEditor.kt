@@ -251,7 +251,7 @@ private fun JsonEditorContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(bottom = 32.dp, start = 32.dp, end = 32.dp)
+                            .padding(bottom = 32.dp, start = 32.dp, end = 16.dp)
                     ) {
                         TowerEditor(
                             state = editorState.data.tower,

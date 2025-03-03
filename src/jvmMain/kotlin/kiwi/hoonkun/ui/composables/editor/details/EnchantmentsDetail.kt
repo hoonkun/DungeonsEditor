@@ -1,9 +1,6 @@
 package kiwi.hoonkun.ui.composables.editor.details
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -18,6 +15,7 @@ import kiwi.hoonkun.ui.reusables.defaultFadeIn
 import kiwi.hoonkun.ui.reusables.defaultFadeOut
 import kiwi.hoonkun.ui.reusables.drawEnchantmentRune
 import kiwi.hoonkun.ui.states.LocalOverlayState
+import kiwi.hoonkun.ui.units.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import minecraft.dungeons.states.MutableDungeons
@@ -31,6 +29,7 @@ fun ItemEnchantments(
     modifier: Modifier = Modifier
 ) {
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .aspectRatio(3f / 1f)
             .drawBehind { drawEnchantmentRune() }
@@ -41,6 +40,7 @@ fun ItemEnchantments(
                 holder = holder,
                 slot = slot,
                 modifier = Modifier
+                    .requiredWidthIn(max = 225.dp)
                     .weight(1f)
                     .aspectRatio(1f / 1f)
             )

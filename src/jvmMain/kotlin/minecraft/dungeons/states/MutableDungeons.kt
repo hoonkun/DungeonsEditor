@@ -76,10 +76,10 @@ class MutableDungeons(
     val hasInitialTower = from.getJSONObject(FIELD_MISSION_STATES_MAP)?.has(FIELD_TOWER_STATES) ?: false
     var includeEditedTower by mutableStateOf(false)
     val tower = from
-        .getJSONObject(FIELD_MISSION_STATES_MAP)
-        ?.getJSONObject(FIELD_TOWER_STATES)
-        ?.getJSONArray(FIELD_MISSION_STATES)
-        ?.getJSONObject(0)
+        .tryOrNull { getJSONObject(FIELD_MISSION_STATES_MAP) }
+        ?.tryOrNull { getJSONObject(FIELD_TOWER_STATES) }
+        ?.tryOrNull { getJSONArray(FIELD_MISSION_STATES) }
+        ?.tryOrNull { getJSONObject(0) }
         ?.let { TowerMissionState(it) }
         ?: TowerMissionState(uniqueSaveId)
 
@@ -138,14 +138,14 @@ class MutableDungeons(
         type: String,
         power: SerializedDungeonsPower,
         rarity: DungeonsItem.Rarity,
-        inventoryIndex: Int?,
+        inventoryIndex: Int? = null,
         equipmentSlot: DungeonsItem.EquipmentSlot? = null,
         netheriteEnchant: Enchantment? = null,
         enchantments: List<Enchantment>? = null,
         armorProperties: List<ArmorProperty>? = null,
         modified: Boolean? = null,
         timesModified: Int? = null,
-        upgraded: Boolean,
+        upgraded: Boolean = false,
         markedNew: Boolean? = null
     ) {
         val internalId = UUID.randomUUID().toString()
@@ -495,7 +495,7 @@ class MutableDungeons(
                 playerEnchantmentPointsGranted: Int = 3,
                 playerIsTowerOwner: Boolean = true,
                 playerLastFloorIndex: Int = 0,
-                playerItems: List<Item> = emptyList()
+                playerItems: List<Item> = DefaultPlayerItems
             ) {
                 var playerArrowsAmmount by mutableStateOf(playerArrowsAmmount)
                 var playerEnchantmentPointsGranted by mutableStateOf(playerEnchantmentPointsGranted)
@@ -504,6 +504,12 @@ class MutableDungeons(
                 val playerItems = playerItems.toMutableStateList()
 
                 companion object {
+                    private val DefaultPlayerItems = listOf(
+                        Item("Sword", 1.0.asSerializedPower(), DungeonsItem.Rarity.Common),
+                        Item("MercenaryArmor", 1.0.asSerializedPower(), DungeonsItem.Rarity.Common),
+                        Item("Bow", 1.0.asSerializedPower(), DungeonsItem.Rarity.Common),
+                    )
+
                     private const val FIELD_LOCAL_SAVE_GUID = "localSaveGUID"
                     private const val FIELD_ARROWS_AMOUNT = "playerArrowsAmmount"
                     private const val FIELD_ENCHANTMENT_POINTS_GRANTED = "playerEnchantmentPointsGranted"

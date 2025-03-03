@@ -6,6 +6,9 @@ import org.json.JSONObject
 inline fun <T>JSONObject.tryOrNull(block: JSONObject.() -> T): T? =
     try { block(this) } catch (_: Exception) { null }
 
+inline fun <T>JSONArray.tryOrNull(block: JSONArray.() -> T): T? =
+    try { block(this) } catch (_: Exception) { null }
+
 inline fun <reified T>JSONObject.replace(key: String, value: T): JSONObject =
     apply {
         remove(key)
