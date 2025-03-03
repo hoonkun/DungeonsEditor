@@ -1,7 +1,6 @@
 package kiwi.hoonkun.ui.composables.overlays.tower
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -17,10 +16,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.roundToIntSize
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
@@ -33,6 +34,7 @@ import kiwi.hoonkun.ui.reusables.offsetRelative
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsSkeletons
+import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.values.DungeonsItem
@@ -68,8 +70,8 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
             .drawBehind {
                 drawRect(
                     Brush.horizontalGradient(
-                        0f to Color(0xff080808).copy(alpha = 0.75f),
-                        1f to Color(0xff080808).copy(alpha = 0f),
+                        0f to Color(0xff000000).copy(alpha = 0.75f),
+                        1f to Color(0xff000000).copy(alpha = 0f),
                         startX = size.width * 0.45f,
                         endX = size.width
                     )
@@ -90,8 +92,16 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
             ),
             modifier = Modifier
                 .fillMaxHeight()
-                .background(color = Color.Black)
-                .padding(horizontal = 48.dp)
+                .clipToBounds()
+                .drawBehind {
+                    val image = DungeonsTextures["/Textures/InventoryNew/master_inventory_backdrop_switch.png"]
+                    drawImage(
+                        image = image,
+                        dstSize = Size(size.height * (image.width / image.height), size.height).roundToIntSize(),
+                        colorFilter = ColorFilter.lighting(Color(0.75f, 0.75f, 0.75f), Color.Black)
+                    )
+                }
+                .padding(horizontal = 36.dp)
         ) {
 
             items(filteredEntries) {
@@ -139,11 +149,6 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
             contentAlignment = Alignment.Center,
             modifier = Modifier.width(950.dp)
                 .padding(horizontal = 32.dp)
-                .drawWithCache {
-                    val path = RetroIndicator()
-                    onDrawBehind { drawPath(path, color = Color.Black) }
-                }
-                .padding(start = 64.dp, end = 64.dp, top = 16.dp)
         ) {
             AnimatedContent(
                 targetState = item,
@@ -154,7 +159,30 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
                     enter togetherWith exit using SizeTransform(false)
                 },
             ) {
-                Box(modifier = Modifier.clipToBounds().padding(bottom = 12.dp)) {
+                Box(
+                    modifier = Modifier
+                        .clipToBounds()
+                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                        .drawWithCache {
+                            val path = RetroIndicator()
+                            val image = DungeonsTextures["/Textures/InventoryNew/master_inventory_backdrop_switch.png"]
+                            onDrawBehind {
+                                drawPath(
+                                    path = path,
+                                    color = Color.Black,
+                                )
+                                scale(2f) {
+                                    drawImage(
+                                        image = image,
+                                        blendMode = BlendMode.SrcIn,
+                                        dstSize = Size(size.height * (image.width / image.height), size.height).roundToIntSize(),
+                                        colorFilter = ColorFilter.lighting(Color(0.75f, 0.75f, 0.75f), Color.Black)
+                                    )
+                                }
+                            }
+                        }
+                        .padding(start = 64.dp, end = 64.dp, top = 24.dp)
+                ) {
                     if (it != null)
                         ItemDetailContent(it)
                     else
@@ -163,7 +191,8 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .alpha(0.7f)
-                                .padding(vertical = 64.dp)
+                                .padding(top = 152.dp, bottom = 192.dp)
+                                .fillMaxWidth()
                         )
                 }
             }
@@ -171,7 +200,7 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .offset(x = 64.dp, y = 24.dp)
+                    .offset(y = 16.dp)
                     .offsetRelative(y = 1.0f)
             ) {
                 RetroButton(
