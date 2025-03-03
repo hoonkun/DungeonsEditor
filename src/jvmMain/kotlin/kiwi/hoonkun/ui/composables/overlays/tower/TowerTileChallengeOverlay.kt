@@ -118,8 +118,12 @@ fun AnimatedVisibilityScope?.TowerTileChallengeOverlay(
 
                         if (newChallenge == null)
                             holder.challenges.clear()
-                        else
-                            holder.challenges[0] = newChallenge
+                        else {
+                            if (holder.challenges.isNotEmpty())
+                                holder.challenges[0] = newChallenge
+                            else if (holder.challenges.isEmpty())
+                                holder.challenges.add(newChallenge)
+                        }
 
                         requestClose()
                     },
