@@ -29,8 +29,10 @@ import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.EmptyItemSlot
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
+import kiwi.hoonkun.ui.composables.overlays.tower.TowerTileChallengeOverlay
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
+import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
@@ -156,6 +158,9 @@ private fun TowerFloorEditor(
     info: MutableDungeons.TowerMissionState.Info.InnerInfo.Floor,
     config: MutableDungeons.TowerMissionState.Info.Config.Floor
 ) {
+
+    val overlays = LocalOverlayState.current
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -180,12 +185,12 @@ private fun TowerFloorEditor(
 
         TowerFloorField("지형 및 도전") {
             TowerRetroButton(
-                onClick = { },
+                onClick = { overlays.make { TowerTileChallengeOverlay(config, config.tile, config.challenges, it) } },
                 modifier = Modifier.weight(1.1f),
                 content = { Text(LocalizeTowerTile(config.tile)) },
             )
             TowerRetroButton(
-                onClick = { },
+                onClick = { overlays.make { TowerTileChallengeOverlay(config, config.tile, config.challenges, it) } },
                 modifier = Modifier.weight(2f),
                 content = { Text(config.challenges.getOrNull(0) ?: "-") }
             )

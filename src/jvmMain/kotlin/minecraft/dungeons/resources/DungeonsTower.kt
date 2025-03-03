@@ -1,5 +1,6 @@
 package minecraft.dungeons.resources
 
+import kiwi.hoonkun.resources.Localizations
 import org.json.JSONObject
 import pak.PakIndex
 import utils.transformWithJsonObject
@@ -34,6 +35,19 @@ object DungeonsTower {
     val AreaLocalizations = listOf(
         "boss", "arena", "igloo", "top_tempest", "tempest", "inhabitant",
         "puzzle", "alt", "entrance", "bottom", "top", "sec"
+    )
+
+    val ChallengeCommonLocalizations = Localizations.keys()
+        .filter { it.startsWith("tower_challenge_common_") }
+        .map { it.removePrefix("tower_challenge_common_") }
+        .sortedByDescending { it.length }
+    val ChallengeExactLocalizations = Localizations.keys()
+        .filter { it.startsWith("tower_challenge_exact_") }
+        .map { it.removePrefix("tower_challenge_exact_") }
+        .sortedByDescending { it.length }
+
+    val AreaMediumNames = listOf(
+        "soggyswamp" to "ss", "abyssal" to "am", "cacti" to "cc", "windswept" to "wp"
     )
 
     object Initializer {

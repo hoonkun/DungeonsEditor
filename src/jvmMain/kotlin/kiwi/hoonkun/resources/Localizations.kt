@@ -18,4 +18,6 @@ object Localizations {
             acc.replace("{$index}", s)
         }
 
+    fun keys() = texts.getValue("ko-KR").keys
+
 }
