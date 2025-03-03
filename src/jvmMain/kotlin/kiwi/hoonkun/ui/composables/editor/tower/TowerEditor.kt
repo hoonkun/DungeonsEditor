@@ -331,7 +331,13 @@ private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionSt
             ) {
                 TowerItemModificationOverlay(
                     oldItem = item,
-                    onUpdate = { newItem -> player.playerItems[index] = newItem },
+                    onUpdate = { newItem ->
+                        if (player.playerItems.size <= index) {
+                            player.playerItems.add(newItem)
+                        } else {
+                            player.playerItems[index] = newItem
+                        }
+                    },
                     requestClose = { selected = -1; it() }
                 )
             }
