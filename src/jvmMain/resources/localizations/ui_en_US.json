@@ -237,5 +237,6 @@
   "tower_edit_desc_13": "So that merchants can spawn in proper location.",
   "tower_edit_desc_14": "The developer is not responsible for any data loss and any issues that occur with your account if you subsequently press \"Continue Edit\"",
   "tower_edit_back": "Back",
-  "tower_edit_confirm": "Continue Edit"
+  "tower_edit_confirm": "Continue Edit",
+  "pick_from_equipped": "Pick from Equipped Items"
 }

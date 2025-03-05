@@ -210,7 +210,7 @@ class MutableDungeons(
             markedNew = from.tryOrNull { getBoolean(FIELD_MARKED_NEW) }
         )
 
-        fun copy() = Item(
+        fun copy(markedNew: Boolean = true) = Item(
             power = _power,
             rarity = rarity,
             type = type,
@@ -222,7 +222,7 @@ class MutableDungeons(
             timesModified = timesModified,
             inventoryIndex = 0,
             equipmentSlot = null,
-            markedNew = true
+            markedNew = markedNew
         )
 
         fun export() =

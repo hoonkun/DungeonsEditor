@@ -179,7 +179,7 @@ fun BoxScope.TowerEditor(
                     }
 
                     capturedState.towerInfo.towerPlayersData
-                        .forEachIndexed { index, player -> TowerPlayerEditor(index, player) }
+                        .forEachIndexed { index, player -> TowerPlayerEditor(editor.data, index, player) }
 
                     Spacer(modifier = Modifier.height(32.dp))
 
@@ -312,7 +312,7 @@ private fun TowerFloorEditor(
 
 
 @Composable
-private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionState.Info.PlayerData) {
+private fun TowerPlayerEditor(dungeons: MutableDungeons, index: Int, player: MutableDungeons.TowerMissionState.Info.PlayerData) {
 
     val overlays = LocalOverlayState.current
 
@@ -341,6 +341,8 @@ private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionSt
                 exit = fadeOut()
             ) {
                 TowerItemModificationOverlay(
+                    dungeons = dungeons,
+                    index = index,
                     oldItem = item,
                     onUpdate = { newItem ->
                         if (player.playerItems.size <= index) {

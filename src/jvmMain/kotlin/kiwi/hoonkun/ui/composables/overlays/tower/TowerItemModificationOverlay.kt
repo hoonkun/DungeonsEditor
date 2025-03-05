@@ -44,12 +44,14 @@ import minecraft.dungeons.values.toSerialized
 
 @Composable
 fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
+    dungeons: MutableDungeons,
+    index: Int,
     oldItem: MutableDungeons.Item?,
     onUpdate: (MutableDungeons.Item) -> Unit,
     requestClose: () -> Unit
 ) {
 
-    var item by remember(oldItem) { mutableStateOf(oldItem?.copy()?.also { it.markedNew = false }) }
+    var item by remember(oldItem) { mutableStateOf(oldItem?.copy(markedNew = false)) }
 
     val density = LocalDensity.current
 
@@ -63,6 +65,8 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
     val initialFirstVisibleItemIndex = filteredEntries
         .indexOfFirst { it.type == item?.type }
         .coerceAtLeast(0)
+
+    val equippedItem = dungeons.equippedItems[index]
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -209,6 +213,15 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
                     .offsetRelative(y = 1.0f)
             ) {
                 RetroButton(
+                    text = Localizations["pick_from_equipped"],
+                    color = Color(0xffffffff),
+                    hoverInteraction = RetroButtonHoverInteraction.Overlay,
+                    enabled = equippedItem != null,
+                    onClick = { if (equippedItem != null) item = equippedItem.copy(markedNew = false) },
+                    modifier = Modifier.size(260.dp, 55.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                RetroButton(
                     text = Localizations["cancel"],
                     color = Color(0xffff6e25),
                     hoverInteraction = RetroButtonHoverInteraction.Outline,
@@ -229,3 +242,5 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
     }
 
 }
+
+operator fun List<MutableDungeons.Item?>.component6(): MutableDungeons.Item? = this[5]
