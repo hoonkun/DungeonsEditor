@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
+import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.units.dp
 
@@ -149,14 +150,14 @@ fun TextFieldValidatable(
                     val offsetModifier = Modifier.offset { IntOffset(0, if (direction == PopupDirection.Bottom) 10.dp.roundToPx() else 0) }
                     if (capturedValid) {
                         RetroButton(
-                            text = "확정",
+                            text = Localizations["confirm_input"],
                             color = Color(0xff3f8e4f),
                             hoverInteraction = RetroButtonHoverInteraction.Outline,
                             modifier = Modifier.size(110.dp, 50.dp).then(offsetModifier),
                             onClick = { onSubmit(value) },
                         )
                     } else {
-                        Text(text = "잘못된 값이에요!", modifier = offsetModifier)
+                        Text(text = Localizations["invalid_value"], modifier = offsetModifier)
                     }
                 }
             }

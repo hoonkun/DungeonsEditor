@@ -20,6 +20,7 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
+import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
 import kiwi.hoonkun.ui.composables.editor.collections.EmptyItemSlot
@@ -71,9 +72,9 @@ fun BoxScope.TowerEditor(
     val deleteTowerWithConfirm = {
         overlays.make {
             TowerConfirmOverlay(
-                title = "정말 모든 타워 데이터를 삭제하시겠어요?",
-                description = "이 작업은 실행취소할 수 없어요.",
-                confirmLabel = "삭제하기",
+                title = Localizations["tower_delete_all_title"],
+                description = Localizations["tower_delete_all_description"],
+                confirmLabel = Localizations["tower_delete_confirm"],
                 requestClose = it,
                 onConfirm = { editor.data.tower = null; it() }
             )
@@ -130,36 +131,36 @@ fun BoxScope.TowerEditor(
                         .verticalScroll(rememberScrollState())
                         .padding(top = 48.dp, bottom = scrollableFadeDistance, start = 16.dp, end = 16.dp),
                 ) {
-                    Header("타워 기본 정보")
+                    Header(Localizations["tower_header_info"])
 
                     FieldsFlowRow {
                         IntegerValidatorField(
-                            label = "현재 진행중인 층수",
+                            label = Localizations["tower_field_current_floor"],
                             value = capturedState.towerInfo.towerInfo.towerInfoCurrentFloor,
                             onChange = { capturedState.towerInfo.towerInfo.towerInfoCurrentFloor = it },
                             modifier = Modifier.weight(1f).zIndex(1f)
                         )
                         IntegerValidatorField(
-                            label = "진행 중 쓰러진 횟수",
+                            label = Localizations["tower_field_lives_lost"],
                             value = capturedState.livesLost,
                             onChange = { capturedState.livesLost = it },
                             modifier = Modifier.weight(1f).zIndex(1f)
                         )
                         CheckField(
-                            label = "현재 층의 완료 여부",
+                            label = Localizations["tower_field_current_floor_completed"],
                             value = capturedState.towerInfo.towerCurrentFloorWasCompleted,
                             onChange = { capturedState.towerInfo.towerCurrentFloorWasCompleted = it },
                             modifier = Modifier.weight(1f)
                         )
                         IntegerValidatorField(
-                            label = "진행 중 쓰러뜨린 보스의 수",
+                            label = Localizations["tower_field_bosses_killed"],
                             value = capturedState.towerInfo.towerInfo.towerInfoBossesKilled,
                             onChange = { capturedState.towerInfo.towerInfo.towerInfoBossesKilled = it },
                             modifier = Modifier.weight(1f)
                         )
                     }
 
-                    RowRepeatedField(label = "설정 난이도", 1..3) {
+                    RowRepeatedField(label = Localizations["tower_field_difficulty"], 1..3) {
                         TowerRetroButton(
                             selected = capturedState.missionDifficulty.difficulty == it,
                             onClick = { capturedState.missionDifficulty.difficulty = it },
@@ -168,7 +169,7 @@ fun BoxScope.TowerEditor(
                         )
                     }
 
-                    RowRepeatedField(label = "위협 레벨", 1..7) {
+                    RowRepeatedField(label = Localizations["tower_field_threat_level"], 1..7) {
                         TowerRetroButton(
                             selected = capturedState.missionDifficulty.threatLevel == it,
                             onClick = { capturedState.missionDifficulty.threatLevel = it },
@@ -185,7 +186,7 @@ fun BoxScope.TowerEditor(
                     TowerRetroButton(
                         onClick = deleteTowerWithConfirm,
                         color = { Color(0xffff6e25) },
-                        content = { Text("타워 삭제") },
+                        content = { Text(Localizations["tower_delete_all_button"]) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -196,17 +197,14 @@ fun BoxScope.TowerEditor(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Text("타워 테이터가 없습니다.", modifier = Modifier.padding(bottom = 24.dp), fontSize = 30.sp)
+                Text(Localizations["tower_no_data"], modifier = Modifier.padding(bottom = 24.dp), fontSize = 30.sp)
                 Column(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
                     val style = TextStyle(color = Color.White.copy(alpha = 0.5f), lineHeight = 30.sp)
-                    val lines = listOf(
-                        "타워는 시즌 별 고유 ID 로 검증이 진행되므로 신규로 생성할 수 없습니다.",
-                        "대신, 게임 내에서 타워를 시작한 뒤 입구 층에서 '탑 나가기'를 통해 나온 뒤에\n여기에서 수정할 수 있습니다.",
-                        "탑을 나오면서 생기는 디메리트(쓰러진 횟수)도 수정할 수 있습니다."
-                    )
+
+                    val lines = List(3) { Localizations["tower_no_data_desc_${it}"] }
 
                     @Composable
                     fun Line(content: @Composable () -> Unit) = Row { Text("// ", style = style); content() }
@@ -251,9 +249,12 @@ private fun TowerFloorEditor(
             }
             .padding(16.dp)
     ) {
-        Header(if (index == 0) "입구 층" else "$index 층")
+        Header(
+            if (index == 0) Localizations["tower_header_entrance_floor"]
+            else Localizations["tower_header_floor", "$index"]
+        )
 
-        TowerFloorField("층 유형") {
+        TowerFloorField(Localizations["tower_floor_field_type"]) {
             MutableDungeons.TowerMissionState.Info.InnerInfo.Floor.Type.entries.forEach {
                 TowerRetroButton(
                     selected = it == info.towerFloorType,
@@ -264,7 +265,7 @@ private fun TowerFloorEditor(
             }
         }
 
-        TowerFloorField("지형 및 도전") {
+        TowerFloorField(Localizations["tower_floor_field_tile_and_challenge"]) {
             val onClick = { overlays.make(enter = fadeIn(), exit = fadeOut()) { TowerTileChallengeOverlay(config, config.tile, config.challenges, it) } }
             TowerRetroButton(
                 onClick = onClick,
@@ -284,7 +285,7 @@ private fun TowerFloorEditor(
             )
         }
 
-        TowerFloorField("보상 유형") {
+        TowerFloorField(Localizations["tower_floor_field_rewards"]) {
             config.rewards.forEachIndexed { rewardIndex, configReward ->
                 val rewardBitmap = remember(configReward) {
                     try { configReward.previewBitmap() }
@@ -322,7 +323,7 @@ private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionSt
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(top = 16.dp)
     ) {
-        Header("${index + 1} 번째 플레이어")
+        Header(Localizations["tower_header_player", "${index + 1}"])
 
         var selected by remember { mutableStateOf(-1) }
 
@@ -369,20 +370,20 @@ private fun TowerPlayerEditor(index: Int, player: MutableDungeons.TowerMissionSt
 
         FieldsFlowRow {
             IntegerValidatorField(
-                label = "플레이어의 현재 층수",
+                label = Localizations["tower_player_field_floor"],
                 value = player.playerLastFloorIndex,
                 onChange = { player.playerLastFloorIndex = it },
                 modifier = Modifier.weight(1f)
             )
             IntegerValidatorField(
-                label = "보유 화살 수",
+                label = Localizations["tower_player_field_arrows"],
                 value = player.playerArrowsAmmount,
                 onChange = { player.playerArrowsAmmount = it },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.weight(1f))
             IntegerValidatorField(
-                label = "보유 효과부여 포인트",
+                label = Localizations["tower_player_field_points"],
                 value = player.playerEnchantmentPointsGranted,
                 onChange = { player.playerEnchantmentPointsGranted = it },
                 modifier = Modifier.weight(1f)
@@ -569,13 +570,16 @@ private fun IncludeEditedTowerDataSwitcher(
                 linkInteractionListener = { onClick(!capturedCurrent) }
             )
             val textFirstLine = buildAnnotatedString {
-                append("수정한 탑 데이터를 ")
-                withLink(annotation) { append(if (capturedCurrent) "사용합니다" else "사용하지 않습니다.") }
-            }
+                val a = { withLink(annotation) { append(Localizations["tower_use_edited_data_objective_${capturedCurrent}"]) } }
+                val d = { append(" ") }
+                val b = { append(Localizations["tower_use_edited_data"]) }
 
-            val textSecondLine =
-                if (capturedCurrent) "현재 보이는 데이터를 저장 시 반영합니다."
-                else "수정한 데이터를 반영하지 않고 기존 데이터를 유지합니다."
+                if (ArcticSettings.locale == "en") {
+                    a(); d(); b()
+                } else {
+                    b(); d(); a()
+                }
+            }
 
             Column(
                 horizontalAlignment = Alignment.End,
@@ -583,7 +587,7 @@ private fun IncludeEditedTowerDataSwitcher(
             ) {
                 Text(text = textFirstLine)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = textSecondLine, color = Color.White.copy(alpha = 0.6f))
+                Text(text = Localizations["tower_use_edited_data_description_${capturedCurrent}"], color = Color.White.copy(alpha = 0.6f))
             }
         }
     }
@@ -615,14 +619,10 @@ private fun ExperimentalFeatureWarning(
                 verticalArrangement = Arrangement.Bottom,
                 modifier = modifier
             ) {
-                Text(
-                    if (hasInitialTower) "현재 기존 탑 데이터를 수정하고 있습니다."
-                    else "현재 새 탑 데이터를 추가하고 있습니다."
-                )
+                Text(Localizations["tower_experimental_warning_desc_1_${hasInitialTower}"])
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    if (hasInitialTower) "실험적 기능입니다. 일부 기존 데이터가 유실되거나 게임이 제대로 동작하지 않을 수 있습니다."
-                    else "실험적 기능입니다. 로드 시 게임이 제대로 동작하지 않을 수 있습니다.",
+                    Localizations["tower_experimental_warning_desc_2_${hasInitialTower}"],
                     color = Color(0xffff884c)
                 )
             }

@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.overlays.OverlayRoot
@@ -21,39 +22,39 @@ fun TowerModificationWarningOverlay(
 ) {
     OverlayRoot {
         OverlayTitleDescription(
-            title = "타워를 수정하려고 합니다",
+            title = Localizations["tower_edit_warning_title"],
         )
 
         WarningContainer {
-            WarningRed("계정이 정지당할 가능성이 높습니다.")
-            WarningDescription("개발자가 탑 수정 후 플레이 중 '게임 소유권 확인 실패'의 형태로 계정이 정지당한 정황을 확인했습니다.")
-            WarningWhite("수정한 타워는 높은 확률로 제대로 동작하지 않습니다.")
-            WarningDescription("일부 미완성인 내부용 지형 및 도전이 존재하며, 버튼 퍼즐이나 특정 조건에 따라 지형이 변형되는 경우 그 조건에 맞는 도전을 사용해야합니다.")
+            WarningRed(Localizations["tower_edit_desc_1"])
+            WarningDescription(Localizations["tower_edit_desc_2"])
+            WarningWhite(Localizations["tower_edit_desc_3"])
+            WarningDescription(Localizations["tower_edit_desc_4"])
             Spacer(modifier = Modifier.height(0.dp))
-            WarningTurn("그럼에도 수정하려고 하신다면:")
+            WarningTurn(Localizations["tower_edit_desc_5"])
             Spacer(modifier = Modifier.height(0.dp))
-            WarningRed("연구용 부계정을 만드십시오.")
-            WarningDescription("탑을 수정하는 이상 언제든지 계정이 정지당해도 이상하지 않습니다.\n세이브 데이터가 정지당하는 것이 아닌 계정이 정지당하여 해당 마이크로소프트 계정으로 로그인했을 때 시즌보상 등의 제약을 받습니다.")
-            WarningRed("수정한 타워를 30층까지 완료하지 마십시오.")
-            WarningDescription("타워 보상은 충분히 기존 아이템 수정으로도 안전하게 추가할 수 있습니다.")
-            WarningWhite("전투 층에는 반드시 도전이 있어야 합니다.")
-            WarningDescription("그러지 않으면 출구가 정상적으로 생성되지 않아 층에 갇힙니다.")
-            WarningWhite("상인 층의 지형은 반드시 '관계자실' 1, 2, 3중 하나여야 합니다.")
-            WarningDescription("그래야 지형의 일정한 위치에 상인이 스폰될 수 있습니다.")
+            WarningRed(Localizations["tower_edit_desc_6"])
+            WarningDescription(Localizations["tower_edit_desc_7"])
+            WarningRed(Localizations["tower_edit_desc_8"])
+            WarningDescription(Localizations["tower_edit_desc_9"])
+            WarningWhite(Localizations["tower_edit_desc_10"])
+            WarningDescription(Localizations["tower_edit_desc_11"])
+            WarningWhite(Localizations["tower_edit_desc_12"])
+            WarningDescription(Localizations["tower_edit_desc_13"])
             Spacer(modifier = Modifier.height(0.dp))
-            WarningTurn("이후 '계속 수정'을 눌러 발생한 모든 데이터 손실 및 계정에 발생한 문제에 대해 개발자는 책임지지 않습니다.", color = Color(0xffffc14f))
+            WarningTurn(Localizations["tower_edit_desc_14"], color = Color(0xffffc14f))
         }
         Spacer(modifier = Modifier.height(80.dp))
         Row {
             RetroButton(
-                text = "뒤로 가기",
+                text = Localizations["tower_edit_back"],
                 color = Color(0xffffffff),
                 hoverInteraction = RetroButtonHoverInteraction.Overlay,
                 onClick = requestClose
             )
             Spacer(modifier = Modifier.width(75.dp))
             RetroButton(
-                text = "계속 수정",
+                text = Localizations["tower_edit_confirm"],
                 color = Color(0xffff6e25),
                 hoverInteraction = RetroButtonHoverInteraction.Outline,
                 onClick = onConfirm

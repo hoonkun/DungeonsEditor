@@ -192,7 +192,7 @@ fun AnimatedVisibilityScope?.TowerItemModificationOverlay(
                         ItemDetailContent(it)
                     else
                         Text(
-                            text = "왼쪽 목록에서 추가할 아이템을 선택해주세요.",
+                            text = Localizations["tower_item_add"],
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .alpha(0.7f)
