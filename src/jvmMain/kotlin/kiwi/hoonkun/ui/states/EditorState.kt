@@ -17,6 +17,7 @@ class EditorState(
     var view: DungeonsItem.Location by mutableStateOf(DungeonsItem.Location.Inventory)
 
     var isInTowerEditMode: Boolean by mutableStateOf(false)
+    var towerEditEnabled by mutableStateOf(false)
 
     val primary: MutableDungeons.Item? get() = selections[Slot.Primary]
     val secondary: MutableDungeons.Item? get() = selections[Slot.Secondary]

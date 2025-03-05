@@ -27,6 +27,7 @@ import kiwi.hoonkun.ui.composables.editor.collections.ItemHoverBorderModifier
 import kiwi.hoonkun.ui.composables.editor.collections.ItemSlot
 import kiwi.hoonkun.ui.composables.overlays.tower.TowerConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.tower.TowerItemModificationOverlay
+import kiwi.hoonkun.ui.composables.overlays.tower.TowerModificationWarningOverlay
 import kiwi.hoonkun.ui.composables.overlays.tower.TowerTileChallengeOverlay
 import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
@@ -91,6 +92,18 @@ fun BoxScope.TowerEditor(
     ) { capturedState ->
 
         if (capturedState != null) {
+
+            LaunchedEffect(true) {
+                if (editor.towerEditEnabled) return@LaunchedEffect
+
+                overlays.make {
+                    val closeAndBack = { it(); editor.isInTowerEditMode = false }
+                    val confirmAndEdit = { it(); editor.towerEditEnabled = true }
+
+                    TowerModificationWarningOverlay(onConfirm = confirmAndEdit, requestClose = closeAndBack)
+                }
+            }
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize()
@@ -543,7 +556,7 @@ private fun IncludeEditedTowerDataSwitcher(
 
             enter togetherWith exit using SizeTransform(false)
         },
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(end = 16.dp),
         contentAlignment = Alignment.BottomEnd
     ) { (capturedCurrent, capturedHasTower) ->
         if (capturedHasTower) {
