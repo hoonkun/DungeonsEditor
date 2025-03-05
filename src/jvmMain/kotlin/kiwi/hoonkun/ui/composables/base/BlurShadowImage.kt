@@ -38,6 +38,7 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
     bitmap: ImageBitmap,
     enabled: Boolean = true,
     modifier: Modifier,
+    clickableModifier: Modifier? = null,
     contentScale: Float = 1f,
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     contentPaint: () -> Paint = { DefaultPaint },
@@ -83,6 +84,13 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
                 }
                 .padding(contentPadding)
         )
+        if (clickableModifier !== null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .then(clickableModifier)
+            )
+        }
     }
 }
 
@@ -90,6 +98,7 @@ fun <T: BlurShadowImageDrawCache>BlurShadowImage(
 fun BlurShadowImage(
     bitmap: ImageBitmap,
     enabled: Boolean = true,
+    clickableModifier: Modifier? = null,
     modifier: Modifier,
     contentScale: Float = 1f,
     contentPaint: () -> Paint = { DefaultPaint },
@@ -102,6 +111,7 @@ fun BlurShadowImage(
         enabled = enabled,
         modifier = modifier,
         contentPadding = contentPadding,
+        clickableModifier = clickableModifier,
         contentPaint = contentPaint,
         contentScale = contentScale,
         drawCacheFactory = { _, _ -> BlurShadowImageDrawCache.None },
