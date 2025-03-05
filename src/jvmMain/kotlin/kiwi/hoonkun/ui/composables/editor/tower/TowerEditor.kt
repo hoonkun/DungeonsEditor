@@ -37,6 +37,8 @@ import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.AnnotateTowerChallenge
+import minecraft.dungeons.states.extensions.LocalizeTowerChallenge
 import minecraft.dungeons.states.extensions.LocalizeTowerTile
 import minecraft.dungeons.states.extensions.previewBitmap
 import utils.padEnd
@@ -270,7 +272,13 @@ private fun TowerFloorEditor(
             TowerRetroButton(
                 onClick = onClick,
                 modifier = Modifier.weight(2f),
-                content = { Text(config.challenges.getOrNull(0) ?: "-") }
+                content = {
+                    Text(
+                        config.challenges.getOrNull(0)
+                            ?.let { AnnotateTowerChallenge(LocalizeTowerChallenge(it), null) }
+                            ?: AnnotatedString("-")
+                    )
+                }
             )
         }
 

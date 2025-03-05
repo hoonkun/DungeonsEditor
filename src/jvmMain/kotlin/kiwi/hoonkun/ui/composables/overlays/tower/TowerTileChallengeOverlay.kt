@@ -23,10 +23,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.core.LocalWindowState
@@ -39,6 +35,7 @@ import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsTower
 import minecraft.dungeons.states.MutableDungeons
+import minecraft.dungeons.states.extensions.AnnotateTowerChallenge
 import minecraft.dungeons.states.extensions.LocalizeTowerChallenge
 import minecraft.dungeons.states.extensions.LocalizeTowerTile
 
@@ -265,23 +262,8 @@ private fun ChallengesDataCollectionItem(
     data: String,
     state: MutableState<String?>
 ) {
-    val segments = LocalizeTowerChallenge(data).split("/")
-    val annotated = buildAnnotatedString {
-        val slashStyle = SpanStyle(
-            fontSize = 18.sp,
-            color = Color.White.copy(alpha = 0.25f),
-            baselineShift = BaselineShift(0.25f)
-        )
-        segments.forEachIndexed { index, segment ->
-            append(segment)
-            if (index < segments.size - 1) withStyle(slashStyle) {
-                append(" / ")
-            }
-        }
-    }
-
     DataCollectionItem(selected = state.value == data, onClick = { state.value = if (data == state.value) null else data }) {
-        AutosizeText(text = annotated, maxFontSize = 26.sp, maxLines = 1)
+        AutosizeText(text = AnnotateTowerChallenge(LocalizeTowerChallenge(data)), maxFontSize = 26.sp, maxLines = 1)
         AutosizeText(text = data, maxFontSize = 18.sp, modifier = Modifier.alpha(0.5f))
     }
 }

@@ -1,7 +1,14 @@
 package minecraft.dungeons.states.extensions
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
 import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.ui.units.sp
 import minecraft.dungeons.resources.DungeonsLocalizations
 import minecraft.dungeons.resources.DungeonsTextures
 import minecraft.dungeons.resources.DungeonsTower
@@ -76,4 +83,21 @@ fun LocalizeTowerChallenge(challenge: String): String {
     }
 
     return result.replace("_", "/")
+}
+
+fun AnnotateTowerChallenge(localizedChallenge: String, baseLineShift: BaselineShift? = BaselineShift(0.25f)): AnnotatedString {
+    val segments = LocalizeTowerChallenge(localizedChallenge).split("/")
+    return buildAnnotatedString {
+        val slashStyle = SpanStyle(
+            fontSize = 18.sp,
+            color = Color.White.copy(alpha = 0.25f),
+            baselineShift = baseLineShift
+        )
+        segments.forEachIndexed { index, segment ->
+            append(segment)
+            if (index < segments.size - 1) withStyle(slashStyle) {
+                append(" / ")
+            }
+        }
+    }
 }
