@@ -28,7 +28,7 @@ fun TowerModificationWarningOverlay(
             WarningRed("계정이 정지당할 가능성이 높습니다.")
             WarningDescription("개발자가 탑 수정 후 플레이 중 '게임 소유권 확인 실패'의 형태로 계정이 정지당한 정황을 확인했습니다.")
             WarningWhite("수정한 타워는 높은 확률로 제대로 동작하지 않습니다.")
-            WarningDescription("일부 미완성인 내부용 지형 및 도전이 존재하며, 잘못된 데이터가 들어가면 게임이 무시하고 새 데이터를 만들어 덮어씌웁니다.")
+            WarningDescription("일부 미완성인 내부용 지형 및 도전이 존재하며, 버튼 퍼즐이나 특정 조건에 따라 지형이 변형되는 경우 그 조건에 맞는 도전을 사용해야합니다.")
             Spacer(modifier = Modifier.height(0.dp))
             WarningTurn("그럼에도 수정하려고 하신다면:")
             Spacer(modifier = Modifier.height(0.dp))
