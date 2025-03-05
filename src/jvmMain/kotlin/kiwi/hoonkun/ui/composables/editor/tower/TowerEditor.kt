@@ -116,10 +116,9 @@ fun BoxScope.TowerEditor(
                         .weight(2.25f)
                         .then(scrollableFadeModifier)
                 ) {
-                    itemsIndexed(
-                        capturedState.towerInfo.towerInfo.towerInfoFloors.zip(capturedState.towerInfo.towerConfig.floors)
-                    ) { index, (info, config) ->
-                        TowerFloorEditor(index, info, config)
+                    val items = capturedState.towerInfo.towerInfo.towerInfoFloors.zip(capturedState.towerInfo.towerConfig.floors)
+                    itemsIndexed(items) { index, (info, config) ->
+                        TowerFloorEditor(index, index == items.size - 1, info, config)
                     }
                 }
 
@@ -236,6 +235,7 @@ fun BoxScope.TowerEditor(
 @Composable
 private fun TowerFloorEditor(
     index: Int,
+    lastFloor: Boolean,
     info: MutableDungeons.TowerMissionState.Info.InnerInfo.Floor,
     config: MutableDungeons.TowerMissionState.Info.Config.Floor
 ) {
@@ -302,7 +302,8 @@ private fun TowerFloorEditor(
             }
             TowerRetroButton(
                 modifier = Modifier.weight(1f).aspectRatio(1f / 1f).alpha(0.4f),
-                content = { if (index != 30) Image(bitmap = enchantmentPointBitmap, contentDescription = null)  }
+                enabled = !lastFloor,
+                content = { if (!lastFloor) Image(bitmap = enchantmentPointBitmap, contentDescription = null)  }
             )
         }
     }
@@ -518,6 +519,7 @@ private fun TowerFloorField(
 private fun TowerRetroButton(
     onClick: () -> Unit = { },
     selected: Boolean = false,
+    enabled: Boolean = true,
     color: () -> Color = { if (selected) Color(0xffa85632) else Color(0xff444444) },
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
@@ -528,6 +530,7 @@ private fun TowerRetroButton(
         stroke = 3.dp,
         radius = RetroButtonDpCornerRadius(all = 4.dp),
         contentPadding = PaddingValues(vertical = 12.dp),
+        enabled = enabled,
         modifier = modifier,
         onClick = onClick,
         content = content
