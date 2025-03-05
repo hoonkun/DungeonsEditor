@@ -131,32 +131,12 @@ fun EditorBottomBar(
 }
 
 @Composable
-private fun IconButton(icon: String, onClick: () -> Unit) {
-    val source = rememberMutableInteractionSource()
-    val hovered by source.collectIsHoveredAsState()
-
-    val bitmap = remember(icon) { DungeonsTextures[icon] }
-
-    Image(
-        bitmap = bitmap,
-        contentDescription = null,
-        modifier = Modifier
-            .size(60.dp)
-            .hoverable(source)
-            .clickable(source, null, onClick = onClick)
-            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.toPx())) }
-            .padding(10.dp)
-    )
-}
-
-@Composable
 private fun TowerButton(
     onClick: () -> Unit
 ) {
     ToolbarIconRetroButton(
         color = Color(0xff366c75),
         iconPath = "/UI/Materials/MissionSelectMap/legend/Marker_TowerSavePoint.png",
-        iconModifier = Modifier.size(27.dp),
         onClick = onClick
     )
 }
@@ -168,7 +148,6 @@ private fun InventoryButton(
     ToolbarIconRetroButton(
         color = Color(0xff7d6136),
         iconPath = "/UI/Materials/Map/Pins/mapicon_chest.png",
-        iconModifier = Modifier.size(27.dp),
         onClick = onClick
     )
 }
@@ -180,7 +159,6 @@ private fun StorageButton(
     ToolbarIconRetroButton(
         color = Color(0xff55367d),
         iconPath = "/UI/Materials/Map/Pins/mapicon_chest.png",
-        iconModifier = Modifier.size(27.dp),
         onClick = onClick
     )
 }
@@ -212,6 +190,7 @@ private fun SaveButton(editor: EditorState) {
     ToolbarIconRetroButton(
         color = Color(0xff3f8e4f),
         iconPath = "/UI/Materials/Portrait/friend_check_play.png",
+        iconModifier = Modifier.size(22.dp)
     ) {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             FileSaveOverlay(
@@ -227,7 +206,7 @@ private fun SaveButton(editor: EditorState) {
 private fun ToolbarIconRetroButton(
     color: Color,
     iconPath: String,
-    iconModifier: Modifier = Modifier.size(22.dp),
+    iconModifier: Modifier = Modifier.size(32.dp),
     onClick: () -> Unit,
 ) {
     val bitmap = remember(iconPath) { DungeonsTextures[iconPath] }
@@ -235,7 +214,7 @@ private fun ToolbarIconRetroButton(
     RetroButton(
         color = color,
         hoverInteraction = RetroButtonHoverInteraction.Outline,
-        modifier = Modifier.padding(start = 16.dp).size(40.dp),
+        modifier = Modifier.padding(start = 16.dp).size(48.dp),
         radius = RetroButtonDpCornerRadius(all = 4.dp),
         stroke = 3.dp,
         onClick = onClick,
