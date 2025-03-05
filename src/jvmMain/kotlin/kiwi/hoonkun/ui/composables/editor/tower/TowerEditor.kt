@@ -67,21 +67,6 @@ fun BoxScope.TowerEditor(
             )
         }
 
-    val createTower = {
-        editor.data.tower = MutableDungeons.TowerMissionState(editor.data.uniqueSaveId)
-    }
-
-    val recreateTowerWithConfirm = {
-        overlays.make {
-            TowerConfirmOverlay(
-                title = "정말 기존 타워를 버리고 다시 만드시겠어요?",
-                description = "이 작업은 실행취소할 수 없어요.",
-                confirmLabel = "다시 만들기",
-                requestClose = it,
-                onConfirm = { createTower(); it() }
-            )
-        }
-    }
     val deleteTowerWithConfirm = {
         overlays.make {
             TowerConfirmOverlay(
@@ -183,21 +168,14 @@ fun BoxScope.TowerEditor(
                     capturedState.towerInfo.towerPlayersData
                         .forEachIndexed { index, player -> TowerPlayerEditor(index, player) }
 
-                    Header("타워 삭제 및 초기화")
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        TowerRetroButton(
-                            onClick = recreateTowerWithConfirm,
-                            color = { Color(0xffff6e25) },
-                            content = { Text("타워 다시 만들기") },
-                            modifier = Modifier.weight(1f)
-                        )
-                        TowerRetroButton(
-                            onClick = deleteTowerWithConfirm,
-                            color = { Color(0xffff6e25) },
-                            content = { Text("타워 삭제") },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    TowerRetroButton(
+                        onClick = deleteTowerWithConfirm,
+                        color = { Color(0xffff6e25) },
+                        content = { Text("타워 삭제") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         } else {
@@ -206,12 +184,22 @@ fun BoxScope.TowerEditor(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Text("타워 테이터가 없습니다.", modifier = Modifier.padding(bottom = 16.dp), fontSize = 24.sp)
-                TowerRetroButton(
-                    color = { Color(0xff3f8e4f) },
-                    onClick = createTower,
+                Text("타워 테이터가 없습니다.", modifier = Modifier.padding(bottom = 24.dp), fontSize = 30.sp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Text("새 타워 만들기", modifier = Modifier.padding(horizontal = 24.dp))
+                    val style = TextStyle(color = Color.White.copy(alpha = 0.5f), lineHeight = 30.sp)
+                    val lines = listOf(
+                        "타워는 시즌 별 고유 ID 로 검증이 진행되므로 신규로 생성할 수 없습니다.",
+                        "대신, 게임 내에서 타워를 시작한 뒤 입구 층에서 '탑 나가기'를 통해 나온 뒤에\n여기에서 수정할 수 있습니다.",
+                        "탑을 나오면서 생기는 디메리트(쓰러진 횟수)도 수정할 수 있습니다."
+                    )
+
+                    @Composable
+                    fun Line(content: @Composable () -> Unit) = Row { Text("// ", style = style); content() }
+
+                    lines.forEach { Line { Text(it, style = style) } }
                 }
             }
         }
@@ -219,6 +207,7 @@ fun BoxScope.TowerEditor(
     }
 
     IncludeEditedTowerDataSwitcher(
+        hasTower = state != null,
         currentValue = editor.data.includeEditedTower,
         onClick = { newValue -> editor.data.includeEditedTower = newValue },
     )
@@ -539,6 +528,7 @@ private fun RowScope.RowScopedTowerRetroButtonModifier() =
 
 @Composable
 private fun IncludeEditedTowerDataSwitcher(
+    hasTower: Boolean,
     currentValue: Boolean,
     onClick: (Boolean) -> Unit,
 ) {
@@ -546,7 +536,7 @@ private fun IncludeEditedTowerDataSwitcher(
     val slideDistance = with(density) { 15.dp.roundToPx() }
 
     MinimizableAnimatedContent(
-        targetState = currentValue,
+        targetState = currentValue to hasTower,
         transitionSpec = minimizableContentTransform {
             val enter = defaultFadeIn() + slideInHorizontally { slideDistance }
             val exit = defaultFadeOut() + slideOutHorizontally { slideDistance }
@@ -555,31 +545,31 @@ private fun IncludeEditedTowerDataSwitcher(
         },
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomEnd
-    ) { capturedCurrent ->
+    ) { (capturedCurrent, capturedHasTower) ->
+        if (capturedHasTower) {
+            val annotation = LinkAnnotation.Clickable(
+                tag = "include_edited_tower",
+                styles = TextLinkStyles(style = SpanStyle(textDecoration = TextDecoration.Underline, color = Color(0xffff884c))),
+                linkInteractionListener = { onClick(!capturedCurrent) }
+            )
+            val textFirstLine = buildAnnotatedString {
+                append("수정한 탑 데이터를 ")
+                withLink(annotation) { append(if (capturedCurrent) "사용합니다" else "사용하지 않습니다.") }
+            }
 
-        val annotation = LinkAnnotation.Clickable(
-            tag = "include_edited_tower",
-            styles = TextLinkStyles(style = SpanStyle(textDecoration = TextDecoration.Underline, color = Color(0xffff884c))),
-            linkInteractionListener = { onClick(!capturedCurrent) }
-        )
-        val textFirstLine = buildAnnotatedString {
-            append("수정한 탑 데이터를 ")
-            withLink(annotation) { append(if (capturedCurrent) "사용합니다" else "사용하지 않습니다.") }
+            val textSecondLine =
+                if (capturedCurrent) "현재 보이는 데이터를 저장 시 반영합니다."
+                else "수정한 데이터를 반영하지 않고 기존 데이터를 유지합니다."
+
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Bottom,
+            ) {
+                Text(text = textFirstLine)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = textSecondLine, color = Color.White.copy(alpha = 0.6f))
+            }
         }
-
-        val textSecondLine =
-            if (capturedCurrent) "현재 보이는 데이터를 저장 시 반영합니다."
-            else "수정한 데이터를 반영하지 않고 기존 데이터를 유지합니다."
-
-        Column(
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Bottom,
-        ) {
-            Text(text = textFirstLine)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = textSecondLine, color = Color.White.copy(alpha = 0.6f))
-        }
-
     }
 }
 
