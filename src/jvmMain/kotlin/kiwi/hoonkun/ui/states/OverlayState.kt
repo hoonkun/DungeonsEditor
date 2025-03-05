@@ -46,7 +46,7 @@ class OverlayState {
         last.state = Overlay.State.Exiting
         return true
     }
-    fun any(): Boolean = stack.any { it.state == Overlay.State.Idle }
+    fun any(predicate: (Overlay) -> Boolean = { true }): Boolean = stack.any { it.state == Overlay.State.Idle && predicate(it) }
 
     @Composable
     fun Stack() {
@@ -128,6 +128,7 @@ data class Overlay(
     }
 
     data class BackdropOptions(
+        val blur: Boolean = true,
         val alpha: Float = 0.376f,
         val onClick: OverlayState.(Overlay) -> Unit = { if (it.canBeDismissed) destroy(it.id) }
     )

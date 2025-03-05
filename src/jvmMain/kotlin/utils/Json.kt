@@ -6,6 +6,9 @@ import org.json.JSONObject
 inline fun <T>JSONObject.tryOrNull(block: JSONObject.() -> T): T? =
     try { block(this) } catch (_: Exception) { null }
 
+inline fun <T>JSONArray.tryOrNull(block: JSONArray.() -> T): T? =
+    try { block(this) } catch (_: Exception) { null }
+
 inline fun <reified T>JSONObject.replace(key: String, value: T): JSONObject =
     apply {
         remove(key)
@@ -14,3 +17,6 @@ inline fun <reified T>JSONObject.replace(key: String, value: T): JSONObject =
 
 inline fun <reified T>JSONArray.transformWithJsonObject(length: Int = length(), transform: (json: JSONObject) -> T): List<T> =
     (0 until length.coerceAtMost(length())).map { transform(getJSONObject(it)) }
+
+fun JSONArray.toStringList(length: Int = length()): List<String> =
+    (0 until length.coerceAtMost(length())).map { getString(it) }

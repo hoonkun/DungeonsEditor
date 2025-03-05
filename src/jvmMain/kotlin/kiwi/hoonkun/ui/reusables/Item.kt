@@ -40,6 +40,16 @@ fun RarityColor(rarity: DungeonsItem.Rarity, type: RarityColorType): Color {
     }
 }
 
+@Stable
+fun RarityFilterFrame(rarity: DungeonsItem.Rarity): ImageBitmap {
+    val filename = when(rarity) {
+        DungeonsItem.Rarity.Common -> "regular"
+        DungeonsItem.Rarity.Rare -> "rare"
+        DungeonsItem.Rarity.Unique -> "Unique"
+    }
+    return DungeonsTextures["/UI/Materials/Notification/${filename}_frame.png"]
+}
+
 enum class RarityColorType {
     Translucent, Opaque
 }

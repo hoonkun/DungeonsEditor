@@ -1,31 +1,26 @@
 package kiwi.hoonkun.ui.composables.editor
 
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import kiwi.hoonkun.ui.composables.base.RetroButton
+import kiwi.hoonkun.ui.composables.base.RetroButtonDpCornerRadius
+import kiwi.hoonkun.ui.composables.base.RetroButtonHoverInteraction
 import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
-import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
@@ -107,12 +102,19 @@ fun EditorBottomBar(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        InventorySwitcher(
-            current = editor.view,
-            onSwitch = { editor.view = it }
-        )
+        InventoryButton {
+            editor.isInTowerEditMode = false
+            editor.view = DungeonsItem.Location.Inventory
+        }
+        StorageButton {
+            editor.isInTowerEditMode = false
+            editor.view = DungeonsItem.Location.Storage
+        }
+        TowerButton {
+            editor.isInTowerEditMode = true
+        }
 
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(30.dp))
 
         SaveButton(editor)
         CloseFileButton(requestClose)
@@ -120,21 +122,35 @@ fun EditorBottomBar(
 }
 
 @Composable
-private fun IconButton(icon: String, onClick: () -> Unit) {
-    val source = rememberMutableInteractionSource()
-    val hovered by source.collectIsHoveredAsState()
+private fun TowerButton(
+    onClick: () -> Unit
+) {
+    ToolbarIconRetroButton(
+        color = Color(0xff366c75),
+        iconPath = "/UI/Materials/MissionSelectMap/legend/Marker_TowerSavePoint.png",
+        onClick = onClick
+    )
+}
 
-    val bitmap = remember(icon) { DungeonsTextures[icon] }
+@Composable
+private fun InventoryButton(
+    onClick: () -> Unit
+) {
+    ToolbarIconRetroButton(
+        color = Color(0xff7d6136),
+        iconPath = "/UI/Materials/Map/Pins/mapicon_chest.png",
+        onClick = onClick
+    )
+}
 
-    Image(
-        bitmap = bitmap,
-        contentDescription = null,
-        modifier = Modifier
-            .size(60.dp)
-            .hoverable(source)
-            .clickable(source, null, onClick = onClick)
-            .drawBehind { if (hovered) drawRoundRect(Color.White, alpha = 0.15f, cornerRadius = CornerRadius(6.dp.toPx())) }
-            .padding(10.dp)
+@Composable
+private fun StorageButton(
+    onClick: () -> Unit
+) {
+    ToolbarIconRetroButton(
+        color = Color(0xff55367d),
+        iconPath = "/UI/Materials/Map/Pins/mapicon_chest.png",
+        onClick = onClick
     )
 }
 
@@ -143,7 +159,12 @@ private fun CloseFileButton(
     onClick: () -> Unit
 ) {
     val overlays = LocalOverlayState.current
-    IconButton("/UI/Materials/Map/Pins/dungeon_door.png") {
+
+    ToolbarIconRetroButton(
+        color = Color(0xff77726c),
+        iconPath = "/UI/Materials/Map/close.png",
+        iconModifier = Modifier.size(35.dp)
+    ) {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             CloseFileConfirmOverlay(
                 onConfirm = onClick,
@@ -156,7 +177,12 @@ private fun CloseFileButton(
 @Composable
 private fun SaveButton(editor: EditorState) {
     val overlays = LocalOverlayState.current
-    IconButton("/UI/Materials/Map/Pins/mapicon_chest.png") {
+
+    ToolbarIconRetroButton(
+        color = Color(0xff3f8e4f),
+        iconPath = "/UI/Materials/Portrait/friend_check_play.png",
+        iconModifier = Modifier.size(22.dp)
+    ) {
         overlays.make(backdropOptions = Overlay.BackdropOptions(alpha = 0.6f)) {
             FileSaveOverlay(
                 editor = editor,
@@ -168,62 +194,23 @@ private fun SaveButton(editor: EditorState) {
 }
 
 @Composable
-private fun InventorySwitcher(
-    current: DungeonsItem.Location,
-    onSwitch: (DungeonsItem.Location) -> Unit
+private fun ToolbarIconRetroButton(
+    color: Color,
+    iconPath: String,
+    iconModifier: Modifier = Modifier.size(32.dp),
+    onClick: () -> Unit,
 ) {
-    val source = rememberMutableInteractionSource()
-    val hovered by source.collectIsHoveredAsState()
-    val pressed by source.collectIsPressedAsState()
+    val bitmap = remember(iconPath) { DungeonsTextures[iconPath] }
 
-    val leftArrow = remember { DungeonsTextures["/UI/Materials/Character/left_arrow_carousel.png"] }
-    val rightArrow = remember { DungeonsTextures["/UI/Materials/Character/right_arrow_carousel.png"] }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .hoverable(source)
-            .clickable(source, null) { onSwitch(current.other()) }
-            .height(60.dp)
-            .drawBehind {
-                drawRoundRect(
-                    color = Color.White,
-                    alpha = if (pressed) 0.2f else if (hovered) 0.15f else 0f,
-                    cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-                )
-            }
-            .padding(start = 15.dp)
-    ) {
-        Box(modifier = Modifier.width(32.5.dp)) {
-            Image(
-                bitmap = leftArrow,
-                contentDescription = null,
-                modifier = Modifier.width(20.dp).align(Alignment.CenterStart)
-            )
-            Image(
-                bitmap = rightArrow,
-                contentDescription = null,
-                modifier = Modifier.width(20.dp).align(Alignment.CenterEnd)
-            )
-        }
-
-        MinimizableAnimatedContent(
-            targetState = current,
-            transitionSpec = minimizableContentTransform spec@ {
-                val enter = defaultFadeIn()
-                val exit = defaultFadeOut()
-                enter togetherWith exit using SizeTransform(false)
-            }
-        ) { selected ->
-            Text(
-                text = selected.name,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(horizontal = 15.dp)
-            )
-        }
-    }
+    RetroButton(
+        color = color,
+        hoverInteraction = RetroButtonHoverInteraction.Outline,
+        modifier = Modifier.padding(start = 16.dp).size(48.dp),
+        radius = RetroButtonDpCornerRadius(all = 4.dp),
+        stroke = 3.dp,
+        onClick = onClick,
+        content =  { Image(bitmap = bitmap, contentDescription = null, modifier = iconModifier, filterQuality = FilterQuality.None) }
+    )
 }
 
 @Composable

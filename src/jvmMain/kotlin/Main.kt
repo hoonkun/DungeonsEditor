@@ -74,7 +74,7 @@ private fun App(
     val pakIndexingState by rememberPakIndexingState()
 
     val blur by minimizableAnimateFloatAsState(
-        targetValue = if (overlays.any()) 50f else 0f,
+        targetValue = if (overlays.any { it.backdropOptions.blur }) 50f else 0f,
         animationSpec = minimizableSpecDefault()
     )
 

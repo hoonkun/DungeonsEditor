@@ -21,14 +21,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.TextUnit
 import kiwi.hoonkun.resources.Resources
-import kiwi.hoonkun.ui.reusables.*
+import kiwi.hoonkun.ui.reusables.applyZeroIntrinsics
+import kiwi.hoonkun.ui.reusables.drawItemFrame
+import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.units.dp
 import kiwi.hoonkun.ui.units.sp
@@ -74,7 +75,6 @@ fun <T>ItemGridItem(
 
     val modifier = Modifier
         .aspectRatio(1f / 1f)
-        .hoverable(interaction)
         // 아래 .onClick 수정자가 특정 상황에서 클릭 시
         // ComposeSceneAccessible.getAccessibleChild 에서 IndexOutOfBoundsException 을 던진다.
         // 던지긴 하지만 다행히 앱이 죽지는 않는데, 추후 다른 것으로 변경할 수 있으면 할 것.
@@ -88,9 +88,27 @@ fun <T>ItemGridItem(
             enabled = item != null,
             onClick = { if (item != null) editor.select(item, EditorState.Slot.Secondary) }
         )
+        .hoverable(interaction)
+        .then(ItemHoverBorderModifier(selected = item != null && editor.selected(item), hovered = hovered))
+
+    if (item == null) {
+        EmptyItemSlot(modifier)
+    } else {
+        if (simplified)
+            ItemSlotSimplified(item = item, modifier = modifier)
+        else
+            ItemSlot(item = item, modifier = modifier)
+    }
+}
+
+fun ItemHoverBorderModifier(
+    selected: Boolean,
+    hovered: Boolean
+) =
+    Modifier
         .drawBehind {
             val brush =
-                if (item != null && editor.selected(item))
+                if (selected)
                     Brush.linearGradient(listOf(Color(0xeeffffff), Color(0xaaffffff), Color(0xeeffffff)))
                 else if (hovered)
                     Brush.linearGradient(listOf(Color(0x75ffffff), Color(0x25ffffff), Color(0x75ffffff)))
@@ -105,49 +123,42 @@ fun <T>ItemGridItem(
             )
         }
 
-    if (item == null) {
-        EmptyItemSlot(modifier)
-    } else {
-        if (simplified)
-            ItemSlotSimplified(item = item, modifier = modifier)
-        else
-            ItemSlot(item = item, modifier = modifier)
-    }
-}
-
 @Composable
 fun ItemSlot(
     item: MutableDungeons.Item,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 17.dp, vertical = 12.dp),
     fillFraction: Float = 0.8f,
-    fontSize: TextUnit = 22.sp
+    fontSize: TextUnit = 22.sp,
+    hideDecorations: Boolean = false
 ) {
     Box(modifier = modifier) {
         ItemImage(item = item, fillFraction = fillFraction)
 
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .padding(contentPadding)
-        ) {
-            PowerText(
-                power = item.power,
-                fontSize = fontSize,
-                modifier = Modifier.align(Alignment.BottomEnd)
-            )
-
-            if (item.enchanted) {
-                InvestedEnchantmentPointsText(
-                    points = item.totalEnchantmentInvestedPoints,
+        if (!hideDecorations) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(contentPadding)
+            ) {
+                PowerText(
+                    power = item.power,
                     fontSize = fontSize,
-                    modifier = Modifier.align(Alignment.TopEnd)
+                    modifier = Modifier.align(Alignment.BottomEnd)
                 )
-            }
-        }
 
-        if (item.markedNew == true) {
-            NewMark(modifier = Modifier.align(Alignment.TopStart))
+                if (item.enchanted) {
+                    InvestedEnchantmentPointsText(
+                        points = item.totalEnchantmentInvestedPoints,
+                        fontSize = fontSize,
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    )
+                }
+            }
+
+            if (item.markedNew == true) {
+                NewMark(modifier = Modifier.align(Alignment.TopStart))
+            }
         }
     }
 }
@@ -163,32 +174,15 @@ fun ItemSlotSimplified(
 }
 
 @Composable
-private fun EmptyItemSlot(
+fun EmptyItemSlot(
     modifier: Modifier
 ) =
     Box(
         modifier = Modifier
+            .drawBehind {
+                drawItemFrame(DungeonsItem.Rarity.Common)
+            }
             .fillMaxSize()
-            .background(
-                brush = Brush.linearGradient(
-                    listOf(
-                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Translucent),
-                        Color.Transparent
-                    )
-                )
-            )
-            .border(
-                width = 7.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Opaque),
-                        Color.Transparent,
-                        RarityColor(DungeonsItem.Rarity.Common, RarityColorType.Opaque)
-                    )
-                ),
-                shape = RectangleShape
-            )
-            .padding(20.dp)
             .then(modifier)
     )
 

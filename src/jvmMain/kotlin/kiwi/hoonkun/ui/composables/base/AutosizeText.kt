@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Paragraph
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -23,6 +24,31 @@ import kotlin.math.ceil
 @Composable
 fun AutosizeText(
     text: String,
+    modifier: Modifier = Modifier,
+    acceptableError: Dp = 5.dp,
+    maxFontSize: TextUnit = TextUnit.Unspecified,
+    style: TextStyle = LocalTextStyle.current,
+    contentAlignment: Alignment? = null,
+    maxLines: Int = 1,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
+    key(text) {
+        AutosizeText(
+            text = AnnotatedString(text),
+            modifier = modifier,
+            acceptableError = acceptableError,
+            maxFontSize = maxFontSize,
+            style = style,
+            contentAlignment = contentAlignment,
+            maxLines = maxLines,
+            onTextLayout = onTextLayout,
+        )
+    }
+}
+
+@Composable
+fun AutosizeText(
+    text: AnnotatedString,
     modifier: Modifier = Modifier,
     acceptableError: Dp = 5.dp,
     maxFontSize: TextUnit = TextUnit.Unspecified,
@@ -47,12 +73,12 @@ fun AutosizeText(
             val calculateIntrinsics = @Composable {
                 val mergedStyle = style.merge(TextStyle(fontSize = shrunkFontSize))
                 Paragraph(
-                    text = text,
+                    text = text.text,
                     style = mergedStyle,
                     constraints = Constraints(maxWidth = ceil(LocalDensity.current.run { maxWidth.toPx() }).toInt()),
                     density = LocalDensity.current,
                     fontFamilyResolver = LocalFontFamilyResolver.current,
-                    spanStyles = listOf(),
+                    spanStyles = text.spanStyles,
                     placeholders = listOf(),
                     maxLines = maxLines,
                 )
