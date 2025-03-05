@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import kiwi.hoonkun.core.LocalWindowState
@@ -90,7 +91,7 @@ fun AnimatedVisibilityScope?.TowerTileChallengeOverlay(
             Row(
                 modifier = Modifier
                     .offsetRelative(x = 0f, y = 1f)
-                    .offset(y = -childOffset - 25.dp)
+                    .offset(y = (-50).dp)
                     .then(animateModifier)
                     .padding(vertical = 4.dp)
             ) {
@@ -150,18 +151,21 @@ private fun TilePreview(
     modifier: Modifier = Modifier
 ) {
     Column(
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .width(DetailWidth)
-            .wrapContentHeight()
+            .size(DetailWidth, DetailHeight)
             .offset(y = offset)
-            .offsetRelative(x = 0f, y = -1f)
             .then(modifier)
             .background(Color(0xff080808))
             .clipToBounds()
             .consumeClick()
-            .padding(20.dp)
+            .padding(vertical = 20.dp, horizontal = 30.dp)
     ) {
-        Text("TODO: Preview [${state.value}] Tile")
+        Text(
+            text = Localizations["todo_tile_preview"],
+            color = Color.White.copy(alpha = 0.5f),
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
