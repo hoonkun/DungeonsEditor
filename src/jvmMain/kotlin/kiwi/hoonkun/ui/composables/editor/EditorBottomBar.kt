@@ -1,21 +1,13 @@
 package kiwi.hoonkun.ui.composables.editor
 
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
@@ -29,7 +21,6 @@ import kiwi.hoonkun.ui.composables.base.TextFieldValidatable
 import kiwi.hoonkun.ui.composables.overlays.CloseFileConfirmOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveCompleteOverlay
 import kiwi.hoonkun.ui.composables.overlays.FileSaveOverlay
-import kiwi.hoonkun.ui.reusables.*
 import kiwi.hoonkun.ui.states.EditorState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.states.Overlay
@@ -220,70 +211,6 @@ private fun ToolbarIconRetroButton(
         onClick = onClick,
         content =  { Image(bitmap = bitmap, contentDescription = null, modifier = iconModifier, filterQuality = FilterQuality.None) }
     )
-}
-
-@Composable
-private fun ToolbarIconTooltip(content: String) {
-    Text(text = content)
-}
-
-@Composable
-private fun InventorySwitcher(
-    current: DungeonsItem.Location,
-    onSwitch: (DungeonsItem.Location) -> Unit
-) {
-    val source = rememberMutableInteractionSource()
-    val hovered by source.collectIsHoveredAsState()
-    val pressed by source.collectIsPressedAsState()
-
-    val leftArrow = remember { DungeonsTextures["/UI/Materials/Character/left_arrow_carousel.png"] }
-    val rightArrow = remember { DungeonsTextures["/UI/Materials/Character/right_arrow_carousel.png"] }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .hoverable(source)
-            .clickable(source, null) { onSwitch(current.other()) }
-            .height(60.dp)
-            .drawBehind {
-                drawRoundRect(
-                    color = Color.White,
-                    alpha = if (pressed) 0.2f else if (hovered) 0.15f else 0f,
-                    cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-                )
-            }
-            .padding(start = 15.dp)
-    ) {
-        Box(modifier = Modifier.width(32.5.dp)) {
-            Image(
-                bitmap = leftArrow,
-                contentDescription = null,
-                modifier = Modifier.width(20.dp).align(Alignment.CenterStart)
-            )
-            Image(
-                bitmap = rightArrow,
-                contentDescription = null,
-                modifier = Modifier.width(20.dp).align(Alignment.CenterEnd)
-            )
-        }
-
-        MinimizableAnimatedContent(
-            targetState = current,
-            transitionSpec = minimizableContentTransform spec@ {
-                val enter = defaultFadeIn()
-                val exit = defaultFadeOut()
-                enter togetherWith exit using SizeTransform(false)
-            }
-        ) { selected ->
-            Text(
-                text = selected.name,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(horizontal = 15.dp)
-            )
-        }
-    }
 }
 
 @Composable
