@@ -236,5 +236,6 @@
   "tower_edit_desc_14": "이후 '계속 수정'을 눌러 발생한 모든 데이터 손실 및 계정에 발생한 문제에 대해 개발자는 책임지지 않습니다.",
   "tower_edit_back": "뒤로 가기",
   "tower_edit_confirm": "계속 수정",
-  "pick_from_equipped": "장착된 장비에서 가져오기"
+  "pick_from_equipped": "장착된 장비에서 가져오기",
+  "tower_edit_warning_description": "아래 주의사항을 반드시 매우 주의깊게 확인해주십세요."
 }

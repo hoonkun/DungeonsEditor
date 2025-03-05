@@ -23,6 +23,7 @@ fun TowerModificationWarningOverlay(
     OverlayRoot {
         OverlayTitleDescription(
             title = Localizations["tower_edit_warning_title"],
+            description = Localizations["tower_edit_warning_description"]
         )
 
         WarningContainer {

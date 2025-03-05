@@ -238,5 +238,6 @@
   "tower_edit_desc_14": "The developer is not responsible for any data loss and any issues that occur with your account if you subsequently press \"Continue Edit\"",
   "tower_edit_back": "Back",
   "tower_edit_confirm": "Continue Edit",
-  "pick_from_equipped": "Pick from Equipped Items"
+  "pick_from_equipped": "Pick from Equipped Items",
+  "tower_edit_warning_description": "Please read the caveats below VERY carefully."
 }
