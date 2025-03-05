@@ -275,13 +275,13 @@ private fun TowerFloorEditor(
         }
 
         TowerFloorField("보상 유형") {
-            config.rewards.forEach { configReward ->
+            config.rewards.forEachIndexed { rewardIndex, configReward ->
                 val rewardBitmap = remember(configReward) {
                     try { configReward.previewBitmap() }
                     catch(e: Exception) { null }
                 }
                 TowerRetroButton(
-                    onClick = { },
+                    onClick = { config.rewards[rewardIndex] = configReward.next() },
                     modifier = Modifier.weight(1f).aspectRatio(1f / 1f),
                     content = { if (rewardBitmap != null) Image(bitmap = rewardBitmap, contentDescription = null)  }
                 )
@@ -291,7 +291,6 @@ private fun TowerFloorEditor(
                 DungeonsTextures["/UI/Materials/Inventory2/Enchantment/enchant_counter.png"]
             }
             TowerRetroButton(
-                onClick = { },
                 modifier = Modifier.weight(1f).aspectRatio(1f / 1f).alpha(0.4f),
                 content = { if (index != 30) Image(bitmap = enchantmentPointBitmap, contentDescription = null)  }
             )
@@ -507,7 +506,7 @@ private fun TowerFloorField(
 
 @Composable
 private fun TowerRetroButton(
-    onClick: () -> Unit,
+    onClick: () -> Unit = { },
     selected: Boolean = false,
     color: () -> Color = { if (selected) Color(0xffa85632) else Color(0xff444444) },
     modifier: Modifier = Modifier,

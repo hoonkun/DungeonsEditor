@@ -678,6 +678,8 @@ class MutableDungeons(
                         Armor("armor"),
                         Artifact("artefact");
 
+                        fun next() = Reward.entries[(Reward.entries.indexOf(this) + 1) % Reward.entries.size]
+
                         companion object {
                             private val valueMap = Reward.entries.associateBy(Reward::value)
                             fun fromString(value: String) = valueMap.getValue(value)
