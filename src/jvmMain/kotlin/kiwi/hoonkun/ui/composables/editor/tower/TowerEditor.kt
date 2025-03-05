@@ -97,7 +97,7 @@ fun BoxScope.TowerEditor(
             LaunchedEffect(true) {
                 if (editor.towerEditEnabled) return@LaunchedEffect
 
-                overlays.make {
+                overlays.make(canBeDismissed = false) {
                     val closeAndBack = { it(); editor.isInTowerEditMode = false }
                     val confirmAndEdit = { it(); editor.towerEditEnabled = true }
 
