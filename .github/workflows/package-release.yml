@@ -31,6 +31,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set up Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libfuse2
+
       - name: Hello, LINUX World!
         run: echo Hello, LINUX World!
 
