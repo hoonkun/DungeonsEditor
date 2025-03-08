@@ -8,7 +8,7 @@ cp -r ../../build/compose/binaries/main-release/app/DungeonsEditor DungeonsEdito
 cp -r DungeonsEditor.Built/bin/DungeonsEditor DungeonsEditor.AppDir/usr/bin
 cp -r DungeonsEditor.Built/lib/* DungeonsEditor.AppDir/usr/lib/
 cp DungeonsEditor.Built/lib/DungeonsEditor.png DungeonsEditor.AppDir/usr/share/icons/hicolor/256x256/apps/DungeonsEditor.png
-cp DungeonsEditor.Built.lib/DungeonsEditor.png DungeonsEditor.AppDir
+cp DungeonsEditor.Built/lib/DungeonsEditor.png DungeonsEditor.AppDir
 
 chmod +x DungeonsEditor.AppDir/AppRun
 
