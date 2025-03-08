@@ -1,0 +1,110 @@
+name: Package Release Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "version name"
+        required: true
+
+jobs:
+
+  package-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup main repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{github.workspace}}/DungeonsEditor
+
+      - name: Setup PakReader
+        uses: actions/checkout@v4
+        with:
+          repository: hoonkun/PakReader
+          path: ${{github.workspace}}/PakReader
+          token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libfuse2
+
+      - name: Hello, LINUX World!
+        run: echo Hello, LINUX World!
+
+      - name: Create Keysets
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
+
+      - name: Gradle Build
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: ./gradlew build
+
+      - name: Package Linux
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: ./gradlew packageReleaseDistributionForCurrentOS
+
+      - name: Build AppImage
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: |
+          chmod +x .packaging/linux/prepare-appimage
+          .packaging/linux/prepare-appimage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "DungeonsEditor-${{ github.event.inputs.version_name }}.AppImage"
+          path: ${{github.workspace}}/DungeonsEditor/.packaging/linux/DungeonsEditor.AppImage
+
+  package-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Setup main repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{github.workspace}}/DungeonsEditor
+
+      - name: Setup PakReader
+        uses: actions/checkout@v4
+        with:
+          repository: hoonkun/PakReader
+          path: ${{github.workspace}}/PakReader
+          token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Hello, WINDOWS World!
+        run: echo Hello, WINDOWS World!
+
+      - name: Create Keysets
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
+
+      - name: Gradle Build
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: ./gradlew build
+
+      - name: Package Windows
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: ./gradlew packageReleaseDistributionForCurrentOS
+
+      - name: Post Package - Extract and Archive
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: tar -a -c -f .packaging/windows/DungeonsEditor.zip -C "./build/compose/binaries/main-release/app/DungeonsEditor" .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "DungeonsEditor-${{ github.event.inputs.version_name }}.zip"
+          path: ${{github.workspace}}/DungeonsEditor/.packaging/windows/DungeonsEditor.zip
+
