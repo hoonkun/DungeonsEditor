@@ -20,7 +20,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hoonkun/PakReader
-          path: PakReader
+          path: ../PakReader
+          token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
 
       - name: Create Keysets
         run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
@@ -61,7 +62,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hoonkun/PakReader
-          path: PakReader
+          path: ../PakReader
+          token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
 
       - name: Create Keysets
         run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
