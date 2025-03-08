@@ -133,7 +133,7 @@ private fun JsonEditorFileSelector(
                 .zIndex(1f)
                 .alpha(0.5f)
         ) {
-            Text(text = "Dungeons Editor, 1.1.0 by HoonKun", fontFamily = Resources.Fonts.JetbrainsMono)
+            Text(text = "Dungeons Editor, 1.2.0 by HoonKun", fontFamily = Resources.Fonts.JetbrainsMono)
             Text(
                 text = "Compatible with Minecraft Dungeons 1.17.0.0",
                 fontFamily = Resources.Fonts.JetbrainsMono
