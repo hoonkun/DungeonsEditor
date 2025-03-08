@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup main repository
+      - name: Set up DungeonsEditor
         uses: actions/checkout@v4
         with:
           path: ${{github.workspace}}/DungeonsEditor
 
-      - name: Setup PakReader
+      - name: Set up PakReader
         uses: actions/checkout@v4
         with:
           repository: hoonkun/PakReader
@@ -36,10 +36,7 @@ jobs:
           sudo apt update
           sudo apt install -y libfuse2
 
-      - name: Hello, LINUX World!
-        run: echo Hello, LINUX World!
-
-      - name: Create Keysets
+      - name: Create Keysets.kt
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
 
@@ -47,7 +44,7 @@ jobs:
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew build
 
-      - name: Package Linux
+      - name: Gradle Package Release
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew packageReleaseDistributionForCurrentOS
 
@@ -57,7 +54,8 @@ jobs:
           chmod +x .packaging/linux/prepare-appimage
           .packaging/linux/prepare-appimage
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: "DungeonsEditor-${{ github.event.inputs.version_name }}.AppImage"
           path: ${{github.workspace}}/DungeonsEditor/.packaging/linux/DungeonsEditor.AppImage
@@ -66,12 +64,12 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Setup main repository
+      - name: Set up DungeonsEditor
         uses: actions/checkout@v4
         with:
           path: ${{github.workspace}}/DungeonsEditor
 
-      - name: Setup PakReader
+      - name: Set up PakReader
         uses: actions/checkout@v4
         with:
           repository: hoonkun/PakReader
@@ -84,10 +82,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Hello, WINDOWS World!
-        run: echo Hello, WINDOWS World!
-
-      - name: Create Keysets
+      - name: Create Keysets.kt
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
 
@@ -95,11 +90,12 @@ jobs:
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew build
 
-      - name: Package Windows
+      - name: Gradle Package Release
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew packageReleaseDistributionForCurrentOS
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: "DungeonsEditor-${{ github.event.inputs.version_name }}"
           path: ${{github.workspace}}/DungeonsEditor/build/compose/binaries/main-release/app/DungeonsEditor
