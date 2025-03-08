@@ -1,0 +1,57 @@
+name: Package Release Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "version name"
+        required: true
+
+env:
+  LINUX_RUNNER: ubuntu-latest
+  WINDOWS_RUNNER: windows-latest
+
+jobs:
+
+  package-linux:
+    runs-on: ${{ env.LINUX_RUNNER }}
+
+    steps:
+      - uses: .github/workflows/setup.yml
+        with:
+          runs-on: ${{ env.LINUX_RUNNER }}
+          label: "WINDOWS"
+
+      - name: Package Linux
+        run: ./gradlew packageReleaseDistributionForCurrentOS
+
+      - name: Build AppImage
+        run: |
+          chmod +x .packaging/linux/prepare-appimage
+          .packaging/linux/prepare-appimage
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: "DungeonsEditor-${{ github.event.inputs.version_name }}.AppImage"
+          path: .packaging/linux/DungeonsEditor.AppImage
+
+  package-windows:
+    runs-on: ${{ env.WINDOWS_RUNNER }}
+
+    steps:
+      - uses: .github/workflows/setup.yml
+        with:
+          runs-on: ${{ env.WINDOWS_RUNNER }}
+          label: "LINUX"
+
+      - name: Package Windows
+        run: ./gradlew packageReleaseDistributionForCurrentOS
+
+      - name: Post Package - Extract and Archive
+        run: tar -a -c -f .packaging/windows/DungeonsEditor.zip -C "./build/compose/binaries/main-release/app/DungeonsEditor" .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: "DungeonsEditor-${{ github.event.inputs.version_name }}.zip"
+          path: .packaging/windows/DungeonsEditor.zip
+
