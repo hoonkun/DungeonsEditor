@@ -7,20 +7,35 @@ on:
         description: "version name"
         required: true
 
-env:
-  LINUX_RUNNER: ubuntu-latest
-  WINDOWS_RUNNER: windows-latest
-
 jobs:
 
   package-linux:
-    runs-on: ${{ env.LINUX_RUNNER }}
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: .github/workflows/setup.yml
+      - name: Setup main repository
+        uses: actions/checkout@v4
+
+      - name: Setup PakReader
+        uses: actions/checkout@v4
         with:
-          runs-on: ${{ env.LINUX_RUNNER }}
-          label: "WINDOWS"
+          repository: hoonkun/PakReader
+          path: PakReader
+
+      - name: Create Keysets
+        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Hello, LINUX World!
+        run: echo Hello, LINUX World!
+
+      - name: Gradle Build
+        run: ./gradlew build
 
       - name: Package Linux
         run: ./gradlew packageReleaseDistributionForCurrentOS
@@ -36,13 +51,32 @@ jobs:
           path: .packaging/linux/DungeonsEditor.AppImage
 
   package-windows:
-    runs-on: ${{ env.WINDOWS_RUNNER }}
+    runs-on: windows-latest
 
     steps:
-      - uses: .github/workflows/setup.yml
+      - name: Setup main repository
+        uses: actions/checkout@v4
+
+      - name: Setup PakReader
+        uses: actions/checkout@v4
         with:
-          runs-on: ${{ env.WINDOWS_RUNNER }}
-          label: "LINUX"
+          repository: hoonkun/PakReader
+          path: PakReader
+
+      - name: Create Keysets
+        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Hello, WINDOWS World!
+        run: echo Hello, WINDOWS World!
+
+      - name: Gradle Build
+        run: ./gradlew build
 
       - name: Package Windows
         run: ./gradlew packageReleaseDistributionForCurrentOS
