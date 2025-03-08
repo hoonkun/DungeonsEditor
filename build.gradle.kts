@@ -52,7 +52,7 @@ compose.desktop {
             packageName = "DungeonsEditor"
             packageVersion = "1.1.0"
             linux {
-                iconFile.set(project.file("src/jvmMain/resources/_icon.png"))
+                iconFile.set(project.file("src/jvmMain/resources/_icon_256x256.png"))
             }
             windows {
                 iconFile.set(project.file("src/jvmMain/resources/_icon.ico"))
