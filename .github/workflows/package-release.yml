@@ -45,7 +45,7 @@ jobs:
           chmod +x .packaging/linux/prepare-appimage
           .packaging/linux/prepare-appimage
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: "DungeonsEditor-${{ github.event.inputs.version_name }}.AppImage"
           path: .packaging/linux/DungeonsEditor.AppImage
@@ -84,7 +84,7 @@ jobs:
       - name: Post Package - Extract and Archive
         run: tar -a -c -f .packaging/windows/DungeonsEditor.zip -C "./build/compose/binaries/main-release/app/DungeonsEditor" .
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: "DungeonsEditor-${{ github.event.inputs.version_name }}.zip"
           path: .packaging/windows/DungeonsEditor.zip
