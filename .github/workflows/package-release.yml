@@ -25,9 +25,6 @@ jobs:
           path: ${{github.workspace}}/PakReader
           token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
 
-      - name: Create Keysets
-        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
-
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -36,6 +33,10 @@ jobs:
 
       - name: Hello, LINUX World!
         run: echo Hello, LINUX World!
+
+      - name: Create Keysets
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
 
       - name: Gradle Build
         working-directory: ${{github.workspace}}/DungeonsEditor
@@ -72,9 +73,6 @@ jobs:
           path: ${{github.workspace}}/PakReader
           token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
 
-      - name: Create Keysets
-        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
-
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -83,6 +81,10 @@ jobs:
 
       - name: Hello, WINDOWS World!
         run: echo Hello, WINDOWS World!
+
+      - name: Create Keysets
+        working-directory: ${{github.workspace}}/DungeonsEditor
+        run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
 
       - name: Gradle Build
         working-directory: ${{github.workspace}}/DungeonsEditor
