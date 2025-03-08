@@ -15,11 +15,14 @@ jobs:
     steps:
       - name: Setup main repository
         uses: actions/checkout@v4
+        with:
+          path: ${{github.workspace}}/DungeonsEditor
 
       - name: Setup PakReader
         uses: actions/checkout@v4
         with:
           repository: hoonkun/PakReader
+          path: ${{github.workspace}}/PakReader
           token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
 
       - name: Create Keysets
@@ -35,12 +38,15 @@ jobs:
         run: echo Hello, LINUX World!
 
       - name: Gradle Build
+        working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew build
 
       - name: Package Linux
+        working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew packageReleaseDistributionForCurrentOS
 
       - name: Build AppImage
+        working-directory: ${{github.workspace}}/DungeonsEditor
         run: |
           chmod +x .packaging/linux/prepare-appimage
           .packaging/linux/prepare-appimage
@@ -48,7 +54,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: "DungeonsEditor-${{ github.event.inputs.version_name }}.AppImage"
-          path: .packaging/linux/DungeonsEditor.AppImage
+          path: ${{github.workspace}}/DungeonsEditor/.packaging/linux/DungeonsEditor.AppImage
 
   package-windows:
     runs-on: windows-latest
@@ -56,11 +62,14 @@ jobs:
     steps:
       - name: Setup main repository
         uses: actions/checkout@v4
+        with:
+          path: ${{github.workspace}}/DungeonsEditor
 
       - name: Setup PakReader
         uses: actions/checkout@v4
         with:
           repository: hoonkun/PakReader
+          path: ${{github.workspace}}/PakReader
           token: ${{ secrets.PAK_READER_ACCESS_SECRET }}
 
       - name: Create Keysets
@@ -76,16 +85,19 @@ jobs:
         run: echo Hello, WINDOWS World!
 
       - name: Gradle Build
+        working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew build
 
       - name: Package Windows
+        working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew packageReleaseDistributionForCurrentOS
 
       - name: Post Package - Extract and Archive
+        working-directory: ${{github.workspace}}/DungeonsEditor
         run: tar -a -c -f .packaging/windows/DungeonsEditor.zip -C "./build/compose/binaries/main-release/app/DungeonsEditor" .
 
       - uses: actions/upload-artifact@v4
         with:
           name: "DungeonsEditor-${{ github.event.inputs.version_name }}.zip"
-          path: .packaging/windows/DungeonsEditor.zip
+          path: ${{github.workspace}}/DungeonsEditor/.packaging/windows/DungeonsEditor.zip
 
