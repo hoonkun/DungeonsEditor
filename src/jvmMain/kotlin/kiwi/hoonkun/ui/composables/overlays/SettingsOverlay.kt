@@ -53,7 +53,7 @@ fun SettingsOverlay() {
             ScaleCandidates.forEach { (name, value) ->
                 Spacer(modifier = Modifier.width(16.dp))
                 SelectableRetroButton(
-                    text = "x${name}",
+                    text = name,
                     modifier = Modifier.width(96.dp).fillMaxHeight(),
                     onClick = { ArcticSettings.withSave { globalScale = value } },
                     selected = ArcticSettings.globalScale == value,
@@ -101,8 +101,8 @@ fun SettingsOverlay() {
     }
 }
 
-private val ScaleCandidateNames = listOf("0.6", "0.8", "1", "1.2", "1.4")
-private val ScaleCandidateValues = listOf(0.4f, 0.475f, 0.55f, 0.625f, 0.7f)
+private val ScaleCandidateNames = listOf("0.4", "0.6", "0.8", "1", "1.2", "1.4")
+private val ScaleCandidateValues = listOf(0.3f, 0.4f, 0.475f, 0.55f, 0.625f, 0.7f)
 private val ScaleCandidates = ScaleCandidateNames.zip(ScaleCandidateValues)
 
 @Composable
