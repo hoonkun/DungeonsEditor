@@ -67,5 +67,5 @@ compose.desktop {
 }
 
 composeCompiler {
-    enableStrongSkippingMode.set(true)
+    featureFlags.addAll(ComposeFeatureFlag.PausableComposition)
 }
