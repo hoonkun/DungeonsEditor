@@ -36,7 +36,7 @@ jobs:
           sudo apt update
           sudo apt install -y libfuse2
 
-      - name: Create Keysets.kt
+      - name: Set up Keysets.kt
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
 
@@ -48,7 +48,7 @@ jobs:
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: ./gradlew packageReleaseDistributionForCurrentOS
 
-      - name: Build AppImage
+      - name: Bundle AppImage
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: |
           chmod +x .packaging/linux/prepare-appimage
@@ -82,7 +82,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Create Keysets.kt
+      - name: Set up Keysets.kt
         working-directory: ${{github.workspace}}/DungeonsEditor
         run: echo "${{ secrets.KEYSET }}" > ./src/jvmMain/kotlin/Keyset.kt
 
