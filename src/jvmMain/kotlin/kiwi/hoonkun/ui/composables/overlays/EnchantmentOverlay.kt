@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -412,7 +411,10 @@ private fun EnchantmentDataCollectionItem(
         )
         Text(
             text = Localizations["effect_delete"],
-            style = LocalTextStyle.current.copy(fontSize = 14.sp, textAlign = TextAlign.Center),
+            style = LocalTextStyle.current.copy(
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            ),
             modifier = Modifier.graphicsLayer { alpha = if (selected) 1f else 0f }
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -573,7 +575,10 @@ private fun EnchantmentLevelSelector(
 private fun PowerfulEnchantmentIndicator() =
     Text(
         text = DungeonsLocalizations["/enchantment_rarity_powerful"]!!,
-        style = TextStyle(color = Color(0xffe5247e), fontWeight = FontWeight.Bold),
+        style = LocalTextStyle.current.copy(
+            color = Color(0xffe5247e),
+            fontWeight = FontWeight.Bold
+        ),
         modifier = Modifier.padding(start = 10.dp, bottom = 3.dp)
     )
 

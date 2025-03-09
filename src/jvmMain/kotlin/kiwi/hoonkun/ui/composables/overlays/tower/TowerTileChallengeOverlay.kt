@@ -141,8 +141,8 @@ fun AnimatedVisibilityScope?.TowerTileChallengeOverlay(
     }
 }
 
-private val DetailHeight = 300.dp
-private val DetailWidth = 500.dp
+private val DetailHeight get() = 300.dp
+private val DetailWidth get() = 500.dp
 
 @Composable
 private fun TilePreview(

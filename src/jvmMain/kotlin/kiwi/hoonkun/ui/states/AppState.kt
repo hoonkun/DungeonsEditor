@@ -39,7 +39,7 @@ class AppState(
     fun exitApplication() = scope?.exitApplication()
 
     object Constants {
-        val EntriesWidth = 550.dp
+        val EntriesWidth get() = 550.dp
         const val SlidingRatio = 0.2f
     }
 

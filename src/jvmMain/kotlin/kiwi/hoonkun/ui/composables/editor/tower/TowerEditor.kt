@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -202,7 +203,7 @@ fun BoxScope.TowerEditor(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    val style = TextStyle(color = Color.White.copy(alpha = 0.5f), lineHeight = 30.sp)
+                    val style = LocalTextStyle.current.copy(color = Color.White.copy(alpha = 0.5f), lineHeight = 30.sp)
 
                     val lines = List(3) { Localizations["tower_no_data_desc_${it}"] }
 

@@ -16,7 +16,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import kiwi.hoonkun.ArcticSettings
 import kiwi.hoonkun.resources.Localizations
@@ -290,7 +289,9 @@ private fun ItemDescription(text: String?) {
         text = text,
         fontSize = 25.sp,
         color = Color.White,
-        style = TextStyle(shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 5f)),
+        style = LocalTextStyle.current.copy(
+            shadow = Shadow(color = Color.Black, offset = Offset.Zero, blurRadius = 5f)
+        ),
         modifier = Modifier.padding(bottom = 12.dp)
     )
 }

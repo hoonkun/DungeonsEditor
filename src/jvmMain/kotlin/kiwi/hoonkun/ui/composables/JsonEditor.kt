@@ -179,7 +179,8 @@ private fun JsonEditorTabs() {
             bitmap = DungeonsTextures["/UI/Materials/Map/Pins/mapicon_chest.png"],
             selected = appState.activeEditorKey == null,
             onClick = { appState.activeEditorKey = null },
-            contentPadding = PaddingValues(16.dp)
+            contentPadding = PaddingValues(16.dp),
+            imageModifier = Modifier.size(45.dp)
         )
         appState.openedEditors.keys.forEach { key ->
             JsonEditorTabButton(
@@ -196,6 +197,7 @@ private fun JsonEditorTabButton(
     bitmap: ImageBitmap,
     selected: Boolean,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+    imageModifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val color by minimizableAnimateColorAsState(
@@ -213,7 +215,8 @@ private fun JsonEditorTabButton(
     ) {
         Image(
             bitmap = bitmap,
-            contentDescription = null
+            contentDescription = null,
+            modifier = imageModifier
         )
     }
     Spacer(modifier = Modifier.height(10.dp))
