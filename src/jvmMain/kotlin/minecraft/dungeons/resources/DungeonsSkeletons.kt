@@ -4,7 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
 import kiwi.hoonkun.resources.Localizations
+import kiwi.hoonkun.resources.bytesOf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import minecraft.dungeons.io.DungeonsPakRegistry
@@ -12,7 +14,6 @@ import minecraft.dungeons.values.DungeonsItem
 import pak.PakIndex
 import utils.nameWithoutExtension
 import utils.removeExtension
-import utils.resourceText
 import java.awt.Color
 import java.awt.image.BufferedImage
 import kotlin.io.path.Path
@@ -427,9 +428,9 @@ object DungeonsSkeletons {
     class NotFoundException(key: String, type: Element): Exception("No skeleton found: ${type::class.simpleName}[$key]")
 
     private inline fun <reified T>Json.decodeDatabaseResource(path: String, prefix: String = "databases/"): T =
-        decodeFromString<T>(resourceText("$prefix$path"))
+        decodeFromString<T>(Res.bytesOf("$prefix$path"))
 
     private fun Json.decodeLocResource(path: String, prefix: String = "localizations/") =
-        decodeFromString<Map<String, String>>(resourceText("$prefix$path"))
+        decodeFromString<Map<String, String>>(Res.bytesOf("$prefix$path"))
 
 }

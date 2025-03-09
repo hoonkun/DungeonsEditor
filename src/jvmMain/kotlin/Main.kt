@@ -21,12 +21,15 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.*
 import androidx.compose.ui.zIndex
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources._icon
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.leave
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.settings
 import kiwi.hoonkun.core.AppCompositionLocals
 import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.core.PakIndexingState
 import kiwi.hoonkun.core.rememberPakIndexingState
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.JsonEditor
 import kiwi.hoonkun.ui.composables.JsonEntries
 import kiwi.hoonkun.ui.composables.base.RetroButton
@@ -39,6 +42,8 @@ import kiwi.hoonkun.ui.states.LocalAppState
 import kiwi.hoonkun.ui.states.LocalOverlayState
 import kiwi.hoonkun.ui.units.dp
 import minecraft.dungeons.resources.DungeonsTextures
+import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 
 
 fun main() = application {
@@ -58,7 +63,7 @@ fun main() = application {
         state = windowState,
         resizable = false,
         title = "Dungeons Editor",
-        icon = Resources.Drawables.icon(),
+        icon = painterResource(Res.drawable._icon),
     ) {
         App(windowState = windowState, scope = this@application)
     }
@@ -186,7 +191,7 @@ fun MainMenuButtons(
     val overlays = LocalOverlayState.current
 
     MainIconButton(
-        bitmap = Resources.Drawables.leave,
+        bitmap = imageResource(Res.drawable.leave),
         onClick = {
             overlays.make { requestClose ->
                 ExitApplicationConfirmOverlay(
@@ -199,7 +204,7 @@ fun MainMenuButtons(
     )
     Spacer(modifier = Modifier.width(16.dp))
     MainIconButton(
-        bitmap = Resources.Drawables.settings,
+        bitmap = imageResource(Res.drawable.settings),
         onClick = { overlays.make { SettingsOverlay() } }
     )
 }

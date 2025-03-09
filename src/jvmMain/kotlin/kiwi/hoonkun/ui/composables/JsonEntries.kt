@@ -29,8 +29,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.rememberComponentRectPositionProvider
 import kiwi.hoonkun.ArcticSettings
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.resources.JetbrainsMono
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.AnimatedTooltipArea
 import kiwi.hoonkun.ui.composables.base.BlurShadowImage
 import kiwi.hoonkun.ui.reusables.*
@@ -386,7 +387,7 @@ private fun CurrencyTextContent(
 ) =
     Text(
         text = value,
-        fontFamily = Resources.Fonts.JetbrainsMono,
+        fontFamily = Res.font.JetbrainsMono(),
         fontSize = 20.sp,
         color = Color.White.copy(alpha = 0.85f),
         overflow = TextOverflow.Ellipsis,

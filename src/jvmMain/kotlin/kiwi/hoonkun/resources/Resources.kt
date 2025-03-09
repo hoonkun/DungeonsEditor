@@ -1,37 +1,19 @@
 package kiwi.hoonkun.resources
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.platform.Font
-import javax.imageio.ImageIO
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.JetBrainsMono_Regular
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.Font
 
-object Resources {
 
-    object Fonts {
+@Composable
+internal fun Res.font.JetbrainsMono() =
+    FontFamily(Font(resource = JetBrainsMono_Regular, weight = FontWeight.W400, style = FontStyle.Normal))
 
-        val JetbrainsMono =
-            FontFamily(
-                Font(
-                    resource = "JetBrainsMono-Regular.ttf",
-                    weight = FontWeight.W400,
-                    style = FontStyle.Normal
-                )
-            )
-
-    }
-
-    object Drawables {
-        @Composable
-        fun icon() = painterResource("_icon.png")
-
-        val settings = useResource("settings.png") { ImageIO.read(it).toComposeImageBitmap() }
-
-        val leave = useResource("leave.png") { ImageIO.read(it).toComposeImageBitmap() }
-    }
-
-}
+@OptIn(ExperimentalResourceApi::class)
+internal fun Res.bytesOf(path: String): String = runBlocking { String(readBytes("files/$path")) }

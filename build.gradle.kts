@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 
 plugins {
     kotlin("multiplatform") version "2.0.0"
@@ -24,9 +25,15 @@ kotlin {
     jvmToolchain(17)
     jvm()
     sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.components.resources)
+            }
+        }
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(compose.components.resources)
                 implementation("org.json:json:20240303")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")

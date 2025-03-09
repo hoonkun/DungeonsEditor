@@ -36,8 +36,9 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.resources.JetbrainsMono
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.reusables.rememberFocusRequester
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
 import kiwi.hoonkun.ui.units.dp
@@ -389,7 +390,7 @@ fun BasePathProperty(key: String, value: String, disabled: Boolean) =
         ),
         color = SelectorColors.IdeGeneral,
         fontSize = 20.sp,
-        fontFamily = Resources.Fonts.JetbrainsMono,
+        fontFamily = Res.font.JetbrainsMono(),
         modifier = Modifier.padding(bottom = 2.dp).alpha(if (disabled) 0.35f else 1f)
     )
 
@@ -408,7 +409,7 @@ fun BasePathToggleProperty(key: String, value: String, onClick: (Boolean) -> Uni
         ),
         color = SelectorColors.IdeKeyword,
         fontSize = 20.sp,
-        fontFamily = Resources.Fonts.JetbrainsMono,
+        fontFamily = Res.font.JetbrainsMono(),
         modifier = Modifier
             .padding(bottom = 2.dp)
             .clickable(rememberMutableInteractionSource(), null) { onClick(value == "false") }

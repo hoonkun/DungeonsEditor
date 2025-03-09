@@ -26,7 +26,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.unit.TextUnit
-import kiwi.hoonkun.resources.Resources
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.resources.JetbrainsMono
 import kiwi.hoonkun.ui.reusables.applyZeroIntrinsics
 import kiwi.hoonkun.ui.reusables.drawItemFrame
 import kiwi.hoonkun.ui.reusables.rememberMutableInteractionSource
@@ -197,7 +198,7 @@ private fun PowerText(
         style = LocalTextStyle.current.copy(
             color = Color.White.copy(alpha = 0.85f),
             fontSize = fontSize,
-            fontFamily = Resources.Fonts.JetbrainsMono,
+            fontFamily = Res.font.JetbrainsMono(),
             shadow = Shadow(Color.Black, blurRadius = 5f)
         ),
         modifier = modifier
@@ -218,7 +219,7 @@ private fun InvestedEnchantmentPointsText(
             style = LocalTextStyle.current.copy(
                 color = Color.White.copy(alpha = 0.85f),
                 fontSize = fontSize,
-                fontFamily = Resources.Fonts.JetbrainsMono,
+                fontFamily = Res.font.JetbrainsMono(),
                 shadow = Shadow(Color.Black, blurRadius = 5f)
             )
         )

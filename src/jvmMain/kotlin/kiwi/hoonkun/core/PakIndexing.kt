@@ -18,8 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import kiwi.hoonkun.ArcticSettings
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.resources.JetbrainsMono
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.overlays.ErrorOverlay
 import kiwi.hoonkun.ui.composables.overlays.OverlayRoot
@@ -312,7 +313,7 @@ private fun TextProgressBar(progress: Float, width: Int = 11, modifier: Modifier
             append("]")
         },
         style = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontFeatureSettings = "liga 0"),
-        fontFamily = Resources.Fonts.JetbrainsMono,
+        fontFamily = Res.font.JetbrainsMono(),
         modifier = Modifier.alpha(if (progressInt == 0) 0.4f else 1f).fillMaxWidth().then(modifier),
     )
 }

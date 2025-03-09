@@ -23,8 +23,6 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.loadImageBitmap
-import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.ic_close
 import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.resources.Localizations
 import kiwi.hoonkun.ui.composables.base.*
@@ -47,6 +47,7 @@ import minecraft.dungeons.states.MutableDungeons
 import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withEnchantments
 import minecraft.dungeons.values.roundToInt
+import org.jetbrains.compose.resources.imageResource
 
 
 @Stable
@@ -376,7 +377,7 @@ private fun EnchantmentDataCollectionItem(
     selected: Boolean,
     onItemSelect: (DungeonsSkeletons.Enchantment) -> Unit
 ) {
-    val deleteIcon = remember { useResource("ic_close.png") { loadImageBitmap(it) } }
+    val deleteIcon = imageResource(Res.drawable.ic_close)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         EnchantmentImage(

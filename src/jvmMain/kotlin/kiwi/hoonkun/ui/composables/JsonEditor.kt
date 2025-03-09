@@ -23,9 +23,10 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.zIndex
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
 import kiwi.hoonkun.core.LocalWindowState
+import kiwi.hoonkun.resources.JetbrainsMono
 import kiwi.hoonkun.resources.Localizations
-import kiwi.hoonkun.resources.Resources
 import kiwi.hoonkun.ui.composables.base.FileSelector
 import kiwi.hoonkun.ui.composables.base.RetroButton
 import kiwi.hoonkun.ui.composables.base.RetroButtonDpCornerRadius
@@ -133,10 +134,10 @@ private fun JsonEditorFileSelector(
                 .zIndex(1f)
                 .alpha(0.5f)
         ) {
-            Text(text = "Dungeons Editor, 1.2.0 by HoonKun", fontFamily = Resources.Fonts.JetbrainsMono)
+            Text(text = "Dungeons Editor, 1.2.0 by HoonKun", fontFamily = Res.font.JetbrainsMono())
             Text(
                 text = "Compatible with Minecraft Dungeons 1.17.0.0",
-                fontFamily = Resources.Fonts.JetbrainsMono
+                fontFamily = Res.font.JetbrainsMono()
             )
         }
         Column(
