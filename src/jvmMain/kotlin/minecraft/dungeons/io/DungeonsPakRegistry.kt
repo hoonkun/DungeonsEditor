@@ -22,7 +22,7 @@ object DungeonsPakRegistry {
         val pakPath = detectWindowsPakPath(customLocation) ?: detectSteamdeckPakPath(customLocation) ?: return false
 
         val newIndex = PakIndex(
-            target = File(pakPath).listFiles()!!.filter { it.name != "~mods" }.sortedBy { it.name },
+            target = File(pakPath).listFiles()!!.filter { it.name.endsWith(".pak") }.sortedBy { it.name },
             useCache = true,
             caseSensitive = true,
             filter = PathPakFilter(listOf("/Dungeons/Content"), false)
