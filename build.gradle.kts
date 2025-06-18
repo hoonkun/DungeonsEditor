@@ -2,10 +2,10 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 
 plugins {
-    kotlin("multiplatform") version "2.0.0"
+    kotlin("multiplatform") version "2.1.21"
     kotlin("plugin.serialization") version "2.0.0"
-    id("org.jetbrains.compose") version "1.8.0-alpha03"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.20-RC"
+    id("org.jetbrains.compose") version "1.8.2"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
 }
 
 group = "kiwi.hoonkun.app.editor.dungeons"
