@@ -17,7 +17,9 @@ object MutableDungeonsEnchantmentExtensionScope {
         level = newLevel
 
         investedPoints =
-            if (isNetheriteEnchant)
+            if (newLevel > MutableDungeons.Enchantment.IntendedMaxLevel)
+                0
+            else if (isNetheriteEnchant)
                 0
             else if (!skeleton.powerful && !glided)
                 CommonNonGlidedInvestedPoints.slice(0 until newLevel).sum()

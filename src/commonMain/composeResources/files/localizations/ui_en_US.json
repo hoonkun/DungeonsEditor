@@ -240,5 +240,6 @@
   "tower_edit_confirm": "Continue Edit",
   "pick_from_equipped": "Pick from Equipped Items",
   "tower_edit_warning_description": "Please read the caveats below VERY carefully.",
-  "todo_tile_preview": "If developer has more willing to maintain this project, Tile preview will be displayed in this area."
+  "todo_tile_preview": "If developer has more willing to maintain this project, Tile preview will be displayed in this area.",
+  "enchantment_level_unlimited_text_field_label": "Level Value (Integer)"
 }

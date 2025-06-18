@@ -238,5 +238,6 @@
   "tower_edit_confirm": "계속 수정",
   "pick_from_equipped": "장착된 장비에서 가져오기",
   "tower_edit_warning_description": "아래 주의사항을 반드시 매우 주의깊게 확인해주십세요.",
-  "todo_tile_preview": "개발자가 이 프로젝트를 유지할 기력이 더 생기면,\n이 공간에 지형의 미리보기 스크린샷이\n추가될지도 모릅니다."
+  "todo_tile_preview": "개발자가 이 프로젝트를 유지할 기력이 더 생기면,\n이 공간에 지형의 미리보기 스크린샷이\n추가될지도 모릅니다.",
+  "enchantment_level_unlimited_text_field_label": "레벨 값 (정수)"
 }

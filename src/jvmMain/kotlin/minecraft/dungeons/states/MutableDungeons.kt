@@ -318,6 +318,8 @@ class MutableDungeons(
             private const val FIELD_ID = "id"
             private const val FIELD_INVESTED_POINTS = "investedPoints"
             private const val FIELD_LEVEL = "level"
+
+            const val IntendedMaxLevel = 3
         }
     }
 

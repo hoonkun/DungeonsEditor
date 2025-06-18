@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.round
 import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.Res
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.code_disabled
+import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.code_enabled
 import kiwi.hoonkun.app.editor.dungeons.dungeonseditor.generated.resources.ic_close
 import kiwi.hoonkun.core.LocalWindowState
 import kiwi.hoonkun.resources.Localizations
@@ -47,6 +49,7 @@ import minecraft.dungeons.states.extensions.skeleton
 import minecraft.dungeons.states.extensions.withEnchantments
 import minecraft.dungeons.values.roundToInt
 import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 
 
 @Stable
@@ -489,38 +492,80 @@ private fun ValidEnchantmentPreview(
     parent: MutableDungeons.Enchantment,
     onLevelChange: (Int) -> Unit
 ) {
-    Row {
-        Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
-            EnchantmentImage(
-                data = data,
-                enabled = false,
-                modifier = Modifier.fillMaxSize()
+
+    var useUnlimitedLevel by remember(parent.level) { mutableStateOf(parent.level > MutableDungeons.Enchantment.IntendedMaxLevel) }
+
+    val animatedColor by animateColorAsState(Color(if (useUnlimitedLevel) 0xffff6633 else 0xff444444))
+
+    Box(
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        RetroButton(
+            color = { animatedColor },
+            onClick = { useUnlimitedLevel = !useUnlimitedLevel },
+            hoverInteraction = RetroButtonHoverInteraction.Outline,
+            radius = RetroButtonDpCornerRadius(0.dp, 4.dp, 0.dp, 4.dp),
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier
+                .width(64.dp)
+                .height(48.dp)
+                .offset(y = (-32).dp)
+                .offsetRelative(x = 1f),
+        ) {
+            Image(
+                painter =
+                    if (useUnlimitedLevel) painterResource(Res.drawable.code_enabled)
+                    else painterResource(Res.drawable.code_disabled),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp)
             )
-            EnchantmentLevel(level = parent.level)
         }
-        Column(modifier = Modifier.padding(end = 36.dp).padding(vertical = 36.dp)) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                EnchantmentNameText(data.name)
-                if (data.powerful)
-                    PowerfulEnchantmentIndicator()
+        Row {
+            Box(modifier = Modifier.fillMaxHeight().aspectRatio(1f / 1f)) {
+                EnchantmentImage(
+                    data = data,
+                    enabled = false,
+                    modifier = Modifier.fillMaxSize()
+                )
+                EnchantmentLevel(level = parent.level)
             }
+            Column(modifier = Modifier.padding(end = 36.dp).padding(vertical = 36.dp)) {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    EnchantmentNameText(data.name)
+                    if (data.powerful)
+                        PowerfulEnchantmentIndicator()
+                }
 
-            IfNotNull(data.description) {
-                Text(text = it, fontSize = 16.sp, color = Color.White.copy(0.75f))
+                IfNotNull(data.description) {
+                    Text(text = it, fontSize = 16.sp, color = Color.White.copy(0.75f))
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                IfNotNull(data.effect) {
+                    Text(text = it, fontSize = 20.sp, color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Crossfade(
+                    targetState = useUnlimitedLevel,
+                ) {
+                    if (it) {
+                        EnchantmentLevelTextField(
+                            isNetheriteEnchant = parent.isNetheriteEnchant,
+                            currentLevel = parent.level,
+                            onLevelChange = onLevelChange,
+                        )
+                    } else {
+                        EnchantmentLevelSelector(
+                            isNetheriteEnchant = parent.isNetheriteEnchant,
+                            currentLevel = parent.level,
+                            onLevelChange = onLevelChange,
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            IfNotNull(data.effect) {
-                Text(text = it, fontSize = 20.sp, color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            EnchantmentLevelSelector(
-                isNetheriteEnchant = parent.isNetheriteEnchant,
-                currentLevel = parent.level,
-                onLevelChange = onLevelChange
-            )
         }
     }
 }
@@ -532,6 +577,33 @@ private fun EnchantmentNameText(text: String) =
         style = LocalTextStyle.current.copy(fontSize = 40.sp, fontWeight = FontWeight.Bold),
         overflow = TextOverflow.Ellipsis
     )
+
+@Composable
+private fun EnchantmentLevelTextField(
+    isNetheriteEnchant: Boolean,
+    currentLevel: Int,
+    onLevelChange: (Int) -> Unit
+) {
+    var value by remember(currentLevel) { mutableStateOf("$currentLevel") }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.height(40.dp)
+    ) {
+        Text(
+            text = Localizations["enchantment_level_unlimited_text_field_label"]
+        )
+
+        TextFieldValidatable(
+            value = value,
+            onValueChange = { if (!value.contains(Regex("[^0-9]]"))) value = it },
+            validator = { it.toIntOrNull() != null && (!isNetheriteEnchant || it.toInt() > 0) },
+            onSubmit = { onLevelChange(it.toInt()) },
+            textStyle = LocalTextStyle.current.copy(fontSize = 24.sp),
+        )
+    }
+}
 
 @Composable
 private fun EnchantmentLevelSelector(
